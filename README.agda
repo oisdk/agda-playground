@@ -2,4 +2,5 @@
 
 module README where
 
-open import Cubical.Foundations.Everything
+-- Full module list:
+open import Everything
