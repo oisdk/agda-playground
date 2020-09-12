@@ -1,0 +1,17 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.Binary.Literals</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+
+<a id="35" class="Keyword">module</a> <a id="42" href="Data.Binary.Literals.html" class="Module">Data.Binary.Literals</a> <a id="63" class="Keyword">where</a>
+
+<a id="70" class="Keyword">open</a> <a id="75" class="Keyword">import</a> <a id="82" href="Data.Binary.Base.html" class="Module">Data.Binary.Base</a>
+
+
+<a id="101" class="Keyword">open</a> <a id="106" class="Keyword">import</a> <a id="113" href="Literals.Number.html" class="Module">Literals.Number</a>
+<a id="129" class="Keyword">open</a> <a id="134" class="Keyword">import</a> <a id="141" href="Data.Unit.html" class="Module">Data.Unit</a>
+<a id="151" class="Keyword">open</a> <a id="156" class="Keyword">import</a> <a id="163" href="Data.Nat.Literals.html" class="Module">Data.Nat.Literals</a>
+
+<a id="182" class="Keyword">instance</a>
+  <a id="number𝔹"></a><a id="193" href="Data.Binary.Literals.html#193" class="Function">number𝔹</a> <a id="201" class="Symbol">:</a> <a id="203" href="Agda.Builtin.FromNat.html#197" class="Record">Number</a> <a id="210" href="Data.Binary.Base.html#132" class="Datatype">𝔹</a>
+  <a id="214" href="Agda.Builtin.FromNat.html#253" class="Field">Number.Constraint</a> <a id="232" href="Data.Binary.Literals.html#193" class="Function">number𝔹</a> <a id="240" class="Symbol">=</a> <a id="242" class="Symbol">λ</a> <a id="244" href="Data.Binary.Literals.html#244" class="Bound">_</a> <a id="246" class="Symbol">→</a> <a id="248" href="Agda.Builtin.Unit.html#164" class="Record">⊤</a>
+  <a id="252" href="Agda.Builtin.FromNat.html#282" class="Field">Number.fromNat</a> <a id="267" href="Data.Binary.Literals.html#193" class="Function">number𝔹</a> <a id="275" class="Symbol">=</a> <a id="277" class="Symbol">λ</a> <a id="279" href="Data.Binary.Literals.html#279" class="Bound">n</a> <a id="281" class="Symbol">→</a> <a id="283" href="Data.Binary.Base.html#266" class="Function Operator">⟦</a> <a id="285" href="Data.Binary.Literals.html#279" class="Bound">n</a> <a id="287" href="Data.Binary.Base.html#266" class="Function Operator">⇑⟧</a>
+</pre></body></html>
