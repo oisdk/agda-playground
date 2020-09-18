@@ -1,25 +1,38 @@
 {-# OPTIONS --cubical --safe #-}
 
-module Data.Binary.Base where
+module Data.Binary.Multiplication where
 
-open import Prelude
+open import Data.Binary.Definition
+open import Data.Binary.Addition
 
 double : 𝔹 → 𝔹
 double [] = []
 double (1ᵇ∷ xs) = 2ᵇ∷ double xs
 double (2ᵇ∷ xs) = 2ᵇ∷ 1ᵇ∷ xs
 
+infixl 7 _*_
+_*_ : 𝔹 → 𝔹 → 𝔹
+xs * [] = []
+xs * (1ᵇ∷ ys) = go xs
+  where
+  ys2 = double ys
 
-_≡ᵇ_ : 𝔹 → 𝔹 → Bool
-[] ≡ᵇ [] = true
-[] ≡ᵇ (1ᵇ∷ ys) = false
-[] ≡ᵇ (2ᵇ∷ ys) = false
-(1ᵇ∷ xs) ≡ᵇ [] = false
-(1ᵇ∷ xs) ≡ᵇ (1ᵇ∷ ys) = xs ≡ᵇ ys
-(1ᵇ∷ xs) ≡ᵇ (2ᵇ∷ ys) = false
-(2ᵇ∷ xs) ≡ᵇ [] = false
-(2ᵇ∷ xs) ≡ᵇ (1ᵇ∷ ys) = false
-(2ᵇ∷ xs) ≡ᵇ (2ᵇ∷ ys) = xs ≡ᵇ ys
+  go : 𝔹 → 𝔹
+  go [] = []
+  go (1ᵇ∷ xs) = 1ᵇ∷ ys + go xs
+  go (2ᵇ∷ xs) = 2ᵇ∷ (ys2 + go xs)
+
+xs * (2ᵇ∷ ys) = go xs
+  where
+  go : 𝔹 → 𝔹
+  go [] = []
+  go (1ᵇ∷ xs) = 2ᵇ∷ ys + go xs
+  go (2ᵇ∷ xs) = 2ᵇ∷ (1ᵇ∷ ys) + go xs
+
+
+
+-- open import Prelude
+-- open import Data.Binary.Conversion
 
 -- testers : ℕ → Type₀
 -- testers n = bins n n ≡ nats n n
@@ -37,13 +50,13 @@ _≡ᵇ_ : 𝔹 → 𝔹 → Bool
 --   bins ns ms = do
 --     n ← upTo id ns
 --     m ← upTo id ms
---     pure (⟦ n ⇑⟧ - ⟦ m ⇑⟧)
+--     pure (⟦ n ⇑⟧ * ⟦ m ⇑⟧)
 
 --   nats : ℕ → ℕ → List 𝔹
 --   nats ns ms = do
 --     n ← upTo id ns
 --     m ← upTo id ms
---     pure ⟦ n Nat.- m ⇑⟧
+--     pure ⟦ n Nat.* m ⇑⟧
 
--- _ : testers 100
+-- _ : testers 10
 -- _ = refl

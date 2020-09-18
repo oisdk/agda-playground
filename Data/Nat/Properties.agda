@@ -12,9 +12,9 @@ pred (suc n) = n
 pred zero = zero
 
 correct-== : ∀ n m → Reflects (n ≡ m) (n ≡ᴮ m)
-correct-== zero zero = ofʸ refl
-correct-== zero (suc m) = ofⁿ znots
-correct-== (suc n) zero = ofⁿ snotz
+correct-== zero zero = refl
+correct-== zero (suc m) = znots
+correct-== (suc n) zero = snotz
 correct-== (suc n) (suc m) =
   map-reflects (cong suc) (λ contra prf  → contra (cong pred prf)) (correct-== n m)
 
