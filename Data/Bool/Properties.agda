@@ -8,8 +8,8 @@ open import Data.Unit.Properties
 
 T? : ∀ x → Dec (T x)
 T? x .does = x
-T? false .why = ofⁿ id
-T? true  .why = ofʸ tt
+T? false .why = id
+T? true  .why = tt
 
 isPropT : ∀ x → isProp (T x)
 isPropT false = isProp⊥
@@ -18,7 +18,7 @@ isPropT true  = isProp⊤
 discreteBool : Discrete Bool
 discreteBool false y .does = not y
 discreteBool true y .does = y
-discreteBool false false .why = ofʸ refl
-discreteBool false true .why = ofⁿ λ p → subst (bool ⊤ ⊥) p tt
-discreteBool true false .why = ofⁿ λ p → subst (bool ⊥ ⊤) p tt
-discreteBool true true .why = ofʸ refl
+discreteBool false false .why = refl
+discreteBool false true .why = λ p → subst (bool ⊤ ⊥) p tt
+discreteBool true false .why = λ p → subst (bool ⊥ ⊤) p tt
+discreteBool true true .why = refl

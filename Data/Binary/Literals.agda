@@ -2,7 +2,8 @@
 
 module Data.Binary.Literals where
 
-open import Data.Binary.Base
+open import Data.Binary.Definition
+open import Data.Binary.Conversion
 
 
 open import Literals.Number

@@ -11,7 +11,7 @@ import Data.Empty.UniversePolymorphic as Poly
 
 open TotalOrder totalOrder using (_≤_; _<_)
 
-_≲_ : List E → List E → Type r
-[] ≲ ys = Poly.⊤
-(x ∷ xs) ≲ [] = Poly.⊥
-(x ∷ xs) ≲ (y ∷ ys) = (x < y) ⊎ ((x ≤ y) × (xs ≲ ys))
+-- _≲_ : List E → List E → Type r
+-- [] ≲ ys = Poly.⊤
+-- (x ∷ xs) ≲ [] = Poly.⊥
+-- (x ∷ xs) ≲ (y ∷ ys) = (x < y) ⊎ ((x ≤ y) × (xs ≲ ys))
