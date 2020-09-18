@@ -17,19 +17,17 @@ _≡ᴮ_ : 𝔹 → 𝔹 → Bool
 (2ᵇ∷ xs) ≡ᴮ (1ᵇ∷ ys) = false
 (2ᵇ∷ xs) ≡ᴮ (2ᵇ∷ ys) = xs ≡ᴮ ys
 
-≡ᴮ⇒≡ : ∀ xs ys → T (xs ≡ᴮ ys) → xs ≡ ys
-≡ᴮ⇒≡ []       []       xs≡ys i = []
-≡ᴮ⇒≡ (1ᵇ∷ xs) (1ᵇ∷ ys) xs≡ys i = 1ᵇ∷ ≡ᴮ⇒≡ xs ys xs≡ys i
-≡ᴮ⇒≡ (2ᵇ∷ xs) (2ᵇ∷ ys) xs≡ys i = 2ᵇ∷ ≡ᴮ⇒≡ xs ys xs≡ys i
-
-≡⇒≡ᴮ : ∀ xs ys → xs ≡ ys → T (xs ≡ᴮ ys)
-≡⇒≡ᴮ xs ys p = subst (λ z → T (xs ≡ᴮ z)) p (go xs)
-  where
-  go : ∀ xs → T (xs ≡ᴮ xs)
-  go [] = tt
-  go (1ᵇ∷ xs) = go xs
-  go (2ᵇ∷ xs) = go xs
+open import Relation.Nullary.Discrete.FromBoolean
 
 _≟_ : Discrete 𝔹
-xs ≟ ys = ⟦yes ≡ᴮ⇒≡ xs ys ,no ≡⇒≡ᴮ xs ys ⟧ (from-bool (xs ≡ᴮ ys))
+_≟_ = from-bool-eq _≡ᴮ_ ≡ᴮ⇒≡ T-refl
+  where
+  ≡ᴮ⇒≡ : ∀ xs ys → T (xs ≡ᴮ ys) → xs ≡ ys
+  ≡ᴮ⇒≡ []       []       xs≡ys i = []
+  ≡ᴮ⇒≡ (1ᵇ∷ xs) (1ᵇ∷ ys) xs≡ys i = 1ᵇ∷ ≡ᴮ⇒≡ xs ys xs≡ys i
+  ≡ᴮ⇒≡ (2ᵇ∷ xs) (2ᵇ∷ ys) xs≡ys i = 2ᵇ∷ ≡ᴮ⇒≡ xs ys xs≡ys i
 
+  T-refl : ∀ xs → T (xs ≡ᴮ xs)
+  T-refl [] = tt
+  T-refl (1ᵇ∷ xs) = T-refl xs
+  T-refl (2ᵇ∷ xs) = T-refl xs
