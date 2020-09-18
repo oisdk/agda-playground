@@ -8,14 +8,9 @@ open import Data.Binary.Definition
 infix 4 _≡ᴮ_
 _≡ᴮ_ : 𝔹 → 𝔹 → Bool
 []       ≡ᴮ []       = true
-[]       ≡ᴮ (1ᵇ∷ ys) = false
-[]       ≡ᴮ (2ᵇ∷ ys) = false
-(1ᵇ∷ xs) ≡ᴮ []       = false
 (1ᵇ∷ xs) ≡ᴮ (1ᵇ∷ ys) = xs ≡ᴮ ys
-(1ᵇ∷ xs) ≡ᴮ (2ᵇ∷ ys) = false
-(2ᵇ∷ xs) ≡ᴮ []       = false
-(2ᵇ∷ xs) ≡ᴮ (1ᵇ∷ ys) = false
 (2ᵇ∷ xs) ≡ᴮ (2ᵇ∷ ys) = xs ≡ᴮ ys
+_        ≡ᴮ _        = false
 
 open import Relation.Nullary.Discrete.FromBoolean
 

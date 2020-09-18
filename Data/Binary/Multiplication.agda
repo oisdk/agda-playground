@@ -29,8 +29,6 @@ xs * (2ᵇ∷ ys) = go xs
   go (1ᵇ∷ xs) = 2ᵇ∷ ys + go xs
   go (2ᵇ∷ xs) = 2ᵇ∷ (1ᵇ∷ ys) + go xs
 
-
-
 -- open import Prelude
 -- open import Data.Binary.Conversion
 

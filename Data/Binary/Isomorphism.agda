@@ -10,7 +10,7 @@ import Data.Nat as ℕ
 
 inc-suc : ∀ x → ⟦ inc x ⇓⟧ ≡ suc ⟦ x ⇓⟧
 inc-suc []      i = 1
-inc-suc (1ᵇ∷ x) i = ⟦ 2ᵇ∷ x ⇓⟧
+inc-suc (1ᵇ∷ x) i = 2 ℕ.+ ⟦ x ⇓⟧ ℕ.* 2
 inc-suc (2ᵇ∷ x) i = suc (inc-suc x i ℕ.* 2)
 
 inc-2*-1ᵇ∷ : ∀ n → inc ⟦ n ℕ.* 2 ⇑⟧ ≡ 1ᵇ∷ ⟦ n ⇑⟧
@@ -23,7 +23,7 @@ inc-2*-1ᵇ∷ (suc n) i = inc (inc (inc-2*-1ᵇ∷ n i))
 
 𝔹-leftInv : ∀ x → ⟦ ⟦ x ⇓⟧ ⇑⟧ ≡ x
 𝔹-leftInv [] = refl
-𝔹-leftInv (1ᵇ∷ x) = inc-2*-1ᵇ∷ ⟦ x ⇓⟧ ; cong 1ᵇ∷_ (𝔹-leftInv x)
+𝔹-leftInv (1ᵇ∷ x) =           inc-2*-1ᵇ∷ ⟦ x ⇓⟧  ; cong 1ᵇ∷_ (𝔹-leftInv x)
 𝔹-leftInv (2ᵇ∷ x) = cong inc (inc-2*-1ᵇ∷ ⟦ x ⇓⟧) ; cong 2ᵇ∷_ (𝔹-leftInv x)
 
 𝔹⇔ℕ : 𝔹 ⇔ ℕ

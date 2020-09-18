@@ -15,4 +15,4 @@ module _ {a} {A : Type a}
   from-bool-eq x y =
     ⟦yes sound x y
     ,no (λ p → subst (λ z → T (x ≡ᴮ z)) p (complete x))
-    ⟧ (from-bool (x ≡ᴮ y))
+    ⟧ (T? (x ≡ᴮ y))
