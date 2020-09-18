@@ -11,16 +11,18 @@ pred : ℕ → ℕ
 pred (suc n) = n
 pred zero = zero
 
-correct-== : ∀ n m → Reflects (n ≡ m) (n ≡ᴮ m)
-correct-== zero zero = refl
-correct-== zero (suc m) = znots
-correct-== (suc n) zero = snotz
-correct-== (suc n) (suc m) =
-  map-reflects (cong suc) (λ contra prf  → contra (cong pred prf)) (correct-== n m)
+sound-== : ∀ n m →  T (n ≡ᴮ m) → n ≡ m
+sound-== zero zero p i = zero
+sound-== (suc n) (suc m) p i = suc (sound-== n m p i)
+
+complete-== : ∀ n → T (n ≡ᴮ n)
+complete-== zero = tt
+complete-== (suc n) = complete-== n
+
+open import Relation.Nullary.Discrete.FromBoolean
 
 discreteℕ : Discrete ℕ
-discreteℕ n m .does = n ≡ᴮ m
-discreteℕ n m .why  = correct-== n m
+discreteℕ = from-bool-eq _≡ᴮ_ sound-== complete-==
 
 isSetℕ : isSet ℕ
 isSetℕ = Discrete→isSet discreteℕ
