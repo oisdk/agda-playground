@@ -30,35 +30,33 @@
   <a id="478" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="481" class="Symbol">(</a><a id="482" href="Data.Binary.Definition.html#144" class="InductiveConstructor Operator">1ᵇ∷</a> <a id="486" href="Data.Binary.Multiplication.html#486" class="Bound">xs</a><a id="488" class="Symbol">)</a> <a id="490" class="Symbol">=</a> <a id="492" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="496" href="Data.Binary.Multiplication.html#430" class="Bound">ys</a> <a id="499" href="Data.Binary.Addition.html#788" class="Function Operator">+</a> <a id="501" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="504" href="Data.Binary.Multiplication.html#486" class="Bound">xs</a>
   <a id="509" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="512" class="Symbol">(</a><a id="513" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="517" href="Data.Binary.Multiplication.html#517" class="Bound">xs</a><a id="519" class="Symbol">)</a> <a id="521" class="Symbol">=</a> <a id="523" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="527" class="Symbol">(</a><a id="528" href="Data.Binary.Definition.html#144" class="InductiveConstructor Operator">1ᵇ∷</a> <a id="532" href="Data.Binary.Multiplication.html#430" class="Bound">ys</a><a id="534" class="Symbol">)</a> <a id="536" href="Data.Binary.Addition.html#788" class="Function Operator">+</a> <a id="538" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="541" href="Data.Binary.Multiplication.html#517" class="Bound">xs</a>
 
+<a id="545" class="Comment">-- open import Prelude</a>
+<a id="568" class="Comment">-- open import Data.Binary.Conversion</a>
 
+<a id="607" class="Comment">-- testers : ℕ → Type₀</a>
+<a id="630" class="Comment">-- testers n = bins n n ≡ nats n n</a>
+<a id="665" class="Comment">--   where</a>
+<a id="676" class="Comment">--   open import Data.List</a>
+<a id="703" class="Comment">--   open import Data.List.Syntax</a>
+<a id="737" class="Comment">--   open import Data.List.Sugar</a>
+<a id="770" class="Comment">--   import Agda.Builtin.Nat as Nat</a>
 
-<a id="547" class="Comment">-- open import Prelude</a>
-<a id="570" class="Comment">-- open import Data.Binary.Conversion</a>
+<a id="807" class="Comment">--   upTo : (ℕ → A) → ℕ → List A</a>
+<a id="840" class="Comment">--   upTo f zero = []</a>
+<a id="862" class="Comment">--   upTo f (suc n) = f zero List.∷ upTo (f ∘ suc) n</a>
 
-<a id="609" class="Comment">-- testers : ℕ → Type₀</a>
-<a id="632" class="Comment">-- testers n = bins n n ≡ nats n n</a>
-<a id="667" class="Comment">--   where</a>
-<a id="678" class="Comment">--   open import Data.List</a>
-<a id="705" class="Comment">--   open import Data.List.Syntax</a>
-<a id="739" class="Comment">--   open import Data.List.Sugar</a>
-<a id="772" class="Comment">--   import Agda.Builtin.Nat as Nat</a>
+<a id="916" class="Comment">--   bins : ℕ → ℕ → List 𝔹</a>
+<a id="943" class="Comment">--   bins ns ms = do</a>
+<a id="964" class="Comment">--     n ← upTo id ns</a>
+<a id="986" class="Comment">--     m ← upTo id ms</a>
+<a id="1008" class="Comment">--     pure (⟦ n ⇑⟧ * ⟦ m ⇑⟧)</a>
 
-<a id="809" class="Comment">--   upTo : (ℕ → A) → ℕ → List A</a>
-<a id="842" class="Comment">--   upTo f zero = []</a>
-<a id="864" class="Comment">--   upTo f (suc n) = f zero List.∷ upTo (f ∘ suc) n</a>
+<a id="1039" class="Comment">--   nats : ℕ → ℕ → List 𝔹</a>
+<a id="1066" class="Comment">--   nats ns ms = do</a>
+<a id="1087" class="Comment">--     n ← upTo id ns</a>
+<a id="1109" class="Comment">--     m ← upTo id ms</a>
+<a id="1131" class="Comment">--     pure ⟦ n Nat.* m ⇑⟧</a>
 
-<a id="918" class="Comment">--   bins : ℕ → ℕ → List 𝔹</a>
-<a id="945" class="Comment">--   bins ns ms = do</a>
-<a id="966" class="Comment">--     n ← upTo id ns</a>
-<a id="988" class="Comment">--     m ← upTo id ms</a>
-<a id="1010" class="Comment">--     pure (⟦ n ⇑⟧ * ⟦ m ⇑⟧)</a>
-
-<a id="1041" class="Comment">--   nats : ℕ → ℕ → List 𝔹</a>
-<a id="1068" class="Comment">--   nats ns ms = do</a>
-<a id="1089" class="Comment">--     n ← upTo id ns</a>
-<a id="1111" class="Comment">--     m ← upTo id ms</a>
-<a id="1133" class="Comment">--     pure ⟦ n Nat.* m ⇑⟧</a>
-
-<a id="1161" class="Comment">-- _ : testers 10</a>
-<a id="1179" class="Comment">-- _ = refl</a>
+<a id="1159" class="Comment">-- _ : testers 10</a>
+<a id="1177" class="Comment">-- _ = refl</a>
 </pre></body></html>
