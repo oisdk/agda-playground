@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.List.Order</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+
+<a id="35" class="Keyword">open</a> <a id="40" class="Keyword">import</a> <a id="47" href="Prelude.html" class="Module">Prelude</a>
+<a id="55" class="Keyword">open</a> <a id="60" class="Keyword">import</a> <a id="67" href="Relation.Binary.html" class="Module">Relation.Binary</a>
+
+<a id="84" class="Keyword">module</a> <a id="91" href="Data.List.Order.html" class="Module">Data.List.Order</a> <a id="107" class="Symbol">{</a><a id="108" href="Data.List.Order.html#108" class="Bound">e</a> <a id="110" href="Data.List.Order.html#110" class="Bound">r</a><a id="111" class="Symbol">}</a> <a id="113" class="Symbol">{</a><a id="114" href="Data.List.Order.html#114" class="Bound">E</a> <a id="116" class="Symbol">:</a> <a id="118" href="Level.html#192" class="Function">Type</a> <a id="123" href="Data.List.Order.html#108" class="Bound">e</a><a id="124" class="Symbol">}</a> <a id="126" class="Symbol">(</a><a id="127" href="Data.List.Order.html#127" class="Bound">totalOrder</a> <a id="138" class="Symbol">:</a> <a id="140" href="Relation.Binary.html#1228" class="Record">TotalOrder</a> <a id="151" href="Data.List.Order.html#114" class="Bound">E</a> <a id="153" href="Data.List.Order.html#110" class="Bound">r</a><a id="154" class="Symbol">)</a> <a id="156" class="Keyword">where</a>
+
+<a id="163" class="Keyword">open</a> <a id="168" class="Keyword">import</a> <a id="175" href="Data.List.Base.html" class="Module">Data.List.Base</a>
+<a id="190" class="Keyword">import</a> <a id="197" href="Data.Unit.UniversePolymorphic.html" class="Module">Data.Unit.UniversePolymorphic</a> <a id="227" class="Symbol">as</a> <a id="230" class="Module">Poly</a>
+<a id="235" class="Keyword">import</a> <a id="242" href="Data.Empty.UniversePolymorphic.html" class="Module">Data.Empty.UniversePolymorphic</a> <a id="273" class="Symbol">as</a> <a id="276" class="Module">Poly</a>
+
+<a id="282" class="Keyword">open</a> <a id="287" href="Relation.Binary.html#1228" class="Module">TotalOrder</a> <a id="298" href="Data.List.Order.html#127" class="Bound">totalOrder</a> <a id="309" class="Keyword">using</a> <a id="315" class="Symbol">(</a>_≤_<a id="319" class="Symbol">;</a> _&lt;_<a id="324" class="Symbol">)</a>
+
+<a id="327" class="Comment">-- _≲_ : List E → List E → Type r</a>
+<a id="361" class="Comment">-- [] ≲ ys = Poly.⊤</a>
+<a id="381" class="Comment">-- (x ∷ xs) ≲ [] = Poly.⊥</a>
+<a id="407" class="Comment">-- (x ∷ xs) ≲ (y ∷ ys) = (x &lt; y) ⊎ ((x ≤ y) × (xs ≲ ys))</a>
+</pre></body></html>

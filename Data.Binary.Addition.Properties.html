@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.Binary.Addition.Properties</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+
+<a id="35" class="Keyword">module</a> <a id="42" href="Data.Binary.Addition.Properties.html" class="Module">Data.Binary.Addition.Properties</a> <a id="74" class="Keyword">where</a>
+
+<a id="81" class="Keyword">open</a> <a id="86" class="Keyword">import</a> <a id="93" href="Prelude.html" class="Module">Prelude</a>
+<a id="101" class="Keyword">open</a> <a id="106" class="Keyword">import</a> <a id="113" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a>
+<a id="136" class="Keyword">open</a> <a id="141" class="Keyword">import</a> <a id="148" href="Data.Binary.Addition.html" class="Module">Data.Binary.Addition</a>
+<a id="169" class="Keyword">open</a> <a id="174" class="Keyword">import</a> <a id="181" href="Data.Binary.Conversion.html" class="Module">Data.Binary.Conversion</a>
+<a id="204" class="Keyword">import</a> <a id="211" href="Data.Nat.html" class="Module">Data.Nat</a> <a id="220" class="Symbol">as</a> <a id="223" class="Module">ℕ</a>
+<a id="225" class="Keyword">import</a> <a id="232" href="Data.Nat.Properties.html" class="Module">Data.Nat.Properties</a> <a id="252" class="Symbol">as</a> <a id="255" class="Module">ℕ</a>
+<a id="257" class="Keyword">open</a> <a id="262" class="Keyword">import</a> <a id="269" href="Path.Reasoning.html" class="Module">Path.Reasoning</a>
+
+<a id="285" class="Comment">-- +-cong : ∀ xs ys → ⟦ xs + ys ⇓⟧ ≡ ⟦ xs ⇓⟧ ℕ.+ ⟦ ys ⇓⟧</a>
+<a id="342" class="Comment">-- +-cong [] ys = refl</a>
+<a id="365" class="Comment">-- +-cong (1ᵇ∷ xs) [] = cong suc (sym (ℕ.+-idʳ (⟦ xs ⇓⟧ ℕ.* 2)))</a>
+<a id="430" class="Comment">-- +-cong (2ᵇ∷ xs) [] = cong (suc ∘ suc) (sym (ℕ.+-idʳ (⟦ xs ⇓⟧ ℕ.* 2)))</a>
+<a id="503" class="Comment">-- +-cong (1ᵇ∷ xs) (1ᵇ∷ ys) =</a>
+<a id="533" class="Comment">--   ⟦ (1ᵇ∷ xs) + (1ᵇ∷ ys) ⇓⟧ ≡⟨⟩</a>
+<a id="567" class="Comment">--   ⟦ 2ᵇ∷ xs + ys ⇓⟧ ≡⟨⟩</a>
+<a id="593" class="Comment">--   2 ℕ.+ ⟦ xs + ys ⇓⟧ ℕ.* 2 ≡⟨ cong (λ n → suc (suc (n ℕ.* 2))) (+-cong xs ys) ⟩</a>
+<a id="676" class="Comment">--   2 ℕ.+ (⟦ xs ⇓⟧ ℕ.+  ⟦ ys ⇓⟧) ℕ.* 2 ≡⟨ {!!} ⟩</a>
+<a id="726" class="Comment">--   2 ℕ.+ ⟦ xs ⇓⟧ ℕ.* 2 ℕ.+ (⟦ ys ⇓⟧ ℕ.* 2) ≡˘⟨ ℕ.+-suc (1 ℕ.+ ⟦ xs ⇓⟧ ℕ.* 2) (⟦ ys ⇓⟧ ℕ.* 2) ⟩</a>
+<a id="823" class="Comment">--   (1 ℕ.+ ⟦ xs ⇓⟧ ℕ.* 2) ℕ.+ (1 ℕ.+ ⟦ ys ⇓⟧ ℕ.* 2) ≡⟨⟩</a>
+<a id="880" class="Comment">--   ⟦ 1ᵇ∷ xs ⇓⟧ ℕ.+ ⟦ 1ᵇ∷ ys ⇓⟧ ∎</a>
+<a id="915" class="Comment">-- +-cong (1ᵇ∷ xs) (2ᵇ∷ ys) = {!!}</a>
+<a id="950" class="Comment">-- +-cong (2ᵇ∷ xs) (1ᵇ∷ ys) = {!!}</a>
+<a id="985" class="Comment">-- +-cong (2ᵇ∷ xs) (2ᵇ∷ ys) = {!!}</a>
+</pre></body></html>

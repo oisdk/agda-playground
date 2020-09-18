@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.Binary.Multiplication</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+
+<a id="35" class="Keyword">module</a> <a id="42" href="Data.Binary.Multiplication.html" class="Module">Data.Binary.Multiplication</a> <a id="69" class="Keyword">where</a>
+
+<a id="76" class="Keyword">open</a> <a id="81" class="Keyword">import</a> <a id="88" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a>
+<a id="111" class="Keyword">open</a> <a id="116" class="Keyword">import</a> <a id="123" href="Data.Binary.Addition.html" class="Module">Data.Binary.Addition</a>
+
+<a id="double"></a><a id="145" href="Data.Binary.Multiplication.html#145" class="Function">double</a> <a id="152" class="Symbol">:</a> <a id="154" href="Data.Binary.Definition.html#117" class="Datatype">𝔹</a> <a id="156" class="Symbol">→</a> <a id="158" href="Data.Binary.Definition.html#117" class="Datatype">𝔹</a>
+<a id="160" href="Data.Binary.Multiplication.html#145" class="Function">double</a> <a id="167" href="Data.Binary.Definition.html#135" class="InductiveConstructor">[]</a> <a id="170" class="Symbol">=</a> <a id="172" href="Data.Binary.Definition.html#135" class="InductiveConstructor">[]</a>
+<a id="175" href="Data.Binary.Multiplication.html#145" class="Function">double</a> <a id="182" class="Symbol">(</a><a id="183" href="Data.Binary.Definition.html#144" class="InductiveConstructor Operator">1ᵇ∷</a> <a id="187" href="Data.Binary.Multiplication.html#187" class="Bound">xs</a><a id="189" class="Symbol">)</a> <a id="191" class="Symbol">=</a> <a id="193" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="197" href="Data.Binary.Multiplication.html#145" class="Function">double</a> <a id="204" href="Data.Binary.Multiplication.html#187" class="Bound">xs</a>
+<a id="207" href="Data.Binary.Multiplication.html#145" class="Function">double</a> <a id="214" class="Symbol">(</a><a id="215" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="219" href="Data.Binary.Multiplication.html#219" class="Bound">xs</a><a id="221" class="Symbol">)</a> <a id="223" class="Symbol">=</a> <a id="225" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="229" href="Data.Binary.Definition.html#144" class="InductiveConstructor Operator">1ᵇ∷</a> <a id="233" href="Data.Binary.Multiplication.html#219" class="Bound">xs</a>
+
+<a id="237" class="Keyword">infixl</a> <a id="244" class="Number">7</a> <a id="246" href="Data.Binary.Multiplication.html#250" class="Function Operator">_*_</a>
+<a id="_*_"></a><a id="250" href="Data.Binary.Multiplication.html#250" class="Function Operator">_*_</a> <a id="254" class="Symbol">:</a> <a id="256" href="Data.Binary.Definition.html#117" class="Datatype">𝔹</a> <a id="258" class="Symbol">→</a> <a id="260" href="Data.Binary.Definition.html#117" class="Datatype">𝔹</a> <a id="262" class="Symbol">→</a> <a id="264" href="Data.Binary.Definition.html#117" class="Datatype">𝔹</a>
+<a id="266" href="Data.Binary.Multiplication.html#266" class="Bound">xs</a> <a id="269" href="Data.Binary.Multiplication.html#250" class="Function Operator">*</a> <a id="271" href="Data.Binary.Definition.html#135" class="InductiveConstructor">[]</a> <a id="274" class="Symbol">=</a> <a id="276" href="Data.Binary.Definition.html#135" class="InductiveConstructor">[]</a>
+<a id="279" href="Data.Binary.Multiplication.html#279" class="Bound">xs</a> <a id="282" href="Data.Binary.Multiplication.html#250" class="Function Operator">*</a> <a id="284" class="Symbol">(</a><a id="285" href="Data.Binary.Definition.html#144" class="InductiveConstructor Operator">1ᵇ∷</a> <a id="289" href="Data.Binary.Multiplication.html#289" class="Bound">ys</a><a id="291" class="Symbol">)</a> <a id="293" class="Symbol">=</a> <a id="295" href="Data.Binary.Multiplication.html#330" class="Function">go</a> <a id="298" href="Data.Binary.Multiplication.html#279" class="Bound">xs</a>
+  <a id="303" class="Keyword">where</a>
+  <a id="311" href="Data.Binary.Multiplication.html#311" class="Function">ys2</a> <a id="315" class="Symbol">=</a> <a id="317" href="Data.Binary.Multiplication.html#145" class="Function">double</a> <a id="324" href="Data.Binary.Multiplication.html#289" class="Bound">ys</a>
+
+  <a id="330" href="Data.Binary.Multiplication.html#330" class="Function">go</a> <a id="333" class="Symbol">:</a> <a id="335" href="Data.Binary.Definition.html#117" class="Datatype">𝔹</a> <a id="337" class="Symbol">→</a> <a id="339" href="Data.Binary.Definition.html#117" class="Datatype">𝔹</a>
+  <a id="343" href="Data.Binary.Multiplication.html#330" class="Function">go</a> <a id="346" href="Data.Binary.Definition.html#135" class="InductiveConstructor">[]</a> <a id="349" class="Symbol">=</a> <a id="351" href="Data.Binary.Definition.html#135" class="InductiveConstructor">[]</a>
+  <a id="356" href="Data.Binary.Multiplication.html#330" class="Function">go</a> <a id="359" class="Symbol">(</a><a id="360" href="Data.Binary.Definition.html#144" class="InductiveConstructor Operator">1ᵇ∷</a> <a id="364" href="Data.Binary.Multiplication.html#364" class="Bound">xs</a><a id="366" class="Symbol">)</a> <a id="368" class="Symbol">=</a> <a id="370" href="Data.Binary.Definition.html#144" class="InductiveConstructor Operator">1ᵇ∷</a> <a id="374" href="Data.Binary.Multiplication.html#289" class="Bound">ys</a> <a id="377" href="Data.Binary.Addition.html#788" class="Function Operator">+</a> <a id="379" href="Data.Binary.Multiplication.html#330" class="Function">go</a> <a id="382" href="Data.Binary.Multiplication.html#364" class="Bound">xs</a>
+  <a id="387" href="Data.Binary.Multiplication.html#330" class="Function">go</a> <a id="390" class="Symbol">(</a><a id="391" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="395" href="Data.Binary.Multiplication.html#395" class="Bound">xs</a><a id="397" class="Symbol">)</a> <a id="399" class="Symbol">=</a> <a id="401" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="405" class="Symbol">(</a><a id="406" href="Data.Binary.Multiplication.html#311" class="Function">ys2</a> <a id="410" href="Data.Binary.Addition.html#788" class="Function Operator">+</a> <a id="412" href="Data.Binary.Multiplication.html#330" class="Function">go</a> <a id="415" href="Data.Binary.Multiplication.html#395" class="Bound">xs</a><a id="417" class="Symbol">)</a>
+
+<a id="420" href="Data.Binary.Multiplication.html#420" class="Bound">xs</a> <a id="423" href="Data.Binary.Multiplication.html#250" class="Function Operator">*</a> <a id="425" class="Symbol">(</a><a id="426" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="430" href="Data.Binary.Multiplication.html#430" class="Bound">ys</a><a id="432" class="Symbol">)</a> <a id="434" class="Symbol">=</a> <a id="436" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="439" href="Data.Binary.Multiplication.html#420" class="Bound">xs</a>
+  <a id="444" class="Keyword">where</a>
+  <a id="452" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="455" class="Symbol">:</a> <a id="457" href="Data.Binary.Definition.html#117" class="Datatype">𝔹</a> <a id="459" class="Symbol">→</a> <a id="461" href="Data.Binary.Definition.html#117" class="Datatype">𝔹</a>
+  <a id="465" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="468" href="Data.Binary.Definition.html#135" class="InductiveConstructor">[]</a> <a id="471" class="Symbol">=</a> <a id="473" href="Data.Binary.Definition.html#135" class="InductiveConstructor">[]</a>
+  <a id="478" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="481" class="Symbol">(</a><a id="482" href="Data.Binary.Definition.html#144" class="InductiveConstructor Operator">1ᵇ∷</a> <a id="486" href="Data.Binary.Multiplication.html#486" class="Bound">xs</a><a id="488" class="Symbol">)</a> <a id="490" class="Symbol">=</a> <a id="492" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="496" href="Data.Binary.Multiplication.html#430" class="Bound">ys</a> <a id="499" href="Data.Binary.Addition.html#788" class="Function Operator">+</a> <a id="501" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="504" href="Data.Binary.Multiplication.html#486" class="Bound">xs</a>
+  <a id="509" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="512" class="Symbol">(</a><a id="513" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="517" href="Data.Binary.Multiplication.html#517" class="Bound">xs</a><a id="519" class="Symbol">)</a> <a id="521" class="Symbol">=</a> <a id="523" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">2ᵇ∷</a> <a id="527" class="Symbol">(</a><a id="528" href="Data.Binary.Definition.html#144" class="InductiveConstructor Operator">1ᵇ∷</a> <a id="532" href="Data.Binary.Multiplication.html#430" class="Bound">ys</a><a id="534" class="Symbol">)</a> <a id="536" href="Data.Binary.Addition.html#788" class="Function Operator">+</a> <a id="538" href="Data.Binary.Multiplication.html#452" class="Function">go</a> <a id="541" href="Data.Binary.Multiplication.html#517" class="Bound">xs</a>
+
+
+
+<a id="547" class="Comment">-- open import Prelude</a>
+<a id="570" class="Comment">-- open import Data.Binary.Conversion</a>
+
+<a id="609" class="Comment">-- testers : ℕ → Type₀</a>
+<a id="632" class="Comment">-- testers n = bins n n ≡ nats n n</a>
+<a id="667" class="Comment">--   where</a>
+<a id="678" class="Comment">--   open import Data.List</a>
+<a id="705" class="Comment">--   open import Data.List.Syntax</a>
+<a id="739" class="Comment">--   open import Data.List.Sugar</a>
+<a id="772" class="Comment">--   import Agda.Builtin.Nat as Nat</a>
+
+<a id="809" class="Comment">--   upTo : (ℕ → A) → ℕ → List A</a>
+<a id="842" class="Comment">--   upTo f zero = []</a>
+<a id="864" class="Comment">--   upTo f (suc n) = f zero List.∷ upTo (f ∘ suc) n</a>
+
+<a id="918" class="Comment">--   bins : ℕ → ℕ → List 𝔹</a>
+<a id="945" class="Comment">--   bins ns ms = do</a>
+<a id="966" class="Comment">--     n ← upTo id ns</a>
+<a id="988" class="Comment">--     m ← upTo id ms</a>
+<a id="1010" class="Comment">--     pure (⟦ n ⇑⟧ * ⟦ m ⇑⟧)</a>
+
+<a id="1041" class="Comment">--   nats : ℕ → ℕ → List 𝔹</a>
+<a id="1068" class="Comment">--   nats ns ms = do</a>
+<a id="1089" class="Comment">--     n ← upTo id ns</a>
+<a id="1111" class="Comment">--     m ← upTo id ms</a>
+<a id="1133" class="Comment">--     pure ⟦ n Nat.* m ⇑⟧</a>
+
+<a id="1161" class="Comment">-- _ : testers 10</a>
+<a id="1179" class="Comment">-- _ = refl</a>
+</pre></body></html>
