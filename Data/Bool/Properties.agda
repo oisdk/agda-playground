@@ -6,11 +6,6 @@ open import Prelude
 open import Data.Bool
 open import Data.Unit.Properties
 
-T? : ∀ x → Dec (T x)
-T? x .does = x
-T? false .why = id
-T? true  .why = tt
-
 isPropT : ∀ x → isProp (T x)
 isPropT false = isProp⊥
 isPropT true  = isProp⊤
