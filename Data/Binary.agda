@@ -12,3 +12,5 @@ open import Data.Binary.Multiplication public
   using (_*_)
 open import Data.Binary.Subtraction public
   using (_-_)
+open import Data.Binary.Isomorphism public
+  using (𝔹⇔ℕ)
