@@ -15,17 +15,16 @@ _*_ : 𝔹 → 𝔹 → 𝔹
 xs * 0ᵇ = 0ᵇ
 xs * (1ᵇ ys) = go xs
   where
-  ys2 = double ys
+  ys₂ = double ys
 
   go : 𝔹 → 𝔹
   go 0ᵇ = 0ᵇ
-  go (1ᵇ xs) = 1ᵇ ys + go xs
-  go (2ᵇ xs) = 2ᵇ (ys2 + go xs)
+  go (1ᵇ xs) = 1ᵇ (ys  + go xs)
+  go (2ᵇ xs) = 2ᵇ (ys₂ + go xs)
 
 xs * (2ᵇ ys) = go xs
   where
   go : 𝔹 → 𝔹
   go 0ᵇ = 0ᵇ
-  go (1ᵇ xs) = 2ᵇ ys + go xs
-  go (2ᵇ xs) = 2ᵇ (1ᵇ ys) + go xs
-
+  go (1ᵇ xs) = 2ᵇ (   ys + go xs)
+  go (2ᵇ xs) = 2ᵇ (1ᵇ ys + go xs)
