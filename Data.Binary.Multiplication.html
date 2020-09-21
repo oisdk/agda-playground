@@ -30,33 +30,4 @@
   <a id="467" href="Data.Binary.Multiplication.html#441" class="Function">go</a> <a id="470" class="Symbol">(</a><a id="471" href="Data.Binary.Definition.html#142" class="InductiveConstructor Operator">1ᵇ</a> <a id="474" href="Data.Binary.Multiplication.html#474" class="Bound">xs</a><a id="476" class="Symbol">)</a> <a id="478" class="Symbol">=</a> <a id="480" href="Data.Binary.Definition.html#156" class="InductiveConstructor Operator">2ᵇ</a> <a id="483" href="Data.Binary.Multiplication.html#419" class="Bound">ys</a> <a id="486" href="Data.Binary.Addition.html#741" class="Function Operator">+</a> <a id="488" href="Data.Binary.Multiplication.html#441" class="Function">go</a> <a id="491" href="Data.Binary.Multiplication.html#474" class="Bound">xs</a>
   <a id="496" href="Data.Binary.Multiplication.html#441" class="Function">go</a> <a id="499" class="Symbol">(</a><a id="500" href="Data.Binary.Definition.html#156" class="InductiveConstructor Operator">2ᵇ</a> <a id="503" href="Data.Binary.Multiplication.html#503" class="Bound">xs</a><a id="505" class="Symbol">)</a> <a id="507" class="Symbol">=</a> <a id="509" href="Data.Binary.Definition.html#156" class="InductiveConstructor Operator">2ᵇ</a> <a id="512" class="Symbol">(</a><a id="513" href="Data.Binary.Definition.html#142" class="InductiveConstructor Operator">1ᵇ</a> <a id="516" href="Data.Binary.Multiplication.html#419" class="Bound">ys</a><a id="518" class="Symbol">)</a> <a id="520" href="Data.Binary.Addition.html#741" class="Function Operator">+</a> <a id="522" href="Data.Binary.Multiplication.html#441" class="Function">go</a> <a id="525" href="Data.Binary.Multiplication.html#503" class="Bound">xs</a>
 
-<a id="529" class="Comment">-- open import Prelude</a>
-<a id="552" class="Comment">-- open import Data.Binary.Conversion</a>
-
-<a id="591" class="Comment">-- testers : ℕ → Type₀</a>
-<a id="614" class="Comment">-- testers n = bins n n ≡ nats n n</a>
-<a id="649" class="Comment">--   where</a>
-<a id="660" class="Comment">--   open import Data.List</a>
-<a id="687" class="Comment">--   open import Data.List.Syntax</a>
-<a id="721" class="Comment">--   open import Data.List.Sugar</a>
-<a id="754" class="Comment">--   import Agda.Builtin.Nat as Nat</a>
-
-<a id="791" class="Comment">--   upTo : (ℕ → A) → ℕ → List A</a>
-<a id="824" class="Comment">--   upTo f zero = 0ᵇ</a>
-<a id="846" class="Comment">--   upTo f (suc n) = f zero List.∷ upTo (f ∘ suc) n</a>
-
-<a id="900" class="Comment">--   bins : ℕ → ℕ → List 𝔹</a>
-<a id="927" class="Comment">--   bins ns ms = do</a>
-<a id="948" class="Comment">--     n ← upTo id ns</a>
-<a id="970" class="Comment">--     m ← upTo id ms</a>
-<a id="992" class="Comment">--     pure (⟦ n ⇑⟧ * ⟦ m ⇑⟧)</a>
-
-<a id="1023" class="Comment">--   nats : ℕ → ℕ → List 𝔹</a>
-<a id="1050" class="Comment">--   nats ns ms = do</a>
-<a id="1071" class="Comment">--     n ← upTo id ns</a>
-<a id="1093" class="Comment">--     m ← upTo id ms</a>
-<a id="1115" class="Comment">--     pure ⟦ n Nat.* m ⇑⟧</a>
-
-<a id="1143" class="Comment">-- _ : testers 10</a>
-<a id="1161" class="Comment">-- _ = refl</a>
 </pre></body></html>
