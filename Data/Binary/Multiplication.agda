@@ -29,32 +29,3 @@ xs * (2ᵇ ys) = go xs
   go (1ᵇ xs) = 2ᵇ ys + go xs
   go (2ᵇ xs) = 2ᵇ (1ᵇ ys) + go xs
 
--- open import Prelude
--- open import Data.Binary.Conversion
-
--- testers : ℕ → Type₀
--- testers n = bins n n ≡ nats n n
---   where
---   open import Data.List
---   open import Data.List.Syntax
---   open import Data.List.Sugar
---   import Agda.Builtin.Nat as Nat
-
---   upTo : (ℕ → A) → ℕ → List A
---   upTo f zero = 0ᵇ
---   upTo f (suc n) = f zero List.∷ upTo (f ∘ suc) n
-
---   bins : ℕ → ℕ → List 𝔹
---   bins ns ms = do
---     n ← upTo id ns
---     m ← upTo id ms
---     pure (⟦ n ⇑⟧ * ⟦ m ⇑⟧)
-
---   nats : ℕ → ℕ → List 𝔹
---   nats ns ms = do
---     n ← upTo id ns
---     m ← upTo id ms
---     pure ⟦ n Nat.* m ⇑⟧
-
--- _ : testers 10
--- _ = refl

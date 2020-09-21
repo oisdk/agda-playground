@@ -46,3 +46,19 @@ take : ℕ → List A → List A
 take zero _ = []
 take (suc n) [] = []
 take (suc n) (x ∷ xs) = x ∷ take n xs
+
+_⋯_ : ℕ → ℕ → List ℕ
+_⋯_ n = go n
+  where
+  go″ : ℕ → ℕ → List ℕ
+  go′ : ℕ → ℕ → List ℕ
+
+  go″ n zero = []
+  go″ n (suc m) = go′ (suc n) m
+
+  go′ n m = n ∷ go″ n m
+
+  go : ℕ → ℕ → List ℕ
+  go zero = go′ n
+  go (suc n) zero = []
+  go (suc n) (suc m) = go n m

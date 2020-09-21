@@ -26,3 +26,15 @@ fs <*> xs = do
 guard : Bool → List ⊤
 guard false = []
 guard true  = [ tt ]
+
+liftA2 : (A → B → C) → List A → List B → List C
+liftA2 {A = A} {B = B} {C = C} f xs ys = go xs
+  where
+  go′ : A → List A → List B → List C
+  go : List A → List C
+
+  go′ x xs [] = go xs
+  go′ x xs (y ∷ ys) = f x y ∷ go′ x xs ys
+
+  go [] = []
+  go (x ∷ xs) = go′ x xs ys
