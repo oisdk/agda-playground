@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --cubical --safe --postfix-projections #-}
 
 module Data.Binary.Skew where
 
@@ -19,19 +19,43 @@ inc (x₁ ∷ suc x₂ ∷ xs) = zero ∷ x₁ ∷ x₂ ∷ xs
 ⟦ zero ⇑⟧ = []
 ⟦ suc n ⇑⟧ = inc ⟦ n ⇑⟧
 
-2^ : ℕ → ℕ
-2^ zero = 1
-2^ (suc n) = 2^ n * 2
+skew : ℕ → ℕ
+skew n = suc (n + n)
 
-go : 𝔹 → ℕ
-go [] = zero
-go (x ∷ xs) = suc (go xs * 2) * 2^ x
+w : ℕ → ℕ → ℕ
+w zero    a = a
+w (suc n) a = skew (w n a)
+
+go : ℕ → 𝔹 → ℕ
+go a [] = zero
+go a (x ∷ xs) = let a′ = w x a in a′ + go (skew a′) xs
 
 ⟦_⇓⟧ : 𝔹 → ℕ
 ⟦ [] ⇓⟧ = zero
-⟦ x  ∷ [] ⇓⟧ = 2^ x
-⟦ x  ∷ zero   ∷ xs ⇓⟧ = suc (suc (go xs * 2)) * 2^ x
-⟦ x₁ ∷ suc x₂ ∷ xs ⇓⟧ = go (x₁ ∷ x₂ ∷ xs)
+⟦ x  ∷ xs ⇓⟧ = let a = w x 1 in a + go a xs
 
 fn : ℕ → _
 fn n = ⟦ ⟦ n ⇑⟧ ⇓⟧
+
+open import Path.Reasoning
+import Data.Nat.Properties as ℕ
+
+inc-suc : ∀ x → ⟦ inc x ⇓⟧ ≡ suc ⟦ x ⇓⟧
+inc-suc [] = refl
+inc-suc (x ∷ []) = refl
+inc-suc (x ∷ zero ∷ xs) = cong suc (ℕ.+-assoc (w x 1) (w x 1) (go (skew (w x 1)) xs))
+inc-suc (x₁ ∷ suc x₂ ∷ xs) = cong suc (cong (w x₁ 1 +_) {!!})
+
+𝔹-rightInv : ∀ x → ⟦ ⟦ x ⇑⟧ ⇓⟧ ≡ x
+𝔹-rightInv zero = refl
+𝔹-rightInv (suc x) = {!!}
+
+𝔹-leftInv : ∀ x → ⟦ ⟦ x ⇓⟧ ⇑⟧ ≡ x
+𝔹-leftInv [] = refl
+𝔹-leftInv (x ∷ xs) = {!!}
+
+-- 𝔹⇔ℕ : 𝔹 ⇔ ℕ
+-- 𝔹⇔ℕ .fun = ⟦_⇓⟧
+-- 𝔹⇔ℕ .inv = ⟦_⇑⟧
+-- 𝔹⇔ℕ .rightInv x = {!!}
+-- 𝔹⇔ℕ .leftInv = {!!}
