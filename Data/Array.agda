@@ -18,7 +18,7 @@ open 2× public
 infixr 5 _∷₁_ _∷₂_ _∷_
 data Array {a} (A : Type a) : 𝔹 → Type a where
   [] : Array A 0ᵇ
-  _∷₁_ : A → Array (2× A) ns → Array A (1ᵇ ns)
+  _∷₁_ :    A → Array (2× A) ns → Array A (1ᵇ ns)
   _∷₂_ : 2× A → Array (2× A) ns → Array A (2ᵇ ns)
 
 _∷_ : A → Array A ns → Array A (inc ns)
@@ -77,6 +77,7 @@ head2ᵇ .into (x ∷₂ xs) = lens-part x (_∷₂ xs)
 head2ᵇ .get-set (x ∷₂ xs) v i = v
 head2ᵇ .set-get (x ∷₂ xs) i = x ∷₂ xs
 head2ᵇ .set-set (x ∷₂ xs) v₁ v₂ i = v₂ ∷₂ xs
+{-# INLINE head2ᵇ #-}
 
 tail1ᵇ : Lens (Array A (1ᵇ ns)) (Array (2× A) ns)
 tail1ᵇ .into (x ∷₁ xs) = lens-part xs (x ∷₁_)
@@ -137,6 +138,10 @@ at is {p = p} = ind is p
 -- open import Data.Binary.Literals
 -- open import Data.Nat.Literals
 -- open import Literals.Number
+
+-- e : Array ℕ 100 →  ℕ → Array ℕ 100
+-- e xs n = xs [ at 10 ]≔ n
+
 
 -- e : Array ℕ _
 -- e = (0 ∷ 1 ∷ 2 ∷ 3 ∷ 4 ∷ 5 ∷ []) [ at 3 ]≔ 10
