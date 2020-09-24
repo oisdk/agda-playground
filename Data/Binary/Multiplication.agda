@@ -12,19 +12,6 @@ double (2ᵇ xs) = 2ᵇ 1ᵇ xs
 
 infixl 7 _*_
 _*_ : 𝔹 → 𝔹 → 𝔹
-xs * 0ᵇ = 0ᵇ
-xs * (1ᵇ ys) = go xs
-  where
-  ys₂ = double ys
-
-  go : 𝔹 → 𝔹
-  go 0ᵇ = 0ᵇ
-  go (1ᵇ xs) = 1ᵇ (ys  + go xs)
-  go (2ᵇ xs) = 2ᵇ (ys₂ + go xs)
-
-xs * (2ᵇ ys) = go xs
-  where
-  go : 𝔹 → 𝔹
-  go 0ᵇ = 0ᵇ
-  go (1ᵇ xs) = 2ᵇ (   ys + go xs)
-  go (2ᵇ xs) = 2ᵇ (1ᵇ ys + go xs)
+0ᵇ    * ys = 0ᵇ
+1ᵇ xs * ys = ys + double (ys * xs)
+2ᵇ xs * ys = double (ys + ys * xs)

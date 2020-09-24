@@ -77,7 +77,6 @@ head2ᵇ .into (x ∷₂ xs) = lens-part x (_∷₂ xs)
 head2ᵇ .get-set (x ∷₂ xs) v i = v
 head2ᵇ .set-get (x ∷₂ xs) i = x ∷₂ xs
 head2ᵇ .set-set (x ∷₂ xs) v₁ v₂ i = v₂ ∷₂ xs
-{-# INLINE head2ᵇ #-}
 
 tail1ᵇ : Lens (Array A (1ᵇ ns)) (Array (2× A) ns)
 tail1ᵇ .into (x ∷₁ xs) = lens-part xs (x ∷₁_)

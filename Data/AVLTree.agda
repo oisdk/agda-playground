@@ -8,6 +8,7 @@ module Data.AVLTree {e} {E : Type e} {r} (totalOrder : TotalOrder E r) where
 open import Relation.Binary.Construct.Bounded totalOrder
 open import Data.Nat using (_+_)
 open TotalOrder totalOrder using (_≤?_)
+open TotalOrder b-ord using () renaming (trans to ≤-trans; refl to ≤-refl)
 
 private
   variable
@@ -70,3 +71,16 @@ insertWithin x lb≤x x≤ub (node y bal ls rs) | inr y≤x | false , rs′ = fa
 insertWithin x lb≤x x≤ub (node y ll ls rs) | inr y≤x | true , rs′ = false , node y ee ls rs′
 insertWithin x lb≤x x≤ub (node y ee ls rs) | inr y≤x | true , rs′ = true , node y rr ls rs′
 insertWithin x lb≤x x≤ub (node y rr ls rs) | inr y≤x | true , rs′ = rotˡ y ls rs′
+
+infixr 5 _⟨_⟩∷_
+data OrdList (lb : [∙]) : Type (e ℓ⊔ r) where
+  [] : OrdList lb
+  _⟨_⟩∷_ : (x : E) → lb [≤] [ x ] → OrdList [ x ] → OrdList lb
+
+toList : Tree lb ub n → OrdList lb
+toList tr = go tr []
+  where
+  go : Tree lb ub n → OrdList ub → OrdList lb
+  go (leaf x) [] = []
+  go {lb} {ub} (leaf p) (x ⟨ q ⟩∷ xs) = x ⟨ ≤-trans {lb} p q ⟩∷ xs
+  go (node x bal ls rs) xs = go ls (x ⟨ ≤-refl ⟩∷ go  rs xs)
