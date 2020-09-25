@@ -5,9 +5,22 @@
 
 <a id="74" class="Keyword">open</a> <a id="79" class="Keyword">import</a> <a id="86" href="Level.html" class="Module">Level</a>
 
-<a id="93" class="Keyword">infixr</a> <a id="100" class="Number">8</a> <a id="102" href="Data.Binary.Definition.html#142" class="InductiveConstructor Operator">1ᵇ_</a> <a id="106" href="Data.Binary.Definition.html#156" class="InductiveConstructor Operator">2ᵇ_</a>
-<a id="110" class="Keyword">data</a> <a id="𝔹"></a><a id="115" href="Data.Binary.Definition.html#115" class="Datatype">𝔹</a> <a id="117" class="Symbol">:</a> <a id="119" href="Level.html#242" class="Function">Type₀</a> <a id="125" class="Keyword">where</a>
-  <a id="𝔹.0ᵇ"></a><a id="133" href="Data.Binary.Definition.html#133" class="InductiveConstructor">0ᵇ</a> <a id="136" class="Symbol">:</a> <a id="138" href="Data.Binary.Definition.html#115" class="Datatype">𝔹</a>
-  <a id="𝔹.1ᵇ_"></a><a id="142" href="Data.Binary.Definition.html#142" class="InductiveConstructor Operator">1ᵇ_</a> <a id="146" class="Symbol">:</a> <a id="148" href="Data.Binary.Definition.html#115" class="Datatype">𝔹</a> <a id="150" class="Symbol">→</a> <a id="152" href="Data.Binary.Definition.html#115" class="Datatype">𝔹</a>
-  <a id="𝔹.2ᵇ_"></a><a id="156" href="Data.Binary.Definition.html#156" class="InductiveConstructor Operator">2ᵇ_</a> <a id="160" class="Symbol">:</a> <a id="162" href="Data.Binary.Definition.html#115" class="Datatype">𝔹</a> <a id="164" class="Symbol">→</a> <a id="166" href="Data.Binary.Definition.html#115" class="Datatype">𝔹</a>
+
+<a id="94" class="Keyword">data</a> <a id="𝔹"></a><a id="99" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a> <a id="101" class="Symbol">:</a> <a id="103" href="Level.html#242" class="Function">Type₀</a> <a id="109" class="Keyword">where</a>
+  <a id="𝔹.0ᵇ"></a><a id="117" href="Data.Binary.Definition.html#117" class="InductiveConstructor">0ᵇ</a> <a id="120" class="Symbol">:</a> <a id="122" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a>
+  <a id="𝔹.1ᵇ_"></a><a id="126" href="Data.Binary.Definition.html#126" class="InductiveConstructor Operator">1ᵇ_</a> <a id="130" class="Symbol">:</a> <a id="132" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a> <a id="134" class="Symbol">→</a> <a id="136" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a>
+  <a id="𝔹.2ᵇ_"></a><a id="140" href="Data.Binary.Definition.html#140" class="InductiveConstructor Operator">2ᵇ_</a> <a id="144" class="Symbol">:</a> <a id="146" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a> <a id="148" class="Symbol">→</a> <a id="150" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a>
+
+<a id="153" class="Comment">-- The following causes a performance hit:</a>
+
+<a id="197" class="Comment">-- open import Agda.Builtin.List using ([]; _∷_; List)</a>
+<a id="252" class="Comment">-- open import Agda.Builtin.Bool using (Bool; true; false)</a>
+
+<a id="312" class="Comment">-- 𝔹 : Type₀</a>
+<a id="325" class="Comment">-- 𝔹 = List Bool</a>
+
+<a id="343" class="Comment">-- infixr 8 1ᵇ_ 2ᵇ_</a>
+<a id="363" class="Comment">-- pattern 0ᵇ = []</a>
+<a id="382" class="Comment">-- pattern 1ᵇ_ xs = false ∷ xs</a>
+<a id="413" class="Comment">-- pattern 2ᵇ_ xs = true  ∷ xs</a>
 </pre></body></html>
