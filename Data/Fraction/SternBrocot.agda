@@ -5,11 +5,8 @@ module Data.Fraction.SternBrocot where
 open import Prelude
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕ
-
-data ℚ⁺ : Type₀ where
-  1ℚ : ℚ⁺
-  lℚ : ℚ⁺ → ℚ⁺
-  rℚ : ℚ⁺ → ℚ⁺
+open import Data.Bits renaming (Bits to ℚ⁺; [] to 1ℚ; 0∷_ to lℚ; 1∷_ to rℚ)
+open import Data.Bits.Equatable
 
 ⟦_⇓⟧ : ℚ⁺ → (ℕ × ℕ)
 ⟦ 1ℚ ⇓⟧ = 1 , 1

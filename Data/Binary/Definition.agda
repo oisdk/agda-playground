@@ -3,12 +3,7 @@
 module Data.Binary.Definition where
 
 open import Level
-
-
-data 𝔹 : Type₀ where
-  0ᵇ : 𝔹
-  1ᵇ_ : 𝔹 → 𝔹
-  2ᵇ_ : 𝔹 → 𝔹
+open import Data.Bits public renaming (Bits to 𝔹; [] to 0ᵇ; 0∷_ to 1ᵇ_; 1∷_ to 2ᵇ∷_)
 
 -- The following causes a performance hit:
 
