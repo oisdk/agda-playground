@@ -5,6 +5,8 @@ module Data.Bits.Order where
 open import Prelude
 open import Data.Bits
 
+-- Least significant bit first
+
 infix 4 _≲ᴮ_&_
 _≲ᴮ_&_ : Bits → Bits → Bool → Bool
 []    ≲ᴮ ys    & true  = true
