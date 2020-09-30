@@ -20,34 +20,36 @@ inc (x₁ ∷ suc x₂ ∷ xs) = zero ∷ x₁ ∷ x₂ ∷ xs
 ⟦ suc n ⇑⟧ = inc ⟦ n ⇑⟧
 
 skew : ℕ → ℕ
-skew n = 1 + (2 * n)
+-- skew n = 1 + (2 * n)
 -- Maybe easier for proofs:
--- skew n = suc (n + n)
+skew n = suc (n + n)
 
 w : ℕ → ℕ → ℕ
 w zero    a = a
 w (suc n) a = skew (w n a)
 
-go : 𝔹 → ℕ → ℕ
-go = foldr f (λ _ → zero)
-  where
-  f : ℕ → (ℕ → ℕ) → ℕ → ℕ
-  f x xs a = let a′ = w x a in a′ + xs (skew a′)
+⟦_⇓⟧′ : 𝔹 → ℕ → ℕ
+⟦ []     ⇓⟧′ a = zero
+⟦ x ∷ xs ⇓⟧′ a = let a′ = w x a in a′ + ⟦ xs ⇓⟧′ (skew a′)
+-- ⟦_⇓⟧′ = foldr f (λ _ → zero)
+--   where
+--   f : ℕ → (ℕ → ℕ) → ℕ → ℕ
+--   f x xs a = let a′ = w x a in a′ + xs (skew a′)
 
 ⟦_⇓⟧ : 𝔹 → ℕ
 ⟦ [] ⇓⟧ = zero
-⟦ x ∷ xs ⇓⟧ = let a = w x 1 in a + go xs a
+⟦ x ∷ xs ⇓⟧ = let a = w x 1 in a + ⟦ xs ⇓⟧′ a
 
-fn : ℕ → _
-fn n = ⟦ ⟦ n ⇑⟧ ⇓⟧
+-- fn : ℕ → _
+-- fn n = ⟦ ⟦ n ⇑⟧ ⇓⟧
 
 -- open import Path.Reasoning
 -- import Data.Nat.Properties as ℕ
 
 -- inc-suc : ∀ x → ⟦ inc x ⇓⟧ ≡ suc ⟦ x ⇓⟧
 -- inc-suc [] = refl
--- inc-suc (x ∷ []) = refl
--- inc-suc (x ∷ zero ∷ xs) = cong suc (ℕ.+-assoc (w x 1) (w x 1) (go (skew (w x 1)) xs))
+-- inc-suc (x  ∷ []) = refl
+-- inc-suc (x  ∷ zero   ∷ xs) = cong suc (ℕ.+-assoc (w x 1) (w x 1) _)
 -- inc-suc (x₁ ∷ suc x₂ ∷ xs) = cong suc (cong (w x₁ 1 +_) {!!})
 
 -- 𝔹-rightInv : ∀ x → ⟦ ⟦ x ⇑⟧ ⇓⟧ ≡ x
@@ -58,8 +60,8 @@ fn n = ⟦ ⟦ n ⇑⟧ ⇓⟧
 -- 𝔹-leftInv [] = refl
 -- 𝔹-leftInv (x ∷ xs) = {!!}
 
--- -- 𝔹⇔ℕ : 𝔹 ⇔ ℕ
--- -- 𝔹⇔ℕ .fun = ⟦_⇓⟧
--- -- 𝔹⇔ℕ .inv = ⟦_⇑⟧
--- -- 𝔹⇔ℕ .rightInv x = {!!}
--- -- 𝔹⇔ℕ .leftInv = {!!}
+-- 𝔹⇔ℕ : 𝔹 ⇔ ℕ
+-- 𝔹⇔ℕ .fun = ⟦_⇓⟧
+-- 𝔹⇔ℕ .inv = ⟦_⇑⟧
+-- 𝔹⇔ℕ .rightInv x = {!!}
+-- 𝔹⇔ℕ .leftInv = {!!}

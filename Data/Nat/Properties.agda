@@ -59,3 +59,7 @@ _≥ᴮ_ = flip _≤ᴮ_
 +-assoc : ∀ x y z → (x + y) + z ≡ x + (y + z)
 +-assoc zero     y z i = y + z
 +-assoc (suc x)  y z i = suc (+-assoc x y z i)
+
++-*-distrib : ∀ x y z → (x + y) * z ≡ x * z + y * z
++-*-distrib zero y z = refl
++-*-distrib (suc x) y z = cong (z +_) (+-*-distrib x y z) ; sym (+-assoc z (x * z) (y * z))
