@@ -18,7 +18,7 @@ test bf nf n =
 import Data.Nat as ℕ
 open import Data.Binary.Addition using (_+_)
 open import Data.Binary.Multiplication using (_*_)
-open import Data.Binary.Subtraction using (_-_)
+-- open import Data.Binary.Subtraction using (_-_)
 
 _ : test _+_ ℕ._+_ 15
 _ = refl
@@ -26,5 +26,3 @@ _ = refl
 _ : test _*_ ℕ._*_ 15
 _ = refl
 
-_ : test _-_ ℕ._∸_ 15
-_ = refl
