@@ -126,7 +126,6 @@ jobs:
         echo "{-# OPTIONS --cubical #-}" > Everything
         echo "module Everything where" >> Everything
         find . -type f \( -name "*.agda" -o -name "*.lagda" \) \
-                | sort -z
                 | cut -c 3- \
                 | cut -f1 -d'.' \
                 | sed 's/\//\./g' \
