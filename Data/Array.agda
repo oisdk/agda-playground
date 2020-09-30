@@ -126,6 +126,11 @@ foldrP {ns = 2ᵇ ns} P f b ((x₁ ⊛ x₂) ∷₂ xs) = f x₁ (f x₂ (foldrP
 foldr : (A → B → B) → B → Array A ns → B
 foldr f b = foldrP (λ _ → _) f b
 
+map : (A → B) → Array A ns → Array B ns
+map {ns = 0ᵇ}    f xs = []
+map {ns = 1ᵇ ns} f (x ∷₁ xs) = f x ∷₁ map (λ { (x₁ ⊛ x₂) → f x₁ ⊛ f x₂ }) xs
+map {ns = 2ᵇ ns} f ((x₁ ⊛ x₂) ∷₂ xs) = (f x₁ ⊛ f x₂) ∷₂ map (λ { (x₁ ⊛ x₂) → f x₁ ⊛ f x₂ }) xs
+
 record ArraySyntax {a b} (A : Type a) (B : Type b) (n : 𝔹) : Type (a ℓ⊔ b) where
   field [_] : B → Array A n
 open ArraySyntax ⦃ ... ⦄ public
