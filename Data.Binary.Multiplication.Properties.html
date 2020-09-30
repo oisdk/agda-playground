@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.Binary.Multiplication.Properties</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+
+<a id="35" class="Keyword">module</a> <a id="42" href="Data.Binary.Multiplication.Properties.html" class="Module">Data.Binary.Multiplication.Properties</a> <a id="80" class="Keyword">where</a>
+
+<a id="87" class="Keyword">open</a> <a id="92" class="Keyword">import</a> <a id="99" href="Prelude.html" class="Module">Prelude</a>
+<a id="107" class="Keyword">open</a> <a id="112" class="Keyword">import</a> <a id="119" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a>
+<a id="142" class="Keyword">open</a> <a id="147" class="Keyword">import</a> <a id="154" href="Data.Binary.Addition.html" class="Module">Data.Binary.Addition</a>
+<a id="175" class="Keyword">open</a> <a id="180" class="Keyword">import</a> <a id="187" href="Data.Binary.Addition.Properties.html" class="Module">Data.Binary.Addition.Properties</a> <a id="219" class="Keyword">using</a> <a id="225" class="Symbol">(</a><a id="226" href="Data.Binary.Addition.Properties.html#322" class="Function">+-cong</a><a id="232" class="Symbol">)</a>
+<a id="234" class="Keyword">open</a> <a id="239" class="Keyword">import</a> <a id="246" href="Data.Binary.Multiplication.html" class="Module">Data.Binary.Multiplication</a>
+<a id="273" class="Keyword">open</a> <a id="278" class="Keyword">import</a> <a id="285" href="Data.Binary.Conversion.html" class="Module">Data.Binary.Conversion</a>
+<a id="308" class="Keyword">import</a> <a id="315" href="Data.Nat.html" class="Module">Data.Nat</a> <a id="324" class="Symbol">as</a> <a id="327" class="Module">ℕ</a>
+<a id="329" class="Keyword">import</a> <a id="336" href="Data.Nat.Properties.html" class="Module">Data.Nat.Properties</a> <a id="356" class="Symbol">as</a> <a id="359" class="Module">ℕ</a>
+<a id="361" class="Keyword">open</a> <a id="366" class="Keyword">import</a> <a id="373" href="Path.Reasoning.html" class="Module">Path.Reasoning</a>
+<a id="388" class="Keyword">open</a> <a id="393" class="Keyword">import</a> <a id="400" href="Data.Binary.Isomorphism.html" class="Module">Data.Binary.Isomorphism</a>
+
+<a id="425" class="Comment">-- double-cong : ∀ xs → ⟦ double xs ⇓⟧ ≡ ⟦ xs ⇓⟧ ℕ.* 2</a>
+<a id="480" class="Comment">-- double-cong 0ᵇ i = zero</a>
+<a id="507" class="Comment">-- double-cong (1ᵇ xs) i = 2 ℕ.+ double-cong xs i ℕ.* 2</a>
+<a id="563" class="Comment">-- double-cong (2ᵇ xs) i = ⟦ 2ᵇ 1ᵇ xs ⇓⟧</a>
+
+<a id="605" class="Comment">-- lemma₁ : ∀ x y → x ℕ.+ x ℕ.* y ℕ.* 2 ≡ x ℕ.+ y ℕ.* 2 ℕ.* x</a>
+<a id="667" class="Comment">-- lemma₁ x y = {!!}</a>
+
+<a id="689" class="Comment">-- lemma₂ : ∀ x y → (x ℕ.+ x ℕ.* y) ℕ.* 2 ≡ x ℕ.+ (x ℕ.+ y ℕ.* 2 ℕ.* x)</a>
+<a id="761" class="Comment">-- lemma₂ x y = {!!}</a>
+
+<a id="783" class="Comment">-- *-cong : ∀ xs ys → ⟦ xs * ys ⇓⟧ ≡ ⟦ xs ⇓⟧ ℕ.* ⟦ ys ⇓⟧</a>
+<a id="840" class="Comment">-- *-cong 0ᵇ ys = refl</a>
+<a id="863" class="Comment">-- *-cong (1ᵇ xs) ys =</a>
+<a id="886" class="Comment">--   ⟦ ys + double (ys * xs) ⇓⟧ ≡⟨ +-cong ys (double (ys * xs)) ⟩</a>
+<a id="952" class="Comment">--   ⟦ ys ⇓⟧  ℕ.+ ⟦ double (ys * xs) ⇓⟧ ≡⟨ cong (⟦ ys ⇓⟧ ℕ.+_)  (double-cong (ys * xs)) ⟩</a>
+<a id="1042" class="Comment">--   ⟦ ys ⇓⟧  ℕ.+ ⟦ ys * xs ⇓⟧ ℕ.* 2 ≡⟨ cong (⟦ ys ⇓⟧ ℕ.+_)  (cong (ℕ._* 2) (*-cong ys xs)) ⟩</a>
+<a id="1136" class="Comment">--   ⟦ ys ⇓⟧  ℕ.+ ⟦ ys ⇓⟧ ℕ.* ⟦ xs ⇓⟧ ℕ.* 2 ≡⟨ lemma₁ ⟦ ys ⇓⟧ ⟦ xs ⇓⟧ ⟩</a>
+<a id="1208" class="Comment">--   ⟦ ys ⇓⟧ ℕ.+ ⟦ xs ⇓⟧ ℕ.* 2 ℕ.* ⟦ ys ⇓⟧ ∎</a>
+<a id="1253" class="Comment">-- *-cong (2ᵇ xs) ys =</a>
+<a id="1276" class="Comment">--   ⟦ double (ys + ys * xs) ⇓⟧ ≡⟨ double-cong (ys + ys * xs) ⟩</a>
+<a id="1340" class="Comment">--   ⟦ ys + ys * xs ⇓⟧ ℕ.* 2 ≡⟨ cong (ℕ._* 2) (+-cong ys (ys * xs)) ⟩</a>
+<a id="1410" class="Comment">--   (⟦ ys ⇓⟧ ℕ.+ ⟦ ys * xs ⇓⟧) ℕ.* 2 ≡⟨ cong (ℕ._* 2) (cong (⟦ ys ⇓⟧ ℕ.+_) (*-cong ys xs)) ⟩</a>
+<a id="1504" class="Comment">--   (⟦ ys ⇓⟧ ℕ.+ ⟦ ys ⇓⟧ ℕ.* ⟦ xs ⇓⟧) ℕ.* 2 ≡⟨ lemma₂ ⟦ ys ⇓⟧ ⟦ xs ⇓⟧  ⟩</a>
+<a id="1578" class="Comment">--   ⟦ ys ⇓⟧ ℕ.+ (⟦ ys ⇓⟧ ℕ.+ ⟦ xs ⇓⟧ ℕ.* 2 ℕ.* ⟦ ys ⇓⟧) ∎</a>
+</pre></body></html>
