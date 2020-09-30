@@ -4,23 +4,18 @@
 <a id="37" class="Keyword">module</a> <a id="44" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a> <a id="67" class="Keyword">where</a>
 
 <a id="74" class="Keyword">open</a> <a id="79" class="Keyword">import</a> <a id="86" href="Level.html" class="Module">Level</a>
+<a id="92" class="Keyword">open</a> <a id="97" class="Keyword">import</a> <a id="104" href="Data.Bits.html" class="Module">Data.Bits</a> <a id="114" class="Keyword">public</a> <a id="121" class="Keyword">renaming</a> <a id="130" class="Symbol">(</a><a id="131" href="Data.Bits.html#102" class="Datatype">Bits</a> <a id="136" class="Symbol">to</a> <a id="Bits"></a><a id="139" href="Data.Binary.Definition.html#139" class="Datatype">𝔹</a><a id="140" class="Symbol">;</a> <a id="142" href="Data.Bits.html#123" class="InductiveConstructor">[]</a> <a id="145" class="Symbol">to</a> <a id="[]"></a><a id="148" href="Data.Binary.Definition.html#148" class="InductiveConstructor">0ᵇ</a><a id="150" class="Symbol">;</a> <a id="152" href="Data.Bits.html#135" class="InductiveConstructor Operator">0∷_</a> <a id="156" class="Symbol">to</a> <a id="0∷_"></a><a id="159" href="Data.Binary.Definition.html#159" class="InductiveConstructor Operator">1ᵇ_</a><a id="162" class="Symbol">;</a> <a id="164" href="Data.Bits.html#155" class="InductiveConstructor Operator">1∷_</a> <a id="168" class="Symbol">to</a> <a id="1∷_"></a><a id="171" href="Data.Binary.Definition.html#171" class="InductiveConstructor Operator">2ᵇ_</a><a id="174" class="Symbol">)</a>
 
+<a id="177" class="Comment">-- The following causes a performance hit:</a>
 
-<a id="94" class="Keyword">data</a> <a id="𝔹"></a><a id="99" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a> <a id="101" class="Symbol">:</a> <a id="103" href="Level.html#242" class="Function">Type₀</a> <a id="109" class="Keyword">where</a>
-  <a id="𝔹.0ᵇ"></a><a id="117" href="Data.Binary.Definition.html#117" class="InductiveConstructor">0ᵇ</a> <a id="120" class="Symbol">:</a> <a id="122" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a>
-  <a id="𝔹.1ᵇ_"></a><a id="126" href="Data.Binary.Definition.html#126" class="InductiveConstructor Operator">1ᵇ_</a> <a id="130" class="Symbol">:</a> <a id="132" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a> <a id="134" class="Symbol">→</a> <a id="136" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a>
-  <a id="𝔹.2ᵇ_"></a><a id="140" href="Data.Binary.Definition.html#140" class="InductiveConstructor Operator">2ᵇ_</a> <a id="144" class="Symbol">:</a> <a id="146" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a> <a id="148" class="Symbol">→</a> <a id="150" href="Data.Binary.Definition.html#99" class="Datatype">𝔹</a>
+<a id="221" class="Comment">-- open import Agda.Builtin.List using ([]; _∷_; List)</a>
+<a id="276" class="Comment">-- open import Agda.Builtin.Bool using (Bool; true; false)</a>
 
-<a id="153" class="Comment">-- The following causes a performance hit:</a>
+<a id="336" class="Comment">-- 𝔹 : Type₀</a>
+<a id="349" class="Comment">-- 𝔹 = List Bool</a>
 
-<a id="197" class="Comment">-- open import Agda.Builtin.List using ([]; _∷_; List)</a>
-<a id="252" class="Comment">-- open import Agda.Builtin.Bool using (Bool; true; false)</a>
-
-<a id="312" class="Comment">-- 𝔹 : Type₀</a>
-<a id="325" class="Comment">-- 𝔹 = List Bool</a>
-
-<a id="343" class="Comment">-- infixr 8 1ᵇ_ 2ᵇ_</a>
-<a id="363" class="Comment">-- pattern 0ᵇ = []</a>
-<a id="382" class="Comment">-- pattern 1ᵇ_ xs = false ∷ xs</a>
-<a id="413" class="Comment">-- pattern 2ᵇ_ xs = true  ∷ xs</a>
+<a id="367" class="Comment">-- infixr 8 1ᵇ_ 2ᵇ_</a>
+<a id="387" class="Comment">-- pattern 0ᵇ = []</a>
+<a id="406" class="Comment">-- pattern 1ᵇ_ xs = false ∷ xs</a>
+<a id="437" class="Comment">-- pattern 2ᵇ_ xs = true  ∷ xs</a>
 </pre></body></html>
