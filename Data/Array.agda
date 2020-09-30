@@ -160,14 +160,8 @@ at is {p = p} = ind is p
 -- e : Array ℕ 100 →  ℕ → Array ℕ 100
 -- e xs n = xs [ at 10 ]≔ n
 
-module _ {a} {A : Type a} where
-  open import ListSyntax A (Array )
-
-
 -- e : Array ℕ _
 -- e = (0 ∷ 1 ∷ 2 ∷ 3 ∷ 4 ∷ 5 ∷ []) [ at 3 ]≔ 10
-
-
 
 import Data.Nat as ℕ
 
