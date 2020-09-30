@@ -63,3 +63,19 @@ _≥ᴮ_ = flip _≤ᴮ_
 +-*-distrib : ∀ x y z → (x + y) * z ≡ x * z + y * z
 +-*-distrib zero y z = refl
 +-*-distrib (suc x) y z = cong (z +_) (+-*-distrib x y z) ; sym (+-assoc z (x * z) (y * z))
+
+*-zeroʳ : ∀ x → x * zero ≡ zero
+*-zeroʳ zero = refl
+*-zeroʳ (suc x) = *-zeroʳ x
+
+*-suc : ∀ x y → x + x * y ≡ x * suc y
+*-suc zero    y = refl
+*-suc (suc x) y = cong suc (sym (+-assoc x y (x * y)) ; cong (_+ x * y) (+-comm x y) ; +-assoc y x (x * y) ; cong (y +_) (*-suc x y))
+
+*-comm : ∀ x y → x * y ≡ y * x
+*-comm zero    y = sym (*-zeroʳ y)
+*-comm (suc x) y = cong (y +_) (*-comm x y) ; *-suc y x
+
+*-assoc : ∀ x y z → (x * y) * z ≡ x * (y * z)
+*-assoc zero    y z = refl
+*-assoc (suc x) y z = +-*-distrib y (x * y) z ; cong (y * z +_) (*-assoc x y z)
