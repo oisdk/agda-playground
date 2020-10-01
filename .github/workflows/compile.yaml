@@ -123,15 +123,16 @@ jobs:
         cp -f -R ~/main-build/_build $GITHUB_WORKSPACE/main/_build
         rm -r ~/main-build
         cd main
-        echo "{-# OPTIONS --cubical #-}" > Everything
-        echo "module Everything where" >> Everything
         find . -type f \( -name "*.agda" -o -name "*.lagda" \) \
                 | cut -c 3- \
                 | cut -f1 -d'.' \
                 | sed 's/\//\./g' \
                 | sed 's/^/open import /' \
-                      >> Everything
-        mv Everything Everything.agda
+                      > Everything
+        echo "{-# OPTIONS --cubical #-}" > Everything.agda
+        echo "module Everything where" >> Everything.agda
+        sort Everything >> Everything.agda
+        rm Everything
         agda --html --html-dir=docs Everything.agda
         rm Everything.agda
         cd ..
