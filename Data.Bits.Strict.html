@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.Bits.Strict</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+
+<a id="35" class="Keyword">module</a> <a id="42" href="Data.Bits.Strict.html" class="Module">Data.Bits.Strict</a> <a id="59" class="Keyword">where</a>
+
+<a id="66" class="Keyword">open</a> <a id="71" class="Keyword">import</a> <a id="78" href="Data.Bits.html" class="Module">Data.Bits</a>
+<a id="88" class="Keyword">open</a> <a id="93" class="Keyword">import</a> <a id="100" href="Prelude.html" class="Module">Prelude</a>
+
+<a id="109" class="Keyword">infixr</a> <a id="116" class="Number">8</a> <a id="118" href="Data.Bits.Strict.html#128" class="Function Operator">0∷!_</a> <a id="123" href="Data.Bits.Strict.html#170" class="Function Operator">1∷!_</a>
+<a id="0∷!_"></a><a id="128" href="Data.Bits.Strict.html#128" class="Function Operator">0∷!_</a> <a id="133" class="Symbol">:</a> <a id="135" href="Data.Bits.html#102" class="Datatype">Bits</a> <a id="140" class="Symbol">→</a> <a id="142" href="Data.Bits.html#102" class="Datatype">Bits</a>
+<a id="147" href="Data.Bits.Strict.html#128" class="Function Operator">0∷!_</a> <a id="152" class="Symbol">=</a> <a id="154" href="Strict.html#438" class="Function">λ!</a> <a id="157" href="Data.Bits.Strict.html#157" class="Bound">xs</a> <a id="160" href="Strict.html#438" class="Function">→!</a> <a id="163" href="Data.Bits.html#135" class="InductiveConstructor Operator">0∷</a> <a id="166" href="Data.Bits.Strict.html#157" class="Bound">xs</a>
+
+<a id="1∷!_"></a><a id="170" href="Data.Bits.Strict.html#170" class="Function Operator">1∷!_</a> <a id="175" class="Symbol">:</a> <a id="177" href="Data.Bits.html#102" class="Datatype">Bits</a> <a id="182" class="Symbol">→</a> <a id="184" href="Data.Bits.html#102" class="Datatype">Bits</a>
+<a id="189" href="Data.Bits.Strict.html#170" class="Function Operator">1∷!_</a> <a id="194" class="Symbol">=</a> <a id="196" href="Strict.html#438" class="Function">λ!</a> <a id="199" href="Data.Bits.Strict.html#199" class="Bound">xs</a> <a id="202" href="Strict.html#438" class="Function">→!</a> <a id="205" href="Data.Bits.html#155" class="InductiveConstructor Operator">1∷</a> <a id="208" href="Data.Bits.Strict.html#199" class="Bound">xs</a>
+
+<a id="0∷!≡0∷"></a><a id="212" href="Data.Bits.Strict.html#212" class="Function">0∷!≡0∷</a> <a id="219" class="Symbol">:</a> <a id="221" class="Symbol">∀</a> <a id="223" href="Data.Bits.Strict.html#223" class="Bound">xs</a> <a id="226" class="Symbol">→</a> <a id="228" href="Data.Bits.Strict.html#128" class="Function Operator">0∷!</a> <a id="232" href="Data.Bits.Strict.html#223" class="Bound">xs</a> <a id="235" href="Agda.Builtin.Cubical.Path.html#381" class="Function Operator">≡</a> <a id="237" href="Data.Bits.html#135" class="InductiveConstructor Operator">0∷</a> <a id="240" href="Data.Bits.Strict.html#223" class="Bound">xs</a>
+<a id="243" href="Data.Bits.Strict.html#212" class="Function">0∷!≡0∷</a> <a id="250" class="Symbol">=</a> <a id="252" href="Strict.Properties.html#175" class="Function">$!-≡</a> <a id="257" href="Data.Bits.html#135" class="InductiveConstructor Operator">0∷_</a>
+
+<a id="1∷!≡1∷"></a><a id="262" href="Data.Bits.Strict.html#262" class="Function">1∷!≡1∷</a> <a id="269" class="Symbol">:</a> <a id="271" class="Symbol">∀</a> <a id="273" href="Data.Bits.Strict.html#273" class="Bound">xs</a> <a id="276" class="Symbol">→</a> <a id="278" href="Data.Bits.Strict.html#170" class="Function Operator">1∷!</a> <a id="282" href="Data.Bits.Strict.html#273" class="Bound">xs</a> <a id="285" href="Agda.Builtin.Cubical.Path.html#381" class="Function Operator">≡</a> <a id="287" href="Data.Bits.html#155" class="InductiveConstructor Operator">1∷</a> <a id="290" href="Data.Bits.Strict.html#273" class="Bound">xs</a>
+<a id="293" href="Data.Bits.Strict.html#262" class="Function">1∷!≡1∷</a> <a id="300" class="Symbol">=</a> <a id="302" href="Strict.Properties.html#175" class="Function">$!-≡</a> <a id="307" href="Data.Bits.html#155" class="InductiveConstructor Operator">1∷_</a>
+</pre></body></html>
