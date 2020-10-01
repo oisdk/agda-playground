@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Strict where
 
@@ -16,16 +16,3 @@ bang = primForce
 {-# INLINE bang #-}
 
 syntax bang v (λ x → e) = let! x =! v in! e
-
-open import Path
-open import Agda.Builtin.Equality hiding (_≡_)
-import Agda.Builtin.Equality as MLTT
-
-mltt-to-path : {A : Type a} {x y : A} → x MLTT.≡ y → x ≡ y
-mltt-to-path {x = x} MLTT.refl i = x
-
-$!-≡ : {A : Type a} {B : A → Type b} → (f : ∀ x → B x) → ∀ x → (f $! x) ≡ f x
-$!-≡ f x = mltt-to-path (primForceLemma x f)
-
--- primForceLemma x f
--- $!-≡ f x | res = {!res!}

@@ -38,3 +38,8 @@ infix 4 PathP-syntax
 PathP-syntax = PathP
 
 syntax PathP-syntax (λ i → Ty) lhs rhs = lhs ≡[ i ≔ Ty ]≡ rhs
+
+import Agda.Builtin.Equality as MLTT
+
+builtin-eq-to-path : {A : Type a} {x y : A} → x MLTT.≡ y → x ≡ y
+builtin-eq-to-path {x = x} MLTT.refl i = x

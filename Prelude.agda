@@ -31,4 +31,5 @@ open import Data.Lift public
 open import Function.Biconditional public
 open import Relation.Unary public
 open import Strict public
+open import Strict.Properties public
 open import Instance public
