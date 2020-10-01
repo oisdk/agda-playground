@@ -131,6 +131,7 @@ jobs:
         echo "" >> Everything.agda
         echo "-- This file imports every module in the project. Click on" >> Everything.agda
         echo "-- a module name to go to its source." >> Everything.agda
+        echo "" >> Everything.agda
         cat FileList | cut -c 3-               \
                      | cut -f1 -d'.'           \
                      | sed 's/\//\./g'         \
