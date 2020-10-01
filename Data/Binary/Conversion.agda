@@ -8,7 +8,7 @@ import Data.Nat as ℕ
 open import Data.Nat using (ℕ; suc; zero)
 
 ⟦_⇑⟧ : ℕ → 𝔹
-⟦ zero  ⇑⟧ = 0ᵇ
+⟦ zero ⇑⟧ = 0ᵇ
 ⟦ suc n ⇑⟧ = inc ⟦ n ⇑⟧
 
 ⟦_⇓⟧ : 𝔹 → ℕ

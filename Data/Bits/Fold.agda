@@ -6,14 +6,20 @@ open import Data.Bits
 open import Strict
 open import Prelude
 
-foldr-bits : (A → A) → (A → A) → A → Bits → A
-foldr-bits {A = A} zer one base = go
-  where
-  go : Bits → A
-  go [] = base
-  go (0∷ xs) = zer (go xs)
-  go (1∷ xs) = one (go xs)
-{-# INLINE foldr-bits #-}
+module _ {a} {A : Type a} (zer : A → A) (one : A → A) (base : A) where
+  foldr-bits : Bits → A
+  foldr-bits [] = base
+  foldr-bits (0∷ xs) = zer (foldr-bits xs)
+  foldr-bits (1∷ xs) = one (foldr-bits xs)
+
+foldr-universal : ∀ (h : Bits → A) z o e →
+                    (h [] ≡ e) →
+                    (∀ xs → h (0∷ xs) ≡ z (h xs)) →
+                    (∀ xs → h (1∷ xs) ≡ o (h xs)) →
+                    ∀ xs → h xs ≡ foldr-bits z o e xs
+foldr-universal h z o e base zer one [] = base
+foldr-universal h z o e base zer one (0∷ xs) = zer xs ; cong z (foldr-universal h z o e base zer one xs)
+foldr-universal h z o e base zer one (1∷ xs) = one xs ; cong o (foldr-universal h z o e base zer one xs)
 
 module _ {a} {A : Type a} (zer : A → A) (one : A → A) where
   foldl-go : Bits → A → A
