@@ -4,15 +4,13 @@
 <a id="35" class="Keyword">module</a> <a id="42" href="Data.Binary.Literals.html" class="Module">Data.Binary.Literals</a> <a id="63" class="Keyword">where</a>
 
 <a id="70" class="Keyword">open</a> <a id="75" class="Keyword">import</a> <a id="82" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a>
-<a id="105" class="Keyword">open</a> <a id="110" class="Keyword">import</a> <a id="117" href="Data.Binary.Conversion.html" class="Module">Data.Binary.Conversion</a>
+<a id="105" class="Keyword">open</a> <a id="110" class="Keyword">import</a> <a id="117" href="Data.Binary.Conversion.Strict.html" class="Module">Data.Binary.Conversion.Strict</a>
+<a id="147" class="Keyword">open</a> <a id="152" class="Keyword">import</a> <a id="159" href="Literals.Number.html" class="Module">Literals.Number</a>
+<a id="175" class="Keyword">open</a> <a id="180" class="Keyword">import</a> <a id="187" href="Data.Unit.html" class="Module">Data.Unit</a>
+<a id="197" class="Keyword">open</a> <a id="202" class="Keyword">import</a> <a id="209" href="Data.Nat.Literals.html" class="Module">Data.Nat.Literals</a>
 
-
-<a id="142" class="Keyword">open</a> <a id="147" class="Keyword">import</a> <a id="154" href="Literals.Number.html" class="Module">Literals.Number</a>
-<a id="170" class="Keyword">open</a> <a id="175" class="Keyword">import</a> <a id="182" href="Data.Unit.html" class="Module">Data.Unit</a>
-<a id="192" class="Keyword">open</a> <a id="197" class="Keyword">import</a> <a id="204" href="Data.Nat.Literals.html" class="Module">Data.Nat.Literals</a>
-
-<a id="223" class="Keyword">instance</a>
-  <a id="number𝔹"></a><a id="234" href="Data.Binary.Literals.html#234" class="Function">number𝔹</a> <a id="242" class="Symbol">:</a> <a id="244" href="Agda.Builtin.FromNat.html#197" class="Record">Number</a> <a id="251" href="Data.Bits.html#102" class="Datatype">𝔹</a>
-  <a id="255" href="Agda.Builtin.FromNat.html#253" class="Field">Number.Constraint</a> <a id="273" href="Data.Binary.Literals.html#234" class="Function">number𝔹</a> <a id="281" class="Symbol">=</a> <a id="283" class="Symbol">λ</a> <a id="285" href="Data.Binary.Literals.html#285" class="Bound">_</a> <a id="287" class="Symbol">→</a> <a id="289" href="Agda.Builtin.Unit.html#164" class="Record">⊤</a>
-  <a id="293" href="Agda.Builtin.FromNat.html#282" class="Field">Number.fromNat</a> <a id="308" href="Data.Binary.Literals.html#234" class="Function">number𝔹</a> <a id="316" class="Symbol">=</a> <a id="318" class="Symbol">λ</a> <a id="320" href="Data.Binary.Literals.html#320" class="Bound">n</a> <a id="322" class="Symbol">→</a> <a id="324" href="Data.Binary.Conversion.html#207" class="Function Operator">⟦</a> <a id="326" href="Data.Binary.Literals.html#320" class="Bound">n</a> <a id="328" href="Data.Binary.Conversion.html#207" class="Function Operator">⇑⟧</a>
+<a id="228" class="Keyword">instance</a>
+  <a id="number𝔹"></a><a id="239" href="Data.Binary.Literals.html#239" class="Function">number𝔹</a> <a id="247" class="Symbol">:</a> <a id="249" href="Agda.Builtin.FromNat.html#197" class="Record">Number</a> <a id="256" href="Data.Bits.html#102" class="Datatype">𝔹</a>
+  <a id="260" href="Agda.Builtin.FromNat.html#253" class="Field">Number.Constraint</a> <a id="278" href="Data.Binary.Literals.html#239" class="Function">number𝔹</a> <a id="286" class="Symbol">=</a> <a id="288" class="Symbol">λ</a> <a id="290" href="Data.Binary.Literals.html#290" class="Bound">_</a> <a id="292" class="Symbol">→</a> <a id="294" href="Agda.Builtin.Unit.html#164" class="Record">⊤</a>
+  <a id="298" href="Agda.Builtin.FromNat.html#282" class="Field">Number.fromNat</a> <a id="313" href="Data.Binary.Literals.html#239" class="Function">number𝔹</a> <a id="321" class="Symbol">=</a> <a id="323" class="Symbol">λ</a> <a id="325" href="Data.Binary.Literals.html#325" class="Bound">n</a> <a id="327" class="Symbol">→</a> <a id="329" href="Data.Binary.Conversion.Strict.html#264" class="Function Operator">⟦</a> <a id="331" href="Data.Binary.Literals.html#325" class="Bound">n</a> <a id="333" href="Data.Binary.Conversion.Strict.html#264" class="Function Operator">⇑⟧′</a>
 </pre></body></html>
