@@ -137,6 +137,15 @@ _∪_ = λ xs ys → [ ys ∪′ ]↓ xs
     (x ∷ ys) ∪ xs ≡⟨ ∪-cons x ys xs ⟩
     ys ∪ x ∷ xs ∎
 
+⟅⟆-commutative-monoid : ∀ {a} (A : Type a) → CommutativeMonoid _
+Monoid.𝑆 (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = ⟅ A ⟆
+Monoid._∙_ (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = _∪_
+Monoid.ε (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = []
+Monoid.assoc (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = ∪-assoc
+Monoid.ε∙ (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) _ = refl
+Monoid.∙ε (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = ∪-idʳ
+CommutativeMonoid.comm (⟅⟆-commutative-monoid A) = ∪-comm
+
 module _ {ℓ} (mon : CommutativeMonoid ℓ) (sIsSet : isSet (CommutativeMonoid.𝑆 mon)) where
   open CommutativeMonoid mon
   ⟦_⟧ : (A → 𝑆) → ⟅ A ⟆ → 𝑆
@@ -215,3 +224,5 @@ map-fuse g f = funExt ⟦ map-fuse′ g f ∘≡⟧⇓
   ⟦ map-fuse′ g f ∘≡⟧ x ∷ xs = refl
   ⟦ map-fuse′ g f ∘≡⟧[] = refl
 
+bind : ⟅ A ⟆ → (A → ⟅ B ⟆) → ⟅ B ⟆
+bind xs f = ⟦ ⟅⟆-commutative-monoid _ ⟧ trunc f xs
