@@ -3,6 +3,7 @@
 module HITs.PropositionalTruncation.Sugar where
 
 open import Cubical.HITs.PropositionalTruncation
+  renaming (elim to elimPropTrunc; rec to recPropTrunc)
 open import Level
 
 _=<<_ : ∀ {a} {A : Type a} {b} {B : ∥ A ∥ → Type b}

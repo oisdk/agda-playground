@@ -3,6 +3,6 @@
 module HITs.PropositionalTruncation where
 
 open import Cubical.HITs.PropositionalTruncation
-  using (squash; ∥_∥; ∣_∣)
-  renaming (recPropTrunc to rec; recPropTrunc→Set to rec→set)
+  using (squash; ∥_∥; ∣_∣; rec)
+  renaming (rec→Set to rec→set)
   public

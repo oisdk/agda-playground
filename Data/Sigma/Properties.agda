@@ -3,7 +3,8 @@
 module Data.Sigma.Properties where
 
 open import Prelude hiding (B; C)
-open import Cubical.Foundations.HLevels using (ΣProp≡; isOfHLevelΣ) public
+open import Cubical.Foundations.HLevels using (isOfHLevelΣ) public
+open import Cubical.Data.Sigma.Properties using (ΣProp≡) public
 
 private
   variable

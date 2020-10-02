@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        cubical-ref: ["a01973ef7264f9454a40697313a2073c51a6b77a"]
+        cubical-ref: ["v0.2"]
         agda-ref: ["v2.6.1"]
         ghc-ver: ["8.10.1"]
         cabal-ver: ["3.2"]
@@ -84,10 +84,13 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/cubical
         agda Cubical/Core/Everything.agda
-        agda Cubical/Data/Everything.agda
         agda Cubical/Foundations/Everything.agda
-        agda Cubical/HITs/Everything.agda
-        agda Cubical/Relation/Everything.agda
+        find Cubical/Data -type f -name "*.agda" | while read -r code ; do
+            agda $code
+        done
+        find Cubical/HITs -type f -name "*.agda" | while read -r code ; do
+            agda $code
+        done
         cp -f -r _build/ ~/cubical-build
 
     - name: Retrieve cubical library

@@ -2,8 +2,7 @@
 
 module Function.Isomorphism where
 
-open import Cubical.Foundations.Equiv using (isoToEquiv) public
-open import Cubical.Foundations.Isomorphism using (Iso; section; retract; isoToPath; iso) public
+open import Cubical.Foundations.Isomorphism using (Iso; section; retract; isoToPath; iso; isoToEquiv) public
 open import Level
 open import Path
 open import Function

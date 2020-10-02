@@ -11,6 +11,7 @@ open import HITs.PropositionalTruncation.Sugar
 open import HITs.PropositionalTruncation.Properties
 open import HITs.PropositionalTruncation
 open import Data.Unit.UniversePolymorphic
+open import Data.Sigma.Properties
 
 private
   variable p : Level
