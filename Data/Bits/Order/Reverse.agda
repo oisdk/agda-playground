@@ -1,6 +1,6 @@
 {-# OPTIONS --cubical --safe #-}
 
-module Data.Bits.Order where
+module Data.Bits.Order.Reverse where
 
 open import Prelude
 open import Data.Bits

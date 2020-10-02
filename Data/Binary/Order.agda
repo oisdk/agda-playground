@@ -4,7 +4,7 @@ module Data.Binary.Order where
 
 open import Prelude
 open import Data.Binary.Definition
-open import Data.Bits.Order public
+open import Data.Bits.Order.Reverse public
 
 -- weaken : ∀ xs ys → T (xs ≲ᴮ ys & false) → T (xs ≲ᴮ ys & true)
 -- weaken 0ᵇ ys xs≲ys = tt
