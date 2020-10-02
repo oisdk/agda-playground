@@ -41,13 +41,16 @@ record Elim {a ℓ}
       i j
 
 open Elim public
+
+
+infixr 0 elim-syntax
 elim-syntax  : ∀ {a ℓ}
              → (A : Type a)
              → (⟅ A ⟆ → Type ℓ)
              → Type (a ℓ⊔ ℓ)
 elim-syntax = Elim
 
-syntax elim-syntax A (λ xs → Pxs) = [ xs ⦂⟅ A ⟆→ Pxs ]
+syntax elim-syntax A (λ xs → Pxs) = xs ⦂⟅ A ⟆→ Pxs
 
 record ElimProp {a ℓ} (A : Type a) (P : ⟅ A ⟆ → Type ℓ) : Type (a ℓ⊔ ℓ) where
   constructor elim-prop
@@ -64,10 +67,12 @@ record ElimProp {a ℓ} (A : Type a) (P : ⟅ A ⟆ → Type ℓ) : Type (a ℓ�
   ⟦_⟧⇓ = ⟅ ⟦_⟧⇑ ⟆⇓
 
 open ElimProp public
+
+infixr 0 elim-prop-syntax
 elim-prop-syntax : ∀ {a ℓ} → (A : Type a) → (⟅ A ⟆ → Type ℓ) → Type (a ℓ⊔ ℓ)
 elim-prop-syntax = ElimProp
 
-syntax elim-prop-syntax A (λ xs → Pxs) = ⟦ xs ∶⟅ A ⟆⇒ Pxs ⟧
+syntax elim-prop-syntax A (λ xs → Pxs) = xs ⦂⟅ A ⟆→∥ Pxs ∥
 
 record [⟅_⟆→_] {a b} (A : Type a) (B : Type b) : Type (a ℓ⊔ b) where
   constructor rec
@@ -97,7 +102,7 @@ _∪_ = λ xs ys → [ ys ∪′ ]↓ xs
 ∪-assoc = λ xs ys zs → ⟦ ∪-assoc′ ys zs ⟧⇓ xs
   where
   ∪-assoc′ : ∀ ys zs →
-    ⟦ xs ∶⟅ A ⟆⇒ (xs ∪ ys) ∪ zs ≡ xs ∪ (ys ∪ zs) ⟧
+    xs ⦂⟅ A ⟆→∥ (xs ∪ ys) ∪ zs ≡ xs ∪ (ys ∪ zs) ∥
   ⟦ ∪-assoc′ ys zs ⟧-prop = trunc _ _
   ⟦ ∪-assoc′ ys zs ⟧[] = refl
   ⟦ ∪-assoc′ ys zs ⟧ x ∷ xs ⟨ P ⟩ = cong (x ∷_) P
@@ -107,21 +112,15 @@ _∪_ = λ xs ys → [ ys ∪′ ]↓ xs
 ∪-cons = λ x xs ys → ⟦ ∪-cons′ x ys ⟧⇓ xs
   where
   ∪-cons′ : ∀ x ys →
-    ⟦ xs ∶⟅ A ⟆⇒ (x ∷ xs) ∪ ys ≡ xs ∪ (x ∷ ys) ⟧
+    xs ⦂⟅ A ⟆→∥ (x ∷ xs) ∪ ys ≡ xs ∪ (x ∷ ys) ∥
   ⟦ ∪-cons′ x ys ⟧-prop = trunc _ _
   ⟦ ∪-cons′ x ys ⟧[] = refl
-  ⟦ ∪-cons′ x ys ⟧ y ∷ xs ⟨ P ⟩ =
-    (x ∷ y ∷ xs) ∪ ys    ≡⟨  cong (_∪ ys)
-                             (com x y xs) ⟩
-    (y ∷ x ∷ xs) ∪ ys    ≡⟨⟩
-    y ∷ ((x ∷ xs) ∪ ys)  ≡⟨ cong (y ∷_) P ⟩
-    y ∷ (xs ∪ (x ∷ ys))  ≡⟨⟩
-    (y ∷ xs) ∪ x ∷ ys ∎
+  ⟦ ∪-cons′ x ys ⟧ y ∷ xs ⟨ P ⟩ = cong (_∪ ys) (com x y xs) ; cong (y ∷_) P
 
 ∪-idʳ : (xs : ⟅ A ⟆) → xs ∪ [] ≡ xs
 ∪-idʳ = ⟦ ∪-idʳ′ ⟧⇓
   where
-  ∪-idʳ′ : ⟦ xs ∶⟅ A ⟆⇒ xs ∪ [] ≡ xs ⟧
+  ∪-idʳ′ : xs ⦂⟅ A ⟆→∥ xs ∪ [] ≡ xs ∥
   ⟦ ∪-idʳ′ ⟧-prop = trunc _ _
   ⟦ ∪-idʳ′ ⟧[] = refl
   ⟦ ∪-idʳ′ ⟧ x ∷ xs ⟨ P ⟩ = cong (x ∷_) P
@@ -130,7 +129,7 @@ _∪_ = λ xs ys → [ ys ∪′ ]↓ xs
 ∪-comm {A = A} = λ xs ys → ⟦ ∪-comm′ ys ⟧⇓ xs
   where
   ∪-comm′ : (ys : ⟅ A ⟆) →
-    ⟦ xs ∶⟅ A ⟆⇒ xs ∪ ys ≡ ys ∪ xs ⟧
+    xs ⦂⟅ A ⟆→∥ xs ∪ ys ≡ ys ∪ xs ∥
   ⟦ ∪-comm′ ys ⟧-prop = trunc _ _
   ⟦ ∪-comm′ ys ⟧[] = sym (∪-idʳ ys)
   ⟦ ∪-comm′ ys ⟧ x ∷ xs ⟨ P ⟩ =
@@ -167,7 +166,7 @@ record ⟦_≡_⟧ {a b} {A : Type a} {B : Type b}
   ⟦_≡⟧⇓ : ∀ xs → h xs ≡ [ xf ]↓ xs
   ⟦_≡⟧⇓ = ⟦ ≡⇓′ ⟧⇓
     where
-    ≡⇓′ : ⟦ xs ∶⟅ A ⟆⇒ h xs ≡ [ xf ]↓ xs ⟧
+    ≡⇓′ : xs ⦂⟅ A ⟆→∥ h xs ≡ [ xf ]↓ xs ∥
     ⟦ ≡⇓′ ⟧-prop = [ xf ]-set _ _
     ⟦ ≡⇓′ ⟧[] = ⟦_≡⟧[]
     ⟦ ≡⇓′ ⟧ x ∷ xs ⟨ P ⟩ = ⟦_≡⟧_∷_ x _ ; cong ([ xf ] x ∷_) P
@@ -186,7 +185,7 @@ record ⟦_⊚_≡_⟧ {a b c} {A : Type a} {B : Type b} {C : Type c}
   ⟦_∘≡⟧⇓ : ∀ xs → h ([ xf ]↓ xs) ≡ [ yf ]↓ xs
   ⟦_∘≡⟧⇓ = ⟦ ≡⇓′ ⟧⇓
     where
-    ≡⇓′ : ⟦ xs ∶⟅ A ⟆⇒ h ([ xf ]↓ xs) ≡ [ yf ]↓ xs ⟧
+    ≡⇓′ : xs ⦂⟅ A ⟆→∥ h ([ xf ]↓ xs) ≡ [ yf ]↓ xs ∥
     ⟦ ≡⇓′ ⟧-prop = [ yf ]-set _ _
     ⟦ ≡⇓′ ⟧[] = ⟦_∘≡⟧[]
     ⟦ ≡⇓′ ⟧ x ∷ xs ⟨ P ⟩ = ⟦_∘≡⟧_∷_ x _ ; cong ([ yf ] x ∷_) P
