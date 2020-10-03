@@ -33,3 +33,4 @@ open import Relation.Unary public
 open import Strict public
 open import Strict.Properties public
 open import Instance public
+open import WellFounded public

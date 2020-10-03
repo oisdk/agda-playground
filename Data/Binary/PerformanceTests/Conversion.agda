@@ -6,6 +6,7 @@ open import Prelude
 open import Data.Binary.Definition
 open import Data.Binary.Conversion
 open import Data.Binary.Conversion.Strict
+open import Data.Binary.Conversion.Unsafe
 
 -- one-thousand : 𝔹
 -- one-thousand = 2ᵇ 1ᵇ 1ᵇ 2ᵇ 1ᵇ 2ᵇ 2ᵇ 2ᵇ 2ᵇ 0ᵇ
