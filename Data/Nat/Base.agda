@@ -23,12 +23,3 @@ compare (suc m) (suc n) with compare m n
 ... | equal   m   = equal (suc m)
 ... | greater n k = greater (suc n) k
 
--- nonZero : ℕ → Bool
--- nonZero (suc _) = true
--- nonZero zero    = false
-
--- _÷_ : (n m : ℕ) → { m≢0 : T (nonZero m) } → ℕ
--- _÷_ n (suc m) = Nat.div-helper 0 m n m
-
--- rem : (n m : ℕ) → { m≢0 : T (nonZero m) } → ℕ
--- rem n (suc m) = Nat.mod-helper 0 m n m
