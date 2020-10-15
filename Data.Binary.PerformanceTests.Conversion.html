@@ -5,20 +5,20 @@
 
 <a id="82" class="Keyword">open</a> <a id="87" class="Keyword">import</a> <a id="94" href="Prelude.html" class="Module">Prelude</a>
 <a id="102" class="Keyword">open</a> <a id="107" class="Keyword">import</a> <a id="114" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a>
-<a id="137" class="Keyword">open</a> <a id="142" class="Keyword">import</a> <a id="149" href="Data.Binary.Conversion.html" class="Module">Data.Binary.Conversion</a>
-<a id="172" class="Keyword">open</a> <a id="177" class="Keyword">import</a> <a id="184" href="Data.Binary.Conversion.Strict.html" class="Module">Data.Binary.Conversion.Strict</a>
-<a id="214" class="Keyword">open</a> <a id="219" class="Keyword">import</a> <a id="226" href="Data.Binary.Conversion.Unsafe.html" class="Module">Data.Binary.Conversion.Unsafe</a>
+<a id="137" class="Keyword">open</a> <a id="142" class="Keyword">import</a> <a id="149" href="Data.Binary.Conversion.html" class="Module">Data.Binary.Conversion</a> <a id="172" class="Keyword">using</a> <a id="178" class="Symbol">(</a><a id="179" href="Data.Binary.Conversion.html#261" class="Function Operator">⟦_⇓⟧</a><a id="183" class="Symbol">)</a>
+<a id="185" class="Comment">-- open import Data.Binary.Conversion.Strict</a>
+<a id="230" class="Keyword">open</a> <a id="235" class="Keyword">import</a> <a id="242" href="Data.Binary.Conversion.Fast.html" class="Module">Data.Binary.Conversion.Fast</a>
 
-<a id="257" class="Comment">-- one-thousand : 𝔹</a>
-<a id="277" class="Comment">-- one-thousand = 2ᵇ 1ᵇ 1ᵇ 2ᵇ 1ᵇ 2ᵇ 2ᵇ 2ᵇ 2ᵇ 0ᵇ</a>
+<a id="271" class="Comment">-- one-thousand : 𝔹</a>
+<a id="291" class="Comment">-- one-thousand = 2ᵇ 1ᵇ 1ᵇ 2ᵇ 1ᵇ 2ᵇ 2ᵇ 2ᵇ 2ᵇ 0ᵇ</a>
 
-<a id="326" class="Comment">-- f : 𝔹</a>
-<a id="335" class="Comment">-- f = one-thousand</a>
+<a id="340" class="Comment">-- f : 𝔹</a>
+<a id="349" class="Comment">-- f = one-thousand</a>
 
-<a id="n"></a><a id="356" href="Data.Binary.PerformanceTests.Conversion.html#356" class="Function">n</a> <a id="358" class="Symbol">:</a> <a id="360" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a>
-<a id="362" href="Data.Binary.PerformanceTests.Conversion.html#356" class="Function">n</a> <a id="364" class="Symbol">=</a> <a id="366" class="Number">5000000</a>
+<a id="n"></a><a id="370" href="Data.Binary.PerformanceTests.Conversion.html#370" class="Function">n</a> <a id="372" class="Symbol">:</a> <a id="374" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a>
+<a id="376" href="Data.Binary.PerformanceTests.Conversion.html#370" class="Function">n</a> <a id="378" class="Symbol">=</a> <a id="380" class="Number">5000000</a>
 
-<a id="375" class="Comment">-- The actual performance test (uncomment and time how long it takes to type-check)</a>
-<a id="459" class="Comment">-- _ : ⟦ ⟦ n ⇑⟧″ ⇓⟧ ≡ n</a>
-<a id="483" class="Comment">-- _ = refl</a>
+<a id="389" class="Comment">-- The actual performance test (uncomment and time how long it takes to type-check)</a>
+<a id="473" class="Comment">-- _ : ⟦ ⟦ n ⇑⟧ ⇓⟧ ≡ n</a>
+<a id="496" class="Comment">-- _ = refl</a>
 </pre></body></html>
