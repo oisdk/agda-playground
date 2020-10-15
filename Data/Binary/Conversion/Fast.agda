@@ -26,6 +26,7 @@ toBin-helper (suc _) zero = 0ᵇ -- will not happen
 -- we satisfy the termination checker.
 ⟦_⇑⟧ : ℕ → 𝔹
 ⟦ n ⇑⟧ = toBin-helper n n
+{-# INLINE ⟦_⇑⟧ #-}
 
 -- Without the added argument to the recursor, the function does not
 -- pass the termination checker:

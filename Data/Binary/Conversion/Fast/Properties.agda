@@ -53,19 +53,11 @@ head-tail-cong 0ᵇ 0ᵇ h≡ t≡ = refl
 head-tail-cong 0ᵇ (1ᵇ ys) h≡ t≡ = ⊥-elim (nothing≢just h≡)
 head-tail-cong 0ᵇ (2ᵇ ys) h≡ t≡ = ⊥-elim (nothing≢just h≡)
 head-tail-cong (1ᵇ xs) 0ᵇ h≡ t≡ = ⊥-elim (just≢nothing h≡)
-head-tail-cong (1ᵇ xs) (1ᵇ ys) h≡ t≡ = cong 1ᵇ_ (t≡)
+head-tail-cong (1ᵇ xs) (1ᵇ ys) h≡ t≡ = cong 1ᵇ_ t≡
 head-tail-cong (1ᵇ xs) (2ᵇ ys) h≡ t≡ = ⊥-elim (subst (bool ⊥ ⊤) (just-inj h≡) tt)
 head-tail-cong (2ᵇ xs) 0ᵇ h≡ t≡ = ⊥-elim (just≢nothing h≡)
 head-tail-cong (2ᵇ xs) (1ᵇ ys) h≡ t≡ = ⊥-elim (subst (bool ⊤ ⊥) (just-inj h≡) tt)
-head-tail-cong (2ᵇ xs) (2ᵇ ys) h≡ t≡ = cong 2ᵇ_ (t≡)
-
-lemma₁ : ∀ x xs → head𝔹 (if x then 1ᵇ xs else 2ᵇ xs) ≡ just x
-lemma₁ false xs = refl
-lemma₁ true xs = refl
-
-lemma₂ : ∀ x xs → tail𝔹 (if x then 1ᵇ xs else 2ᵇ xs) ≡ xs
-lemma₂ false xs = refl
-lemma₂ true xs = refl
+head-tail-cong (2ᵇ xs) (2ᵇ ys) h≡ t≡ = cong 2ᵇ_ t≡
 
 ≤-pred : ∀ n m → suc n ≤ m → n ≤ m
 ≤-pred zero m p = tt
@@ -87,15 +79,23 @@ div2≤ n m n≤m = subst (_≤ m) (sym (div-helper-lemma 0 1 n 1)) (go n m n≤
   go : ∀ n m → n ≤ m → div-helper′ 1 n 1 ≤ m
   go zero m n≤m = tt
   go (suc zero) m n≤m = tt
-  go (suc (suc n)) (suc m) n≤m = let p = go n m (≤-pred n m n≤m) in ≤-suc (div-helper′ 1 n 1) m p
+  go (suc (suc n)) (suc m) n≤m = ≤-suc (div-helper′ 1 n 1) m (go n m (≤-pred n m n≤m))
 
 fast-correct-helper : ∀ n w → n ≤ w → F.toBin-helper n w ≡ ⟦ n ⇑⟧
 fast-correct-helper zero    w       p = refl
 fast-correct-helper (suc n) (suc w) p =
-  $!-≡ _ (F.toBin-helper (n ÷ 2) w) ;
-  head-tail-cong _ (inc ⟦ n ⇑⟧)
-    (lemma₁ (rem n 2 ≡ᴮ 0) (F.toBin-helper (n ÷ 2) w) ; sym (head𝔹-homo n))
-    (lemma₂ (rem n 2 ≡ᴮ 0) (F.toBin-helper (n ÷ 2) w) ; fast-correct-helper (n ÷ 2) w (div2≤ n w (≤-pred-pred n w p)) ; sym (tail-homo n))
+    $!-≡ _ (F.toBin-helper (n ÷ 2) w) ;
+    head-tail-cong _ (inc ⟦ n ⇑⟧)
+      (lemma₁ (rem n 2 ≡ᴮ 0) (F.toBin-helper (n ÷ 2) w) ; sym (head𝔹-homo n))
+      (lemma₂ (rem n 2 ≡ᴮ 0) (F.toBin-helper (n ÷ 2) w) ; fast-correct-helper (n ÷ 2) w (div2≤ n w (≤-pred-pred n w p)) ; sym (tail-homo n))
+  where
+  lemma₁ : ∀ x xs → head𝔹 (if x then 1ᵇ xs else 2ᵇ xs) ≡ just x
+  lemma₁ false xs = refl
+  lemma₁ true xs = refl
+
+  lemma₂ : ∀ x xs → tail𝔹 (if x then 1ᵇ xs else 2ᵇ xs) ≡ xs
+  lemma₂ false xs = refl
+  lemma₂ true xs = refl
 
 n≤n : ∀ n → n ≤ n
 n≤n zero    = tt

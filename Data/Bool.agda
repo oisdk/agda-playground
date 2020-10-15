@@ -29,6 +29,7 @@ infixr 0 if_then_else_
 if_then_else_ : ∀ {a} {A : Set a} → Bool → A → A → A
 if true  then x else _ = x
 if false then _ else x = x
+{-# INLINE if_then_else_ #-}
 
 T : Bool → Type₀
 T true  = ⊤
