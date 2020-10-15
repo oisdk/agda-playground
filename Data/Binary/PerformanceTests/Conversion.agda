@@ -18,5 +18,5 @@ n : ℕ
 n = 5000000
 
 -- The actual performance test (uncomment and time how long it takes to type-check)
-_ : ⟦ ⟦ n ⇑⟧ ⇓⟧ ≡ n
-_ = refl
+-- _ : ⟦ ⟦ n ⇑⟧ ⇓⟧ ≡ n
+-- _ = refl
