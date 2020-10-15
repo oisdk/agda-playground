@@ -27,30 +27,31 @@
 <a id="713" class="Comment">-- we satisfy the termination checker.</a>
 <a id="⟦_⇑⟧"></a><a id="752" href="Data.Binary.Conversion.Fast.html#752" class="Function Operator">⟦_⇑⟧</a> <a id="757" class="Symbol">:</a> <a id="759" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="761" class="Symbol">→</a> <a id="763" href="Data.Bits.html#102" class="Datatype">𝔹</a>
 <a id="765" href="Data.Binary.Conversion.Fast.html#752" class="Function Operator">⟦</a> <a id="767" href="Data.Binary.Conversion.Fast.html#767" class="Bound">n</a> <a id="769" href="Data.Binary.Conversion.Fast.html#752" class="Function Operator">⇑⟧</a> <a id="772" class="Symbol">=</a> <a id="774" href="Data.Binary.Conversion.Fast.html#369" class="Function">toBin-helper</a> <a id="787" href="Data.Binary.Conversion.Fast.html#767" class="Bound">n</a> <a id="789" href="Data.Binary.Conversion.Fast.html#767" class="Bound">n</a>
+<a id="791" class="Symbol">{-#</a> <a id="795" class="Keyword">INLINE</a> <a id="802" href="Data.Binary.Conversion.Fast.html#752" class="Function Operator">⟦_⇑⟧</a> <a id="807" class="Symbol">#-}</a>
 
-<a id="792" class="Comment">-- Without the added argument to the recursor, the function does not</a>
-<a id="861" class="Comment">-- pass the termination checker:</a>
-<a id="894" class="Comment">-- {-# TERMINATING #-}</a>
-<a id="917" class="Comment">-- ⟦_⇑⟧″ : ℕ → 𝔹</a>
-<a id="934" class="Comment">-- ⟦ zero  ⇑⟧″ = 0ᵇ</a>
-<a id="954" class="Comment">-- ⟦ suc n ⇑⟧″ =</a>
-<a id="971" class="Comment">--   if rem n 2 ℕ.≡ᴮ 0</a>
-<a id="994" class="Comment">--   then 1ᵇ ⟦ n ÷ 2 ⇑⟧″</a>
-<a id="1019" class="Comment">--   else 2ᵇ ⟦ n ÷ 2 ⇑⟧″</a>
+<a id="812" class="Comment">-- Without the added argument to the recursor, the function does not</a>
+<a id="881" class="Comment">-- pass the termination checker:</a>
+<a id="914" class="Comment">-- {-# TERMINATING #-}</a>
+<a id="937" class="Comment">-- ⟦_⇑⟧″ : ℕ → 𝔹</a>
+<a id="954" class="Comment">-- ⟦ zero  ⇑⟧″ = 0ᵇ</a>
+<a id="974" class="Comment">-- ⟦ suc n ⇑⟧″ =</a>
+<a id="991" class="Comment">--   if rem n 2 ℕ.≡ᴮ 0</a>
+<a id="1014" class="Comment">--   then 1ᵇ ⟦ n ÷ 2 ⇑⟧″</a>
+<a id="1039" class="Comment">--   else 2ᵇ ⟦ n ÷ 2 ⇑⟧″</a>
 
-<a id="1045" class="Comment">-- The &quot;principled&quot; version (which uses well-founded recursion) is</a>
-<a id="1112" class="Comment">-- incredibly slow. (and the following doesn&#39;t even compute, because of</a>
-<a id="1184" class="Comment">-- cubical)</a>
+<a id="1065" class="Comment">-- The &quot;principled&quot; version (which uses well-founded recursion) is</a>
+<a id="1132" class="Comment">-- incredibly slow. (and the following doesn&#39;t even compute, because of</a>
+<a id="1204" class="Comment">-- cubical)</a>
 
-<a id="1197" class="Comment">-- open import Data.Nat.WellFounded</a>
+<a id="1217" class="Comment">-- open import Data.Nat.WellFounded</a>
 
-<a id="1234" class="Comment">-- ⟦_⇑⟧‴ : ℕ → 𝔹</a>
-<a id="1251" class="Comment">-- ⟦ n ⇑⟧‴ = go n (≤-wellFounded n)</a>
-<a id="1287" class="Comment">--   where</a>
-<a id="1298" class="Comment">--   go : ∀ n → Acc _&lt;_ n → 𝔹</a>
-<a id="1328" class="Comment">--   go zero    wf = 0ᵇ</a>
-<a id="1352" class="Comment">--   go (suc n) (acc wf) =</a>
-<a id="1379" class="Comment">--     if rem n 2 ℕ.≡ᴮ 0</a>
-<a id="1404" class="Comment">--     then 1ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))</a>
-<a id="1459" class="Comment">--     else 2ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))</a>
+<a id="1254" class="Comment">-- ⟦_⇑⟧‴ : ℕ → 𝔹</a>
+<a id="1271" class="Comment">-- ⟦ n ⇑⟧‴ = go n (≤-wellFounded n)</a>
+<a id="1307" class="Comment">--   where</a>
+<a id="1318" class="Comment">--   go : ∀ n → Acc _&lt;_ n → 𝔹</a>
+<a id="1348" class="Comment">--   go zero    wf = 0ᵇ</a>
+<a id="1372" class="Comment">--   go (suc n) (acc wf) =</a>
+<a id="1399" class="Comment">--     if rem n 2 ℕ.≡ᴮ 0</a>
+<a id="1424" class="Comment">--     then 1ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))</a>
+<a id="1479" class="Comment">--     else 2ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))</a>
 </pre></body></html>
