@@ -79,3 +79,16 @@ _≥ᴮ_ = flip _≤ᴮ_
 *-assoc : ∀ x y z → (x * y) * z ≡ x * (y * z)
 *-assoc zero    y z = refl
 *-assoc (suc x) y z = +-*-distrib y (x * y) z ; cong (y * z +_) (*-assoc x y z)
+
+open import Data.Nat.DivMod
+open import Agda.Builtin.Nat using (div-helper)
+
+div-helper′ : (m n j : ℕ) → ℕ
+div-helper′ m  zero    j      = zero
+div-helper′ m (suc n)  zero   = suc (div-helper′ m n m)
+div-helper′ m (suc n) (suc j) = div-helper′ m n j
+
+div-helper-lemma : ∀ k m n j → div-helper k m n j ≡ k + div-helper′ m n j
+div-helper-lemma k m zero j = sym (+-idʳ k)
+div-helper-lemma k m (suc n) zero = div-helper-lemma (suc k) m n m ; sym (+-suc k (div-helper′ m n m))
+div-helper-lemma k m (suc n) (suc j) = div-helper-lemma k m n j
