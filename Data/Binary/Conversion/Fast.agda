@@ -12,18 +12,20 @@ open import Data.Nat.DivMod
 open import Prelude
 import Data.Nat.Properties as ℕ
 
+
+toBin-helper : ℕ → ℕ → 𝔹
+toBin-helper (suc n) (suc w) =
+  let! rest =! toBin-helper (n ÷ 2) w in!
+  if rem n 2 ℕ.≡ᴮ 0 then 1ᵇ rest else 2ᵇ rest
+toBin-helper zero    _    = 0ᵇ
+toBin-helper (suc _) zero = 0ᵇ -- will not happen
+
+
 -- We build the output by repeatedly halving the input,
 -- but we also pass in the number to reduce as we go so that
 -- we satisfy the termination checker.
 ⟦_⇑⟧ : ℕ → 𝔹
-⟦ n ⇑⟧ = go n n
-  where
-  go : ℕ → ℕ → 𝔹
-  go (suc n) (suc w) =
-    let! rest =! go (n ÷ 2) w in!
-    if rem n 2 ℕ.≡ᴮ 0 then 1ᵇ rest else 2ᵇ rest
-  go zero    _    = 0ᵇ
-  go (suc _) zero = 0ᵇ -- will not happen
+⟦ n ⇑⟧ = toBin-helper n n
 
 -- Without the added argument to the recursor, the function does not
 -- pass the termination checker:
