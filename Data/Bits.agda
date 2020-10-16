@@ -9,5 +9,3 @@ data Bits : Type₀ where
   [] : Bits
   0∷_ : Bits → Bits
   1∷_ : Bits → Bits
-
-
