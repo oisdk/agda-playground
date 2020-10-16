@@ -30,18 +30,27 @@ module TerminationProofs where
   lemma₃ n a = ℕ.+-idʳ (n ℕ.+ a) ; cong (ℕ._+ a) (sym (ℕ.+-idʳ n))
 
 _+1/_+1 : ℕ → ℕ → ℚ⁺
-n +1/ m +1 = go zero n m (suc n ℕ.+ m) (Tᴮ⇒≡ (ℕ.+-idʳ (n ℕ.+ m)))
+n +1/ m +1 = go zero n m (n ℕ.+ m)
   where
-  open TerminationProofs
+  go : (a n m s : ℕ) → ℚ⁺
+  go a zero    (suc m) (suc s) = lℚ (go zero a m s)
+  go a (suc n) (suc m) (suc s) = go (suc a) n m s
+  go a (suc n) zero    (suc s) = rℚ (go zero n a s)
+  go _ _       _       _       = 1ℚ
 
-  go : (a n m : ℕ) → ∀ s → T (suc (n ℕ.+ m ℕ.+ a) ℕ.≡ᴮ s) → ℚ⁺
-  go a zero    (suc m) (suc s) p = lℚ (go zero a m s (lift-suc-≡ s (lemma₁ a m) p))
-  go a (suc n) (suc m) (suc s) p = go (suc a)  n m s (lift-suc-≡ s (lemma₂ n a m) p)
-  go a (suc n) zero    (suc s) p = rℚ (go zero n a s (lift-suc-≡ s (lemma₃ n a) p))
-  go a zero    zero    (suc s) p = 1ℚ
+conv-fast : ℕ → ℕ → ℚ⁺
+conv-fast n m = go n m (n ℕ.+ m)
+  where
+  go : (n m s : ℕ) → ℚ⁺
+  go n m zero    = 1ℚ
+  go n m (suc s) =
+    if n ℕ.≡ᴮ m
+    then 1ℚ
+    else
+    if n ℕ.<ᴮ m
+      then lℚ (go n (m ℕ.∸ (1 ℕ.+ n)) s)
+      else rℚ (go (n ℕ.∸ (1 ℕ.+ m)) m s)
 
-e : ℕ × ℕ
-e = ⟦ 1 +1/ 9 +1 ⇓⟧
 
 _/_ : ℕ → ℕ → ℚ⁺
 suc n / suc m = n +1/ m +1
@@ -54,4 +63,12 @@ _ : ⟦ 51 / 10 ⇓⟧ ≡ (51 , 10)
 _ = refl
 
 _ : ⟦ 60 / 100 ⇓⟧ ≡ (3 , 5)
+_ = refl
+
+tester : ℕ → ℕ → Type₀
+tester (suc n) (suc m) = (n +1/ m +1) ≡ conv-fast n m
+tester _ _ = tt ≡ tt
+
+
+_ : tester 90 100
 _ = refl
