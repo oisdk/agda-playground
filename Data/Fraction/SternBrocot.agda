@@ -17,8 +17,8 @@ module TerminationProofs where
   Tᴮ⇒≡ : {n m : ℕ} → n ≡ m → T (n ℕ.≡ᴮ m)
   Tᴮ⇒≡ {n} {m} n≡m = subst (λ n′ → T (n ℕ.≡ᴮ n′)) n≡m (ℕ.complete-== n)
 
-  lift-suc-≡ : ∀ {n m} s → m ≡ n → T (suc n ℕ.≡ᴮ s) → T (suc m ℕ.≡ᴮ s)
-  lift-suc-≡ {n} {m} s  m≡n p = Tᴮ⇒≡ (cong suc m≡n ; ℕ.sound-== (suc n) s p)
+  lift-suc-≡ : ∀ {n m} s → m ≡ n → T (n ℕ.≡ᴮ s) → T (m ℕ.≡ᴮ s)
+  lift-suc-≡ {n} {m} s  m≡n p = Tᴮ⇒≡ (m≡n ; ℕ.sound-== (n) s p)
 
   lemma₁ : ∀ a m → a ℕ.+ m ℕ.+ zero ≡ m ℕ.+ a
   lemma₁ a m = ℕ.+-idʳ (a ℕ.+ m) ; ℕ.+-comm a m
