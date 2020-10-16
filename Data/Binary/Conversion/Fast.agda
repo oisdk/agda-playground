@@ -10,22 +10,21 @@ module Data.Binary.Conversion.Fast where
 open import Data.Binary.Definition
 open import Data.Nat.DivMod
 open import Prelude
-import Data.Nat.Properties as ℕ
+open import Data.Nat.Properties
 
-
-toBin-helper : ℕ → ℕ → 𝔹
-toBin-helper (suc n) (suc w) =
-  let! rest =! toBin-helper (n ÷ 2) w in!
-  if rem n 2 ℕ.≡ᴮ 0 then 1ᵇ rest else 2ᵇ rest
-toBin-helper zero    _    = 0ᵇ
-toBin-helper (suc _) zero = 0ᵇ -- will not happen
-
+⟦_⇑⟧⟨_⟩ : ℕ → ℕ → 𝔹
+⟦ suc n ⇑⟧⟨ suc w ⟩ =
+  if even n
+    then 1ᵇ ⟦ n ÷ 2 ⇑⟧⟨ w ⟩
+    else 2ᵇ ⟦ n ÷ 2 ⇑⟧⟨ w ⟩
+⟦ zero  ⇑⟧⟨ _    ⟩ = 0ᵇ
+⟦ suc _ ⇑⟧⟨ zero ⟩ = 0ᵇ -- will not happen
 
 -- We build the output by repeatedly halving the input,
 -- but we also pass in the number to reduce as we go so that
 -- we satisfy the termination checker.
 ⟦_⇑⟧ : ℕ → 𝔹
-⟦ n ⇑⟧ = toBin-helper n n
+⟦ n ⇑⟧ = ⟦ n ⇑⟧⟨ n ⟩
 {-# INLINE ⟦_⇑⟧ #-}
 
 -- Without the added argument to the recursor, the function does not

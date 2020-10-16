@@ -92,3 +92,51 @@ div-helper-lemma : ∀ k m n j → div-helper k m n j ≡ k + div-helper′ m n 
 div-helper-lemma k m zero j = sym (+-idʳ k)
 div-helper-lemma k m (suc n) zero = div-helper-lemma (suc k) m n m ; sym (+-suc k (div-helper′ m n m))
 div-helper-lemma k m (suc n) (suc j) = div-helper-lemma k m n j
+
+even : ℕ → Bool
+even n = rem n 2 ≡ᴮ 0
+
+s≤s : ∀ n m → n ≤ m → suc n ≤ suc m
+s≤s zero m p = tt
+s≤s (suc n) m p = p
+
+n≤s : ∀ n m → n ≤ m → n ≤ suc m
+n≤s zero m p = tt
+n≤s (suc zero) m p = tt
+n≤s (suc (suc n)) zero p = p
+n≤s (suc (suc n₁)) (suc n) p = n≤s (suc n₁) n p
+
+div-≤ : ∀ n m → n ÷ suc m ≤ n
+div-≤ n m = subst (_≤ n) (sym (div-helper-lemma 0 m n m)) (go m n m)
+  where
+  go : ∀ m n j → div-helper′ m n j ≤ n
+  go m zero j = tt
+  go m (suc n) zero = s≤s (div-helper′ m n m) n (go m n m)
+  go m (suc n) (suc j) = n≤s (div-helper′ m n j) n (go m n j)
+
+≤-trans : ∀ x y z → x ≤ y → y ≤ z → x ≤ z
+≤-trans zero y z p q = tt
+≤-trans (suc n) zero zero p q = p
+≤-trans (suc zero) zero (suc n) p q = tt
+≤-trans (suc (suc n₁)) zero (suc n) p q = ≤-trans (suc n₁) zero n p tt
+≤-trans (suc n) (suc zero) zero p q = q
+≤-trans (suc zero) (suc zero) (suc n) p q = tt
+≤-trans (suc (suc n₁)) (suc zero) (suc n) p q = ≤-trans (suc n₁) zero n p tt
+≤-trans (suc n₁) (suc (suc n)) zero p q = q
+≤-trans (suc zero) (suc (suc n₁)) (suc n) p q = tt
+≤-trans (suc (suc n₁)) (suc (suc n₂)) (suc n) p q = ≤-trans (suc n₁) (suc n₂) n p q
+
+p≤n : ∀ n m → suc n ≤ m → n ≤ m
+p≤n zero m p = tt
+p≤n (suc n) zero p = p
+p≤n (suc zero) (suc n) p = tt
+p≤n (suc (suc n₁)) (suc n) p = p≤n (suc n₁) n p
+
+p≤p : ∀ n m → suc n ≤ suc m → n ≤ m
+p≤p zero m p = tt
+p≤p (suc n) m p = p
+
+≤-refl : ∀ n → n ≤ n
+≤-refl zero = tt
+≤-refl (suc zero) = tt
+≤-refl (suc (suc n)) = ≤-refl (suc n)
