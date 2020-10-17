@@ -1,6 +1,6 @@
 {-# OPTIONS --cubical --safe #-}
 
-module Data.Fraction.SternBrocot where
+module Data.Rational.SternBrocot where
 
 open import Prelude
 import Data.Nat as ℕ
@@ -46,10 +46,9 @@ conv-fast n m = go n m (n ℕ.+ m)
   go n m (suc s) =
     if n ℕ.≡ᴮ m
     then 1ℚ
-    else
-    if n ℕ.<ᴮ m
-      then lℚ (go n (m ℕ.∸ (1 ℕ.+ n)) s)
-      else rℚ (go (n ℕ.∸ (1 ℕ.+ m)) m s)
+    else if n ℕ.<ᴮ m
+    then lℚ (go n (m ℕ.∸ (1 ℕ.+ n)) s)
+    else rℚ (go (n ℕ.∸ (1 ℕ.+ m)) m s)
 
 
 _/_ : ℕ → ℕ → ℚ⁺
@@ -70,5 +69,5 @@ tester (suc n) (suc m) = (n +1/ m +1) ≡ conv-fast n m
 tester _ _ = tt ≡ tt
 
 
-_ : tester 90 100
+_ : tester 11 11
 _ = refl

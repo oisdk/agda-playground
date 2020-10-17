@@ -3,7 +3,7 @@
 module Data.Bool.Properties where
 
 open import Prelude
-open import Data.Bool
+open import Data.Bool.Base
 open import Data.Unit.Properties
 
 isPropT : ∀ x → isProp (T x)
