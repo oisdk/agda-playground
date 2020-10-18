@@ -9,38 +9,38 @@ import Data.Nat as ℕ
 import Data.Nat.Properties as ℕ
 open import Data.Bool
 
+infixr 9 ⁺_ ⁻suc_ ⁻_
 data ℤ : Type₀ where
-  pos    : ℕ → ℤ
-  negsuc : ℕ → ℤ
+  ⁺_    : ℕ → ℤ
+  ⁻suc_ : ℕ → ℤ
 
-infixr 9 -_
--_ : ℕ → ℤ
-- zero  = pos zero
-- suc n = negsuc n
+⁻_ : ℕ → ℤ
+⁻ zero  = ⁺ zero
+⁻ suc n = ⁻suc n
 
-{-# DISPLAY negsuc n = - suc n #-}
+{-# DISPLAY ⁻suc_ n = ⁻ suc n #-}
 
 infixl 6 _+_
 
 _-suc_ : ℕ → ℕ → ℤ
 x -suc y =
   if y ℕ.<ᴮ x
-    then pos    (x ℕ.∸ (1 ℕ.+ y))
-    else negsuc (y ℕ.∸ x)
+    then ⁺_    (x ℕ.∸ (suc y))
+    else ⁻suc_ (y ℕ.∸ x)
 
 _+_ : ℤ → ℤ → ℤ
-pos    x + pos    y = pos (x ℕ.+ y)
-pos    x + negsuc y = x -suc y
-negsuc x + pos    y = y -suc x
-negsuc x + negsuc y = negsuc (1 ℕ.+ x ℕ.+ y)
+⁺    x + ⁺    y = ⁺ (x ℕ.+ y)
+⁺    x + ⁻suc y = x -suc y
+⁻suc x + ⁺    y = y -suc x
+⁻suc x + ⁻suc y = ⁻suc (suc x ℕ.+ y)
 
 _*-suc_ : ℕ → ℕ → ℤ
-zero  *-suc m = pos zero
-suc n *-suc m = negsuc (n ℕ.+ m ℕ.+ n ℕ.* m)
+zero  *-suc m = ⁺ zero
+suc n *-suc m = ⁻suc (n ℕ.+ m ℕ.+ n ℕ.* m)
 
 infixl 7 _*_
 _*_ : ℤ → ℤ → ℤ
-pos    x * pos    y = pos (x ℕ.* y)
-pos    x * negsuc y = x *-suc y
-negsuc x * pos    y = y *-suc x
-negsuc x * negsuc y = pos ((1 ℕ.+ x) ℕ.* (1 ℕ.+ y))
+⁺    x * ⁺    y = ⁺ (x ℕ.* y)
+⁺    x * ⁻suc y = x *-suc y
+⁻suc x * ⁺    y = y *-suc x
+⁻suc x * ⁻suc y = ⁺ (suc x ℕ.* suc y)

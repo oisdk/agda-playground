@@ -50,28 +50,53 @@ conv-fast n m = go n m (n ℕ.+ m)
     then lℚ (go n (m ℕ.∸ (1 ℕ.+ n)) s)
     else rℚ (go (n ℕ.∸ (1 ℕ.+ m)) m s)
 
--- _/_ : ℕ → ℕ → ℚ⁺
--- suc n / suc m = n +1/ m +1
--- _ / _ = zero +1/ zero +1
-
-
 ℚ : Type₀
 ℚ = ℚ⁺
 
 import Data.Rational.Unnormalised as F
+open import Data.Rational.Unnormalised using (_/suc_; _/_)
 import Data.Integer as ℤ
+open import Data.Integer using (ℤ; ⁺_; ⁻suc_; ⁻_)
 open import Data.Bits.Fold
 
 fraction : ℚ → (ℕ × ℕ)
-fraction = foldr-bits zer one (1 , 1)
+fraction = foldr-bits zer one (0 , 0)
   where
   zer : (ℕ × ℕ) → (ℕ × ℕ)
-  zer (p , q) = p , p ℕ.+ q
+  zer (p , q) = p , suc p ℕ.+ q
 
   one : (ℕ × ℕ) → (ℕ × ℕ)
-  one (p , q) = p ℕ.+ q , q
+  one (p , q) = suc p ℕ.+ q , q
 
--- ⟦_⇓⟧ : ℚ → F.ℚ
--- ⟦ 1ℚ ⇓⟧ = ℤ.pos 0 F./ 0 +1
--- ⟦ lℚ xs ⇓⟧ = {!!}
--- ⟦ rℚ xs ⇓⟧ = {!!}
+record Interval : Type₀ where
+  constructor interval
+  field
+    lbn ubn lbd ubd : ℕ
+open Interval
+
+mediant : Interval → (ℕ → ℕ → A) → A
+mediant (interval b d a c) k = k (a ℕ.+ b) (c ℕ.+ d)
+
+fraction′ : ℚ → ℕ × ℕ
+fraction′ xs = mediant (foldl-bits zer one (interval 0 1 1 0) xs) _,_
+  where
+  zer one : Interval → Interval
+  zer i@(interval lbn ubn lbd ubd) = mediant i (interval lbn ubn)
+  one i@(interval lbn ubn lbd ubd) = mediant i λ mn md → interval mn md lbd ubd
+
+open import Data.Nat.Properties using (pred)
+
+⟦_⇓⟧′ : ℚ → F.ℚ
+⟦ 1ℚ ⇓⟧′ = ⁺ 0 F./suc 0
+⟦ lℚ xs ⇓⟧′ = let n , d = fraction′ xs in ⁻ n /suc pred d
+⟦ rℚ xs ⇓⟧′ = let n , d = fraction′ xs in ⁺ n /suc pred d
+
+⟦_⇓⟧ : ℚ → F.ℚ
+⟦ 1ℚ ⇓⟧ = ⁺ 0 F./suc 0
+⟦ lℚ xs ⇓⟧ = let n , d = fraction xs in ⁻suc n /suc d
+⟦ rℚ xs ⇓⟧ = let n , d = fraction xs in ⁺ suc n /suc d
+
+⟦_⇑⟧ : F.ℚ → ℚ
+⟦ ⁺ zero /suc den-pred ⇑⟧ = 1ℚ
+⟦ ⁺ suc x /suc den-pred ⇑⟧ = rℚ (conv-fast x den-pred)
+⟦ ⁻suc x /suc den-pred ⇑⟧ = lℚ (conv-fast x den-pred)
