@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         cubical-ref: ["v0.2"]
-        agda-ref: ["v2.6.1"]
+        agda-ref: ["v2.6.1.1"]
         ghc-ver: ["8.10.1"]
         cabal-ver: ["3.2"]
 
