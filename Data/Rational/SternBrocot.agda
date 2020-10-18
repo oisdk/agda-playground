@@ -56,7 +56,7 @@ conv-fast n m = go n m (n ℕ.+ m)
 import Data.Rational.Unnormalised as F
 open import Data.Rational.Unnormalised using (_/suc_; _/_)
 import Data.Integer as ℤ
-open import Data.Integer using (ℤ; ⁺_; ⁻suc_; ⁻_)
+open import Data.Integer using (ℤ; ⁺; ⁻suc; ⁻)
 open import Data.Bits.Fold
 
 fraction : ℚ → (ℕ × ℕ)
@@ -94,9 +94,9 @@ open import Data.Nat.Properties using (pred)
 ⟦_⇓⟧ : ℚ → F.ℚ
 ⟦ 1ℚ ⇓⟧ = ⁺ 0 F./suc 0
 ⟦ lℚ xs ⇓⟧ = let n , d = fraction xs in ⁻suc n /suc d
-⟦ rℚ xs ⇓⟧ = let n , d = fraction xs in ⁺ suc n /suc d
+⟦ rℚ xs ⇓⟧ = let n , d = fraction xs in ⁺ (suc n) /suc d
 
 ⟦_⇑⟧ : F.ℚ → ℚ
 ⟦ ⁺ zero /suc den-pred ⇑⟧ = 1ℚ
-⟦ ⁺ suc x /suc den-pred ⇑⟧ = rℚ (conv-fast x den-pred)
+⟦ ⁺ (suc x) /suc den-pred ⇑⟧ = rℚ (conv-fast x den-pred)
 ⟦ ⁻suc x /suc den-pred ⇑⟧ = lℚ (conv-fast x den-pred)
