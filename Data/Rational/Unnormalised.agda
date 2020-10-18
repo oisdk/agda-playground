@@ -3,7 +3,7 @@
 module Data.Rational.Unnormalised where
 
 open import Prelude
-open import Data.Integer using (ℤ; ⁺_)
+open import Data.Integer using (ℤ; ⁺)
 import Data.Integer as ℤ
 import Data.Nat as ℕ
 open import Data.Nat.DivMod using (nonZero)
@@ -26,7 +26,7 @@ n / suc d = n /suc d
 
 infixl 6 _+_
 _+_ : ℚ → ℚ → ℚ
-(x + y) .num = num x ℤ.* ⁺ den y ℤ.+ num y ℤ.* ⁺ den x
+(x + y) .num = num x ℤ.* ⁺ (den y) ℤ.+ num y ℤ.* ⁺ (den x)
 (x + y) .den-pred = x .den-pred ℕ.+ y .den-pred ℕ.+ x .den-pred ℕ.* y .den-pred
 
 infixl 7 _*_
