@@ -23,7 +23,9 @@ Bal = Dyck zero
 
 _ : Dyck 0 3
 _ = ⟨ ⟩ ⟨ ⟩ ⟨ ⟩ done
-_ = ⟨ ⟨ ⟩ ⟩ ⟨ ⟩ done
+
+_ : Dyck 1 2
+_ = ⟩ ⟨ ⟩ ⟨ ⟩ done
 
 support-dyck : ∀ n m → List (Dyck n m)
 support-dyck = λ n m → sup-k n m id []
