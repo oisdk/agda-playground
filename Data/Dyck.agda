@@ -14,12 +14,12 @@ private
 
 infixr 5 ⟨_ ⟩_
 data Dyck : ℕ → ℕ → Type₀ where
-  done : Dyck 0 0
+  done : Dyck zero zero
   ⟨_ : Dyck (suc n) m → Dyck n (suc m)
   ⟩_ : Dyck n m → Dyck (suc n) m
 
 Bal : ℕ → Type₀
-Bal = Dyck 0
+Bal = Dyck zero
 
 support-dyck : ∀ n m → List (Dyck n m)
 support-dyck = λ n m → sup-k n m id []
@@ -69,7 +69,7 @@ toDyck′ : (t : Tree) → Dyck n m → Dyck n (sz t m)
 toDyck′ leaf      d = d
 toDyck′ (xs * ys) d = ⟨ toDyck′ xs (⟩ toDyck′ ys d)
 
-toDyck : (t : Tree) → Dyck 0 (size t)
+toDyck : (t : Tree) → Bal (size t)
 toDyck t = toDyck′ t done
 
 tlbrack : Vec Tree (suc (suc n)) → Vec Tree (suc n)
@@ -81,10 +81,10 @@ trbrack xs = leaf ∷ xs
 fromDyck′ : Vec Tree (suc k) → Dyck n m → Vec Tree (suc n + k)
 fromDyck′ {k = k} xs = foldrDyck (λ n m → Vec Tree (suc n + k)) tlbrack trbrack xs
 
-fromDyck″ : Dyck 0 n → Vec Tree 1
+fromDyck″ : Bal n → Vec Tree 1
 fromDyck″ d = fromDyck′ {k = 0} (leaf ∷ []) d
 
-fromDyck : Dyck 0 n → Tree
+fromDyck : Bal n → Tree
 fromDyck d = head (fromDyck″ d)
 
 from∘to′ : ∀ (xs : Vec Tree (k)) (d : Dyck n m) t → fromDyck′ (leaf ∷ xs) (toDyck′ t (⟩ d)) ≡ (t ∷ fromDyck′ (leaf ∷ xs) d)
@@ -107,18 +107,9 @@ from∘to″ (ls * rs) =
 from∘to : ∀ t → fromDyck (toDyck t) ≡ t
 from∘to t = cong head (from∘to″ t)
 
--- sz′ : Tree → ℕ → ℕ
--- sz′ t n = suc (sz t n)
+open import Function.Surjective
 
-
--- size-proof′ : (v : Vec Tree (suc k)) → (d : Dyck n m) → Data.Vec.foldr sz′ n (fromDyck′ v d) ≡ Data.Vec.foldr sz′ m v
--- size-proof′ v done = refl
--- size-proof′ v (⟨ d) = {!refl!} ; size-proof′ v d ; {!!} 
--- size-proof′ v (⟩ d) = {!refl!} ; size-proof′ v d  
-
--- size-proof : (d : Dyck 0 n) → size (fromDyck d) ≡ n
--- size-proof d = {!!}
-
-
--- to∘from : (t : Dyck 0 n) → PathP (λ i → Dyck 0 (size-proof t i)) (toDyck (fromDyck t)) t
--- to∘from = {!!}
+dyck↠tree : ∃ Bal ↠! Tree
+dyck↠tree .fst (_ , x) = fromDyck x
+dyck↠tree .snd y .fst = _ , toDyck y
+dyck↠tree .snd y .snd = from∘to y
