@@ -21,12 +21,9 @@ data Dyck : ℕ → ℕ → Type₀ where
 Bal : ℕ → Type₀
 Bal = Dyck zero
 
-module ExampleStrings where
-  _ : Bal 3
-  _ = ⟨ ⟩ ⟨ ⟩ ⟨ ⟩ done
-
-  _ : Bal 3
-  _ = ⟨ ⟨ ⟩ ⟩ ⟨ ⟩ done
+_ : Dyck 0 3
+_ = ⟨ ⟩ ⟨ ⟩ ⟨ ⟩ done
+_ = ⟨ ⟨ ⟩ ⟩ ⟨ ⟩ done
 
 support-dyck : ∀ n m → List (Dyck n m)
 support-dyck = λ n m → sup-k n m id []
