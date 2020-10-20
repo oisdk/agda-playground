@@ -13,6 +13,12 @@ private
 open import Agda.Builtin.List using (List; _∷_; []) public
 open import Data.Fin
 
+module _ {p} (P : List A → Type p) (f : ∀ x {xs} → P xs → P (x ∷ xs)) (base : P []) where
+  foldrP : ∀ xs → P xs
+  foldrP [] = base
+  foldrP (x ∷ xs) = f x (foldrP xs)
+
+
 foldr : (A → B → B) → B → List A → B
 foldr f b [] = b
 foldr f b (x ∷ xs) = f x (foldr f b xs)

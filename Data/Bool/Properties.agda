@@ -10,10 +10,16 @@ isPropT : ∀ x → isProp (T x)
 isPropT false = isProp⊥
 isPropT true  = isProp⊤
 
+false≢true : false ≢ true
+false≢true p = subst (bool ⊤ ⊥) p tt
+
+true≢false : true ≢ false
+true≢false p = subst (bool ⊥ ⊤) p tt
+
 discreteBool : Discrete Bool
 discreteBool false y .does = not y
 discreteBool true y .does = y
 discreteBool false false .why = refl
-discreteBool false true .why = λ p → subst (bool ⊤ ⊥) p tt
-discreteBool true false .why = λ p → subst (bool ⊥ ⊤) p tt
+discreteBool false true .why = false≢true
+discreteBool true false .why = true≢false
 discreteBool true true .why = refl
