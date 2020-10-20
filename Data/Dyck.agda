@@ -20,7 +20,7 @@ private
 -- Dyck words: definition and associated functions.
 --------------------------------------------------------------------------------
 
--- A Prefix of a Dyck word.
+-- A suffix of a Dyck word.
 -- The type Dyck n m represents a string
 -- of m pairs of parentheses, and n extra closing parens.
 infixr 5 ⟨_ ⟩_
