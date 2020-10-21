@@ -132,7 +132,7 @@ dyck→treeˡ d = go d (leaf ∷ [])
   go (⟩ d)  (t₁ ∷ t₂ ∷ ts)  = go d (t₂ * t₁ ∷ ts)
   go done   (t  ∷ _)         = t
 
-dyck→tree→dyck-pop : ∀ (xs : Vec Tree (suc k)) (d : Dyck n m) t → dyck→tree⊙ xs (tree→dyck⊙ t (⟩ d)) ≡ (t ∷ dyck→tree⊙ xs d)
+dyck→tree→dyck-pop : ∀ (xs : Vec Tree (suc k)) (d : Dyck n m) t → dyck→tree⊙ xs (tree→dyck⊙ t (⟩ d)) ≡ t ∷ dyck→tree⊙ xs d
 dyck→tree→dyck-pop xs d leaf = refl
 dyck→tree→dyck-pop xs d (ls * rs) =
   dyck→tree⊙ xs (⟨ tree→dyck⊙ ls (⟩ tree→dyck⊙ rs (⟩ d)))        ≡⟨⟩
