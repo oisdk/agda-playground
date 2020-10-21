@@ -29,26 +29,26 @@ open import Data.Bits.Equatable
 --   lemma₃ : ∀ n a → n ℕ.+ a ℕ.+ zero ≡ n ℕ.+ zero ℕ.+ a
 --   lemma₃ n a = ℕ.+-idʳ (n ℕ.+ a) ; cong (ℕ._+ a) (sym (ℕ.+-idʳ n))
 
-_+1/_+1 : ℕ → ℕ → ℚ⁺
-n +1/ m +1 = go zero n m (n ℕ.+ m)
-  where
-  go : (a n m s : ℕ) → ℚ⁺
-  go a zero    (suc m) (suc s) = lℚ (go zero a m s)
-  go a (suc n) (suc m) (suc s) = go (suc a) n m s
-  go a (suc n) zero    (suc s) = rℚ (go zero n a s)
-  go _ _       _       _       = 1ℚ
+-- _+1/_+1 : ℕ → ℕ → ℚ⁺
+-- n +1/ m +1 = go zero n m (n ℕ.+ m)
+--   where
+--   go : (a n m s : ℕ) → ℚ⁺
+--   go a zero    (suc m) (suc s) = lℚ (go zero a m s)
+--   go a (suc n) (suc m) (suc s) = go (suc a) n m s
+--   go a (suc n) zero    (suc s) = rℚ (go zero n a s)
+--   go _ _       _       _       = 1ℚ
 
-conv-fast : ℕ → ℕ → ℚ⁺
-conv-fast n m = go n m (n ℕ.+ m)
-  where
-  go : (n m s : ℕ) → ℚ⁺
-  go n m zero    = 1ℚ
-  go n m (suc s) =
-    if n ℕ.≡ᴮ m
-    then 1ℚ
-    else if n ℕ.<ᴮ m
-    then lℚ (go n (m ℕ.∸ (1 ℕ.+ n)) s)
-    else rℚ (go (n ℕ.∸ (1 ℕ.+ m)) m s)
+euclidian : ℕ → ℕ → ℕ → ℚ⁺
+euclidian n m zero    = 1ℚ
+euclidian n m (suc s) =
+  if n ℕ.≡ᴮ m
+  then 1ℚ
+  else if n ℕ.<ᴮ m
+  then lℚ (euclidian n (m ℕ.∸ (1 ℕ.+ n)) s)
+  else rℚ (euclidian (n ℕ.∸ (1 ℕ.+ m)) m s)
+
+normalise-suc : ℕ → ℕ → ℚ⁺
+normalise-suc n m = euclidian n m (n ℕ.+ m)
 
 ℚ : Type₀
 ℚ = ℚ⁺
@@ -59,37 +59,14 @@ import Data.Integer as ℤ
 open import Data.Integer using (ℤ; ⁺; ⁻suc; ⁻)
 open import Data.Bits.Fold
 
+zer : (ℕ × ℕ) → (ℕ × ℕ)
+zer (p , q) = p , suc p ℕ.+ q
+
+one : (ℕ × ℕ) → (ℕ × ℕ)
+one (p , q) = suc p ℕ.+ q , q
+
 fraction : ℚ → (ℕ × ℕ)
 fraction = foldr-bits zer one (0 , 0)
-  where
-  zer : (ℕ × ℕ) → (ℕ × ℕ)
-  zer (p , q) = p , suc p ℕ.+ q
-
-  one : (ℕ × ℕ) → (ℕ × ℕ)
-  one (p , q) = suc p ℕ.+ q , q
-
-record Interval : Type₀ where
-  constructor interval
-  field
-    lbn ubn lbd ubd : ℕ
-open Interval
-
-mediant : Interval → (ℕ → ℕ → A) → A
-mediant (interval b d a c) k = k (a ℕ.+ b) (c ℕ.+ d)
-
-fraction′ : ℚ → ℕ × ℕ
-fraction′ xs = mediant (foldl-bits zer one (interval 0 1 1 0) xs) _,_
-  where
-  zer one : Interval → Interval
-  zer i@(interval lbn ubn lbd ubd) = mediant i (interval lbn ubn)
-  one i@(interval lbn ubn lbd ubd) = mediant i λ mn md → interval mn md lbd ubd
-
-open import Data.Nat.Properties using (pred)
-
-⟦_⇓⟧′ : ℚ → F.ℚ
-⟦ 1ℚ ⇓⟧′ = ⁺ 0 F./suc 0
-⟦ lℚ xs ⇓⟧′ = let n , d = fraction′ xs in ⁻ n /suc pred d
-⟦ rℚ xs ⇓⟧′ = let n , d = fraction′ xs in ⁺ n /suc pred d
 
 ⟦_⇓⟧ : ℚ → F.ℚ
 ⟦ 1ℚ ⇓⟧ = ⁺ 0 F./suc 0
@@ -98,5 +75,59 @@ open import Data.Nat.Properties using (pred)
 
 ⟦_⇑⟧ : F.ℚ → ℚ
 ⟦ ⁺ zero /suc den-pred ⇑⟧ = 1ℚ
-⟦ ⁺ (suc x) /suc den-pred ⇑⟧ = rℚ (conv-fast x den-pred)
-⟦ ⁻suc x /suc den-pred ⇑⟧ = lℚ (conv-fast x den-pred)
+⟦ ⁺ (suc x) /suc den-pred ⇑⟧ = rℚ (normalise-suc x den-pred)
+⟦ ⁻suc x /suc den-pred ⇑⟧ = lℚ (normalise-suc x den-pred)
+
+-- open import Path.Reasoning
+
+-- n≢sn+d : ∀ n d → (n ℕ.≡ᴮ suc (n ℕ.+ d)) ≡ false
+-- n≢sn+d zero d = refl
+-- n≢sn+d (suc n) d = n≢sn+d n d
+
+-- n<sn+d : ∀ n d → (n ℕ.<ᴮ suc (n ℕ.+ d)) ≡ true
+-- n<sn+d zero d = refl
+-- n<sn+d (suc n) d = n<sn+d n d
+
+-- n+d-n≡d : ∀ n d → n ℕ.+ d ℕ.∸ n ≡ d
+-- n+d-n≡d zero d = refl
+-- n+d-n≡d (suc n) d = n+d-n≡d n d
+
+-- euclidian-term-helper : ∀ n d s₁ s₂ → (n ℕ.+ d ℕ.≤ s₁) → (n ℕ.+ d ℕ.≤ s₂) → euclidian n d s₁ ≡ euclidian n d s₂
+-- euclidian-term-helper zero zero zero zero p₁ p₂ = refl
+-- euclidian-term-helper zero zero zero (suc s₂) p₁ p₂ = refl
+-- euclidian-term-helper zero zero (suc s₁) zero p₁ p₂ = refl
+-- euclidian-term-helper zero zero (suc s₁) (suc s₂) p₁ p₂ = refl
+-- euclidian-term-helper zero (suc d) (suc s₁) (suc s₂) p₁ p₂ = cong lℚ (euclidian-term-helper zero d s₁ s₂ (ℕ.p≤p d s₁ p₁) (ℕ.p≤p d s₂ p₂))
+-- euclidian-term-helper (suc n) zero (suc s₁) (suc s₂) p₁ p₂ = cong rℚ (euclidian-term-helper n zero s₁ s₂ (ℕ.p≤p (n ℕ.+ zero) s₁ p₁) (ℕ.p≤p (n ℕ.+ zero) s₂ p₂))
+-- euclidian-term-helper (suc n) (suc d) (suc s₁) (suc s₂) p₁ p₂ with n ℕ.≡ᴮ d | n ℕ.<ᴮ d
+-- euclidian-term-helper (suc n) (suc d) (suc s₁) (suc s₂) p₁ p₂ | false | false = cong rℚ (euclidian-term-helper (n ℕ.∸ suc d) (suc d) s₁ s₂ {!!} {!!})
+-- euclidian-term-helper (suc n) (suc d) (suc s₁) (suc s₂) p₁ p₂ | false | true  = cong lℚ (euclidian-term-helper (suc n) (d ℕ.∸ suc n) s₁ s₂ {!!} {!!})
+-- euclidian-term-helper (suc n) (suc d) (suc s₁) (suc s₂) p₁ p₂ | true  | _ = refl
+
+-- norm-l : ∀ n d → normalise-suc n (suc n ℕ.+ d) ≡ lℚ (normalise-suc n d)
+-- norm-l n d =
+--   normalise-suc n (suc n ℕ.+ d) ≡⟨⟩
+--   euclidian n (suc n ℕ.+ d) (n ℕ.+ (suc n ℕ.+ d)) ≡⟨ cong (euclidian n (suc n ℕ.+ d)) (ℕ.+-suc n (n ℕ.+ d)) ⟩
+--   euclidian n (suc n ℕ.+ d) (suc n ℕ.+ (n ℕ.+ d)) ≡⟨⟩
+--   (if n ℕ.≡ᴮ suc (n ℕ.+ d) then 1ℚ else
+--        if n ℕ.<ᴮ suc (n ℕ.+ d) then lℚ (euclidian n (n ℕ.+ d ℕ.∸ n) (n ℕ.+ (n ℕ.+ d))) else rℚ (euclidian (n ℕ.∸ suc (suc (n ℕ.+ d))) (suc (n ℕ.+ d)) (n ℕ.+ (n ℕ.+ d)))) ≡⟨ cong (if_then 1ℚ else if n ℕ.<ᴮ suc (n ℕ.+ d) then lℚ (euclidian n (n ℕ.+ d ℕ.∸ n) (n ℕ.+ (n ℕ.+ d))) else rℚ (euclidian (n ℕ.∸ suc (suc (n ℕ.+ d))) (suc (n ℕ.+ d)) (n ℕ.+ (n ℕ.+ d)))) (n≢sn+d n d) ⟩
+--   (if n ℕ.<ᴮ suc (n ℕ.+ d) then
+--        lℚ (euclidian n (n ℕ.+ d ℕ.∸ n) (n ℕ.+ (n ℕ.+ d))) else
+--        rℚ (euclidian (n ℕ.∸ suc (suc (n ℕ.+ d))) (suc (n ℕ.+ d)) (n ℕ.+ (n ℕ.+ d)))) ≡⟨ cong (if_then lℚ ((euclidian n (n ℕ.+ d ℕ.∸ n) (n ℕ.+ (n ℕ.+ d)))) else rℚ ((euclidian (n ℕ.∸ suc (suc (n ℕ.+ d))) (suc (n ℕ.+ d)) (n ℕ.+ (n ℕ.+ d))))) (n<sn+d n d) ⟩
+--   lℚ (euclidian n (n ℕ.+ d ℕ.∸ n) (n ℕ.+ (n ℕ.+ d))) ≡⟨ cong (λ ndn → lℚ (euclidian n ndn (n ℕ.+ (n ℕ.+ d)))) (n+d-n≡d n d) ⟩
+--   lℚ (euclidian n d (n ℕ.+ (n ℕ.+ d))) ≡⟨ {!!} ⟩
+--   lℚ (euclidian n d (n ℕ.+ d)) ≡⟨⟩
+--   lℚ (normalise-suc n d) ∎
+
+
+-- ℚ-retract′ : ∀ x → normalise-suc (fst (fraction x)) (snd (fraction x)) ≡ x
+-- ℚ-retract′ 1ℚ = refl
+-- ℚ-retract′ (rℚ x) = {!!}
+-- ℚ-retract′ (lℚ x) = let n , d = fraction x in
+--   normalise-suc n (suc (n ℕ.+ d)) ≡⟨ {!!} ⟩
+--   lℚ x ∎
+
+-- ℚ-retract : ∀ x → ⟦ ⟦ x ⇓⟧ ⇑⟧ ≡ x
+-- ℚ-retract 1ℚ = refl
+-- ℚ-retract (lℚ x) = cong lℚ (ℚ-retract′ x)
+-- ℚ-retract (rℚ x) = cong rℚ (ℚ-retract′ x)
