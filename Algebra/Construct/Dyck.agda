@@ -1,5 +1,8 @@
 {-# OPTIONS --cubical --safe #-}
 
+-- This module defines the Dyck monoid, also known as the bicyclic semigroup.
+-- This can be used for parsing balanced parentheses.
+
 module Algebra.Construct.Dyck where
 
 open import Prelude
@@ -8,6 +11,21 @@ open import Data.Nat using (_+_)
 import Data.Nat.Properties as ℕ
 open import Agda.Builtin.Nat using (_-_)
 
+--------------------------------------------------------------------------------
+-- Definition
+--------------------------------------------------------------------------------
+
+-- This type can be used to parse balanced parentheses.
+-- The two ℕs represent the number of outward-facing parentheses
+-- in the parse.
+-- i.e.:
+--
+--   parse ")("        = 1 ⟩⟨ 1
+--   parse "()"        = 0 ⟩⟨ 0
+--   parse "()(("      = 0 ⟩⟨ 2
+--   parse ")()(("     = 1 ⟩⟨ 2
+--   parse ")(())(("   = 1 ⟩⟨ 2
+--   parse ")(())()((" = 1 ⟩⟨ 2
 record Bal : Type₀ where
   constructor _⟩⟨_
   field
@@ -17,27 +35,38 @@ open Bal public
 
 infix 4.5 _⟩-⟨_ _⟩⟨_ _+⟨_⟩+_ _+⟨⟩+_
 
+--------------------------------------------------------------------------------
+-- Monoid operations
+--------------------------------------------------------------------------------
+
+-- Find the absolute difference of two numbers.
 _⟩-⟨_ : ℕ → ℕ → Bal
-zero  ⟩-⟨ m     = zero  ⟩⟨ m
-suc n ⟩-⟨ zero  = suc n ⟩⟨ zero
-suc n ⟩-⟨ suc m = n ⟩-⟨ m
+n ⟩-⟨ m =
+  if n ℕ.<ᴮ m
+  then zero ⟩⟨ m - n
+  else n - m ⟩⟨ zero
 
 _+⟨_⟩+_ : ℕ → Bal → ℕ → Bal
-x +⟨ z ⟩+ y = right z + x ⟩⟨ left z  + y
+x +⟨ zˡ ⟩⟨ zʳ ⟩+ y = zʳ + x ⟩⟨ zˡ  + y
 
+-- The actual monoid operator
 _+⟨⟩+_ : Bal → Bal → Bal
-x +⟨⟩+ y = left x +⟨ right x ⟩-⟨ left y ⟩+ right y
+(xˡ ⟩⟨ xʳ) +⟨⟩+ (yˡ ⟩⟨ yʳ) = xˡ +⟨ xʳ ⟩-⟨ yˡ ⟩+ yʳ
 
-mempty : Bal
-mempty = 0 ⟩⟨ 0
-
-diff-zeroʳ : ∀ n → n ⟩-⟨ zero ≡ n ⟩⟨ zero
-diff-zeroʳ zero    = refl
-diff-zeroʳ (suc n) = refl
+-- The mempty
+⟨⟩ : Bal
+⟨⟩ = 0 ⟩⟨ 0
 
 invert : Bal → Bal
 invert (x ⟩⟨ y) = y ⟩⟨ x
 
+--------------------------------------------------------------------------------
+-- Proofs
+--------------------------------------------------------------------------------
+
+diff-zeroʳ : ∀ n → n ⟩-⟨ zero ≡ n ⟩⟨ zero
+diff-zeroʳ zero    = refl
+diff-zeroʳ (suc n) = refl
 diff-inv : ∀ x y → invert (x ⟩-⟨ y) ≡ y ⟩-⟨ x
 diff-inv zero  zero = refl
 diff-inv zero (suc y) = refl
@@ -49,11 +78,11 @@ open import Path.Reasoning
 add-inv : ∀ x y → (x +⟨⟩+ y) ≡ invert (invert y +⟨⟩+ invert x)
 add-inv (xl ⟩⟨ xr) (yl ⟩⟨ yr) = cong₂ _⟩⟨_ (cong (_+ xl) (cong left (diff-inv xr yl))) (cong (_+ yr) (cong right (diff-inv xr yl)))
 
-0+⟨⟩ : ∀ x → mempty +⟨⟩+ x ≡ x
+0+⟨⟩ : ∀ x → ⟨⟩ +⟨⟩+ x ≡ x
 0+⟨⟩ (zero   ⟩⟨ xr) i = zero ⟩⟨ xr
 0+⟨⟩ (suc xl ⟩⟨ xr) i = suc (ℕ.+-idʳ xl i) ⟩⟨ xr
 
-⟨⟩+0 : ∀ x → x +⟨⟩+ mempty ≡ x
+⟨⟩+0 : ∀ x → x +⟨⟩+ ⟨⟩ ≡ x
 ⟨⟩+0 (xl ⟩⟨ zero  ) i = xl ⟩⟨ zero
 ⟨⟩+0 (xl ⟩⟨ suc xr) i = xl ⟩⟨ suc (ℕ.+-idʳ xr i)
 
@@ -131,7 +160,7 @@ rhs″ (suc xr) zero (suc yr) (suc zl) = cong (_- zl) (ℕ.+-suc xr yr) ;  rhs�
     left (xr ⟩-⟨ yl) + yr - zl ≡⟨ cong (_- zl) (cong (_+ yr) (diff-sub xr yl)) ⟩
     (xr - yl) + yr - zl ≡⟨ rhs″ xr yl yr zl ⟩
     (xr - ((zl - yr) + yl)) + (yr - zl) ≡˘⟨ cong (λ yz → (xr - (yz + yl)) + (yr - zl)) (diff-subʳ yr zl) ⟩
-    (xr - (right (yr ⟩-⟨ zl) + yl)) + (yr - zl) ≡˘⟨ cong₂ _+_ (diff-sub xr _) (diff-sub yr zl) ⟩
+    (xr - (right (yr ⟩-⟨ zl) + yl)) + (yr - zl) ≡˘⟨ cong₂ _+_ (diff-sub xr (right (yr ⟩-⟨ zl) + yl)) (diff-sub yr zl) ⟩
     left (xr ⟩-⟨ right (yr ⟩-⟨ zl) + yl) + left (yr ⟩-⟨ zl) ∎
 
   rhs : left (left (xr ⟩-⟨ yl) + yr ⟩-⟨ zl) + zr ≡ left (xr ⟩-⟨ right (yr ⟩-⟨ zl) + yl) + (left (yr ⟩-⟨ zl) + zr)
@@ -145,7 +174,7 @@ semigroupBal .Semigroup.assoc = ⟨⟩-assoc
 monoidBal : Monoid _
 Monoid.𝑆 monoidBal = Bal
 Monoid._∙_ monoidBal = _+⟨⟩+_
-Monoid.ε monoidBal = mempty
+Monoid.ε monoidBal = ⟨⟩
 Monoid.assoc monoidBal = ⟨⟩-assoc
 Monoid.ε∙ monoidBal = 0+⟨⟩
 Monoid.∙ε monoidBal = ⟨⟩+0
