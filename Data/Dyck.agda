@@ -6,11 +6,12 @@
 module Data.Dyck where
 
 open import Prelude
-open import Data.Vec
-open import Data.List
+open import Data.List using (List)
 open import Data.Nat using (_+_)
 open import Path.Reasoning
 open import Function.Surjective
+open import Data.Nat.Properties using (+-idʳ)
+open import Data.Vec.Iterated
 
 private
   variable
@@ -45,6 +46,8 @@ _ = ⟩ ⟨ ⟩ ⟨ ⟩ done
 support-dyck : ∀ n m → List (Dyck n m)
 support-dyck = λ n m → sup-k n m id []
   module ListDyck where
+  open import Data.List using (_∷_; [])
+
   Diff : Type₀ → Type₁
   Diff A = ∀ {B : Type₀} → (A → B) → List B → List B
 
@@ -121,6 +124,14 @@ dyck→tree⊙ xs = foldrDyck (λ n m → Vec Tree (suc n + _)) reduce shift xs
 dyck→tree : Dyck zero n → Tree
 dyck→tree = head ∘ dyck→tree⊙ (leaf ∷ [])
 
+dyck→treeˡ : Dyck zero n → Tree
+dyck→treeˡ d = go d (leaf ∷ [])
+  where
+  go : Dyck n m → Vec Tree (suc n) → Tree
+  go (⟨ d)  ts              = go d (leaf    ∷ ts)
+  go (⟩ d)  (t₁ ∷ t₂ ∷ ts)  = go d (t₂ * t₁ ∷ ts)
+  go done   (t  ∷ _)         = t
+
 dyck→tree→dyck-pop : ∀ (xs : Vec Tree (suc k)) (d : Dyck n m) t → dyck→tree⊙ xs (tree→dyck⊙ t (⟩ d)) ≡ (t ∷ dyck→tree⊙ xs d)
 dyck→tree→dyck-pop xs d leaf = refl
 dyck→tree→dyck-pop xs d (ls * rs) =
@@ -148,9 +159,9 @@ dyck↠tree .snd y .fst = _ , tree→dyck y
 dyck↠tree .snd y .snd = dyck→tree→dyck y
 
 sizes : Vec Tree n → ℕ
-sizes = Data.Vec.foldr size⊙ zero
+sizes = foldr′ size⊙ zero
 
-reduce-suc : (xs : Vec Tree (2 + n)) → sizes (reduce xs) ≡ suc (sizes xs)
+reduce-suc : (xs : Vec Tree (suc (suc n))) → sizes (reduce xs) ≡ suc (sizes xs)
 reduce-suc (_ ∷ _ ∷ _) = refl
 
 size-rev⊙ : (d : Dyck n m) → (v : Vec Tree (suc k)) → m + sizes v ≡ sizes (dyck→tree⊙ v d)
@@ -163,9 +174,7 @@ size-rev⊙ {n = n} {m = suc m} (⟨ d) v =
 size-rev⊙ {m = m} (⟩ d) v = size-rev⊙ d v
 
 size⊙-head : (v : Vec Tree 1) →  size (head v) ≡ sizes v
-size⊙-head (x ∷ []) = refl
-
-import Data.Nat.Properties as ℕ
+size⊙-head (_ ∷ _) = refl
 
 size-rev : (d : Dyck zero n) → size (dyck→tree d) ≡ n
 size-rev {n = n} d =
@@ -173,5 +182,5 @@ size-rev {n = n} d =
   size (head (dyck→tree⊙ (leaf ∷ []) d)) ≡⟨⟩
   size (head (dyck→tree⊙ (leaf ∷ []) d)) ≡⟨ size⊙-head  (dyck→tree⊙ (leaf ∷ []) d) ⟩
   sizes (dyck→tree⊙ (leaf ∷ []) d) ≡˘⟨ size-rev⊙ d (leaf ∷ []) ⟩
-  n + 0 ≡⟨ ℕ.+-idʳ n ⟩
+  n + 0 ≡⟨ +-idʳ n ⟩
   n ∎
