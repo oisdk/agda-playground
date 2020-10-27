@@ -203,4 +203,14 @@
 <a id="6864" class="Comment">--</a>
 <a id="6867" class="Comment">-- This is why we have to try this other cumbersome method.</a>
 <a id="6927" class="Comment">--------------------------------------------------------------------------------</a>
+
+<a id="7009" class="Keyword">open</a> <a id="7014" class="Keyword">import</a> <a id="7021" href="Data.List.html" class="Module">Data.List</a> <a id="7031" class="Keyword">using</a> <a id="7037" class="Symbol">(</a><a id="7038" href="Agda.Builtin.List.html#200" class="InductiveConstructor Operator">_∷_</a><a id="7041" class="Symbol">;</a> <a id="7043" href="Agda.Builtin.List.html#185" class="InductiveConstructor">[]</a><a id="7045" class="Symbol">)</a>
+
+<a id="to-bools"></a><a id="7048" href="Data.Dyck.html#7048" class="Function">to-bools</a> <a id="7057" class="Symbol">:</a> <a id="7059" href="Data.Dyck.html#814" class="Datatype">Dyck</a> <a id="7064" href="Data.Dyck.html#441" class="Generalizable">n</a> <a id="7066" href="Data.Dyck.html#443" class="Generalizable">m</a> <a id="7068" class="Symbol">→</a> <a id="7070" href="Agda.Builtin.List.html#148" class="Datatype">List</a> <a id="7075" href="Agda.Builtin.Bool.html#163" class="Datatype">Bool</a>
+<a id="7080" href="Data.Dyck.html#7048" class="Function">to-bools</a> <a id="7089" href="Data.Dyck.html#843" class="InductiveConstructor">done</a>   <a id="7096" class="Symbol">=</a> <a id="7098" href="Agda.Builtin.List.html#185" class="InductiveConstructor">[]</a>
+<a id="7101" href="Data.Dyck.html#7048" class="Function">to-bools</a> <a id="7110" class="Symbol">(</a><a id="7111" href="Data.Dyck.html#867" class="InductiveConstructor Operator">⟨</a> <a id="7113" href="Data.Dyck.html#7113" class="Bound">xs</a><a id="7115" class="Symbol">)</a> <a id="7117" class="Symbol">=</a> <a id="7119" href="Agda.Builtin.Bool.html#182" class="InductiveConstructor">false</a> <a id="7125" href="Agda.Builtin.List.html#200" class="InductiveConstructor Operator">∷</a> <a id="7127" href="Data.Dyck.html#7048" class="Function">to-bools</a> <a id="7136" href="Data.Dyck.html#7113" class="Bound">xs</a>
+<a id="7139" href="Data.Dyck.html#7048" class="Function">to-bools</a> <a id="7148" class="Symbol">(</a><a id="7149" href="Data.Dyck.html#906" class="InductiveConstructor Operator">⟩</a> <a id="7151" href="Data.Dyck.html#7151" class="Bound">xs</a><a id="7153" class="Symbol">)</a> <a id="7155" class="Symbol">=</a> <a id="7157" href="Agda.Builtin.Bool.html#188" class="InductiveConstructor">true</a>  <a id="7163" href="Agda.Builtin.List.html#200" class="InductiveConstructor Operator">∷</a> <a id="7165" href="Data.Dyck.html#7048" class="Function">to-bools</a> <a id="7174" href="Data.Dyck.html#7151" class="Bound">xs</a>
+
+<a id="7178" class="Comment">-- dyck→tree→dyck′ : (d : Dyck 0 m) → to-bools (tree→dyck (dyck→tree d)) ≡ to-bools d</a>
+<a id="7264" class="Comment">-- dyck→tree→dyck′ d = {!!}</a>
 </pre></body></html>
