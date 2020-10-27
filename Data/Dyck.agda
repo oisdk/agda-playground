@@ -202,3 +202,13 @@ size-rev {n = n} d =
 --
 -- This is why we have to try this other cumbersome method.
 --------------------------------------------------------------------------------
+
+open import Data.List using (_∷_; [])
+
+to-bools : Dyck n m → List Bool
+to-bools done   = []
+to-bools (⟨ xs) = false ∷ to-bools xs
+to-bools (⟩ xs) = true  ∷ to-bools xs
+
+-- dyck→tree→dyck′ : (d : Dyck 0 m) → to-bools (tree→dyck (dyck→tree d)) ≡ to-bools d
+-- dyck→tree→dyck′ d = {!!}
