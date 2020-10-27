@@ -184,3 +184,21 @@ size-rev {n = n} d =
   sizes (dyck→tree⊙ (leaf ∷ []) d) ≡˘⟨ size-rev⊙ d (leaf ∷ []) ⟩
   n + 0 ≡⟨ +-idʳ n ⟩
   n ∎
+
+--------------------------------------------------------------------------------
+-- Trying to prove the other side of the inverse.
+--
+-- We can't prove
+--
+--   ∀ d → tree→dyck (dyck→tree d) ≡ d
+--
+-- in the normal way, for 2 reasons:
+--
+--   * The types don't match up, so we would have to prove a heterogeneous
+--     equality (using something like size-rev).
+--   * Paths in cubical Agda don't currently compute with indexed types like
+--     Dyck, so a lot of the normal approaches won't actually type check
+--     they rely on computation at some point.
+--
+-- This is why we have to try this other cumbersome method.
+--------------------------------------------------------------------------------
