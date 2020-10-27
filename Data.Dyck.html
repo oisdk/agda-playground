@@ -185,4 +185,22 @@
   <a id="6215" href="Data.Dyck.html#5355" class="Function">sizes</a> <a id="6221" class="Symbol">(</a><a id="6222" href="Data.Dyck.html#3427" class="Function">dyck→tree⊙</a> <a id="6233" class="Symbol">(</a><a id="6234" href="Data.Dyck.html#2472" class="InductiveConstructor">leaf</a> <a id="6239" href="Data.Vec.Iterated.html#482" class="InductiveConstructor Operator">∷</a> <a id="6241" href="Data.Vec.Iterated.html#379" class="InductiveConstructor">[]</a><a id="6243" class="Symbol">)</a> <a id="6245" href="Data.Dyck.html#6054" class="Bound">d</a><a id="6246" class="Symbol">)</a> <a id="6248" href="Path.Reasoning.html#125" class="Function">≡˘⟨</a> <a id="6252" href="Data.Dyck.html#5516" class="Function">size-rev⊙</a> <a id="6262" href="Data.Dyck.html#6054" class="Bound">d</a> <a id="6264" class="Symbol">(</a><a id="6265" href="Data.Dyck.html#2472" class="InductiveConstructor">leaf</a> <a id="6270" href="Data.Vec.Iterated.html#482" class="InductiveConstructor Operator">∷</a> <a id="6272" href="Data.Vec.Iterated.html#379" class="InductiveConstructor">[]</a><a id="6274" class="Symbol">)</a> <a id="6276" href="Path.Reasoning.html#125" class="Function">⟩</a>
   <a id="6280" href="Data.Dyck.html#6051" class="Bound">n</a> <a id="6282" href="Agda.Builtin.Nat.html#325" class="Primitive Operator">+</a> <a id="6284" class="Number">0</a> <a id="6286" href="Path.Reasoning.html#266" class="Function">≡⟨</a> <a id="6289" href="Data.Nat.Properties.html#812" class="Function">+-idʳ</a> <a id="6295" href="Data.Dyck.html#6051" class="Bound">n</a> <a id="6297" href="Path.Reasoning.html#266" class="Function">⟩</a>
   <a id="6301" href="Data.Dyck.html#6051" class="Bound">n</a> <a id="6303" href="Path.Reasoning.html#470" class="Function Operator">∎</a>
+
+<a id="6306" class="Comment">--------------------------------------------------------------------------------</a>
+<a id="6387" class="Comment">-- Trying to prove the other side of the inverse.</a>
+<a id="6437" class="Comment">--</a>
+<a id="6440" class="Comment">-- We can&#39;t prove</a>
+<a id="6458" class="Comment">--</a>
+<a id="6461" class="Comment">--   ∀ d → tree→dyck (dyck→tree d) ≡ d</a>
+<a id="6500" class="Comment">--</a>
+<a id="6503" class="Comment">-- in the normal way, for 2 reasons:</a>
+<a id="6540" class="Comment">--</a>
+<a id="6543" class="Comment">--   * The types don&#39;t match up, so we would have to prove a heterogeneous</a>
+<a id="6618" class="Comment">--     equality (using something like size-rev).</a>
+<a id="6667" class="Comment">--   * Paths in cubical Agda don&#39;t currently compute with indexed types like</a>
+<a id="6744" class="Comment">--     Dyck, so a lot of the normal approaches won&#39;t actually type check</a>
+<a id="6817" class="Comment">--     they rely on computation at some point.</a>
+<a id="6864" class="Comment">--</a>
+<a id="6867" class="Comment">-- This is why we have to try this other cumbersome method.</a>
+<a id="6927" class="Comment">--------------------------------------------------------------------------------</a>
 </pre></body></html>
