@@ -13,11 +13,12 @@ open import Cubical.Foundations.Everything
         ;hProp
         ;isSetHProp
         ;isPropIsProp
+        ;hSet
         )
   public
 
 open import Level
 open import Data.Sigma
 
-hSet : ∀ ℓ → Type (ℓsuc ℓ)
-hSet ℓ = Σ (Type ℓ) isSet
+-- hSet : ∀ ℓ → Type (ℓsuc ℓ)
+-- hSet ℓ = Σ (Type ℓ) isSet
