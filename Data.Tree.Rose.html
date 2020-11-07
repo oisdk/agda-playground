@@ -1,0 +1,17 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.Tree.Rose</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+
+<a id="35" class="Keyword">module</a> <a id="42" href="Data.Tree.Rose.html" class="Module">Data.Tree.Rose</a> <a id="57" class="Keyword">where</a>
+
+<a id="64" class="Keyword">open</a> <a id="69" class="Keyword">import</a> <a id="76" href="Prelude.html" class="Module">Prelude</a>
+<a id="84" class="Keyword">open</a> <a id="89" class="Keyword">import</a> <a id="96" href="Data.List.html" class="Module">Data.List</a>
+
+<a id="107" class="Keyword">infixr</a> <a id="114" class="Number">5</a> <a id="116" href="Data.Tree.Rose.html#190" class="InductiveConstructor Operator">_&amp;_</a>
+<a id="120" class="Keyword">record</a> <a id="Tree"></a><a id="127" href="Data.Tree.Rose.html#127" class="Record">Tree</a> <a id="132" class="Symbol">{</a><a id="133" href="Data.Tree.Rose.html#133" class="Bound">a</a><a id="134" class="Symbol">}</a> <a id="136" class="Symbol">(</a><a id="137" href="Data.Tree.Rose.html#137" class="Bound">A</a> <a id="139" class="Symbol">:</a> <a id="141" href="Level.html#192" class="Function">Type</a> <a id="146" href="Data.Tree.Rose.html#133" class="Bound">a</a><a id="147" class="Symbol">)</a> <a id="149" class="Symbol">:</a> <a id="151" href="Level.html#192" class="Function">Type</a> <a id="156" href="Data.Tree.Rose.html#133" class="Bound">a</a> <a id="158" class="Keyword">where</a>
+  <a id="166" class="Keyword">inductive</a>
+  <a id="178" class="Keyword">constructor</a> <a id="_&amp;_"></a><a id="190" href="Data.Tree.Rose.html#190" class="InductiveConstructor Operator">_&amp;_</a>
+  <a id="196" class="Keyword">field</a>
+    <a id="Tree.root"></a><a id="206" href="Data.Tree.Rose.html#206" class="Field">root</a> <a id="211" class="Symbol">:</a> <a id="213" href="Data.Tree.Rose.html#137" class="Bound">A</a>
+    <a id="Tree.children"></a><a id="219" href="Data.Tree.Rose.html#219" class="Field">children</a> <a id="228" class="Symbol">:</a> <a id="230" href="Agda.Builtin.List.html#148" class="Datatype">List</a> <a id="235" class="Symbol">(</a><a id="236" href="Data.Tree.Rose.html#127" class="Record">Tree</a> <a id="241" href="Data.Tree.Rose.html#137" class="Bound">A</a><a id="242" class="Symbol">)</a>
+<a id="244" class="Keyword">open</a> <a id="249" href="Data.Tree.Rose.html#127" class="Module">Tree</a> <a id="254" class="Keyword">public</a>
+</pre></body></html>
