@@ -10,6 +10,7 @@ module _ {ℓ₁ ℓ₂} (C : Category ℓ₁ ℓ₂) where
 
   module _ (X Y : Ob) where
     record Product : Type (ℓ₁ ℓ⊔ ℓ₂) where
+      no-eta-equality
       field
         obj : Ob
         proj₁ : C [ obj , X ]
@@ -21,6 +22,7 @@ module _ {ℓ₁ ℓ₂} (C : Category ℓ₁ ℓ₂) where
       _P[_×_] π₁ π₂ = fst (ump π₁ π₂)
 
   record HasProducts : Type (ℓ₁ ℓ⊔ ℓ₂) where
+    no-eta-equality
     field product : (X Y : Ob) → Product X Y
 
     _×_ : Ob → Ob → Ob

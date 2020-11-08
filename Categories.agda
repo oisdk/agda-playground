@@ -6,6 +6,7 @@ open import Prelude
 open import Cubical.Foundations.HLevels
 
 record PreCategory ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
+  no-eta-equality
   field
     Ob    : Type ℓ₁
     Hom   : Ob → Ob → Type ℓ₂
@@ -103,9 +104,9 @@ record PreCategory ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
     λ _ → isOfHLevelΣ 2 (isOfHLevelSuc 2 Hom-Set _ _)
     λ _ → isOfHLevelSuc 2 Hom-Set _ _
 
-open import Cubical.Foundations.Transport
 
 record Category ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
+  no-eta-equality
   field
     preCategory : PreCategory ℓ₁ ℓ₂
   open PreCategory preCategory public
