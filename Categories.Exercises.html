@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Categories.Exercises</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Pragma">--postfix-projections</a> <a id="52" class="Symbol">#-}</a>
+
+<a id="57" class="Keyword">module</a> <a id="64" href="Categories.Exercises.html" class="Module">Categories.Exercises</a> <a id="85" class="Keyword">where</a>
+
+<a id="92" class="Keyword">open</a> <a id="97" class="Keyword">import</a> <a id="104" href="Prelude.html" class="Module">Prelude</a>
+<a id="112" class="Keyword">open</a> <a id="117" class="Keyword">import</a> <a id="124" href="Categories.html" class="Module">Categories</a>
+
+<a id="136" class="Keyword">open</a> <a id="141" href="Categories.html#3250" class="Module">Category</a> <a id="150" class="Symbol">⦃</a> <a id="152" class="Symbol">...</a> <a id="156" class="Symbol">⦄</a>
+<a id="158" class="Keyword">open</a> <a id="163" class="Keyword">import</a> <a id="170" href="Categories.Product.html" class="Module">Categories.Product</a>
+<a id="189" class="Keyword">open</a> <a id="194" href="Categories.Product.html#227" class="Module">Product</a> <a id="202" class="Keyword">public</a>
+<a id="209" class="Keyword">open</a> <a id="214" href="Categories.Product.html#648" class="Module">HasProducts</a> <a id="226" class="Symbol">⦃</a> <a id="228" class="Symbol">...</a> <a id="232" class="Symbol">⦄</a> <a id="234" class="Keyword">public</a>
+
+<a id="242" class="Comment">-- module _ {ℓ₁} {ℓ₂} ⦃ c : Category ℓ₁ ℓ₂ ⦄ ⦃ hp : HasProducts c ⦄ where</a>
+<a id="316" class="Comment">--   ex17 : (t : Terminal) (x : Ob) → Product.obj (product (fst t) x) ≅ x</a>
+<a id="390" class="Comment">--   ex17 t x .fst = proj₂ (product (fst t) x)</a>
+<a id="437" class="Comment">--   ex17 t x .snd .fst = ump (product (fst t) x) (t .snd .fst) Id .fst</a>
+<a id="509" class="Comment">--   ex17 t x .snd .snd .fst = let p = ump (product (fst t) x) (t .snd .fst) Id .snd .snd ({!!} , {!!}) in {!!}</a>
+<a id="621" class="Comment">--   ex17 t x .snd .snd .snd = {!!}</a>
+</pre></body></html>
