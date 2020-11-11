@@ -11,6 +11,10 @@ record LensPart (A : Type a) (B : Type b) : Type (a ℓ⊔ b) where
     set : B → A
 open LensPart public
 
+map-lens-part : LensPart A C → (A → B) → LensPart B C
+get (map-lens-part xs f) = get xs
+set (map-lens-part xs f) x = f (set xs x)
+
 record Lens (A : Type a) (B : Type b) : Type (a ℓ⊔ b) where
   field
     into : A → LensPart A B
