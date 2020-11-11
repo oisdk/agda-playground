@@ -70,29 +70,29 @@ rotˡ x xv ls (node y yv ee rs rs₁) = high (node y yv ll (node x xv rr ls rs) 
 rotˡ x xv ls (node y yv rr rs rs₁) = stay (node y yv ee (node x xv ee ls rs) rs₁)
 rotˡ y yv a (node x xv ll (node z zv bl b c) d) = stay (node z zv ee (node y yv (balr bl) a b) (node x xv (ball bl) c d))
 
-insertWithin : (x : K) → Val x →
-               ((new : Val x) → (old : Val x) → Val x) →
-               (lb [<] [ x ]) →
-               ([ x ] [<] ub) →
-               (tr : Tree Val lb ub n) →
-               Inc (Tree Val lb ub) n
-insertWithin x xv xf lb<x x<ub (leaf lb<ub) =
+insertWith : (x : K) → Val x →
+             ((new : Val x) → (old : Val x) → Val x) →
+             (lb [<] [ x ]) →
+             ([ x ] [<] ub) →
+             (tr : Tree Val lb ub n) →
+             Inc (Tree Val lb ub) n
+insertWith x xv xf lb<x x<ub (leaf lb<ub) =
   high (node x xv ee (leaf lb<x) (leaf x<ub))
-insertWithin x xv xf lb<x x<ub (node y yv bal ls rs) with compare x y
-... | lt x<y with insertWithin x xv xf lb<x x<y ls
+insertWith x xv xf lb<x x<ub (node y yv bal ls rs) with compare x y
+... | lt x<y with insertWith x xv xf lb<x x<y ls
 ... | stay ls′ = stay (node y yv bal ls′ rs)
 ... | high ls′ with bal
 ... | ll = rotʳ y yv ls′ rs
 ... | ee = high (node y yv ll ls′ rs)
 ... | rr = stay (node y yv ee ls′ rs)
-insertWithin x xv xf lb<x x<ub (node y yv bal ls rs)
-    | gt y<x with insertWithin x xv xf y<x x<ub rs
+insertWith x xv xf lb<x x<ub (node y yv bal ls rs)
+    | gt y<x with insertWith x xv xf y<x x<ub rs
 ... | stay rs′ = stay (node y yv bal ls rs′)
 ... | high rs′ with bal
 ... | ll = stay (node y yv ee ls rs′)
 ... | ee = high (node y yv rr ls rs′)
 ... | rr = rotˡ y yv ls rs′
-insertWithin x xv xf lb<x x<ub (node y yv bal ls rs)
+insertWith x xv xf lb<x x<ub (node y yv bal ls rs)
     | eq x≡y = stay (node y (subst _ x≡y (xf xv (subst _ (sym x≡y) yv))) bal ls rs)
 
 lookup : (x : K) → Tree  Val lb ub n → Maybe (Val x)
@@ -130,7 +130,7 @@ uncons x xv ee (leaf lb<ub) rhs .tail = stay rhs
 uncons x xv rr (leaf lb<ub) rhs .tail = stay rhs
 uncons x xv bl (node y yv yb ls yrs) rs =
   map-tail (uncons y yv yb ls yrs)
-    λ { (high ys) → high (node x xv bl ys rs )
+    λ { (high ys) → high (node x xv bl ys rs)
       ; (stay ys) → case bl of
         λ { ll → stay (node x xv ee ys rs)
           ; ee → high (node x xv rr ys rs)
@@ -210,31 +210,31 @@ alter : (x : K)
       → lb < x < ub
       → Change (Tree Val lb ub) n
 alter x f (leaf l<u) (l , u) with f nothing
-...  | just xv = up (node x xv ee (leaf l) (leaf u) )
-...  | nothing = ev ( leaf l<u )
+...  | just xv = up (node x xv ee (leaf l) (leaf u))
+...  | nothing = ev (leaf l<u)
 alter x f (node y yv b tl tr) (l , u) with compare x y
 alter x f (node y yv b tl tr) (l , u)
      | eq x≡y with f (just (subst _ (sym x≡y) yv))
-...  | just xv = ev ( node y (subst _ x≡y xv) b tl tr )
-...  | nothing = inc→changeup ( join tr b tl )
+...  | just xv = ev (node y (subst _ x≡y xv) b tl tr)
+...  | nothing = inc→changeup (join tr b tl)
 alter x f (node y yv b tl tr) (l , u)
       | lt a with alter x f tl (l , a) | b
-...  | ev tl′ | _  = ev ( node y yv b  tl′ tr )
-...  | up tl′ | ll = inc→changedn ( rotʳ y yv tl′ tr )
-...  | up tl′ | ee = up ( node y yv ll  tl′ tr )
-...  | up tl′ | rr = ev ( node y yv ee  tl′ tr )
-...  | dn tl′ | ll = dn ( node y yv ee  tl′ tr )
-...  | dn tl′ | ee = ev ( node y yv rr  tl′ tr )
-...  | dn tl′ | rr = inc→changeup ( rotˡ y yv tl′ tr )
+...  | ev tl′ | _  = ev (node y yv b  tl′ tr)
+...  | up tl′ | ll = inc→changedn (rotʳ y yv tl′ tr)
+...  | up tl′ | ee = up (node y yv ll  tl′ tr)
+...  | up tl′ | rr = ev (node y yv ee  tl′ tr)
+...  | dn tl′ | ll = dn (node y yv ee  tl′ tr)
+...  | dn tl′ | ee = ev (node y yv rr  tl′ tr)
+...  | dn tl′ | rr = inc→changeup (rotˡ y yv tl′ tr)
 alter x f (node y yv b tl tr) (l , u)
      | gt c with alter x f tr (c , u) | b
-...  | ev tr′ | _  = ev ( node y yv b  tl tr′ )
-...  | up tr′ | ll = ev ( node y yv ee tl tr′ )
-...  | up tr′ | ee = up ( node y yv rr  tl tr′ )
-...  | up tr′ | rr = inc→changedn ( rotˡ y yv tl tr′ )
-...  | dn tr′ | ll = inc→changeup ( rotʳ y yv tl tr′ )
-...  | dn tr′ | ee = ev ( node y yv ll  tl tr′ )
-...  | dn tr′ | rr = dn ( node y yv ee  tl tr′ )
+...  | ev tr′ | _  = ev (node y yv b  tl tr′)
+...  | up tr′ | ll = ev (node y yv ee tl tr′)
+...  | up tr′ | ee = up (node y yv rr  tl tr′)
+...  | up tr′ | rr = inc→changedn (rotˡ y yv tl tr′)
+...  | dn tr′ | ll = inc→changeup (rotʳ y yv tl tr′)
+...  | dn tr′ | ee = ev (node y yv ll  tl tr′)
+...  | dn tr′ | rr = dn (node y yv ee  tl tr′)
 
 open import Lens
 
