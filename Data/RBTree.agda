@@ -3,7 +3,7 @@
 open import Prelude
 open import Relation.Binary
 
-module Data.RBTree {e} {E : Type e} {r} (totalOrder : TotalOrder E r) where
+module Data.RBTree {e} {E : Type e} {r₁ r₂} (totalOrder : TotalOrder E r₁ r₂) where
 
 open import Relation.Binary.Construct.Bounded totalOrder
 
@@ -20,7 +20,7 @@ private
   variable
     n : ℕ
 
-data Tree (lb ub : [∙]) : ℕ → Type (e ℓ⊔ r) where
+data Tree (lb ub : [∙]) : ℕ → Type (e ℓ⊔ r₂) where
   leaf : lb [≤] ub → Tree lb ub n
   node : (x : E) → (c : Colour) → Tree lb [ x ] n → Tree [ x ] ub n → Tree lb ub (add-black c n)
 

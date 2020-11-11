@@ -3,12 +3,12 @@
 open import Prelude
 open import Relation.Binary
 
-module Data.AVLTree {k} {K : Type k} {r} (totalOrder : TotalOrder K r) where
+module Data.AVLTree {k} {K : Type k} {r₁ r₂} (totalOrder : TotalOrder K r₁ r₂) where
 
 open import Relation.Binary.Construct.Bounded totalOrder
 open import Data.Nat using (_+_)
-open TotalOrder totalOrder using (_≤?_)
-open TotalOrder b-ord using () renaming (trans to ≤-trans; refl to ≤-refl)
+open TotalOrder totalOrder using (_<?_; compare)
+open TotalOrder b-ord using (<-trans) renaming (refl to <-refl)
 
 private
   variable
@@ -34,8 +34,8 @@ private
     v : Level
     Val : K → Type v
 
-data Tree {v} (Val : K → Type v) (lb ub : [∙]) : ℕ → Type (k ℓ⊔ r ℓ⊔ v) where
-  leaf : (lb≤ub : lb [≤] ub) →
+data Tree {v} (Val : K → Type v) (lb ub : [∙]) : ℕ → Type (k ℓ⊔ r₁ ℓ⊔ v) where
+  leaf : (lb<ub : lb [<] ub) →
          Tree Val lb ub zero
   node : (key : K)
          (val : Val key)
@@ -70,36 +70,26 @@ rotˡ x xv ls (node y yv rr rs rs₁) = stay (node y yv ee (node x xv ee ls rs) 
 rotˡ y yv a (node x xv ll (node z zv bl b c) d) = stay (node z zv ee (node y yv (balr bl) a b) (node x xv (ball bl) c d))
 
 insertWithin : (x : K) → Val x →
-               (lb [≤] [ x ]) →
-               ([ x ] [≤] ub) →
+               ((new : Val x) → (old : Val x) → Val x) →
+               (lb [<] [ x ]) →
+               ([ x ] [<] ub) →
                (tr : Tree Val lb ub n) →
                Inc (Tree Val lb ub) n
-insertWithin x xv lb≤x x≤ub (leaf lb≤ub) =
-  high (node x xv ee (leaf lb≤x) (leaf x≤ub))
-insertWithin x xv lb≤x x≤ub (node y yv bal ls rs) with x ≤? y
-... | inl x≤y with insertWithin x xv lb≤x x≤y ls
+insertWithin x xv xf lb<x x<ub (leaf lb<ub) =
+  high (node x xv ee (leaf lb<x) (leaf x<ub))
+insertWithin x xv xf lb<x x<ub (node y yv bal ls rs) with compare x y
+... | lt x<y with insertWithin x xv xf lb<x x<y ls
 ... | stay ls′ = stay (node y yv bal ls′ rs)
 ... | high ls′ with bal
 ... | ll = rotʳ y yv ls′ rs
 ... | ee = high (node y yv ll ls′ rs)
 ... | rr = stay (node y yv ee ls′ rs)
-insertWithin x xv lb≤x x≤ub (node y yv bal ls rs)
-    | inr y≤x with insertWithin x xv y≤x x≤ub rs
+insertWithin x xv xf lb<x x<ub (node y yv bal ls rs)
+    | gt y<x with insertWithin x xv xf y<x x<ub rs
 ... | stay rs′ = stay (node y yv bal ls rs′)
 ... | high rs′ with bal
 ... | ll = stay (node y yv ee ls rs′)
 ... | ee = high (node y yv rr ls rs′)
 ... | rr = rotˡ y yv ls rs′
-
--- infixr 5 _⟨_⟩∷_
--- data OrdList (lb : [∙]) : Type (k ℓ⊔ r) where
---   [] : OrdList lb
---   _⟨_⟩∷_ : (x : K) → lb [≤] [ x ] → OrdList [ x ] → OrdList lb
-
--- toList : Tree lb ub n → OrdList lb
--- toList tr = go tr []
---   where
---   go : Tree lb ub n → OrdList ub → OrdList lb
---   go (leaf x) [] = []
---   go {lb} {ub} (leaf p) (x ⟨ q ⟩∷ xs) = x ⟨ ≤-trans {lb} p q ⟩∷ xs
---   go (node x bal ls rs) xs = go ls (x ⟨ ≤-refl ⟩∷ go  rs xs)
+insertWithin x xv xf lb<x x<ub (node y yv bal ls rs)
+    | eq x≡y = stay (node y (subst _ x≡y (xf xv (subst _ (sym x≡y) yv))) bal ls rs)

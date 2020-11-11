@@ -3,12 +3,12 @@
 open import Relation.Binary
 open import Prelude hiding (tt)
 
-module Data.List.Sort {e} {E : Type e} {r} (totalOrder : TotalOrder E r) where
+module Data.List.Sort {e} {E : Type e} {r₁ r₂} (totalOrder : TotalOrder E r₁ r₂) where
 
 open import Relation.Binary.Construct.LowerBound totalOrder
 
 open TotalOrder totalOrder renaming (refl to refl-≤)
-open TotalOrder lb-ord renaming (trans to ⌊trans⌋) using ()
+open TotalOrder lb-ord renaming (≤-trans to ⌊trans⌋) using ()
 
 open import Data.List
 open import Data.Unit.UniversePolymorphic as Poly using (tt)
@@ -29,13 +29,13 @@ sort (x ∷ xs)  = insert x (sort xs)
 
 private variable lb : ⌊∙⌋
 
-Sorted-cons : E → (⌊∙⌋ → Type r) → ⌊∙⌋ → Type r
+Sorted-cons : E → (⌊∙⌋ → Type (r₁ ℓ⊔ r₂)) → ⌊∙⌋ → Type (r₁ ℓ⊔ r₂)
 Sorted-cons x xs lb = (lb ≤⌊ x ⌋) × xs ⌊ x ⌋
 
-SortedFrom : ⌊∙⌋ → List E → Type r
+SortedFrom : ⌊∙⌋ → List E → Type _
 SortedFrom = flip (foldr Sorted-cons (const Poly.⊤))
 
-Sorted : List E → Type r
+Sorted : List E → Type _
 Sorted = SortedFrom ⌊⊥⌋
 
 insert-sorts : ∀ x xs → lb ≤⌊ x ⌋ → SortedFrom lb xs → SortedFrom lb (insert x xs)
