@@ -286,3 +286,17 @@ alterF x xs bnds = go (ev xs) x xs bnds id
             ; rr → k (dn (node y yv ee yl yr′))
             }
         }
+
+open import Data.List
+
+toList⊙ : Tree Val lb ub n → List (∃ Val) → List (∃ Val)
+toList⊙ (leaf lb<ub) ks = ks
+toList⊙ (node x xv bal xl xr) ks = toList⊙ xl ((x , xv) ∷ toList⊙ xr ks)
+
+toList : Tree Val lb ub n → List (∃ Val)
+toList xs = toList⊙ xs []
+
+data Mapping (Val : K → Type v) : Type (k ℓ⊔ v ℓ⊔ r₁) where
+  [_] : Tree Val [⊥] [⊤] n → Mapping Val
+  quot : (xs : Tree Val [⊥] [⊤] n) (ys : Tree Val [⊥] [⊤] m) → toList xs ≡ toList ys → [ xs ] ≡ [ ys ]
+  trunc : isSet (Mapping Val)
