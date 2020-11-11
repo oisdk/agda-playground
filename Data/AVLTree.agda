@@ -53,22 +53,27 @@ data Inc {t} (T : ℕ → Type t) (n : ℕ) : Type t where
   stay : T n       → Inc T n
   high : T (suc n) → Inc T n
 
+private
+  variable
+    t : Level
+    N : ℕ → Type t
+
 rotʳ : (x : K) →
-       (vl : Val x) →
+       (xv : Val x) →
        (ls : Tree Val lb [ x ] (2 + n)) →
        (rs : Tree Val [ x ] ub n) →
        Inc (Tree Val lb ub) (2 + n)
-rotʳ y vl (node x v ll ls ls₁) rs = stay (node x v ee ls (node y vl ee ls₁ rs))
-rotʳ y vl (node x v ee ls ls₁) rs = high (node x v rr ls (node y vl ll ls₁ rs))
-rotʳ x xv (node y yv rr a (node z zv bl b c)) d = stay (node z zv ee (node y yv (balr bl) a b) (node x xv (ball bl) c d))
+rotʳ y yv (node x xv ll xl xr) zs = stay (node x xv ee xl (node y yv ee xr zs))
+rotʳ y yv (node x xv ee xl xr) zs = high (node x xv rr xl (node y yv ll xr zs))
+rotʳ z zv (node x xv rr xl (node y yv bl yl yr)) zr = stay (node y yv ee (node x xv (balr bl) xl yl) (node z zv (ball bl) yr zr))
 
 rotˡ : (x : K) → (xv : Val x) →
        (ls : Tree Val lb [ x ] n) →
        (rs : Tree Val [ x ] ub (2 + n)) →
        Inc (Tree Val lb ub) (2 + n)
-rotˡ x xv ls (node y yv ee rs rs₁) = high (node y yv ll (node x xv rr ls rs) rs₁)
-rotˡ x xv ls (node y yv rr rs rs₁) = stay (node y yv ee (node x xv ee ls rs) rs₁)
-rotˡ y yv a (node x xv ll (node z zv bl b c) d) = stay (node z zv ee (node y yv (balr bl) a b) (node x xv (ball bl) c d))
+rotˡ x xv xl (node y yv ee yl yr) = high (node y yv ll (node x xv rr xl yl) yr)
+rotˡ x xv xl (node y yv rr yl yr) = stay (node y yv ee (node x xv ee xl yl) yr)
+rotˡ x xv xl (node z zv ll (node y yv bl yl yr) zr) = stay (node y yv ee (node x xv (balr bl) xl yl) (node z zv (ball bl) yr zr))
 
 insertWith : (x : K) → Val x →
              ((new : Val x) → (old : Val x) → Val x) →
@@ -111,11 +116,11 @@ record Cons (Val : K → Type v) (lb ub : [∙]) (h : ℕ) : Type (k ℓ⊔ v �
     tail : Inc (Tree Val [ head ] ub) h
 open Cons public
 
-map-tail : ∀ {ub₁ ub₂} → Cons Val lb ub₁ n → (∀ {lb} → Inc (Tree Val lb ub₁) n → Inc (Tree Val lb ub₂) m) → Cons Val lb ub₂ m
-map-tail xs f .head = xs .head
-map-tail xs f .val = xs .val
-map-tail xs f .bounds = xs .bounds
-map-tail xs f .tail = f (xs .tail)
+map-tail : ∀ {ub₁ ub₂} →
+             Cons Val lb ub₁ n →
+             (∀ {lb} → Inc (Tree Val lb ub₁) n → Inc (Tree Val lb ub₂) m) →
+             Cons Val lb ub₂ m
+map-tail (cons h v b t) f = cons h v b (f t)
 
 uncons : (x : K) →
          Val x →
@@ -143,24 +148,24 @@ ext {lb = lb} ub<ub′ (leaf lb<ub) = leaf (<-trans {x = lb} lb<ub ub<ub′)
 ext ub<ub′ (node x xv bal lhs rhs) = node x xv bal lhs (ext ub<ub′ rhs)
 
 join : ∀ {x} →
-       Tree Val [ x ] ub n →
-       Bal m n l →
        Tree Val lb [ x ] m →
+       Bal m n l →
+       Tree Val [ x ] ub n →
        Inc (Tree Val lb ub) l
-join (leaf lb<ub) ll rhs = stay (ext lb<ub rhs)
-join {lb = lb} (leaf lb<ub) ee (leaf lb<ub₁) = stay (leaf (<-trans {x = lb} lb<ub₁ lb<ub))
-join (node x xv xb xl xr) bl rhs with uncons x xv xb xl xr
-... | cons k′ v′ l<u (high tr′) = high (node k′ v′ bl (ext l<u rhs) tr′)
+join lhs ll (leaf lb<ub) = stay (ext lb<ub lhs)
+join {lb = lb} (leaf lb<ub₁) ee (leaf lb<ub) = stay (leaf (<-trans {x = lb} lb<ub₁ lb<ub))
+join lhs bl (node x xv xb xl xr) with uncons x xv xb xl xr
+... | cons k′ v′ l<u (high tr′) = high (node k′ v′ bl (ext l<u lhs) tr′)
 ... | cons k′ v′ l<u (stay tr′) with bl
-... | ll = rotʳ k′ v′ (ext l<u rhs) tr′
-... | ee = high (node k′ v′ ll (ext l<u rhs) tr′)
-... | rr = stay (node k′ v′ ee (ext l<u rhs) tr′)
+... | ll = rotʳ k′ v′ (ext l<u lhs) tr′
+... | ee = high (node k′ v′ ll (ext l<u lhs) tr′)
+... | rr = stay (node k′ v′ ee (ext l<u lhs) tr′)
 
 data Decr {t} (T : ℕ → Type t) : ℕ → Type t where
   same : T n → Decr T n
   decr : T n → Decr T (suc n)
 
-inc→dec : {T : ℕ → Type a} → Inc T n → Decr T (suc n)
+inc→dec : Inc N n → Decr N (suc n)
 inc→dec (stay x) = decr x
 inc→dec (high x) = same x
 
@@ -169,7 +174,7 @@ delete : (x : K)
         → Decr (Tree Val lb ub) n
 delete x (leaf l<u) = same (leaf l<u)
 delete x (node y yv b l r) with compare x y
-delete x (node y yv b l r) | eq _ = inc→dec (join r b l)
+delete x (node y yv b l r) | eq _ = inc→dec (join l b r)
 delete x (node y yv b l r) | lt a with delete x l
 ... | same l′ = same (node y yv b l′ r)
 ... | decr l′ with b
@@ -187,11 +192,6 @@ data Change {t} (T : ℕ → Type t) : ℕ → Type t where
   up : T (suc n) → Change T n
   ev : T n → Change T n
   dn : T n → Change T (suc n)
-
-private
-  variable
-    t : Level
-    N : ℕ → Type t
 
 inc→changeup : Inc N n → Change N (suc n)
 inc→changeup (stay x) = dn x
@@ -216,7 +216,7 @@ alter x f (node y yv b tl tr) (l , u) with compare x y
 alter x f (node y yv b tl tr) (l , u)
      | eq x≡y with f (just (subst _ (sym x≡y) yv))
 ...  | just xv = ev (node y (subst _ x≡y xv) b tl tr)
-...  | nothing = inc→changeup (join tr b tl)
+...  | nothing = inc→changeup (join tl b tr)
 alter x f (node y yv b tl tr) (l , u)
       | lt a with alter x f tl (l , a) | b
 ...  | ev tl′ | _  = ev (node y yv b  tl′ tr)
@@ -256,7 +256,7 @@ alterF x xs bnds = go (ev xs) x xs bnds id
   go xs x (node y yv bl yl yr) (l , u) k with compare x y
   go xs x (node y yv bl yl yr) (l , u) k | eq x≡y = λ where
     .get → just (subst _ (sym x≡y) yv)
-    .set nothing → k (inc→changeup (join yr bl yl))
+    .set nothing → k (inc→changeup (join yl bl yr))
     .set (just xv) → k (ev (node y (subst _ x≡y xv) bl yl yr))
   go xs x (node y yv bl yl yr) (l , u) k | lt x<y =
     go xs x yl (l , x<y)
