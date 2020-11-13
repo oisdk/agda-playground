@@ -41,4 +41,4 @@ module TheFold {a} {A : Type a} (f : A → A → A) (z : A) where
 
     treeFoldHom : ∀ xs → ⟦ ⟦ xs ⟧⇑ ⟧⇓ ≡ foldr f z xs
     treeFoldHom = foldr-fusion ⟦_⟧⇓ [] ∹-hom
-open TheFold using (treeFold; treeFoldHom)
+open TheFold using (treeFold; treeFoldHom) public

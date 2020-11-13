@@ -19,6 +19,12 @@ data ℤ : Type₀ where
 
 {-# DISPLAY ⁻suc n = ⁻ suc n #-}
 
+negate : ℤ → ℤ
+negate (⁺ x) = ⁻ x
+negate (⁻suc x) = ⁺ (suc x)
+
+{-# DISPLAY negate x = ⁻ x #-}
+
 infixl 6 _+_
 
 _-suc_ : ℕ → ℕ → ℤ
