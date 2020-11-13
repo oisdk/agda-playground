@@ -140,3 +140,8 @@ p≤p (suc n) m p = p
 ≤-refl zero = tt
 ≤-refl (suc zero) = tt
 ≤-refl (suc (suc n)) = ≤-refl (suc n)
+
+linearise : ∀ n m → n ≡ m → n ≡ m
+linearise n m n≡m with discreteℕ n m
+... | yes p = p
+... | no ¬p = ⊥-elim (¬p n≡m)
