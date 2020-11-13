@@ -29,3 +29,17 @@ tab-id : ∀ n (f : Fin n → A) → PathP (λ i → Fin (tab-length n f i) → 
 tab-id zero f _ ()
 tab-id (suc n) f i f0 = f f0
 tab-id (suc n) f i (fs m) = tab-id n (f ∘ fs) i m
+
+foldr-universal : ∀ (h : List B → A) f e
+                → (h [] ≡ e)
+                → (∀ x xs → h (x ∷ xs) ≡ f x (h xs))
+                → ∀ xs → h xs ≡ foldr f e xs
+foldr-universal h f e base step [] = base
+foldr-universal h f e base step (x ∷ xs) =
+  step x xs ; cong (f x) (foldr-universal h f e base step xs)
+
+foldr-fusion : ∀ (f : C → A) {_⊕_ : B → C → C} {_⊗_ : B → A → A} e
+              → (∀ x y → f (x ⊕ y) ≡ x ⊗ f y)
+              → ∀ xs → f (foldr _⊕_ e xs) ≡ foldr _⊗_ (f e) xs
+foldr-fusion h {f} {g} e fuse =
+  foldr-universal (h ∘ foldr f e) g (h e) refl (λ x xs → fuse x (foldr f e xs))
