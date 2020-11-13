@@ -1,14 +1,30 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="utf-8"><title>Karatsuba</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+<html><head><meta charset="utf-8"><title>Karatsuba</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Pragma">--postfix-projections</a> <a id="52" class="Symbol">#-}</a>
 
-<a id="35" class="Keyword">module</a> <a id="42" href="Karatsuba.html" class="Module">Karatsuba</a> <a id="52" class="Keyword">where</a>
+<a id="57" class="Keyword">module</a> <a id="64" href="Karatsuba.html" class="Module">Karatsuba</a> <a id="74" class="Keyword">where</a>
 
-<a id="59" class="Keyword">open</a> <a id="64" class="Keyword">import</a> <a id="71" href="Prelude.html" class="Module">Prelude</a>
+<a id="81" class="Keyword">open</a> <a id="86" class="Keyword">import</a> <a id="93" href="Prelude.html" class="Module">Prelude</a>
+<a id="101" class="Keyword">open</a> <a id="106" class="Keyword">import</a> <a id="113" href="Data.List.html" class="Module">Data.List</a>
 
-<a id="80" class="Keyword">data</a> <a id="Tree"></a><a id="85" href="Karatsuba.html#85" class="Datatype">Tree</a> <a id="90" class="Symbol">{</a><a id="91" href="Karatsuba.html#91" class="Bound">a</a><a id="92" class="Symbol">}</a> <a id="94" class="Symbol">(</a><a id="95" href="Karatsuba.html#95" class="Bound">A</a> <a id="97" class="Symbol">:</a> <a id="99" href="Level.html#192" class="Function">Type</a> <a id="104" href="Karatsuba.html#91" class="Bound">a</a><a id="105" class="Symbol">)</a> <a id="107" class="Symbol">:</a> <a id="109" href="Level.html#192" class="Function">Type</a> <a id="114" href="Karatsuba.html#91" class="Bound">a</a> <a id="116" class="Keyword">where</a>
+<a id="124" class="Keyword">data</a> <a id="Tree"></a><a id="129" href="Karatsuba.html#129" class="Datatype">Tree</a> <a id="134" class="Symbol">{</a><a id="135" href="Karatsuba.html#135" class="Bound">a</a><a id="136" class="Symbol">}</a> <a id="138" class="Symbol">(</a><a id="139" href="Karatsuba.html#139" class="Bound">A</a> <a id="141" class="Symbol">:</a> <a id="143" href="Level.html#192" class="Function">Type</a> <a id="148" href="Karatsuba.html#135" class="Bound">a</a><a id="149" class="Symbol">)</a> <a id="151" class="Symbol">:</a> <a id="153" href="Level.html#192" class="Function">Type</a> <a id="158" href="Karatsuba.html#135" class="Bound">a</a> <a id="160" class="Keyword">where</a>
+  <a id="Tree.leaf"></a><a id="168" href="Karatsuba.html#168" class="InductiveConstructor">leaf</a> <a id="173" class="Symbol">:</a> <a id="175" href="Karatsuba.html#139" class="Bound">A</a> <a id="177" class="Symbol">→</a> <a id="179" href="Karatsuba.html#129" class="Datatype">Tree</a> <a id="184" href="Karatsuba.html#139" class="Bound">A</a>
+  <a id="Tree._⊗_"></a><a id="188" href="Karatsuba.html#188" class="InductiveConstructor Operator">_⊗_</a> <a id="192" class="Symbol">:</a> <a id="194" href="Karatsuba.html#129" class="Datatype">Tree</a> <a id="199" href="Karatsuba.html#139" class="Bound">A</a> <a id="201" class="Symbol">→</a> <a id="203" href="Karatsuba.html#129" class="Datatype">Tree</a> <a id="208" href="Karatsuba.html#139" class="Bound">A</a> <a id="210" class="Symbol">→</a> <a id="212" href="Karatsuba.html#129" class="Datatype">Tree</a> <a id="217" href="Karatsuba.html#139" class="Bound">A</a>
+
+<a id="220" class="Keyword">record</a> <a id="Builder"></a><a id="227" href="Karatsuba.html#227" class="Record">Builder</a> <a id="235" class="Symbol">{</a><a id="236" href="Karatsuba.html#236" class="Bound">a</a><a id="237" class="Symbol">}</a> <a id="239" class="Symbol">(</a><a id="240" href="Karatsuba.html#240" class="Bound">A</a> <a id="242" class="Symbol">:</a> <a id="244" href="Level.html#192" class="Function">Type</a> <a id="249" href="Karatsuba.html#236" class="Bound">a</a><a id="250" class="Symbol">)</a> <a id="252" class="Symbol">:</a> <a id="254" href="Level.html#192" class="Function">Type</a> <a id="259" href="Karatsuba.html#236" class="Bound">a</a> <a id="261" class="Keyword">where</a>
+  <a id="269" class="Keyword">field</a>
+    <a id="Builder.shift"></a><a id="279" href="Karatsuba.html#279" class="Field">shift</a> <a id="285" class="Symbol">:</a> <a id="287" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a>
+    <a id="Builder.lo"></a><a id="293" href="Karatsuba.html#293" class="Field">lo</a> <a id="296" class="Symbol">:</a> <a id="298" href="Karatsuba.html#129" class="Datatype">Tree</a> <a id="303" href="Karatsuba.html#240" class="Bound">A</a>
+    <a id="Builder.hi"></a><a id="309" href="Karatsuba.html#309" class="Field">hi</a> <a id="312" class="Symbol">:</a> <a id="314" href="Karatsuba.html#129" class="Datatype">Tree</a> <a id="319" href="Karatsuba.html#240" class="Bound">A</a>
+    <a id="Builder.out"></a><a id="325" href="Karatsuba.html#325" class="Field">out</a> <a id="329" class="Symbol">:</a> <a id="331" href="Agda.Builtin.List.html#148" class="Datatype">List</a> <a id="336" href="Karatsuba.html#240" class="Bound">A</a>
+<a id="338" class="Keyword">open</a> <a id="343" href="Karatsuba.html#227" class="Module">Builder</a>
+
+<a id="352" class="Keyword">open</a> <a id="357" class="Keyword">import</a> <a id="364" href="Data.Integer.html" class="Module">Data.Integer</a>
+<a id="377" class="Keyword">import</a> <a id="384" href="Data.Nat.html" class="Module">Data.Nat</a> <a id="393" class="Symbol">as</a> <a id="396" class="Module">ℕ</a>
 
 
-<a id="124" class="Keyword">record</a> <a id="Builder"></a><a id="131" href="Karatsuba.html#131" class="Record">Builder</a> <a id="139" class="Symbol">{</a><a id="140" href="Karatsuba.html#140" class="Bound">a</a><a id="141" class="Symbol">}</a> <a id="143" class="Symbol">(</a><a id="144" href="Karatsuba.html#144" class="Bound">A</a> <a id="146" class="Symbol">:</a> <a id="148" href="Level.html#192" class="Function">Type</a> <a id="153" href="Karatsuba.html#140" class="Bound">a</a><a id="154" class="Symbol">)</a> <a id="156" class="Symbol">:</a> <a id="158" href="Level.html#192" class="Function">Type</a> <a id="163" href="Karatsuba.html#140" class="Bound">a</a> <a id="165" class="Keyword">where</a>
-  <a id="173" class="Keyword">field</a>
-    <a id="Builder.shift"></a><a id="183" href="Karatsuba.html#183" class="Field">shift</a> <a id="189" class="Symbol">:</a> <a id="191" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a>
+<a id="400" class="Comment">-- _◆_ : Builder ℤ → Builder ℤ → Builder ℤ</a>
+<a id="443" class="Comment">-- (xs ◆ ys) .shift = xs .shift ℕ.+ ys .shift</a>
+<a id="489" class="Comment">-- (xs ◆ ys) .lo = xs .lo ⊗ ys .lo</a>
+<a id="524" class="Comment">-- (xs ◆ ys) .hi = xs .hi ⊗ ys .hi</a>
+<a id="559" class="Comment">-- (xs ◆ ys) .out = {!!}</a>
 </pre></body></html>
