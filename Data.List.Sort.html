@@ -166,6 +166,10 @@
 <a id="7682" class="Comment">-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x&gt;y | lt y&lt;z = cong (merge⁺ y (mergeˡ x xs ys) z zs) (cmp-&lt; y z y&lt;z) ;</a>
 <a id="7800" class="Comment">--                                                            cong (y ∷_) {!!} ;</a>
 <a id="7881" class="Comment">--                                                            cong (merge⁺ x xs y (mergeˡ z zs ys)) (sym (cmp-&gt; x y x&gt;y))</a>
-<a id="8003" class="Comment">-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x&gt;y | eq y≡z = {!!}</a>
-<a id="8070" class="Comment">-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x&gt;y | gt y&gt;z = {!!}</a>
+<a id="8003" class="Comment">-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x&gt;y | eq y≡z = cong (merge⁺ y (mergeˡ x xs ys) z zs) (cmp-≡ y z y≡z) ;</a>
+<a id="8121" class="Comment">--                                                            cong (y ∷_) (cong (z ∷_) (merge-assoc (x ∷ xs) ys zs) ; cong (merge⁺ x xs z (merge ys zs)) (sym (cmp-&gt; x z (subst (_&lt; x) y≡z x&gt;y)))) ;</a>
+<a id="8318" class="Comment">--                                                            cong (merge⁺ x xs y (z ∷ merge ys zs)) (sym (cmp-&gt; x y x&gt;y))</a>
+<a id="8441" class="Comment">-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x&gt;y | gt y&gt;z = cong (merge⁺ y (mergeˡ x xs ys) z zs) (cmp-&gt; y z y&gt;z) ;</a>
+<a id="8559" class="Comment">--                                                            cong (z ∷_) {!!} ;</a>
+<a id="8640" class="Comment">--                                                            cong (merge⁺ x xs z (mergeˡ y ys zs)) (sym (cmp-&gt; x z (&lt;-trans y&gt;z x&gt;y)))</a>
 </pre></body></html>
