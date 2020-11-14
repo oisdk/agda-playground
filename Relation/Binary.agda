@@ -56,6 +56,13 @@ record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ �
   irrefl : Irreflexive _<_
   irrefl {x} {y} x<y x≡y = asym x<y (subst  (y <_) (≡.sym x≡y) (subst (_< y) x≡y x<y))
 
+data Ord : Type₀ where LT EQ GT : Ord
+ord : ∀ {a r₁ r₂ r₃} {A : Type a} {R₁ : A → A → Type r₁} {R₂ : A → A → Type r₂} {R₃ : A → A → Type r₃} {x y : A} →
+      Tri R₁ R₂ R₃ x y → Ord
+ord (lt x<y) = LT
+ord (eq x≡y) = EQ
+ord (gt x>y) = GT
+
 record PartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _≤_
   field
@@ -79,6 +86,9 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
 
     ≰⇒< : ∀ {x y} → ¬ (x ≤ y) → y < x
     ≮⇒≤ : ∀ {x y} → ¬ (x < y) → y ≤ x
+
+  cmp : 𝑆 → 𝑆 → Ord
+  cmp x y = ord (compare x y)
 
   infix 4 _≤ᵇ_ _≤?_
 

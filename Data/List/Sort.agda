@@ -90,7 +90,6 @@ perm-invar xs ys xs⇔ys =
     (sort-sorts ys)
     (λ k → sort-perm xs k ⟨ trans-⇔ ⟩ xs⇔ys k ⟨ trans-⇔ ⟩ sym-⇔ (sort-perm ys k))
 
-
 mutual
   merge : List E → List E → List E
   merge []       ys = ys
@@ -98,9 +97,50 @@ mutual
 
   mergeˡ : E → List E → List E → List E
   mergeˡ x xs [] = x ∷ xs
-  mergeˡ x xs (y ∷ ys) = merge⁺ x xs y ys (x ≤ᵇ y)
+  mergeˡ x xs (y ∷ ys) = merge⁺ x xs y ys (cmp x y)
 
-  merge⁺ : E → List E → E → List E → Bool → List E
-  merge⁺ x xs y ys false = x ∷ mergeˡ y ys xs
-  merge⁺ x xs y ys true  = y ∷ mergeˡ x xs ys
+  merge⁺ : E → List E → E → List E → Ord → List E
+  merge⁺ x xs y ys LT = x ∷ mergeˡ y ys xs
+  merge⁺ x xs y ys EQ = x ∷ y ∷ merge xs ys
+  merge⁺ x xs y ys GT = y ∷ mergeˡ x xs ys
 
+-- merge-idʳ : ∀ xs → merge xs [] ≡ xs
+-- merge-idʳ [] = refl
+-- merge-idʳ (x ∷ xs) = refl
+
+-- open import Path.Reasoning
+
+-- compare-compute-< : ∀ x y → x < y → cmp x y ≡ LT
+-- compare-compute-< x y x<y with compare x y
+-- compare-compute-< x y x<y | lt _ = refl
+-- compare-compute-< x y x<y | eq x≡y = ⊥-elim (irrefl x<y x≡y)
+-- compare-compute-< x y x<y | gt x>y = ⊥-elim (asym x<y x>y)
+
+-- compare-compute-≡ : ∀ x y → x ≡ y → cmp x y ≡ EQ
+-- compare-compute-≡ x y x≡y with compare x y
+-- compare-compute-≡ x y x≡y | lt x<y = ⊥-elim (irrefl x<y x≡y)
+-- compare-compute-≡ x y x≡y | eq _ = refl
+-- compare-compute-≡ x y x≡y | gt x>y = ⊥-elim (irrefl x>y (sym x≡y))
+
+-- merge-assoc : ∀ (xs ys zs : List E) →
+--               merge (merge xs ys) zs ≡ merge xs (merge ys zs)
+-- merge-assoc [] ys zs = refl
+-- merge-assoc (x ∷ xs) [] zs = refl
+-- merge-assoc (x ∷ xs) (y ∷ ys) [] = merge-idʳ (merge⁺ x xs y ys (cmp x y))
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) with compare x y | compare y z
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | yz with compare x z
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | lt y<z | lt x<z = cong (x ∷_) {!!} ; cong (merge⁺ x xs y (mergeˡ z zs ys)) (sym (compare-compute-< x y x<y))
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | eq y≡z | lt x<z = cong (x ∷_) {!!} ; cong (merge⁺ x xs y (z ∷ merge ys zs)) (sym (compare-compute-< x y x<y))
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | gt y>z | lt x<z = cong (x ∷_) {!!} ; cong (merge⁺ x xs z (mergeˡ y ys zs)) (sym (compare-compute-< x z x<z))
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | lt y<z | eq x≡z = cong (x ∷_) {!!} ; cong (merge⁺ x xs y (mergeˡ z zs ys)) (sym (compare-compute-< x y x<y))
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | eq y≡z | eq x≡z = cong (x ∷_) {!!} ; cong (merge⁺ x xs y (z ∷ merge ys zs)) (sym (compare-compute-< x y x<y))
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | gt y>z | eq x≡z = cong (λ r → x ∷ z ∷ r) {!!} ; cong (merge⁺ x xs z (mergeˡ y ys zs)) (sym (compare-compute-≡ x z x≡z))
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | lt y<z | gt x>z = {!!}
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | eq y≡z | gt x>z = {!!}
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | lt x<y | gt y>z | gt x>z = {!!}
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | eq x≡y | lt y<z = {!!}
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | eq x≡y | eq y≡z = {!!}
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | eq x≡y | gt y>z = {!!}
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | lt y<z = {!!}
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | eq y≡z = {!!}
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | gt y>z = {!!}
