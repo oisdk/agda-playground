@@ -40,10 +40,24 @@ module _ (_~_ : A → A → Type b) where
   Total : Type _
   Total = ∀ x y → (x ~ y) ⊎ (y ~ x)
 
-data Tri {a r₁ r₂ r₃} {A : Type a} (R₁ : A → A → Type r₁) (R₂ : A → A → Type r₂) (R₃ : A → A → Type r₃) (x y : A) : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
-  lt : (x<y : R₁ x y) → Tri R₁ R₂ R₃ x y
-  eq : (x≡y : R₂ x y) → Tri R₁ R₂ R₃ x y
-  gt : (x>y : R₃ x y) → Tri R₁ R₂ R₃ x y
+data Ord : Type₀ where LT EQ GT : Ord
+
+module _ {a r₁ r₂ r₃} {A : Type a} (R₁ : A → A → Type r₁) (R₂ : A → A → Type r₂) (R₃ : A → A → Type r₃) (x y : A) where
+  data ProofOfOrder : Ord → Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
+    is-lt : R₁ x y → ProofOfOrder LT
+    is-eq : R₂ x y → ProofOfOrder EQ
+    is-gt : R₃ x y → ProofOfOrder GT
+
+  record Tri : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
+    constructor tri
+    field
+      ord : Ord
+      proofOfOrder : ProofOfOrder ord
+  open Tri public
+
+pattern lt x = tri LT (is-lt x)
+pattern eq x = tri EQ (is-eq x)
+pattern gt x = tri GT (is-gt x)
 
 record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _<_
@@ -62,12 +76,6 @@ record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ �
   x > y = y < x
   x ≯ y = ¬ (y < x)
 
-data Ord : Type₀ where LT EQ GT : Ord
-ord : ∀ {a r₁ r₂ r₃} {A : Type a} {R₁ : A → A → Type r₁} {R₂ : A → A → Type r₂} {R₃ : A → A → Type r₃} {x y : A} →
-      Tri R₁ R₂ R₃ x y → Ord
-ord (lt x<y) = LT
-ord (eq x≡y) = EQ
-ord (gt x>y) = GT
 
 record PartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _≤_
