@@ -165,5 +165,9 @@ merge-comm (x ∷ xs) (y ∷ ys) with compare x y
 -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | lt y<z = cong (merge⁺ y (mergeˡ x xs ys) z zs) (cmp-< y z y<z) ;
 --                                                            cong (y ∷_) {!!} ;
 --                                                            cong (merge⁺ x xs y (mergeˡ z zs ys)) (sym (cmp-> x y x>y))
--- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | eq y≡z = {!!}
--- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | gt y>z = {!!}
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | eq y≡z = cong (merge⁺ y (mergeˡ x xs ys) z zs) (cmp-≡ y z y≡z) ;
+--                                                            cong (y ∷_) (cong (z ∷_) (merge-assoc (x ∷ xs) ys zs) ; cong (merge⁺ x xs z (merge ys zs)) (sym (cmp-> x z (subst (_< x) y≡z x>y)))) ;
+--                                                            cong (merge⁺ x xs y (z ∷ merge ys zs)) (sym (cmp-> x y x>y))
+-- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | gt y>z = cong (merge⁺ y (mergeˡ x xs ys) z zs) (cmp-> y z y>z) ;
+--                                                            cong (z ∷_) {!!} ;
+--                                                            cong (merge⁺ x xs z (mergeˡ y ys zs)) (sym (cmp-> x z (<-trans y>z x>y)))
