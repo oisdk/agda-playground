@@ -56,6 +56,12 @@ record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ �
   irrefl : Irreflexive _<_
   irrefl {x} {y} x<y x≡y = asym x<y (subst  (y <_) (≡.sym x≡y) (subst (_< y) x≡y x<y))
 
+  infix 4 _≮_ _>_ _≯_
+  _≮_ _>_ _≯_ : 𝑆 → 𝑆 → Type ℓ₂
+  x ≮ y = ¬ (x < y)
+  x > y = y < x
+  x ≯ y = ¬ (y < x)
+
 data Ord : Type₀ where LT EQ GT : Ord
 ord : ∀ {a r₁ r₂ r₃} {A : Type a} {R₁ : A → A → Type r₁} {R₂ : A → A → Type r₂} {R₃ : A → A → Type r₃} {x y : A} →
       Tri R₁ R₂ R₃ x y → Ord
@@ -71,6 +77,12 @@ record PartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ �
     antisym : Antisymmetric _≤_
     trans : Transitive _≤_
 
+  infix 4 _≰_ _≥_ _≱_
+  _≰_ _≥_ _≱_ : 𝑆 → 𝑆 → Type ℓ₂
+  x ≰ y = ¬ (x ≤ y)
+  x ≥ y = y ≤ x
+  x ≱ y = ¬ (y ≤ x)
+
 record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂ ℓ⊔ ℓsuc ℓ₃) where
   field
     strictPartialOrder : StrictPartialOrder 𝑆 ℓ₂
@@ -84,22 +96,8 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   field
     compare : ∀ x y → Ordering x y
 
-    ≰⇒< : ∀ {x y} → ¬ (x ≤ y) → y < x
-    ≮⇒≤ : ∀ {x y} → ¬ (x < y) → y ≤ x
-
-  cmp : 𝑆 → 𝑆 → Ord
-  cmp x y = ord (compare x y)
-
-  infix 4 _≤ᵇ_ _≤?_
-
-  _≤?_ : Total _≤_
-  x ≤? y with compare x y
-  (x ≤? y) | lt x<y = inl (≮⇒≤ (asym x<y))
-  (x ≤? y) | eq x≡y = inl (subst (x ≤_) x≡y refl)
-  (x ≤? y) | gt x>y = inr (≮⇒≤ (asym x>y))
-
-  _≤ᵇ_ : 𝑆 → 𝑆 → Bool
-  x ≤ᵇ y = is-l (x ≤? y)
+    ≰⇒> : ∀ {x y} → x ≰ y → x > y
+    ≮⇒≥ : ∀ {x y} → x ≮ y → x ≥ y
 
   infix 4 _<?_
   _<?_ : Decidable _<_
@@ -110,6 +108,33 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
 
   _<ᵇ_ : 𝑆 → 𝑆 → Bool
   x <ᵇ y = does (x <? y)
+
+  <⇒≱ : ∀ {x y} → x < y → x ≱ y
+  <⇒≱ {x} {y} x<y = irrefl x<y ∘ antisym (≮⇒≥ (asym x<y))
+
+  ≤⇒≯ : ∀ {x y} → x ≤ y → x ≯ y
+  ≤⇒≯ {x} {y} x≤y x>y = irrefl x>y (antisym (≮⇒≥ (asym x>y)) x≤y)
+
+  cmp : 𝑆 → 𝑆 → Ord
+  cmp x y = ord (compare x y)
+
+  infix 4 _≤ᵇ_ _≤?_
+
+  _≤?_ : Decidable _≤_
+  x ≤? y with compare x y
+  (x ≤? y) | lt x<y = yes (≮⇒≥ (asym x<y))
+  (x ≤? y) | eq x≡y = yes (subst (x ≤_) x≡y refl)
+  (x ≤? y) | gt x>y = no (<⇒≱ x>y)
+
+
+  _≤ᵇ_ : 𝑆 → 𝑆 → Bool
+  x ≤ᵇ y = does (x ≤? y)
+
+  ≤-total : Total _≤_
+  ≤-total x y with compare x y
+  ≤-total x y | lt x<y = inl (≮⇒≥ (asym x<y))
+  ≤-total x y | eq x≡y = inl (subst (x ≤_) x≡y refl)
+  ≤-total x y | gt x>y = inr (≮⇒≥ (asym x>y))
 
   open import Data.Unit
   open import Data.Empty
@@ -151,15 +176,15 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
     fromPartialOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
     fromPartialOrder .TotalOrder.strictPartialOrder = toStrict
     fromPartialOrder .TotalOrder.partialOrder = partialOrder
-    fromPartialOrder .TotalOrder.≰⇒< x≤y = x≤y
-    fromPartialOrder .TotalOrder.≮⇒≤ {x} {y} x<y with x ≤? y | inspect (x ≤?_) y | y ≤? x | inspect (y ≤?_) x
-    fromPartialOrder .TotalOrder.≮⇒≤ {x} {y} x<y | inl x₁ | xy | inl x₂ | yx = x₂
-    fromPartialOrder .TotalOrder.≮⇒≤ {x} {y} x<y | inl x₁ | 〖 xy 〗 | inr x₂ | 〖 yx 〗 = ⊥-elim (x<y (x≢y ∘ antisym x₂))
+    fromPartialOrder .TotalOrder.≰⇒> x≤y = x≤y
+    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y with x ≤? y | inspect (x ≤?_) y | y ≤? x | inspect (y ≤?_) x
+    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y | inl x₁ | xy | inl x₂ | yx = x₂
+    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y | inl x₁ | 〖 xy 〗 | inr x₂ | 〖 yx 〗 = ⊥-elim (x<y (x≢y ∘ antisym x₂))
       where
       x≢y : x ≢ y
       x≢y = (λ p → subst (bool ⊥ ⊤) (cong is-l (≡.sym xy) ; cong₂ ≤-b p (≡.sym p) ; cong is-l yx) tt)
-    fromPartialOrder .TotalOrder.≮⇒≤ {x} {y} x<y | inr x₁ | xy | inl x₂ | yx = x₂
-    fromPartialOrder .TotalOrder.≮⇒≤ {x} {y} x<y | inr x₁ | xy | inr x₂ | yx = x₁
+    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y | inr x₁ | xy | inl x₂ | yx = x₂
+    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y | inr x₁ | xy | inr x₂ | yx = x₁
     fromPartialOrder .TotalOrder.compare x y with x ≤? y | inspect (x ≤?_) y | y ≤? x | inspect (y ≤?_) x
     fromPartialOrder .TotalOrder.compare x y | inl x₁ | 〖 xy 〗 | inl x₂ | 〖 yx 〗 = eq (antisym x₁ x₂)
     fromPartialOrder .TotalOrder.compare x y | inr x₁ | 〖 xy 〗 | inr x₂ | 〖 yx 〗 = eq (antisym x₂ x₁)
@@ -192,8 +217,8 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (strictPartialOrder : StrictPart
     fromStrictPartialOrder : TotalOrder 𝑆 _ _
     fromStrictPartialOrder .TotalOrder.strictPartialOrder = strictPartialOrder
     fromStrictPartialOrder .TotalOrder.partialOrder = unStrict
-    fromStrictPartialOrder .TotalOrder.≰⇒< = Dec→DoubleNegElim _ (_ <? _)
-    fromStrictPartialOrder .TotalOrder.≮⇒≤ = id
+    fromStrictPartialOrder .TotalOrder.≰⇒> = Dec→DoubleNegElim _ (_ <? _)
+    fromStrictPartialOrder .TotalOrder.≮⇒≥ = id
     fromStrictPartialOrder .TotalOrder.compare x y with x <? y
     fromStrictPartialOrder .TotalOrder.compare x y | yes why₁ = lt why₁
     fromStrictPartialOrder .TotalOrder.compare x y | no why₁ with lt-or-eq why₁

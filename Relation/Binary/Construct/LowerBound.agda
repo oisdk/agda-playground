@@ -38,7 +38,7 @@ lb-lte : Total _⌊≤⌋_
 lb-lte ⌊⊥⌋ ⌊⊥⌋ = inl Poly.tt
 lb-lte ⌊⊥⌋ ⌊ x ⌋ = inl Poly.tt
 lb-lte ⌊ x ⌋ ⌊⊥⌋ = inr Poly.tt
-lb-lte ⌊ x ⌋ ⌊ y ⌋ = x ≤? y
+lb-lte ⌊ x ⌋ ⌊ y ⌋ = ≤-total x y
 
 lb-ord : TotalOrder ⌊∙⌋ _ _
 lb-ord = fromPartialOrder lb-pord lb-lte
