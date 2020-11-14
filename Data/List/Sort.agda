@@ -92,8 +92,7 @@ perm-invar xs ys xs⇔ys =
 
 mutual
   merge : List E → List E → List E
-  merge [] ys = ys
-  merge (x ∷ xs) ys = mergeˡ x (merge xs) ys
+  merge = foldr mergeˡ id
 
   mergeˡ :  E → (List E → List E) → List E → List E
   mergeˡ x xs [] = x ∷ xs []
@@ -136,66 +135,3 @@ merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) with merge-assoc xs (y ∷ ys) (z �
 merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | rx≤z | _ | rx≰z | (yes x≤y) | (no y≰z) with x ≤? z
 ... | no  x≰z = cong (z ∷_) (cong (λ xy → merge (merge⁺ x (merge xs) y ys xy) zs) (sym (cmp-≤ x y x≤y)) ; rx≰z)
 ... | yes x≤z = cong (x ∷_) (rx≤z ; cong (merge xs) (cong (merge⁺ y (merge ys) z zs) (cmp-≰ y z y≰z)))
-
--- mutual
---   merge : List E → List E → List E
---   merge []       ys = ys
---   merge (x ∷ xs) ys = mergeˡ x xs ys
-
---   mergeˡ : E → List E → List E → List E
---   mergeˡ x xs [] = x ∷ xs
---   mergeˡ x xs (y ∷ ys) = merge⁺ x xs y ys (cmp x y)
-
---   merge⁺ : E → List E → E → List E → Ord → List E
---   merge⁺ x xs y ys LT = x ∷ mergeˡ y ys xs
---   merge⁺ x xs y ys EQ = x ∷ y ∷ merge xs ys
---   merge⁺ x xs y ys GT = y ∷ mergeˡ x xs ys
-
--- merge-idʳ : ∀ xs → merge xs [] ≡ xs
--- merge-idʳ [] = refl
--- merge-idʳ (x ∷ xs) = refl
-
-
--- merge-comm : ∀ xs ys → merge xs ys ≡ merge ys xs
--- merge-comm [] [] = refl
--- merge-comm [] (x ∷ ys) = refl
--- merge-comm (x ∷ xs) [] = refl
--- merge-comm (x ∷ xs) (y ∷ ys) with compare x y
--- ... | yes x≤y = cong (merge⁺ y ys x xs) (sym (cmp-> y x x<y))
--- ... | eq x≡y = cong₂ _∷_ x≡y (cong₂ _∷_ (sym x≡y) (merge-comm xs ys)) ; cong (merge⁺ y ys x xs) (sym (cmp-≡ y x (sym x≡y)))
--- ... | gt x>y = cong (merge⁺ y ys x xs) (sym (cmp-< y x x>y))
-
--- -- merge-assoc : ∀ (xs ys zs : List E) →
--- --               merge (merge xs ys) zs ≡ merge xs (merge ys zs)
--- -- merge-assoc [] ys zs = refl
--- -- merge-assoc (x ∷ xs) [] zs = refl
--- -- merge-assoc (x ∷ xs) (y ∷ ys) [] = merge-idʳ (merge⁺ x xs y ys (cmp x y))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) with compare x y | compare y z
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | yz with compare x z
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | lt y<z | lt x<z = cong (x ∷_) {!!} ; cong (merge⁺ x xs y (mergeˡ z zs ys)) (sym (cmp-< x y x<y))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | eq y≡z | lt x<z = cong (x ∷_) {!!} ; cong (merge⁺ x xs y (z ∷ merge ys zs)) (sym (cmp-< x y x<y))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | gt y>z | lt x<z = cong (x ∷_) {!!} ; cong (merge⁺ x xs z (mergeˡ y ys zs)) (sym (cmp-< x z x<z))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | lt y<z | eq x≡z = cong (x ∷_) {!!} ; cong (merge⁺ x xs y (mergeˡ z zs ys)) (sym (cmp-< x y x<y))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | eq y≡z | eq x≡z = cong (x ∷_) {!!} ; cong (merge⁺ x xs y (z ∷ merge ys zs)) (sym (cmp-< x y x<y))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | gt y>z | eq x≡z = cong (λ r → x ∷ z ∷ r) {!!} ; cong (merge⁺ x xs z (mergeˡ y ys zs)) (sym (cmp-≡ x z x≡z))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | lt y<z | gt x>z = ⊥-elim (asym x>z (<-trans x<y y<z))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | eq y≡z | gt x>z = ⊥-elim (irrefl (<-trans x>z x<y) (sym y≡z))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | yes x≤y | gt y>z | gt x>z = cong (z ∷_) {!!} ; cong (merge⁺ x xs z (mergeˡ y ys zs)) (sym (cmp-> x z x>z))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | eq x≡y | lt y<z = cong (merge⁺ x (y ∷ merge xs ys) z zs) (cmp-< x z (subst (_< z) (sym x≡y) y<z)) ;
--- --                                                            cong (x ∷_) (cong (merge⁺ z zs y (merge xs ys)) (cmp-> z y y<z) ; cong (y ∷_) {!!}) ;
--- --                                                            cong (merge⁺ x xs y (mergeˡ z zs ys)) (sym (cmp-≡ x y x≡y))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | eq x≡y | eq y≡z = cong (merge⁺ x (y ∷ merge xs ys) z zs) (cmp-≡ x z (x≡y ; y≡z)) ;
--- --                                                            cong (x ∷_) (cong₂ _∷_ (sym y≡z) {!!}) ;
--- --                                                            cong (merge⁺ x xs y (z ∷ merge ys zs)) (sym (cmp-≡ x y x≡y))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | eq x≡y | gt y>z = cong (merge⁺ x (y ∷ merge xs ys) z zs) (cmp-> x z (subst (z <_) (sym x≡y) y>z)) ;
--- --                                                            cong (z ∷_) {!!} ;
--- --                                                            cong (merge⁺ x xs z (mergeˡ y ys zs)) (sym (cmp-> x z (subst (z <_) (sym x≡y) y>z)))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | lt y<z = cong (merge⁺ y (mergeˡ x xs ys) z zs) (cmp-< y z y<z) ;
--- --                                                            cong (y ∷_) {!!} ;
--- --                                                            cong (merge⁺ x xs y (mergeˡ z zs ys)) (sym (cmp-> x y x>y))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | eq y≡z = cong (merge⁺ y (mergeˡ x xs ys) z zs) (cmp-≡ y z y≡z) ;
--- --                                                            cong (y ∷_) (cong (z ∷_) (merge-assoc (x ∷ xs) ys zs) ; cong (merge⁺ x xs z (merge ys zs)) (sym (cmp-> x z (subst (_< x) y≡z x>y)))) ;
--- --                                                            cong (merge⁺ x xs y (z ∷ merge ys zs)) (sym (cmp-> x y x>y))
--- -- merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | gt x>y | gt y>z = cong (merge⁺ y (mergeˡ x xs ys) z zs) (cmp-> y z y>z) ;
--- --                                                            cong (z ∷_) {!!} ;
--- --                                                            cong (merge⁺ x xs z (mergeˡ y ys zs)) (sym (cmp-> x z (<-trans y>z x>y)))
