@@ -89,3 +89,18 @@ perm-invar xs ys xs⇔ys =
     (sort-sorts xs)
     (sort-sorts ys)
     (λ k → sort-perm xs k ⟨ trans-⇔ ⟩ xs⇔ys k ⟨ trans-⇔ ⟩ sym-⇔ (sort-perm ys k))
+
+
+mutual
+  merge : List E → List E → List E
+  merge []       ys = ys
+  merge (x ∷ xs) ys = mergeˡ x xs ys
+
+  mergeˡ : E → List E → List E → List E
+  mergeˡ x xs [] = x ∷ xs
+  mergeˡ x xs (y ∷ ys) = merge⁺ x xs y ys (x ≤ᵇ y)
+
+  merge⁺ : E → List E → E → List E → Bool → List E
+  merge⁺ x xs y ys false = x ∷ mergeˡ y ys xs
+  merge⁺ x xs y ys true  = y ∷ mergeˡ x xs ys
+
