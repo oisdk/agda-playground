@@ -31,12 +31,3 @@ True (no  _) = ⊥
 
 toWitness : {x : Dec A} → True x → A
 toWitness {x = yes p} _ = p
-
-open import Path
-open import Data.Bool.Base
-
-from-reflects : ∀ b → (d : Dec A) → Reflects A b → does d ≡ b
-from-reflects false (no  y) r = refl
-from-reflects false (yes y) r = ⊥-elim (r y)
-from-reflects true  (no  y) r = ⊥-elim (y r)
-from-reflects true  (yes y) r = refl
