@@ -72,7 +72,7 @@ merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs)
   cong (merge⁺ x (merge (merge xs (y ∷ ys))) z zs) (cmp-≤ x z (≤-trans x≤y y≤z)) ;
   cong (x ∷_) (r ; cong (merge xs) (cong (merge⁺ y (merge ys) z zs) (cmp-≤ y z y≤z))) ;
   cong (merge⁺ x (merge xs) y (merge ys (z ∷ zs))) (sym (cmp-≤ x y x≤y))
-merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | rx≤z | _ | rx≰z | (yes x≤y) | (no y≰z) with x ≤? z
+merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | rx≤z | _ | rx≰z | yes x≤y | no y≰z with x ≤? z
 ... | no  x≰z = cong (z ∷_) (cong (λ xy → merge (merge⁺ x (merge xs) y ys xy) zs) (sym (cmp-≤ x y x≤y)) ; rx≰z)
 ... | yes x≤z = cong (x ∷_) (rx≤z ; cong (merge xs) (cong (merge⁺ y (merge ys) z zs) (cmp-≰ y z y≰z)))
 
