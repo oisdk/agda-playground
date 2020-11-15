@@ -107,6 +107,9 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
     ≰⇒> : ∀ {x y} → x ≰ y → x > y
     ≮⇒≥ : ∀ {x y} → x ≮ y → x ≥ y
 
+  <⇒≤ : ∀ {x y} → x < y → x ≤ y
+  <⇒≤ = ≮⇒≥ ∘ asym
+
   infix 4 _<?_
   _<?_ : Decidable _<_
   x <? y with compare x y
@@ -118,7 +121,7 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   x <ᵇ y = does (x <? y)
 
   <⇒≱ : ∀ {x y} → x < y → x ≱ y
-  <⇒≱ {x} {y} x<y = irrefl x<y ∘ antisym (≮⇒≥ (asym x<y))
+  <⇒≱ {x} {y} x<y = irrefl x<y ∘ antisym (<⇒≤ x<y)
 
   ≤⇒≯ : ∀ {x y} → x ≤ y → x ≯ y
   ≤⇒≯ {x} {y} x≤y x>y = irrefl x>y (antisym (≮⇒≥ (asym x>y)) x≤y)
@@ -130,9 +133,9 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
 
   _≤?_ : Decidable _≤_
   x ≤? y with compare x y
-  (x ≤? y) | lt x<y = yes (≮⇒≥ (asym x<y))
+  (x ≤? y) | lt x<y = yes (<⇒≤ x<y)
   (x ≤? y) | eq x≡y = yes (subst (x ≤_) x≡y refl)
-  (x ≤? y) | gt x>y = no (<⇒≱ x>y)
+  (x ≤? y) | gt x>y = no  (<⇒≱ x>y)
 
 
   _≤ᵇ_ : 𝑆 → 𝑆 → Bool
@@ -140,9 +143,9 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
 
   ≤-total : Total _≤_
   ≤-total x y with compare x y
-  ≤-total x y | lt x<y = inl (≮⇒≥ (asym x<y))
+  ≤-total x y | lt x<y = inl (<⇒≤ x<y)
   ≤-total x y | eq x≡y = inl (subst (x ≤_) x≡y refl)
-  ≤-total x y | gt x>y = inr (≮⇒≥ (asym x>y))
+  ≤-total x y | gt x>y = inr (<⇒≤ x>y)
 
   open import Data.Unit
   open import Data.Empty

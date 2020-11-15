@@ -46,3 +46,7 @@ foldr-fusion h {f} {g} e fuse =
 
 ++-assoc : (xs ys zs : List A) → (xs ++ ys) ++ zs ≡ xs ++ (ys ++ zs)
 ++-assoc xs ys zs = foldr-fusion (_++ zs) ys (λ _ _ → refl) xs
+
+map-fusion : ∀ f (b : C) (g : A → B) xs → foldr f b (map g xs) ≡ foldr (f ∘ g) b xs
+map-fusion f b g [] = refl
+map-fusion f b g (x ∷ xs) = cong (f (g x)) (map-fusion f b g xs)

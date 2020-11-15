@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --postfix-projections #-}
+{-# OPTIONS --cubical --postfix-projections --safe #-}
 
 open import Relation.Binary
 open import Prelude hiding (tt)
@@ -19,13 +19,12 @@ open import Data.List.Membership
 
 insert : E → List E → List E
 insert x [] = x ∷ []
-insert x (y ∷ xs) with ≤-total x y
-... | inl  x≤y  = x  ∷ y ∷ xs
-... | inr  y≤x  = y  ∷ insert x xs
+insert x (y ∷ xs) with x ≤ᵇ y
+... | true  = x ∷ y ∷ xs
+... | false = y ∷ insert x xs
 
-sort : List E → List E
-sort []        = []
-sort (x ∷ xs)  = insert x (sort xs)
+insert-sort : List E → List E
+insert-sort = foldr insert []
 
 private variable lb : ⌊∙⌋
 
@@ -40,23 +39,23 @@ Sorted = SortedFrom ⌊⊥⌋
 
 insert-sorts : ∀ x xs → lb ≤⌊ x ⌋ → SortedFrom lb xs → SortedFrom lb (insert x xs)
 insert-sorts x [] lb≤x Pxs = lb≤x , tt
-insert-sorts x (y ∷ xs) lb≤x (lb≤y , Sxs) with ≤-total x y
-... | inl x≤y = lb≤x , x≤y , Sxs
-... | inr y≤x = lb≤y , insert-sorts x xs y≤x Sxs
+insert-sorts x (y ∷ xs) lb≤x (lb≤y , Sxs) with x ≤? y
+... | yes x≤y = lb≤x , x≤y , Sxs
+... | no  x≰y = lb≤y , insert-sorts x xs (<⇒≤ (≰⇒> x≰y)) Sxs
 
-sort-sorts : ∀ xs → Sorted (sort xs)
+sort-sorts : ∀ xs → Sorted (insert-sort xs)
 sort-sorts [] = tt
-sort-sorts (x ∷ xs) = insert-sorts x (sort xs) tt (sort-sorts xs)
+sort-sorts (x ∷ xs) = insert-sorts x (insert-sort xs) tt (sort-sorts xs)
 
 insert-perm : ∀ x xs → insert x xs ↭ x ∷ xs
 insert-perm x [] = reflₚ
-insert-perm x (y ∷ xs) with ≤-total x y
-... | inl x≤y = consₚ x reflₚ
-... | inr y≤x = consₚ y (insert-perm x xs) ⟨ transₚ ⟩ swapₚ y x xs
+insert-perm x (y ∷ xs) with x ≤ᵇ y
+... | true  = consₚ x reflₚ
+... | false = consₚ y (insert-perm x xs) ⟨ transₚ ⟩ swapₚ y x xs
 
-sort-perm : ∀ xs → sort xs ↭ xs
+sort-perm : ∀ xs → insert-sort xs ↭ xs
 sort-perm [] = reflₚ {xs = []}
-sort-perm (x ∷ xs) = insert-perm x (sort xs) ⟨ transₚ {xs = insert x (sort xs)} ⟩ consₚ x (sort-perm xs)
+sort-perm (x ∷ xs) = insert-perm x (insert-sort xs) ⟨ transₚ {xs = insert x (insert-sort xs)} ⟩ consₚ x (sort-perm xs)
 
 ord-in : ∀ x xs → SortedFrom lb xs → x ∈ xs → lb ≤⌊ x ⌋
 ord-in {lb = lb} x (x₁ ∷ xs) p (f0 , x∈xs) = subst (lb ≤⌊_⌋) x∈xs (p .fst)
@@ -81,11 +80,11 @@ perm-same {lbˣ} {lbʸ} (x ∷ xs) (y ∷ ys) Sxs Sys xs⇔ys =
 sorted-perm-eq : ∀ xs ys → Sorted xs → Sorted ys → xs ↭ ys → xs ≡ ys
 sorted-perm-eq = perm-same
 
-perm-invar : ∀ xs ys → xs ↭ ys → sort xs ≡ sort ys
+perm-invar : ∀ xs ys → xs ↭ ys → insert-sort xs ≡ insert-sort ys
 perm-invar xs ys xs⇔ys =
   perm-same
-    (sort xs)
-    (sort ys)
+    (insert-sort xs)
+    (insert-sort ys)
     (sort-sorts xs)
     (sort-sorts ys)
     (λ k → sort-perm xs k ⟨ trans-⇔ ⟩ xs⇔ys k ⟨ trans-⇔ ⟩ sym-⇔ (sort-perm ys k))
@@ -135,3 +134,26 @@ merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) with merge-assoc xs (y ∷ ys) (z �
 merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | rx≤z | _ | rx≰z | (yes x≤y) | (no y≰z) with x ≤? z
 ... | no  x≰z = cong (z ∷_) (cong (λ xy → merge (merge⁺ x (merge xs) y ys xy) zs) (sym (cmp-≤ x y x≤y)) ; rx≰z)
 ... | yes x≤z = cong (x ∷_) (rx≤z ; cong (merge xs) (cong (merge⁺ y (merge ys) z zs) (cmp-≰ y z y≰z)))
+
+open import TreeFold
+
+merge-sort : List E → List E
+merge-sort = treeFold merge [] ∘ map (_∷ [])
+
+merge-insert : ∀ x xs → merge (x ∷ []) xs ≡ insert x xs
+merge-insert x [] = refl
+merge-insert x (y ∷ xs) with x ≤ᵇ y
+... | false = cong (y ∷_) (merge-insert x xs)
+... | true  = refl
+
+open import Path.Reasoning
+open import Data.List.Properties
+
+merge≡insert-sort : ∀ xs → merge-sort xs ≡ insert-sort xs
+merge≡insert-sort xs =
+  merge-sort xs                      ≡⟨⟩
+  treeFold merge [] (map (_∷ []) xs) ≡⟨ treeFoldHom merge [] merge-assoc (map (_∷ []) xs) ⟩
+  foldr merge [] (map (_∷ []) xs)    ≡⟨ map-fusion merge [] (_∷ []) xs ⟩
+  foldr (λ x → merge (x ∷ [])) [] xs ≡⟨ cong (λ f → foldr f [] xs) (funExt (funExt ∘ merge-insert)) ⟩
+  foldr insert [] xs                 ≡⟨⟩
+  insert-sort xs ∎
