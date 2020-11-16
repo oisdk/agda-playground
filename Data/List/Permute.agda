@@ -113,3 +113,24 @@ merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | _ | r | _ | tru
 merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | r | _ | _ | true | 〖 ij 〗 | false | 〖 jk 〗 | true  | 〖 ik 〗 = cong (i ∹ x ∷_) (r ;
                                                                                                              cong (merge xs) (cong (merge⁺ (j ∸ i) y (merge ys) (k ∸ i) z zs) (≥≡-sub i j k jk ik) ;
                                                                                                              cong (λ s → k ∸ i ∹ z ∷ mergeˡ s y (merge ys) zs) (cong (_∸ 1) (≤-sub-id i k j ik)) ))
+
+open import Data.List
+
+index : List ℕ → List A → List (Premuted A)
+index _  []       = []
+index [] (x ∷ xs) = (0 ∹ x ∷ []) ∷ index [] xs
+index (i ∷ is) (x ∷ xs) = (i ∹ x ∷ []) ∷ index is xs
+
+unindex : Premuted A → List A
+unindex [] = []
+unindex (_ ∹ x ∷ xs) = x ∷ unindex xs
+
+open import TreeFold
+
+shuffle : List ℕ → List A → List A
+shuffle is = unindex ∘ treeFold merge [] ∘ index is
+
+open import Data.List.Syntax
+
+e : List ℕ
+e = shuffle [ 0 , 1 , 0 ] [ 1 , 2 , 3 ]
