@@ -93,23 +93,23 @@ merge-assoc : Associative (merge {A = A})
 merge-assoc [] ys zs = refl
 merge-assoc (i ∹ x ∷ xs) [] zs = cong (flip merge zs) (merge-idʳ (i ∹ x ∷ xs))
 merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) [] = merge-idʳ (merge (i ∹ x ∷ xs) (j ∹ y ∷ ys)) ; sym (cong (merge (i ∹ x ∷ xs)) (merge-idʳ (j ∹ y ∷ ys)))
-merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) with i ≤ᴮ j | inspect (i ≤ᴮ_) j | j ≤ᴮ k | inspect (j ≤ᴮ_) k
-merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | true  | 〖 ij 〗 | true  | 〖 jk 〗 = cong (merge⁺ i x (merge (merge xs (j ∸ i ∹ y ∷ ys))) k z zs) (≤≡-trans i j k ij jk) ;
-                                                                                          cong (i ∹ x ∷_) (merge-assoc xs (j ∸ i ∹ y ∷ ys) (k ∸ i ∹ z ∷ zs) ;
+merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) with merge-assoc xs (j ∸ i ∹ y ∷ ys) (k ∸ i ∹ z ∷ zs) | merge-assoc (i ∸ k ∸ 1 ∹ x ∷ xs) (j ∸ k ∸ 1 ∹ y ∷ ys) zs | (merge-assoc (i ∸ j ∸ 1 ∹ x ∷ xs) ys (k ∸ j ∹ z ∷ zs)) | i ≤ᴮ j | inspect (i ≤ᴮ_) j | j ≤ᴮ k | inspect (j ≤ᴮ_) k
+merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | r | _ | _ | true  | 〖 ij 〗 | true  | 〖 jk 〗 = cong (merge⁺ i x (merge (merge xs (j ∸ i ∹ y ∷ ys))) k z zs) (≤≡-trans i j k ij jk) ;
+                                                                                          cong (i ∹ x ∷_) (r ;
                                                                                           cong (merge xs) (cong (merge⁺ (j ∸ i) y (merge ys) (k ∸ i) z zs) (≤≡-sub i j k jk) ; cong (λ kij → j ∸ i ∹ y ∷ merge ys (kij ∹ z ∷ zs)) (≤-sub-id i j k ij))) ;
                                                                                           cong (merge⁺ i x (merge xs) j y (merge ys (k ∸ j ∹ z ∷ zs))) (sym ij)
-merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | false | 〖 ij 〗 | false | 〖 jk 〗 = cong (merge⁺ j y (merge (mergeˡ (i ∸ j ∸ 1) x (merge xs) ys)) k z zs ) jk ;
+merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | _ | r | _ | false | 〖 ij 〗 | false | 〖 jk 〗 = cong (merge⁺ j y (merge (mergeˡ (i ∸ j ∸ 1) x (merge xs) ys)) k z zs ) jk ;
                                                                                           cong (k ∹ z ∷_) (cong (λ s → mergeˡ (j ∸ k ∸ 1) y (merge (mergeˡ s x (merge xs) ys)) zs) (sym (lemma₁ i j k jk)) ;
                                                                                           cong (λ s → merge (merge⁺ (i ∸ k ∸ 1) x (merge xs) (j ∸ k ∸ 1) y ys s) zs) (sym (<≡-sub i j k ij jk)) ;
-                                                                                          merge-assoc (i ∸ k ∸ 1 ∹ x ∷ xs) (j ∸ k ∸ 1 ∹ y ∷ ys) zs) ;
+                                                                                          r) ;
                                                                                           cong (merge⁺ i x (merge xs) k z (mergeˡ (j ∸ k ∸ 1) y (merge ys) zs)) (sym (<≡-trans i j k ij jk))
-merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | false | 〖 ij 〗 | true  | 〖 jk 〗 = cong (merge⁺ j y (merge (mergeˡ (i ∸ j ∸ 1) x (merge xs) ys)) k z zs) jk ;
-                                                                                          cong (j ∹ y ∷_) (merge-assoc (i ∸ j ∸ 1 ∹ x ∷ xs) ys (k ∸ j ∹ z ∷ zs)) ;
+merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | _ | _ | r | false | 〖 ij 〗 | true  | 〖 jk 〗 = cong (merge⁺ j y (merge (mergeˡ (i ∸ j ∸ 1) x (merge xs) ys)) k z zs) jk ;
+                                                                                          cong (j ∹ y ∷_) r ;
                                                                                           cong (merge⁺ i x (merge xs) j y (merge ys (k ∸ j ∹ z ∷ zs))) (sym ij)
-merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | true  | ij | false | jk with i ≤ᴮ k | inspect (i ≤ᴮ_) k
-merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | true | 〖 ij 〗 | false | 〖 jk 〗 | false | 〖 ik 〗 = cong (k ∹ z ∷_) ((cong (λ s → mergeˡ (i ∸ k ∸ 1) x (merge (merge xs (s ∹ y ∷ ys))) zs) (lemma₂ i j k ij jk ik) ;
+merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | _ | _ | _ | true  | ij | false | jk with i ≤ᴮ k | inspect (i ≤ᴮ_) k
+merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | _ | r | _ | true | 〖 ij 〗 | false | 〖 jk 〗 | false | 〖 ik 〗 = cong (k ∹ z ∷_) ((cong (λ s → mergeˡ (i ∸ k ∸ 1) x (merge (merge xs (s ∹ y ∷ ys))) zs) (lemma₂ i j k ij jk ik) ;
                                                                                                            cong (λ c → merge (merge⁺ (i ∸ k ∸ 1) x (merge xs) (j ∸ k ∸ 1) y ys c) zs) (sym (>≡-sub i j k ij jk ik ))) ;
-                                                                                                           merge-assoc (i ∸ k ∸ 1 ∹ x ∷ xs) (j ∸ k ∸ 1 ∹ y ∷ ys) zs)
-merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | true | 〖 ij 〗 | false | 〖 jk 〗 | true  | 〖 ik 〗 = cong (i ∹ x ∷_) (merge-assoc xs (j ∸ i ∹ y ∷ ys) (k ∸ i ∹ z ∷ zs) ;
+                                                                                                           r )
+merge-assoc (i ∹ x ∷ xs) (j ∹ y ∷ ys) (k ∹ z ∷ zs) | r | _ | _ | true | 〖 ij 〗 | false | 〖 jk 〗 | true  | 〖 ik 〗 = cong (i ∹ x ∷_) (r ;
                                                                                                              cong (merge xs) (cong (merge⁺ (j ∸ i) y (merge ys) (k ∸ i) z zs) (≥≡-sub i j k jk ik) ;
                                                                                                              cong (λ s → k ∸ i ∹ z ∷ mergeˡ s y (merge ys) zs) (cong (_∸ 1) (≤-sub-id i k j ik)) ))
