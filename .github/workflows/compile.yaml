@@ -13,7 +13,7 @@ jobs:
         cubical-ref: ["v0.2"]
         agda-ref: ["v2.6.1.1"]
         ghc-ver: ["8.10.1"]
-        cabal-ver: ["3.2"]
+        cabal-ver: ["3.4.0.0"]
 
     steps:
 
@@ -31,7 +31,7 @@ jobs:
 
     - name: Install cabal
       if: steps.cache-cabal.outputs.cache-hit != 'true'
-      uses: actions/setup-haskell@v1.1
+      uses: actions/setup-haskell@v1.1.3
       with:
         ghc-version: ${{ matrix.ghc-ver }}
         cabal-version: ${{ matrix.cabal-ver }}
