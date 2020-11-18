@@ -12,7 +12,7 @@ open import Data.List
 inc : 𝔹 → 𝔹
 inc [] = zero ∷ []
 inc (x ∷ []) = zero ∷ x ∷ []
-inc (x₁ ∷ zero ∷ xs) = suc x₁ ∷ xs
+inc (x₁ ∷ zero   ∷ xs) = suc x₁ ∷ xs
 inc (x₁ ∷ suc x₂ ∷ xs) = zero ∷ x₁ ∷ x₂ ∷ xs
 
 ⟦_⇑⟧ : ℕ → 𝔹
@@ -20,28 +20,18 @@ inc (x₁ ∷ suc x₂ ∷ xs) = zero ∷ x₁ ∷ x₂ ∷ xs
 ⟦ suc n ⇑⟧ = inc ⟦ n ⇑⟧
 
 skew : ℕ → ℕ
--- skew n = 1 + (2 * n)
--- Maybe easier for proofs:
 skew n = suc (n + n)
 
 w : ℕ → ℕ → ℕ
 w zero    a = a
 w (suc n) a = skew (w n a)
 
-⟦_⇓⟧′ : 𝔹 → ℕ → ℕ
-⟦ []     ⇓⟧′ a = zero
-⟦ x ∷ xs ⇓⟧′ a = let a′ = w x a in a′ + ⟦ xs ⇓⟧′ (skew a′)
--- ⟦_⇓⟧′ = foldr f (λ _ → zero)
---   where
---   f : ℕ → (ℕ → ℕ) → ℕ → ℕ
---   f x xs a = let a′ = w x a in a′ + xs (skew a′)
+⟦_∷_⇓⟧^ : ℕ → (ℕ → ℕ) → ℕ → ℕ
+⟦ x ∷ xs ⇓⟧^ a = let a′ = w x a in a′ + xs (skew a′)
 
 ⟦_⇓⟧ : 𝔹 → ℕ
 ⟦ [] ⇓⟧ = zero
-⟦ x ∷ xs ⇓⟧ = let a = w x 1 in a + ⟦ xs ⇓⟧′ a
-
--- fn : ℕ → _
--- fn n = ⟦ ⟦ n ⇑⟧ ⇓⟧
+⟦ x ∷ xs ⇓⟧ = let a = w x 1 in a + foldr ⟦_∷_⇓⟧^ (const zero) xs a
 
 -- open import Path.Reasoning
 -- import Data.Nat.Properties as ℕ
