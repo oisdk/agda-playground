@@ -128,7 +128,7 @@ jobs:
         cd main
         find . -type f \( -name "*.agda" -o -name "*.lagda" \) > FileList
         sort -o FileList FileList
-        echo "{-# OPTIONS --cubical #-}" > Everything.agda
+        echo "{-# OPTIONS --cubical --prop #-}" > Everything.agda
         echo "" >> Everything.agda
         echo "module Everything where" >> Everything.agda
         echo "" >> Everything.agda
