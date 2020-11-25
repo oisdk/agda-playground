@@ -13,6 +13,7 @@ open import Function.Injective.Properties
 open import Path.Reasoning
 open import Relation.Nullary.Discrete
 open import Function
+
 surj-to-inj : (A ↠! B) → (B ↣ A)
 surj-to-inj (f , surj) .fst x = surj x .fst
 surj-to-inj (f , surj) .snd x y f⁻¹⟨x⟩≡f⁻¹⟨y⟩ =
@@ -20,12 +21,14 @@ surj-to-inj (f , surj) .snd x y f⁻¹⟨x⟩≡f⁻¹⟨y⟩ =
   f (surj x .fst)  ≡⟨ cong f f⁻¹⟨x⟩≡f⁻¹⟨y⟩ ⟩
   f (surj y .fst)  ≡⟨ surj y .snd ⟩
   y ∎
+
 Discrete-distrib-surj : (A ↠! B) → Discrete A → Discrete B
 Discrete-distrib-surj = Discrete-pull-inj ∘ surj-to-inj
 
 SplitSurjective⟨id⟩ : SplitSurjective (id {A = A})
 SplitSurjective⟨id⟩ x .fst = x
 SplitSurjective⟨id⟩ x .snd _ = x
+
 ↠!-ident : A ↠! A
 ↠!-ident .fst = id
 ↠!-ident .snd y .fst = y

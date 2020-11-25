@@ -100,7 +100,7 @@ reduce : Vec Tree (suc (suc n)) → Vec Tree (suc n)
 reduce (x ∷ y ∷ xs) = (x * y) ∷ xs
 
 shift : Vec Tree n → Vec Tree (suc n)
-shift xs = leaf ∷ xs
+shift = leaf ∷_
 
 dyck→tree⊙ : Vec Tree (suc k) → Dyck n → Vec Tree (suc n + k)
 dyck→tree⊙ xs = foldrDyck (λ n → Vec Tree (suc n + _)) reduce shift xs
@@ -137,26 +137,78 @@ dyck→tree→dyck-push (ls * rs) xs =
 dyck→tree→dyck : ∀ t → dyck→tree (tree→dyck t) ≡ t
 dyck→tree→dyck t = cong head (dyck→tree→dyck-push t [])
 
--- tree→dyck-inj : Injective tree→dyck
--- tree→dyck-inj leaf leaf xs≡ys = refl
--- tree→dyck-inj leaf (ys * ys₁) xs≡ys = {!!}
--- tree→dyck-inj (xs * xs₁) leaf xs≡ys = {!!}
--- tree→dyck-inj (xs * xs₁) (ys * ys₁) xs≡ys = {!!}
+s : Dyck 0 ↠! Tree
+s .fst = dyck→tree
+s .snd y .fst = tree→dyck y
+s .snd y .snd = dyck→tree→dyck y
 
--- -- tree↣dyck : Tree ↣ Dyck zero
--- -- tree↣dyck .fst = tree→dyck
--- -- tree↣dyck .snd x y x₁ = {!!}
+unpack : Vec Tree (suc n) → Vec Tree (suc (suc n))
+unpack (leaf ∷ xs) = leaf ∷ leaf ∷ xs
+unpack ((x * x₁) ∷ xs) = x ∷ x₁ ∷ xs
 
--- -- dyck-conc : Dyck n → Dyck m → Dyck (n + m)
--- -- dyck-conc done ys = ys
--- -- dyck-conc (⟨ xs) ys = ⟨ dyck-conc xs ys
--- -- dyck-conc (⟩ xs) ys = ⟩ dyck-conc xs ys
+reduce-inj : (xs ys : Vec Tree (suc (suc n))) → reduce xs ≡ reduce ys → xs ≡ ys
+reduce-inj (head₁ ∷ head₃ ∷ tail₁) (head₂ ∷ head₄ ∷ tail₂) xs≡ys = cong unpack xs≡ys
+
+import Data.Nat.Properties as ℕ
 
 
--- -- dyck→tree→dyck⊙ : (d d′ : Dyck n) → tree→dyck⊙ (dyck→tree d) d′ ≡ dyck-conc d  d′
--- -- dyck→tree→dyck⊙ xs done  d′ = {!!}
--- -- dyck→tree→dyck⊙ xs (⟨ d) d′ = {!!}
--- -- dyck→tree→dyck⊙ xs (⟩ d) d′ = {!!}
+size⊙ : Tree → ℕ → ℕ
+size⊙ leaf n = n
+size⊙ (xs * ys) n = suc (size⊙ xs (size⊙ ys n))
 
--- -- dyck→tree→dyck′ : (d : Dyck zero) → tree→dyck (dyck→tree d) ≡ d
--- -- dyck→tree→dyck′ d = dyck→tree→dyck⊙ (leaf ∷ []) d done
+sizes⊙ : Vec Tree n → ℕ → ℕ
+sizes⊙ xs n = foldr′ size⊙ n xs
+
+lefts⊙ : Dyck n → ℕ → ℕ
+lefts⊙ done n = n
+lefts⊙ (⟨ d) n = suc (lefts⊙ d n)
+lefts⊙ (⟩ d) n = lefts⊙ d n
+
+sizes : Vec Tree n → ℕ
+sizes xs = sizes⊙ xs 0
+
+not-branch-leaf : ∀ {xs ys} → xs * ys ≢ leaf
+not-branch-leaf = ℕ.snotz ∘ cong (flip size⊙ 0)
+
+reduce≢shift : (xs : Vec Tree (suc (suc n))) → (ys : Vec Tree n) → reduce xs ≢ shift ys
+reduce≢shift (x₁ ∷ x₂ ∷ xs) ys xs≡ys = not-branch-leaf (cong head xs≡ys)
+
+sizes-reduce : ∀ (xs : Vec Tree (suc (suc k))) → sizes⊙ (reduce xs) m ≡ suc (sizes⊙ xs m)
+sizes-reduce (x₁ ∷ x₂ ∷ xs) = refl
+
+lemma₂ : (vs : Vec Tree (suc k)) → (xs : Dyck n) → ∀ m → sizes⊙ (dyck→tree⊙ vs xs) m ≡ lefts⊙ xs (sizes⊙ vs m)
+lemma₂ vs done   _ = refl
+lemma₂ vs (⟨ xs) m = sizes-reduce (dyck→tree⊙ vs xs) ; cong suc (lemma₂ vs xs m)
+lemma₂ vs (⟩ xs) m = lemma₂ vs xs m
+
+
+suc-distrib-lefts : ∀ n (x : Dyck m) → suc (lefts⊙ x n) ≡ lefts⊙ x (suc n)
+suc-distrib-lefts n done = refl
+suc-distrib-lefts n (⟨ x) = cong suc (suc-distrib-lefts n x)
+suc-distrib-lefts n (⟩ x) = suc-distrib-lefts n x
+
+lefts-inj : ∀ n (x : Dyck m) → n ≢ suc (lefts⊙ x n)
+lefts-inj zero x p = ℕ.znots p
+lefts-inj (suc n) x p = lefts-inj n x (cong ℕ.pred p ; sym (suc-distrib-lefts n x))
+
+dyck→tree⊙-inj : (vs : Vec Tree (suc k)) → (xs ys : Dyck n) → dyck→tree⊙ vs xs ≡ dyck→tree⊙ vs ys → xs ≡ ys
+dyck→tree⊙-inj vs done done xs≡ys = refl
+dyck→tree⊙-inj vs done (⟨ ys) xs≡ys = let p = sym (lemma₂ vs done 0) ; cong sizes xs≡ys ; lemma₂ vs (⟨ ys) 0 in ⊥-elim (lefts-inj (sizes⊙ vs 0) ys p)
+dyck→tree⊙-inj vs (⟨ xs) done xs≡ys = let p = sym (lemma₂ vs done 0) ; cong sizes (sym xs≡ys) ; lemma₂ vs (⟨ xs) 0 in ⊥-elim (lefts-inj (sizes⊙ vs 0) xs p)
+dyck→tree⊙-inj vs (⟨ xs) (⟨ ys) xs≡ys = cong ⟨_ (dyck→tree⊙-inj vs xs ys (reduce-inj (dyck→tree⊙ vs xs) (dyck→tree⊙ vs ys) xs≡ys))
+dyck→tree⊙-inj vs (⟨ xs) (⟩ ys) xs≡ys = ⊥-elim (reduce≢shift (dyck→tree⊙ vs xs) (dyck→tree⊙ vs ys) xs≡ys)
+dyck→tree⊙-inj vs (⟩ xs) (⟨ ys) xs≡ys = ⊥-elim (reduce≢shift (dyck→tree⊙ vs ys) (dyck→tree⊙ vs xs) (sym xs≡ys))
+dyck→tree⊙-inj vs (⟩ xs) (⟩ ys) xs≡ys = cong ⟩_ (dyck→tree⊙-inj vs xs ys (cong tail xs≡ys))
+
+lemma : (xs ys : Vec A 1) → head xs ≡ head ys → xs ≡ ys
+lemma (head₁ ∷ []) (head₂ ∷ []) p = cong (_∷ []) p
+
+dyck→tree-inj : (xs ys : Dyck 0) → dyck→tree xs ≡ dyck→tree ys → xs ≡ ys
+dyck→tree-inj xs ys xs≡ys = dyck→tree⊙-inj (leaf ∷ []) xs ys (lemma (dyck→tree⊙ (leaf ∷ []) xs) (dyck→tree⊙ (leaf ∷ []) ys) xs≡ys)
+
+
+dyck⇔tree : Dyck 0 ⇔ Tree
+dyck⇔tree .fun = dyck→tree
+dyck⇔tree .inv = tree→dyck
+dyck⇔tree .rightInv x = dyck→tree→dyck x
+dyck⇔tree .leftInv x = dyck→tree-inj _ _ (dyck→tree→dyck (dyck→tree  x))
