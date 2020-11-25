@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --cubical --safe --postfix-projections #-}
 
 module Function.Isomorphism where
 
@@ -58,3 +58,12 @@ iso⇔equiv isSetA .leftInv x i .fun = x .fun
 iso⇔equiv isSetA .leftInv x i .inv = x .inv
 iso⇔equiv isSetA .leftInv x i .rightInv = x .rightInv
 iso⇔equiv isSetA .leftInv x i .leftInv y = isSetA _ y (equivToIso (isoToEquiv x) .leftInv y) (x .leftInv y) i
+
+open import Function.Surjective
+open import Function.Injective
+
+surj×inj⇒iso : (f : A → B) → SplitSurjective f → Injective f → A ⇔ B
+surj×inj⇒iso f surj inj .fun = f
+surj×inj⇒iso f surj inj .inv = fst ∘ surj
+surj×inj⇒iso f surj inj .rightInv = snd ∘ surj
+surj×inj⇒iso f surj inj .leftInv x = inj (fst (surj (f x))) x (surj (f x) .snd)

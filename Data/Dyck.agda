@@ -206,9 +206,5 @@ lemma (head₁ ∷ []) (head₂ ∷ []) p = cong (_∷ []) p
 dyck→tree-inj : (xs ys : Dyck 0) → dyck→tree xs ≡ dyck→tree ys → xs ≡ ys
 dyck→tree-inj xs ys xs≡ys = dyck→tree⊙-inj (leaf ∷ []) xs ys (lemma (dyck→tree⊙ (leaf ∷ []) xs) (dyck→tree⊙ (leaf ∷ []) ys) xs≡ys)
 
-
 dyck⇔tree : Dyck 0 ⇔ Tree
-dyck⇔tree .fun = dyck→tree
-dyck⇔tree .inv = tree→dyck
-dyck⇔tree .rightInv x = dyck→tree→dyck x
-dyck⇔tree .leftInv x = dyck→tree-inj _ _ (dyck→tree→dyck (dyck→tree  x))
+dyck⇔tree = surj×inj⇒iso dyck→tree (λ y → tree→dyck y , dyck→tree→dyck y) dyck→tree-inj
