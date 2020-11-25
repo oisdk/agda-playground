@@ -21,6 +21,7 @@ mutual
 
   infixr 5 _∷_
   record Vec⁺ {a} (A : Type a) (n : ℕ) : Type a where
+    eta-equality
     inductive
     constructor _∷_
     field

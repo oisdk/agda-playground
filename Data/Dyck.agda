@@ -137,17 +137,12 @@ dyck→tree→dyck-push (ls * rs) xs =
 dyck→tree→dyck : ∀ t → dyck→tree (tree→dyck t) ≡ t
 dyck→tree→dyck t = cong head (dyck→tree→dyck-push t [])
 
-s : Dyck 0 ↠! Tree
-s .fst = dyck→tree
-s .snd y .fst = tree→dyck y
-s .snd y .snd = dyck→tree→dyck y
-
-unpack : Vec Tree (suc n) → Vec Tree (suc (suc n))
-unpack (leaf ∷ xs) = leaf ∷ leaf ∷ xs
-unpack ((x * x₁) ∷ xs) = x ∷ x₁ ∷ xs
+unreduce : Vec Tree (suc n) → Vec Tree (suc (suc n))
+unreduce (leaf ∷ xs) = leaf ∷ leaf ∷ xs
+unreduce ((x₁ * x₂) ∷ xs) = x₁ ∷ x₂ ∷ xs
 
 reduce-inj : (xs ys : Vec Tree (suc (suc n))) → reduce xs ≡ reduce ys → xs ≡ ys
-reduce-inj (head₁ ∷ head₃ ∷ tail₁) (head₂ ∷ head₄ ∷ tail₂) xs≡ys = cong unpack xs≡ys
+reduce-inj _ _ xs≡ys = cong unreduce xs≡ys
 
 import Data.Nat.Properties as ℕ
 
@@ -173,12 +168,9 @@ not-branch-leaf = ℕ.snotz ∘ cong (flip size⊙ 0)
 reduce≢shift : (xs : Vec Tree (suc (suc n))) → (ys : Vec Tree n) → reduce xs ≢ shift ys
 reduce≢shift (x₁ ∷ x₂ ∷ xs) ys xs≡ys = not-branch-leaf (cong head xs≡ys)
 
-sizes-reduce : ∀ (xs : Vec Tree (suc (suc k))) → sizes⊙ (reduce xs) m ≡ suc (sizes⊙ xs m)
-sizes-reduce (x₁ ∷ x₂ ∷ xs) = refl
-
 lemma₂ : (vs : Vec Tree (suc k)) → (xs : Dyck n) → ∀ m → sizes⊙ (dyck→tree⊙ vs xs) m ≡ lefts⊙ xs (sizes⊙ vs m)
 lemma₂ vs done   _ = refl
-lemma₂ vs (⟨ xs) m = sizes-reduce (dyck→tree⊙ vs xs) ; cong suc (lemma₂ vs xs m)
+lemma₂ vs (⟨ xs) m = cong suc (lemma₂ vs xs m)
 lemma₂ vs (⟩ xs) m = lemma₂ vs xs m
 
 
@@ -200,11 +192,8 @@ dyck→tree⊙-inj vs (⟨ xs) (⟩ ys) xs≡ys = ⊥-elim (reduce≢shift (dyck
 dyck→tree⊙-inj vs (⟩ xs) (⟨ ys) xs≡ys = ⊥-elim (reduce≢shift (dyck→tree⊙ vs ys) (dyck→tree⊙ vs xs) (sym xs≡ys))
 dyck→tree⊙-inj vs (⟩ xs) (⟩ ys) xs≡ys = cong ⟩_ (dyck→tree⊙-inj vs xs ys (cong tail xs≡ys))
 
-lemma : (xs ys : Vec A 1) → head xs ≡ head ys → xs ≡ ys
-lemma (head₁ ∷ []) (head₂ ∷ []) p = cong (_∷ []) p
-
 dyck→tree-inj : (xs ys : Dyck 0) → dyck→tree xs ≡ dyck→tree ys → xs ≡ ys
-dyck→tree-inj xs ys xs≡ys = dyck→tree⊙-inj (leaf ∷ []) xs ys (lemma (dyck→tree⊙ (leaf ∷ []) xs) (dyck→tree⊙ (leaf ∷ []) ys) xs≡ys)
+dyck→tree-inj xs ys xs≡ys = dyck→tree⊙-inj (leaf ∷ []) xs ys (cong (_∷ []) xs≡ys)
 
 dyck⇔tree : Dyck 0 ⇔ Tree
 dyck⇔tree = surj×inj⇒iso dyck→tree (λ y → tree→dyck y , dyck→tree→dyck y) dyck→tree-inj
