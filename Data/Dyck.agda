@@ -84,6 +84,14 @@ data Tree : Type₀ where
   leaf : Tree
   _*_  : Tree → Tree → Tree
 
+-- Counts the number of branches in the tree
+size⊙ : Tree → ℕ → ℕ
+size⊙ leaf      = id
+size⊙ (xs * ys) = suc ∘ size⊙ xs ∘ size⊙ ys
+
+size : Tree → ℕ
+size t = size⊙ t zero
+
 --------------------------------------------------------------------------------
 -- Conversion between binary trees and Dyck words.
 --------------------------------------------------------------------------------
@@ -96,7 +104,7 @@ tree→dyck⊙ (xs * ys) d = ⟨ tree→dyck⊙ xs (⟩ tree→dyck⊙ ys d)
 tree→dyck : (t : Tree) → Dyck zero
 tree→dyck t = tree→dyck⊙ t done
 
-reduce : Vec Tree (suc (suc n)) → Vec Tree (suc n)
+reduce : Vec Tree (2 + n) → Vec Tree (suc n)
 reduce (x ∷ y ∷ xs) = (x * y) ∷ xs
 
 shift : Vec Tree n → Vec Tree (suc n)
@@ -115,7 +123,7 @@ dyck→treeˡ d = go d (leaf ∷ [])
   go : Dyck n → Vec Tree (suc n) → Tree
   go (⟨ d)  ts              = go d (leaf    ∷ ts)
   go (⟩ d)  (t₁ ∷ t₂ ∷ ts)  = go d (t₂ * t₁ ∷ ts)
-  go done   (t  ∷ _)         = t
+  go done   (t  ∷ _)        = t
 
 dyck→tree→dyck-pop : ∀ (xs : Vec Tree (suc k)) (d : Dyck n) t → dyck→tree⊙ xs (tree→dyck⊙ t (⟩ d)) ≡ t ∷ dyck→tree⊙ xs d
 dyck→tree→dyck-pop xs d leaf = refl
@@ -137,19 +145,15 @@ dyck→tree→dyck-push (ls * rs) xs =
 dyck→tree→dyck : ∀ t → dyck→tree (tree→dyck t) ≡ t
 dyck→tree→dyck t = cong head (dyck→tree→dyck-push t [])
 
-unreduce : Vec Tree (suc n) → Vec Tree (suc (suc n))
+unreduce : Vec Tree (suc n) → Vec Tree (2 + n)
 unreduce (leaf ∷ xs) = leaf ∷ leaf ∷ xs
 unreduce ((x₁ * x₂) ∷ xs) = x₁ ∷ x₂ ∷ xs
 
-reduce-inj : (xs ys : Vec Tree (suc (suc n))) → reduce xs ≡ reduce ys → xs ≡ ys
-reduce-inj _ _ xs≡ys = cong unreduce xs≡ys
+reduce-inj : {xs ys : Vec Tree (2 + n)} → reduce xs ≡ reduce ys → xs ≡ ys
+reduce-inj xs≡ys = cong unreduce xs≡ys
 
 import Data.Nat.Properties as ℕ
 
-
-size⊙ : Tree → ℕ → ℕ
-size⊙ leaf n = n
-size⊙ (xs * ys) n = suc (size⊙ xs (size⊙ ys n))
 
 sizes⊙ : Vec Tree n → ℕ → ℕ
 sizes⊙ xs n = foldr′ size⊙ n xs
@@ -165,14 +169,13 @@ sizes xs = sizes⊙ xs 0
 not-branch-leaf : ∀ {xs ys} → xs * ys ≢ leaf
 not-branch-leaf = ℕ.snotz ∘ cong (flip size⊙ 0)
 
-reduce≢shift : (xs : Vec Tree (suc (suc n))) → (ys : Vec Tree n) → reduce xs ≢ shift ys
-reduce≢shift (x₁ ∷ x₂ ∷ xs) ys xs≡ys = not-branch-leaf (cong head xs≡ys)
+reduce≢shift : (xs : Vec Tree (2 + n)) → (ys : Vec Tree n) → reduce xs ≢ shift ys
+reduce≢shift _ ys xs≡ys = not-branch-leaf (cong head xs≡ys)
 
 lemma₂ : (vs : Vec Tree (suc k)) → (xs : Dyck n) → ∀ m → sizes⊙ (dyck→tree⊙ vs xs) m ≡ lefts⊙ xs (sizes⊙ vs m)
 lemma₂ vs done   _ = refl
 lemma₂ vs (⟨ xs) m = cong suc (lemma₂ vs xs m)
 lemma₂ vs (⟩ xs) m = lemma₂ vs xs m
-
 
 suc-distrib-lefts : ∀ n (x : Dyck m) → suc (lefts⊙ x n) ≡ lefts⊙ x (suc n)
 suc-distrib-lefts n done = refl
@@ -187,7 +190,7 @@ dyck→tree⊙-inj : (vs : Vec Tree (suc k)) → (xs ys : Dyck n) → dyck→tre
 dyck→tree⊙-inj vs done done xs≡ys = refl
 dyck→tree⊙-inj vs done (⟨ ys) xs≡ys = let p = sym (lemma₂ vs done 0) ; cong sizes xs≡ys ; lemma₂ vs (⟨ ys) 0 in ⊥-elim (lefts-inj (sizes⊙ vs 0) ys p)
 dyck→tree⊙-inj vs (⟨ xs) done xs≡ys = let p = sym (lemma₂ vs done 0) ; cong sizes (sym xs≡ys) ; lemma₂ vs (⟨ xs) 0 in ⊥-elim (lefts-inj (sizes⊙ vs 0) xs p)
-dyck→tree⊙-inj vs (⟨ xs) (⟨ ys) xs≡ys = cong ⟨_ (dyck→tree⊙-inj vs xs ys (reduce-inj (dyck→tree⊙ vs xs) (dyck→tree⊙ vs ys) xs≡ys))
+dyck→tree⊙-inj vs (⟨ xs) (⟨ ys) xs≡ys = cong ⟨_ (dyck→tree⊙-inj vs xs ys (reduce-inj xs≡ys))
 dyck→tree⊙-inj vs (⟨ xs) (⟩ ys) xs≡ys = ⊥-elim (reduce≢shift (dyck→tree⊙ vs xs) (dyck→tree⊙ vs ys) xs≡ys)
 dyck→tree⊙-inj vs (⟩ xs) (⟨ ys) xs≡ys = ⊥-elim (reduce≢shift (dyck→tree⊙ vs ys) (dyck→tree⊙ vs xs) (sym xs≡ys))
 dyck→tree⊙-inj vs (⟩ xs) (⟩ ys) xs≡ys = cong ⟩_ (dyck→tree⊙-inj vs xs ys (cong tail xs≡ys))
