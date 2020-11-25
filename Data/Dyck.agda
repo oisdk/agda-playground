@@ -10,6 +10,7 @@ open import Data.List using (List)
 open import Data.Nat using (_+_)
 open import Path.Reasoning
 open import Function.Surjective
+open import Function.Injective
 open import Data.Nat.Properties using (+-idʳ)
 open import Data.Vec.Iterated
 
@@ -22,28 +23,24 @@ private
 --------------------------------------------------------------------------------
 
 -- A suffix of a Dyck word.
--- The type Dyck n m represents a string
--- of m pairs of parentheses, and n extra closing parens.
+-- The type Dyck n represents a string
+-- of pairs of parentheses, and n extra closing parens.
 infixr 5 ⟨_ ⟩_
-data Dyck : ℕ → ℕ → Type₀ where
-  done : Dyck zero zero
-  ⟨_ : Dyck (suc n) m → Dyck n (suc m)
-  ⟩_ : Dyck n m → Dyck (suc n) m
-
--- A string of balanced parentheses
-Bal : Type₀
-Bal = ∃[ n ] Dyck zero n
+data Dyck : ℕ → Type₀ where
+  done : Dyck zero
+  ⟨_ : Dyck (suc n) → Dyck n
+  ⟩_ : Dyck n → Dyck (suc n)
 
 -- Some examples
-_ : Dyck 0 3
+_ : Dyck 0
 _ = ⟨ ⟩ ⟨ ⟩ ⟨ ⟩ done
 
-_ : Dyck 1 2
+_ : Dyck 1
 _ = ⟩ ⟨ ⟩ ⟨ ⟩ done
 
 -- A helper function to list all the dyck
 -- words of a given size. (handy for i.e. testing)
-support-dyck : ∀ n m → List (Dyck n m)
+support-dyck : ∀ (n m : ℕ) → List (Dyck n)
 support-dyck = λ n m → sup-k n m id []
   module ListDyck where
   open import Data.List using (_∷_; [])
@@ -52,28 +49,28 @@ support-dyck = λ n m → sup-k n m id []
   Diff A = ∀ {B : Type₀} → (A → B) → List B → List B
 
   mutual
-    sup-k : ∀ n m → Diff (Dyck n m)
+    sup-k : (n m : ℕ) → Diff (Dyck n)
     sup-k n m k = end n m k ∘ lefts n m k ∘ rights n m k
 
-    lefts : ∀ n m → Diff (Dyck n m)
+    lefts : (n m : ℕ) → Diff (Dyck n)
     lefts n zero    k = id
     lefts n (suc m) k = sup-k (suc n) m (k ∘ ⟨_)
 
-    rights : ∀ n m → Diff (Dyck n m)
+    rights : (n m : ℕ) → Diff (Dyck n)
     rights (suc n) m k = sup-k n m (k ∘ ⟩_)
     rights zero    m k = id
 
-    end : ∀ n m → Diff (Dyck n m)
+    end : (n m : ℕ) → Diff (Dyck n)
     end (suc _) _    k = id
     end zero (suc _) k = id
     end zero zero    k xs = k done ∷ xs
 
-module _ {p} (P : ℕ → ℕ → Type p)
-             (lbrack : ∀ {n m} → P (suc n) m → P n (suc m))
-             (rbrack : ∀ {n m} → P n m → P (suc n) m)
-             (base : P 0 0)
+module _ {p} (P : ℕ → Type p)
+             (lbrack : ∀ {n} → P (suc n) → P n)
+             (rbrack : ∀ {n} → P n → P (suc n))
+             (base : P 0)
              where
-  foldrDyck : Dyck n m → P n m
+  foldrDyck : Dyck n → P n
   foldrDyck done = base
   foldrDyck (⟨ x) = lbrack (foldrDyck x)
   foldrDyck (⟩ x) = rbrack (foldrDyck x)
@@ -87,28 +84,16 @@ data Tree : Type₀ where
   leaf : Tree
   _*_  : Tree → Tree → Tree
 
--- This pair of functions gives the number of internal nodes
--- in the tree.
---
--- Note: we use the symbol ⊙ for helper functions which return
--- the endo monoid for the function itself.
-size⊙ : Tree → ℕ → ℕ
-size⊙ leaf      n = n
-size⊙ (xs * ys) n = suc (size⊙ xs (size⊙ ys n))
-
-size : Tree → ℕ
-size t = size⊙ t 0
-
 --------------------------------------------------------------------------------
 -- Conversion between binary trees and Dyck words.
 --------------------------------------------------------------------------------
 
-tree→dyck⊙ : (t : Tree) → Dyck n m → Dyck n (size⊙ t m)
+tree→dyck⊙ : (t : Tree) → Dyck n → Dyck n
 tree→dyck⊙ leaf      d = d
 tree→dyck⊙ (xs * ys) d = ⟨ tree→dyck⊙ xs (⟩ tree→dyck⊙ ys d)
 
 -- Tree to Dyck
-tree→dyck : (t : Tree) → Dyck zero (size t)
+tree→dyck : (t : Tree) → Dyck zero
 tree→dyck t = tree→dyck⊙ t done
 
 reduce : Vec Tree (suc (suc n)) → Vec Tree (suc n)
@@ -117,22 +102,22 @@ reduce (x ∷ y ∷ xs) = (x * y) ∷ xs
 shift : Vec Tree n → Vec Tree (suc n)
 shift xs = leaf ∷ xs
 
-dyck→tree⊙ : Vec Tree (suc k) → Dyck n m → Vec Tree (suc n + k)
-dyck→tree⊙ xs = foldrDyck (λ n m → Vec Tree (suc n + _)) reduce shift xs
+dyck→tree⊙ : Vec Tree (suc k) → Dyck n → Vec Tree (suc n + k)
+dyck→tree⊙ xs = foldrDyck (λ n → Vec Tree (suc n + _)) reduce shift xs
 
 -- Dyck to tree
-dyck→tree : Dyck zero n → Tree
+dyck→tree : Dyck zero → Tree
 dyck→tree = head ∘ dyck→tree⊙ (leaf ∷ [])
 
-dyck→treeˡ : Dyck zero n → Tree
+dyck→treeˡ : Dyck zero → Tree
 dyck→treeˡ d = go d (leaf ∷ [])
   where
-  go : Dyck n m → Vec Tree (suc n) → Tree
+  go : Dyck n → Vec Tree (suc n) → Tree
   go (⟨ d)  ts              = go d (leaf    ∷ ts)
   go (⟩ d)  (t₁ ∷ t₂ ∷ ts)  = go d (t₂ * t₁ ∷ ts)
   go done   (t  ∷ _)         = t
 
-dyck→tree→dyck-pop : ∀ (xs : Vec Tree (suc k)) (d : Dyck n m) t → dyck→tree⊙ xs (tree→dyck⊙ t (⟩ d)) ≡ t ∷ dyck→tree⊙ xs d
+dyck→tree→dyck-pop : ∀ (xs : Vec Tree (suc k)) (d : Dyck n) t → dyck→tree⊙ xs (tree→dyck⊙ t (⟩ d)) ≡ t ∷ dyck→tree⊙ xs d
 dyck→tree→dyck-pop xs d leaf = refl
 dyck→tree→dyck-pop xs d (ls * rs) =
   dyck→tree⊙ xs (⟨ tree→dyck⊙ ls (⟩ tree→dyck⊙ rs (⟩ d)))        ≡⟨⟩
@@ -152,63 +137,26 @@ dyck→tree→dyck-push (ls * rs) xs =
 dyck→tree→dyck : ∀ t → dyck→tree (tree→dyck t) ≡ t
 dyck→tree→dyck t = cong head (dyck→tree→dyck-push t [])
 
--- Proof that conversion from dyck to tree is surjective
-dyck↠tree : Bal ↠! Tree
-dyck↠tree .fst (_ , x) = dyck→tree x
-dyck↠tree .snd y .fst = _ , tree→dyck y
-dyck↠tree .snd y .snd = dyck→tree→dyck y
+-- tree→dyck-inj : Injective tree→dyck
+-- tree→dyck-inj leaf leaf xs≡ys = refl
+-- tree→dyck-inj leaf (ys * ys₁) xs≡ys = {!!}
+-- tree→dyck-inj (xs * xs₁) leaf xs≡ys = {!!}
+-- tree→dyck-inj (xs * xs₁) (ys * ys₁) xs≡ys = {!!}
 
-sizes : Vec Tree n → ℕ
-sizes = foldr′ size⊙ zero
+-- -- tree↣dyck : Tree ↣ Dyck zero
+-- -- tree↣dyck .fst = tree→dyck
+-- -- tree↣dyck .snd x y x₁ = {!!}
 
-reduce-suc : (xs : Vec Tree (suc (suc n))) → sizes (reduce xs) ≡ suc (sizes xs)
-reduce-suc (_ ∷ _ ∷ _) = refl
+-- -- dyck-conc : Dyck n → Dyck m → Dyck (n + m)
+-- -- dyck-conc done ys = ys
+-- -- dyck-conc (⟨ xs) ys = ⟨ dyck-conc xs ys
+-- -- dyck-conc (⟩ xs) ys = ⟩ dyck-conc xs ys
 
-size-rev⊙ : (d : Dyck n m) → (v : Vec Tree (suc k)) → m + sizes v ≡ sizes (dyck→tree⊙ v d)
-size-rev⊙ done  v = refl
-size-rev⊙ {n = n} {m = suc m} (⟨ d) v =
-  suc (m + sizes v) ≡⟨ cong suc (size-rev⊙ d v) ⟩
-  suc (sizes (dyck→tree⊙ v d)) ≡˘⟨ reduce-suc (dyck→tree⊙ v d) ⟩
-  sizes (reduce (dyck→tree⊙ v d)) ≡⟨⟩
-  sizes (dyck→tree⊙ v (⟨ d)) ∎
-size-rev⊙ {m = m} (⟩ d) v = size-rev⊙ d v
 
-size⊙-head : (v : Vec Tree 1) →  size (head v) ≡ sizes v
-size⊙-head (_ ∷ _) = refl
+-- -- dyck→tree→dyck⊙ : (d d′ : Dyck n) → tree→dyck⊙ (dyck→tree d) d′ ≡ dyck-conc d  d′
+-- -- dyck→tree→dyck⊙ xs done  d′ = {!!}
+-- -- dyck→tree→dyck⊙ xs (⟨ d) d′ = {!!}
+-- -- dyck→tree→dyck⊙ xs (⟩ d) d′ = {!!}
 
-size-rev : (d : Dyck zero n) → size (dyck→tree d) ≡ n
-size-rev {n = n} d =
-  size (dyck→tree d) ≡⟨⟩
-  size (head (dyck→tree⊙ (leaf ∷ []) d)) ≡⟨⟩
-  size (head (dyck→tree⊙ (leaf ∷ []) d)) ≡⟨ size⊙-head  (dyck→tree⊙ (leaf ∷ []) d) ⟩
-  sizes (dyck→tree⊙ (leaf ∷ []) d) ≡˘⟨ size-rev⊙ d (leaf ∷ []) ⟩
-  n + 0 ≡⟨ +-idʳ n ⟩
-  n ∎
-
---------------------------------------------------------------------------------
--- Trying to prove the other side of the inverse.
---
--- We can't prove
---
---   ∀ d → tree→dyck (dyck→tree d) ≡ d
---
--- in the normal way, for 2 reasons:
---
---   * The types don't match up, so we would have to prove a heterogeneous
---     equality (using something like size-rev).
---   * Paths in cubical Agda don't currently compute with indexed types like
---     Dyck, so a lot of the normal approaches won't actually type check
---     they rely on computation at some point.
---
--- This is why we have to try this other cumbersome method.
---------------------------------------------------------------------------------
-
-open import Data.List using (_∷_; [])
-
-to-bools : Dyck n m → List Bool
-to-bools done   = []
-to-bools (⟨ xs) = false ∷ to-bools xs
-to-bools (⟩ xs) = true  ∷ to-bools xs
-
--- dyck→tree→dyck′ : (d : Dyck 0 m) → to-bools (tree→dyck (dyck→tree d)) ≡ to-bools d
--- dyck→tree→dyck′ d = {!!}
+-- -- dyck→tree→dyck′ : (d : Dyck zero) → tree→dyck (dyck→tree d) ≡ d
+-- -- dyck→tree→dyck′ d = dyck→tree→dyck⊙ (leaf ∷ []) d done
