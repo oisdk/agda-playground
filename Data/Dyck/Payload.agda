@@ -19,134 +19,77 @@ private
     n m k : ℕ
 
 --------------------------------------------------------------------------------
--- Dyck words: definition and associated functions.
+-- Binary trees: definition and associated functions.
 --------------------------------------------------------------------------------
-
--- A suffix of a Dyck word.
--- The type Dyck n represents a string
--- of pairs of parentheses, and n extra closing parens.
-infixr 5 _⟨_ ⟩_
-data Dyck {a} (A : Type a) : ℕ → Type a where
-  done : Dyck A zero
-  _⟨_ : A → Dyck A (suc n) → Dyck A n
-  ⟩_ : Dyck A n → Dyck A (suc n)
-
--- -- Some examples
--- _ : Dyck 0
--- _ = ⟨ ⟩ ⟨ ⟩ ⟨ ⟩ done
-
--- _ : Dyck 1
--- _ = ⟩ ⟨ ⟩ ⟨ ⟩ done
-
--- -- A helper function to list all the dyck
--- -- words of a given size. (handy for i.e. testing)
--- support-dyck : ∀ (n m : ℕ) → List (Dyck n)
--- support-dyck = λ n m → sup-k n m id []
---   module ListDyck where
---   open import Data.List using (_∷_; [])
-
---   Diff : Type₀ → Type₁
---   Diff A = ∀ {B : Type₀} → (A → B) → List B → List B
-
---   mutual
---     sup-k : (n m : ℕ) → Diff (Dyck n)
---     sup-k n m k = end n m k ∘ lefts n m k ∘ rights n m k
-
---     lefts : (n m : ℕ) → Diff (Dyck n)
---     lefts n zero    k = id
---     lefts n (suc m) k = sup-k (suc n) m (k ∘ ⟨_)
-
---     rights : (n m : ℕ) → Diff (Dyck n)
---     rights (suc n) m k = sup-k n m (k ∘ ⟩_)
---     rights zero    m k = id
-
---     end : (n m : ℕ) → Diff (Dyck n)
---     end (suc _) _    k = id
---     end zero (suc _) k = id
---     end zero zero    k xs = k done ∷ xs
-
--- module _ {p} (P : ℕ → Type p)
---              (lbrack : ∀ {n} → P (suc n) → P n)
---              (rbrack : ∀ {n} → P n → P (suc n))
---              (base : P 0)
---              where
---   foldrDyck : Dyck n → P n
---   foldrDyck done = base
---   foldrDyck (⟨ x) = lbrack (foldrDyck x)
---   foldrDyck (⟩ x) = rbrack (foldrDyck x)
-
--- foldlDyck : ∀ {p} (P : ℕ → Type p)
---             (lbrack : ∀ {n} → P (suc n) → P n)
---             (rbrack : ∀ {n} → P n → P (suc n))
---             (base : P n) →
---             Dyck n → P zero
--- -- foldlDyck P lb rb bs xs = foldrDyck (λ n → P n → P zero) (λ k bs → k (rb bs)) (λ k bs → k (lb bs)) id xs bs
--- foldlDyck P lb rb bs done = bs
--- foldlDyck P lb rb bs (⟨ xs) = foldlDyck P lb rb (rb bs) xs
--- foldlDyck P lb rb bs (⟩ xs) = foldlDyck P lb rb (lb bs) xs
-
--- --------------------------------------------------------------------------------
--- -- Binary trees: definition and associated functions.
--- --------------------------------------------------------------------------------
 
 -- A basic binary tree type.
 data Tree (A : Type a) : Type a where
   [_] : A → Tree A
   _*_ : Tree A → Tree A → Tree A
 
--- -- Counts the number of branches in the tree
--- size⊙ : Tree → ℕ → ℕ
--- size⊙ leaf      = id
--- size⊙ (xs * ys) = suc ∘ size⊙ xs ∘ size⊙ ys
+-- Counts the number of branches in the tree
+size⊙ : Tree A → ℕ → ℕ
+size⊙ [ _ ]     = id
+size⊙ (xs * ys) = suc ∘ size⊙ xs ∘ size⊙ ys
 
--- size : Tree → ℕ
--- size t = size⊙ t zero
+size : Tree A → ℕ
+size t = size⊙ t zero
 
--- --------------------------------------------------------------------------------
--- -- Conversion between binary trees and Dyck words. (rightwards)
--- --------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Conversion between binary trees and Progs. (rightwards)
+--------------------------------------------------------------------------------
 
--- module Right where
---   tree→dyck⊙ : (t : Tree) → Dyck n → Dyck n
---   tree→dyck⊙ leaf      d = d
---   tree→dyck⊙ (xs * ys) d = ⟨ tree→dyck⊙ xs (⟩ tree→dyck⊙ ys d)
+module Right where
+  data Prog {a} (A : Type a) : ℕ → Type a where
+    halt : Prog A zero
+    push : Prog A (suc n) → Prog A n
+    pull : A → Prog A n → Prog A (suc n)
 
---   -- Tree to Dyck
---   tree→dyck : (t : Tree) → Dyck zero
---   tree→dyck t = tree→dyck⊙ t done
+  foldrProg : (P : ℕ → Type b) → (∀ {n} → P (suc n) → P n) → (∀ {n} → A → P n → P (suc n)) → P zero → Prog A n → P n
+  foldrProg P l r h halt        = h
+  foldrProg P l r h (push   ds) = l (foldrProg P l r h ds)
+  foldrProg P l r h (pull x ds) = r x (foldrProg P l r h ds)
 
---   reduce : Vec Tree (2 + n) → Vec Tree (suc n)
---   reduce (x ∷ y ∷ xs) = (x * y) ∷ xs
+  tree→prog⊙ : Tree A → Prog A n → A × Prog A n
+  tree→prog⊙ [ x ]     = x ,_
+  tree→prog⊙ (xs * ys) = map₂ push ∘ tree→prog⊙ xs ∘ uncurry pull ∘ tree→prog⊙ ys
 
---   shift : Vec Tree n → Vec Tree (suc n)
---   shift = leaf ∷_
+  -- Tree to Prog
+  tree→prog : Tree A → A × Prog A zero
+  tree→prog t = tree→prog⊙ t halt
 
---   dyck→tree⊙ : Vec Tree (suc k) → Dyck n → Vec Tree (suc n + k)
---   dyck→tree⊙ xs = foldrDyck (λ n → Vec Tree (suc n + _)) reduce shift xs
+  reduce : Vec (Tree A) (2 + n) → Vec (Tree A) (suc n)
+  reduce (x ∷ y ∷ xs) = (x * y) ∷ xs
 
---   -- Dyck to tree
---   dyck→tree : Dyck zero → Tree
---   dyck→tree = head ∘ dyck→tree⊙ (leaf ∷ [])
+  shift : A → Vec (Tree A) n → Vec (Tree A) (suc n)
+  shift x = [ x ] ∷_
 
---   dyck→tree→dyck-pop : ∀ (xs : Vec Tree (suc k)) (d : Dyck n) t → dyck→tree⊙ xs (tree→dyck⊙ t (⟩ d)) ≡ t ∷ dyck→tree⊙ xs d
---   dyck→tree→dyck-pop xs d leaf = refl
---   dyck→tree→dyck-pop xs d (ls * rs) =
---     dyck→tree⊙ xs (⟨ tree→dyck⊙ ls (⟩ tree→dyck⊙ rs (⟩ d)))        ≡⟨⟩
---     reduce (dyck→tree⊙ xs (tree→dyck⊙ ls (⟩ tree→dyck⊙ rs (⟩ d)))) ≡⟨ cong reduce (dyck→tree→dyck-pop xs (tree→dyck⊙ rs (⟩ d)) ls) ⟩
---     reduce (ls ∷ dyck→tree⊙ xs (tree→dyck⊙ rs (⟩ d)))              ≡⟨ cong reduce (cong (ls ∷_) (dyck→tree→dyck-pop xs d rs)) ⟩
---     reduce (ls ∷ rs ∷ dyck→tree⊙ xs d)                             ≡⟨⟩
---     (ls * rs) ∷ dyck→tree⊙ xs d ∎
+  prog→tree⊙ : Vec (Tree A) (suc k) → Prog A n → Vec (Tree A) (suc n + k)
+  prog→tree⊙ = foldrProg (λ n → Vec (Tree _) (suc n + _)) reduce shift
 
---   dyck→tree→dyck-push : ∀ t (xs : Vec Tree n) → dyck→tree⊙ (leaf ∷ xs) (tree→dyck t) ≡ t ∷ xs
---   dyck→tree→dyck-push leaf      xs = refl
---   dyck→tree→dyck-push (ls * rs) xs =
---     dyck→tree⊙ (leaf ∷ xs) (tree→dyck (ls * rs))                     ≡⟨⟩
---     reduce (dyck→tree⊙ (leaf ∷ xs) (tree→dyck⊙ ls (⟩ tree→dyck rs))) ≡⟨ cong reduce (dyck→tree→dyck-pop (leaf ∷ xs) (tree→dyck rs) ls ) ⟩
---     reduce (ls ∷ dyck→tree⊙ (leaf ∷ xs) (tree→dyck rs))              ≡⟨ cong reduce (cong (ls ∷_) (dyck→tree→dyck-push rs xs)) ⟩
+  -- Prog to tree
+  prog→tree : A × Prog A zero → Tree A
+  prog→tree (x , xs) = head (prog→tree⊙ ([ x ] ∷ []) xs)
+
+--   prog→tree→prog-pop : ∀ (xs : Vec Tree (suc k)) (d : Prog n) t → prog→tree⊙ xs (tree→prog⊙ t (⟩ d)) ≡ t ∷ prog→tree⊙ xs d
+--   prog→tree→prog-pop xs d leaf = refl
+--   prog→tree→prog-pop xs d (ls * rs) =
+--     prog→tree⊙ xs (⟨ tree→prog⊙ ls (⟩ tree→prog⊙ rs (⟩ d)))        ≡⟨⟩
+--     reduce (prog→tree⊙ xs (tree→prog⊙ ls (⟩ tree→prog⊙ rs (⟩ d)))) ≡⟨ cong reduce (prog→tree→prog-pop xs (tree→prog⊙ rs (⟩ d)) ls) ⟩
+--     reduce (ls ∷ prog→tree⊙ xs (tree→prog⊙ rs (⟩ d)))              ≡⟨ cong reduce (cong (ls ∷_) (prog→tree→prog-pop xs d rs)) ⟩
+--     reduce (ls ∷ rs ∷ prog→tree⊙ xs d)                             ≡⟨⟩
+--     (ls * rs) ∷ prog→tree⊙ xs d ∎
+
+--   prog→tree→prog-push : ∀ t (xs : Vec Tree n) → prog→tree⊙ (leaf ∷ xs) (tree→prog t) ≡ t ∷ xs
+--   prog→tree→prog-push leaf      xs = refl
+--   prog→tree→prog-push (ls * rs) xs =
+--     prog→tree⊙ (leaf ∷ xs) (tree→prog (ls * rs))                     ≡⟨⟩
+--     reduce (prog→tree⊙ (leaf ∷ xs) (tree→prog⊙ ls (⟩ tree→prog rs))) ≡⟨ cong reduce (prog→tree→prog-pop (leaf ∷ xs) (tree→prog rs) ls ) ⟩
+--     reduce (ls ∷ prog→tree⊙ (leaf ∷ xs) (tree→prog rs))              ≡⟨ cong reduce (cong (ls ∷_) (prog→tree→prog-push rs xs)) ⟩
 --     (ls * rs) ∷ xs ∎
 
---   dyck→tree→dyck : ∀ t → dyck→tree (tree→dyck t) ≡ t
---   dyck→tree→dyck t = cong head (dyck→tree→dyck-push t [])
+--   prog→tree→prog : ∀ t → prog→tree (tree→prog t) ≡ t
+--   prog→tree→prog t = cong head (prog→tree→prog-push t [])
 
 --   unreduce : Vec Tree (suc n) → Vec Tree (2 + n)
 --   unreduce (leaf ∷ xs) = leaf ∷ leaf ∷ xs
@@ -155,12 +98,11 @@ data Tree (A : Type a) : Type a where
 --   reduce-inj : {xs ys : Vec Tree (2 + n)} → reduce xs ≡ reduce ys → xs ≡ ys
 --   reduce-inj xs≡ys = cong unreduce xs≡ys
 
-
 --   sizes⊙ : Vec Tree n → ℕ → ℕ
 --   sizes⊙ xs n = foldr′ size⊙ n xs
 
---   lefts⊙ : Dyck n → ℕ → ℕ
---   lefts⊙ done n = n
+--   lefts⊙ : Prog n → ℕ → ℕ
+--   lefts⊙ halt n = n
 --   lefts⊙ (⟨ d) n = suc (lefts⊙ d n)
 --   lefts⊙ (⟩ d) n = lefts⊙ d n
 
@@ -170,47 +112,72 @@ data Tree (A : Type a) : Type a where
 --   reduce≢shift : {xs : Vec Tree (2 + n)} → {ys : Vec Tree n} → reduce xs ≢ shift ys
 --   reduce≢shift = snotz ∘ cong (size ∘ head)
 
---   sizes-lefts : (vs : Vec Tree (suc k)) → (xs : Dyck n) → sizes⊙ (dyck→tree⊙ vs xs) m ≡ lefts⊙ xs (sizes⊙ vs m)
---   sizes-lefts vs done   = refl
+--   sizes-lefts : (vs : Vec Tree (suc k)) → (xs : Prog n) → sizes⊙ (prog→tree⊙ vs xs) m ≡ lefts⊙ xs (sizes⊙ vs m)
+--   sizes-lefts vs halt   = refl
 --   sizes-lefts vs (⟨ xs) = cong suc (sizes-lefts vs xs)
 --   sizes-lefts vs (⟩ xs) = sizes-lefts vs xs
 
---   suc-distrib-lefts : ∀ n (x : Dyck m) → suc (lefts⊙ x n) ≡ lefts⊙ x (suc n)
---   suc-distrib-lefts n done = refl
+--   suc-distrib-lefts : ∀ n (x : Prog m) → suc (lefts⊙ x n) ≡ lefts⊙ x (suc n)
+--   suc-distrib-lefts n halt = refl
 --   suc-distrib-lefts n (⟨ x) = cong suc (suc-distrib-lefts n x)
 --   suc-distrib-lefts n (⟩ x) = suc-distrib-lefts n x
 
---   lefts-monot : ∀ n (x : Dyck m) → n ≢ suc (lefts⊙ x n)
+--   lefts-monot : ∀ n (x : Prog m) → n ≢ suc (lefts⊙ x n)
 --   lefts-monot zero x p = znots p
 --   lefts-monot (suc n) x p = lefts-monot n x (cong pred p ; sym (suc-distrib-lefts n x))
 
---   dyck→tree⊙-inj : (vs : Vec Tree (suc k)) → (xs ys : Dyck n) → dyck→tree⊙ vs xs ≡ dyck→tree⊙ vs ys → xs ≡ ys
---   dyck→tree⊙-inj vs done done xs≡ys = refl
---   dyck→tree⊙-inj vs (⟨ xs) (⟨ ys) xs≡ys = cong ⟨_ (dyck→tree⊙-inj vs xs ys (reduce-inj xs≡ys))
---   dyck→tree⊙-inj vs (⟩ xs) (⟩ ys) xs≡ys = cong ⟩_ (dyck→tree⊙-inj vs xs ys (cong tail xs≡ys))
---   dyck→tree⊙-inj vs done (⟨ ys) xs≡ys = ⊥-elim (lefts-monot (sizes vs) ys (cong sizes xs≡ys ; sizes-lefts vs (⟨ ys)))
---   dyck→tree⊙-inj vs (⟨ xs) done xs≡ys = ⊥-elim (lefts-monot (sizes vs) xs (cong sizes (sym xs≡ys) ; sizes-lefts vs (⟨ xs)))
---   dyck→tree⊙-inj vs (⟨ xs) (⟩ ys) xs≡ys = ⊥-elim (reduce≢shift xs≡ys)
---   dyck→tree⊙-inj vs (⟩ xs) (⟨ ys) xs≡ys = ⊥-elim (reduce≢shift (sym xs≡ys))
+--   prog→tree⊙-inj : (vs : Vec Tree (suc k)) → (xs ys : Prog n) → prog→tree⊙ vs xs ≡ prog→tree⊙ vs ys → xs ≡ ys
+--   prog→tree⊙-inj vs halt halt xs≡ys = refl
+--   prog→tree⊙-inj vs (⟨ xs) (⟨ ys) xs≡ys = cong ⟨_ (prog→tree⊙-inj vs xs ys (reduce-inj xs≡ys))
+--   prog→tree⊙-inj vs (⟩ xs) (⟩ ys) xs≡ys = cong pull (prog→tree⊙-inj vs xs ys (cong tail xs≡ys))
+--   prog→tree⊙-inj vs halt (⟨ ys) xs≡ys = ⊥-elim (lefts-monot (sizes vs) ys (cong sizes xs≡ys ; sizes-lefts vs (⟨ ys)))
+--   prog→tree⊙-inj vs (⟨ xs) halt xs≡ys = ⊥-elim (lefts-monot (sizes vs) xs (cong sizes (sym xs≡ys) ; sizes-lefts vs (⟨ xs)))
+--   prog→tree⊙-inj vs (⟨ xs) (⟩ ys) xs≡ys = ⊥-elim (reduce≢shift xs≡ys)
+--   prog→tree⊙-inj vs (⟩ xs) (⟨ ys) xs≡ys = ⊥-elim (reduce≢shift (sym xs≡ys))
 
---   dyck→tree-inj : (xs ys : Dyck 0) → dyck→tree xs ≡ dyck→tree ys → xs ≡ ys
---   dyck→tree-inj xs ys xs≡ys = dyck→tree⊙-inj (leaf ∷ []) xs ys (cong (_∷ []) xs≡ys)
+--   prog→tree-inj : (xs ys : Prog 0) → prog→tree xs ≡ prog→tree ys → xs ≡ ys
+--   prog→tree-inj xs ys xs≡ys = prog→tree⊙-inj (leaf ∷ []) xs ys (cong (_∷ []) xs≡ys)
 
---   dyck⇔tree : Dyck 0 ⇔ Tree
---   dyck⇔tree = surj×inj⇒iso dyck→tree (λ y → tree→dyck y , dyck→tree→dyck y) dyck→tree-inj
+--   prog⇔tree : Prog 0 ⇔ Tree
+--   prog⇔tree = surj×inj⇒iso prog→tree (λ y → tree→prog y , prog→tree→prog y) prog→tree-inj
 
 module Left where
-  dyck→tree⊙ : Dyck A n → Vec (Tree A) (1 + n) → Vec (Tree A) 1
-  dyck→tree⊙ done                s  = s
-  dyck→tree⊙ (x ⟨ ds)            s  = dyck→tree⊙ ds ([ x ] ∷ s)
-  dyck→tree⊙ (  ⟩ ds) (t₁ ∷ t₂ ∷ s) = dyck→tree⊙ ds ((t₂ * t₁) ∷ s)
 
-  dyck→tree : A × Dyck A zero → Tree A
-  dyck→tree (x , ds) = head (dyck→tree⊙ ds ([ x ] ∷ []))
+  data Prog {a} (A : Type a) : ℕ → Type a where
+    halt : Prog A zero
+    push : A → Prog A (suc n) → Prog A n
+    pull : Prog A n → Prog A (suc n)
 
-  tree→dyck⊙ : Tree A → Dyck A n → A × Dyck A n
-  tree→dyck⊙ [ x ]     d = x , d
-  tree→dyck⊙ (xs * ys) d = tree→dyck⊙ xs (uncurry _⟨_ (tree→dyck⊙ ys (⟩ d)))
+  foldlProg : ∀ {p} (P : ℕ → Type p)
+              (lbrack : ∀ {n} → P (suc n) → P n)
+              (rbrack : ∀ {n} → A → P n → P (suc n))
+              (base : P n) →
+              Prog A n → P zero
+  foldlProg P lb rb bs halt = bs
+  foldlProg P lb rb bs (push x xs) = foldlProg P lb rb (rb x bs) xs
+  foldlProg P lb rb bs (pull   xs) = foldlProg P lb rb (lb bs) xs
+  -- In terms of foldr:
+  -- foldlProg P lb rb bs xs = foldrProg (λ n → P n → P zero) (λ x k bs → k (rb x bs)) (λ k bs → k (lb bs)) id xs bs
 
-  tree→dyck : Tree A → A × Dyck A zero
-  tree→dyck tr = tree→dyck⊙ tr done
+  reduce : Vec (Tree A) (2 + n) → Vec (Tree A) (1 + n)
+  reduce (t₁ ∷ t₂ ∷ s) = (t₂ * t₁) ∷ s
+
+  shift : A → Vec (Tree A) n → Vec (Tree A) (1 + n)
+  shift x s = [ x ] ∷ s
+
+  prog→tree⊙ : Prog A n → Vec (Tree A) (1 + n) → Vec (Tree A) 1
+  prog→tree⊙ p s = foldlProg (λ n → Vec (Tree _) (1 + n)) reduce shift s p
+
+  -- prog→tree⊙ halt                   s  = s
+  -- prog→tree⊙ (push x ds)            s  = prog→tree⊙ ds ([ x ] ∷ s)
+  -- prog→tree⊙ (pull   ds) (t₁ ∷ t₂ ∷ s) = prog→tree⊙ ds ((t₂ * t₁) ∷ s)
+
+  prog→tree : A × Prog A zero → Tree A
+  prog→tree (x , ds) = head (prog→tree⊙ ds ([ x ] ∷ []))
+
+  tree→prog⊙ : Tree A → Prog A n → A × Prog A n
+  tree→prog⊙ [ x ]     = x ,_
+  tree→prog⊙ (xs * ys) = tree→prog⊙ xs ∘ uncurry push ∘ tree→prog⊙ ys ∘ pull
+
+  tree→prog : Tree A → A × Prog A zero
+  tree→prog tr = tree→prog⊙ tr halt
