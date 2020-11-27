@@ -1,0 +1,218 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.Dyck.Payload</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Pragma">--postfix-projections</a> <a id="52" class="Symbol">#-}</a>
+
+<a id="57" class="Comment">-- This module defines a data type for balanced strings of parentheses,</a>
+<a id="129" class="Comment">-- which is isomorphic to binary trees.</a>
+
+<a id="170" class="Keyword">module</a> <a id="177" href="Data.Dyck.Payload.html" class="Module">Data.Dyck.Payload</a> <a id="195" class="Keyword">where</a>
+
+<a id="202" class="Keyword">open</a> <a id="207" class="Keyword">import</a> <a id="214" href="Prelude.html" class="Module">Prelude</a>
+<a id="222" class="Keyword">open</a> <a id="227" class="Keyword">import</a> <a id="234" href="Data.List.html" class="Module">Data.List</a> <a id="244" class="Keyword">using</a> <a id="250" class="Symbol">(</a><a id="251" href="Agda.Builtin.List.html#148" class="Datatype">List</a><a id="255" class="Symbol">)</a>
+<a id="257" class="Keyword">open</a> <a id="262" class="Keyword">import</a> <a id="269" href="Data.Nat.html" class="Module">Data.Nat</a> <a id="278" class="Keyword">using</a> <a id="284" class="Symbol">(</a><a id="285" href="Agda.Builtin.Nat.html#325" class="Primitive Operator">_+_</a><a id="288" class="Symbol">)</a>
+<a id="290" class="Keyword">open</a> <a id="295" class="Keyword">import</a> <a id="302" href="Path.Reasoning.html" class="Module">Path.Reasoning</a>
+<a id="317" class="Keyword">open</a> <a id="322" class="Keyword">import</a> <a id="329" href="Function.Surjective.html" class="Module">Function.Surjective</a>
+<a id="349" class="Keyword">open</a> <a id="354" class="Keyword">import</a> <a id="361" href="Function.Injective.html" class="Module">Function.Injective</a>
+<a id="380" class="Keyword">open</a> <a id="385" class="Keyword">import</a> <a id="392" href="Data.Nat.Properties.html" class="Module">Data.Nat.Properties</a> <a id="412" class="Keyword">using</a> <a id="418" class="Symbol">(</a><a id="419" href="Cubical.Data.Nat.Properties.html#453" class="Function">snotz</a><a id="424" class="Symbol">;</a> <a id="426" href="Cubical.Data.Nat.Properties.html#394" class="Function">znots</a><a id="431" class="Symbol">;</a> <a id="433" href="Data.Nat.Properties.html#272" class="Function">pred</a><a id="437" class="Symbol">)</a>
+<a id="439" class="Keyword">open</a> <a id="444" class="Keyword">import</a> <a id="451" href="Data.Vec.Iterated.html" class="Module">Data.Vec.Iterated</a>
+
+<a id="470" class="Keyword">private</a>
+  <a id="480" class="Keyword">variable</a>
+    <a id="493" href="Data.Dyck.Payload.html#493" class="Generalizable">n</a> <a id="495" href="Data.Dyck.Payload.html#495" class="Generalizable">m</a> <a id="497" href="Data.Dyck.Payload.html#497" class="Generalizable">k</a> <a id="499" class="Symbol">:</a> <a id="501" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a>
+
+<a id="504" class="Comment">--------------------------------------------------------------------------------</a>
+<a id="585" class="Comment">-- Dyck words: definition and associated functions.</a>
+<a id="637" class="Comment">--------------------------------------------------------------------------------</a>
+
+<a id="719" class="Comment">-- A suffix of a Dyck word.</a>
+<a id="747" class="Comment">-- The type Dyck n represents a string</a>
+<a id="786" class="Comment">-- of pairs of parentheses, and n extra closing parens.</a>
+<a id="842" class="Keyword">infixr</a> <a id="849" class="Number">5</a> <a id="851" href="Data.Dyck.Payload.html#927" class="InductiveConstructor Operator">_⟨_</a> <a id="855" href="Data.Dyck.Payload.html#965" class="InductiveConstructor Operator">⟩_</a>
+<a id="858" class="Keyword">data</a> <a id="Dyck"></a><a id="863" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="868" class="Symbol">{</a><a id="869" href="Data.Dyck.Payload.html#869" class="Bound">a</a><a id="870" class="Symbol">}</a> <a id="872" class="Symbol">(</a><a id="873" href="Data.Dyck.Payload.html#873" class="Bound">A</a> <a id="875" class="Symbol">:</a> <a id="877" href="Level.html#192" class="Function">Type</a> <a id="882" href="Data.Dyck.Payload.html#869" class="Bound">a</a><a id="883" class="Symbol">)</a> <a id="885" class="Symbol">:</a> <a id="887" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="889" class="Symbol">→</a> <a id="891" href="Level.html#192" class="Function">Type</a> <a id="896" href="Data.Dyck.Payload.html#869" class="Bound">a</a> <a id="898" class="Keyword">where</a>
+  <a id="Dyck.done"></a><a id="906" href="Data.Dyck.Payload.html#906" class="InductiveConstructor">done</a> <a id="911" class="Symbol">:</a> <a id="913" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="918" href="Data.Dyck.Payload.html#873" class="Bound">A</a> <a id="920" href="Agda.Builtin.Nat.html#210" class="InductiveConstructor">zero</a>
+  <a id="Dyck._⟨_"></a><a id="927" href="Data.Dyck.Payload.html#927" class="InductiveConstructor Operator">_⟨_</a> <a id="931" class="Symbol">:</a> <a id="933" href="Data.Dyck.Payload.html#873" class="Bound">A</a> <a id="935" class="Symbol">→</a> <a id="937" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="942" href="Data.Dyck.Payload.html#873" class="Bound">A</a> <a id="944" class="Symbol">(</a><a id="945" href="Agda.Builtin.Nat.html#223" class="InductiveConstructor">suc</a> <a id="949" href="Data.Dyck.Payload.html#493" class="Generalizable">n</a><a id="950" class="Symbol">)</a> <a id="952" class="Symbol">→</a> <a id="954" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="959" href="Data.Dyck.Payload.html#873" class="Bound">A</a> <a id="961" href="Data.Dyck.Payload.html#493" class="Generalizable">n</a>
+  <a id="Dyck.⟩_"></a><a id="965" href="Data.Dyck.Payload.html#965" class="InductiveConstructor Operator">⟩_</a> <a id="968" class="Symbol">:</a> <a id="970" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="975" href="Data.Dyck.Payload.html#873" class="Bound">A</a> <a id="977" href="Data.Dyck.Payload.html#493" class="Generalizable">n</a> <a id="979" class="Symbol">→</a> <a id="981" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="986" href="Data.Dyck.Payload.html#873" class="Bound">A</a> <a id="988" class="Symbol">(</a><a id="989" href="Agda.Builtin.Nat.html#223" class="InductiveConstructor">suc</a> <a id="993" href="Data.Dyck.Payload.html#493" class="Generalizable">n</a><a id="994" class="Symbol">)</a>
+
+<a id="997" class="Comment">-- -- Some examples</a>
+<a id="1017" class="Comment">-- _ : Dyck 0</a>
+<a id="1031" class="Comment">-- _ = ⟨ ⟩ ⟨ ⟩ ⟨ ⟩ done</a>
+
+<a id="1056" class="Comment">-- _ : Dyck 1</a>
+<a id="1070" class="Comment">-- _ = ⟩ ⟨ ⟩ ⟨ ⟩ done</a>
+
+<a id="1093" class="Comment">-- -- A helper function to list all the dyck</a>
+<a id="1138" class="Comment">-- -- words of a given size. (handy for i.e. testing)</a>
+<a id="1192" class="Comment">-- support-dyck : ∀ (n m : ℕ) → List (Dyck n)</a>
+<a id="1238" class="Comment">-- support-dyck = λ n m → sup-k n m id []</a>
+<a id="1280" class="Comment">--   module ListDyck where</a>
+<a id="1307" class="Comment">--   open import Data.List using (_∷_; [])</a>
+
+<a id="1351" class="Comment">--   Diff : Type₀ → Type₁</a>
+<a id="1377" class="Comment">--   Diff A = ∀ {B : Type₀} → (A → B) → List B → List B</a>
+
+<a id="1434" class="Comment">--   mutual</a>
+<a id="1446" class="Comment">--     sup-k : (n m : ℕ) → Diff (Dyck n)</a>
+<a id="1487" class="Comment">--     sup-k n m k = end n m k ∘ lefts n m k ∘ rights n m k</a>
+
+<a id="1548" class="Comment">--     lefts : (n m : ℕ) → Diff (Dyck n)</a>
+<a id="1589" class="Comment">--     lefts n zero    k = id</a>
+<a id="1619" class="Comment">--     lefts n (suc m) k = sup-k (suc n) m (k ∘ ⟨_)</a>
+
+<a id="1672" class="Comment">--     rights : (n m : ℕ) → Diff (Dyck n)</a>
+<a id="1714" class="Comment">--     rights (suc n) m k = sup-k n m (k ∘ ⟩_)</a>
+<a id="1761" class="Comment">--     rights zero    m k = id</a>
+
+<a id="1793" class="Comment">--     end : (n m : ℕ) → Diff (Dyck n)</a>
+<a id="1832" class="Comment">--     end (suc _) _    k = id</a>
+<a id="1863" class="Comment">--     end zero (suc _) k = id</a>
+<a id="1894" class="Comment">--     end zero zero    k xs = k done ∷ xs</a>
+
+<a id="1938" class="Comment">-- module _ {p} (P : ℕ → Type p)</a>
+<a id="1971" class="Comment">--              (lbrack : ∀ {n} → P (suc n) → P n)</a>
+<a id="2022" class="Comment">--              (rbrack : ∀ {n} → P n → P (suc n))</a>
+<a id="2073" class="Comment">--              (base : P 0)</a>
+<a id="2102" class="Comment">--              where</a>
+<a id="2124" class="Comment">--   foldrDyck : Dyck n → P n</a>
+<a id="2154" class="Comment">--   foldrDyck done = base</a>
+<a id="2181" class="Comment">--   foldrDyck (⟨ x) = lbrack (foldrDyck x)</a>
+<a id="2225" class="Comment">--   foldrDyck (⟩ x) = rbrack (foldrDyck x)</a>
+
+<a id="2270" class="Comment">-- foldlDyck : ∀ {p} (P : ℕ → Type p)</a>
+<a id="2308" class="Comment">--             (lbrack : ∀ {n} → P (suc n) → P n)</a>
+<a id="2358" class="Comment">--             (rbrack : ∀ {n} → P n → P (suc n))</a>
+<a id="2408" class="Comment">--             (base : P n) →</a>
+<a id="2438" class="Comment">--             Dyck n → P zero</a>
+<a id="2469" class="Comment">-- -- foldlDyck P lb rb bs xs = foldrDyck (λ n → P n → P zero) (λ k bs → k (rb bs)) (λ k bs → k (lb bs)) id xs bs</a>
+<a id="2583" class="Comment">-- foldlDyck P lb rb bs done = bs</a>
+<a id="2617" class="Comment">-- foldlDyck P lb rb bs (⟨ xs) = foldlDyck P lb rb (rb bs) xs</a>
+<a id="2679" class="Comment">-- foldlDyck P lb rb bs (⟩ xs) = foldlDyck P lb rb (lb bs) xs</a>
+
+<a id="2742" class="Comment">-- --------------------------------------------------------------------------------</a>
+<a id="2826" class="Comment">-- -- Binary trees: definition and associated functions.</a>
+<a id="2883" class="Comment">-- --------------------------------------------------------------------------------</a>
+
+<a id="2968" class="Comment">-- A basic binary tree type.</a>
+<a id="2997" class="Keyword">data</a> <a id="Tree"></a><a id="3002" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="3007" class="Symbol">(</a><a id="3008" href="Data.Dyck.Payload.html#3008" class="Bound">A</a> <a id="3010" class="Symbol">:</a> <a id="3012" href="Level.html#192" class="Function">Type</a> <a id="3017" href="Level.html#372" class="Generalizable">a</a><a id="3018" class="Symbol">)</a> <a id="3020" class="Symbol">:</a> <a id="3022" href="Level.html#192" class="Function">Type</a> <a id="3027" href="Data.Dyck.Payload.html#3017" class="Bound">a</a> <a id="3029" class="Keyword">where</a>
+  <a id="Tree.[_]"></a><a id="3037" href="Data.Dyck.Payload.html#3037" class="InductiveConstructor Operator">[_]</a> <a id="3041" class="Symbol">:</a> <a id="3043" href="Data.Dyck.Payload.html#3008" class="Bound">A</a> <a id="3045" class="Symbol">→</a> <a id="3047" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="3052" href="Data.Dyck.Payload.html#3008" class="Bound">A</a>
+  <a id="Tree._*_"></a><a id="3056" href="Data.Dyck.Payload.html#3056" class="InductiveConstructor Operator">_*_</a> <a id="3060" class="Symbol">:</a> <a id="3062" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="3067" href="Data.Dyck.Payload.html#3008" class="Bound">A</a> <a id="3069" class="Symbol">→</a> <a id="3071" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="3076" href="Data.Dyck.Payload.html#3008" class="Bound">A</a> <a id="3078" class="Symbol">→</a> <a id="3080" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="3085" href="Data.Dyck.Payload.html#3008" class="Bound">A</a>
+
+<a id="3088" class="Comment">-- -- Counts the number of branches in the tree</a>
+<a id="3136" class="Comment">-- size⊙ : Tree → ℕ → ℕ</a>
+<a id="3160" class="Comment">-- size⊙ leaf      = id</a>
+<a id="3184" class="Comment">-- size⊙ (xs * ys) = suc ∘ size⊙ xs ∘ size⊙ ys</a>
+
+<a id="3232" class="Comment">-- size : Tree → ℕ</a>
+<a id="3251" class="Comment">-- size t = size⊙ t zero</a>
+
+<a id="3277" class="Comment">-- --------------------------------------------------------------------------------</a>
+<a id="3361" class="Comment">-- -- Conversion between binary trees and Dyck words. (rightwards)</a>
+<a id="3428" class="Comment">-- --------------------------------------------------------------------------------</a>
+
+<a id="3513" class="Comment">-- module Right where</a>
+<a id="3535" class="Comment">--   tree→dyck⊙ : (t : Tree) → Dyck n → Dyck n</a>
+<a id="3582" class="Comment">--   tree→dyck⊙ leaf      d = d</a>
+<a id="3614" class="Comment">--   tree→dyck⊙ (xs * ys) d = ⟨ tree→dyck⊙ xs (⟩ tree→dyck⊙ ys d)</a>
+
+<a id="3681" class="Comment">--   -- Tree to Dyck</a>
+<a id="3702" class="Comment">--   tree→dyck : (t : Tree) → Dyck zero</a>
+<a id="3742" class="Comment">--   tree→dyck t = tree→dyck⊙ t done</a>
+
+<a id="3780" class="Comment">--   reduce : Vec Tree (2 + n) → Vec Tree (suc n)</a>
+<a id="3830" class="Comment">--   reduce (x ∷ y ∷ xs) = (x * y) ∷ xs</a>
+
+<a id="3871" class="Comment">--   shift : Vec Tree n → Vec Tree (suc n)</a>
+<a id="3914" class="Comment">--   shift = leaf ∷_</a>
+
+<a id="3936" class="Comment">--   dyck→tree⊙ : Vec Tree (suc k) → Dyck n → Vec Tree (suc n + k)</a>
+<a id="4003" class="Comment">--   dyck→tree⊙ xs = foldrDyck (λ n → Vec Tree (suc n + _)) reduce shift xs</a>
+
+<a id="4080" class="Comment">--   -- Dyck to tree</a>
+<a id="4101" class="Comment">--   dyck→tree : Dyck zero → Tree</a>
+<a id="4135" class="Comment">--   dyck→tree = head ∘ dyck→tree⊙ (leaf ∷ [])</a>
+
+<a id="4183" class="Comment">--   dyck→tree→dyck-pop : ∀ (xs : Vec Tree (suc k)) (d : Dyck n) t → dyck→tree⊙ xs (tree→dyck⊙ t (⟩ d)) ≡ t ∷ dyck→tree⊙ xs d</a>
+<a id="4309" class="Comment">--   dyck→tree→dyck-pop xs d leaf = refl</a>
+<a id="4350" class="Comment">--   dyck→tree→dyck-pop xs d (ls * rs) =</a>
+<a id="4391" class="Comment">--     dyck→tree⊙ xs (⟨ tree→dyck⊙ ls (⟩ tree→dyck⊙ rs (⟩ d)))        ≡⟨⟩</a>
+<a id="4465" class="Comment">--     reduce (dyck→tree⊙ xs (tree→dyck⊙ ls (⟩ tree→dyck⊙ rs (⟩ d)))) ≡⟨ cong reduce (dyck→tree→dyck-pop xs (tree→dyck⊙ rs (⟩ d)) ls) ⟩</a>
+<a id="4601" class="Comment">--     reduce (ls ∷ dyck→tree⊙ xs (tree→dyck⊙ rs (⟩ d)))              ≡⟨ cong reduce (cong (ls ∷_) (dyck→tree→dyck-pop xs d rs)) ⟩</a>
+<a id="4732" class="Comment">--     reduce (ls ∷ rs ∷ dyck→tree⊙ xs d)                             ≡⟨⟩</a>
+<a id="4806" class="Comment">--     (ls * rs) ∷ dyck→tree⊙ xs d ∎</a>
+
+<a id="4844" class="Comment">--   dyck→tree→dyck-push : ∀ t (xs : Vec Tree n) → dyck→tree⊙ (leaf ∷ xs) (tree→dyck t) ≡ t ∷ xs</a>
+<a id="4941" class="Comment">--   dyck→tree→dyck-push leaf      xs = refl</a>
+<a id="4986" class="Comment">--   dyck→tree→dyck-push (ls * rs) xs =</a>
+<a id="5026" class="Comment">--     dyck→tree⊙ (leaf ∷ xs) (tree→dyck (ls * rs))                     ≡⟨⟩</a>
+<a id="5102" class="Comment">--     reduce (dyck→tree⊙ (leaf ∷ xs) (tree→dyck⊙ ls (⟩ tree→dyck rs))) ≡⟨ cong reduce (dyck→tree→dyck-pop (leaf ∷ xs) (tree→dyck rs) ls ) ⟩</a>
+<a id="5243" class="Comment">--     reduce (ls ∷ dyck→tree⊙ (leaf ∷ xs) (tree→dyck rs))              ≡⟨ cong reduce (cong (ls ∷_) (dyck→tree→dyck-push rs xs)) ⟩</a>
+<a id="5375" class="Comment">--     (ls * rs) ∷ xs ∎</a>
+
+<a id="5400" class="Comment">--   dyck→tree→dyck : ∀ t → dyck→tree (tree→dyck t) ≡ t</a>
+<a id="5456" class="Comment">--   dyck→tree→dyck t = cong head (dyck→tree→dyck-push t [])</a>
+
+<a id="5518" class="Comment">--   unreduce : Vec Tree (suc n) → Vec Tree (2 + n)</a>
+<a id="5570" class="Comment">--   unreduce (leaf ∷ xs) = leaf ∷ leaf ∷ xs</a>
+<a id="5615" class="Comment">--   unreduce ((x₁ * x₂) ∷ xs) = x₁ ∷ x₂ ∷ xs</a>
+
+<a id="5662" class="Comment">--   reduce-inj : {xs ys : Vec Tree (2 + n)} → reduce xs ≡ reduce ys → xs ≡ ys</a>
+<a id="5741" class="Comment">--   reduce-inj xs≡ys = cong unreduce xs≡ys</a>
+
+
+<a id="5787" class="Comment">--   sizes⊙ : Vec Tree n → ℕ → ℕ</a>
+<a id="5820" class="Comment">--   sizes⊙ xs n = foldr′ size⊙ n xs</a>
+
+<a id="5858" class="Comment">--   lefts⊙ : Dyck n → ℕ → ℕ</a>
+<a id="5887" class="Comment">--   lefts⊙ done n = n</a>
+<a id="5910" class="Comment">--   lefts⊙ (⟨ d) n = suc (lefts⊙ d n)</a>
+<a id="5949" class="Comment">--   lefts⊙ (⟩ d) n = lefts⊙ d n</a>
+
+<a id="5983" class="Comment">--   sizes : Vec Tree n → ℕ</a>
+<a id="6011" class="Comment">--   sizes xs = sizes⊙ xs 0</a>
+
+<a id="6040" class="Comment">--   reduce≢shift : {xs : Vec Tree (2 + n)} → {ys : Vec Tree n} → reduce xs ≢ shift ys</a>
+<a id="6127" class="Comment">--   reduce≢shift = snotz ∘ cong (size ∘ head)</a>
+
+<a id="6175" class="Comment">--   sizes-lefts : (vs : Vec Tree (suc k)) → (xs : Dyck n) → sizes⊙ (dyck→tree⊙ vs xs) m ≡ lefts⊙ xs (sizes⊙ vs m)</a>
+<a id="6290" class="Comment">--   sizes-lefts vs done   = refl</a>
+<a id="6324" class="Comment">--   sizes-lefts vs (⟨ xs) = cong suc (sizes-lefts vs xs)</a>
+<a id="6382" class="Comment">--   sizes-lefts vs (⟩ xs) = sizes-lefts vs xs</a>
+
+<a id="6430" class="Comment">--   suc-distrib-lefts : ∀ n (x : Dyck m) → suc (lefts⊙ x n) ≡ lefts⊙ x (suc n)</a>
+<a id="6510" class="Comment">--   suc-distrib-lefts n done = refl</a>
+<a id="6547" class="Comment">--   suc-distrib-lefts n (⟨ x) = cong suc (suc-distrib-lefts n x)</a>
+<a id="6613" class="Comment">--   suc-distrib-lefts n (⟩ x) = suc-distrib-lefts n x</a>
+
+<a id="6669" class="Comment">--   lefts-monot : ∀ n (x : Dyck m) → n ≢ suc (lefts⊙ x n)</a>
+<a id="6728" class="Comment">--   lefts-monot zero x p = znots p</a>
+<a id="6764" class="Comment">--   lefts-monot (suc n) x p = lefts-monot n x (cong pred p ; sym (suc-distrib-lefts n x))</a>
+
+<a id="6856" class="Comment">--   dyck→tree⊙-inj : (vs : Vec Tree (suc k)) → (xs ys : Dyck n) → dyck→tree⊙ vs xs ≡ dyck→tree⊙ vs ys → xs ≡ ys</a>
+<a id="6969" class="Comment">--   dyck→tree⊙-inj vs done done xs≡ys = refl</a>
+<a id="7015" class="Comment">--   dyck→tree⊙-inj vs (⟨ xs) (⟨ ys) xs≡ys = cong ⟨_ (dyck→tree⊙-inj vs xs ys (reduce-inj xs≡ys))</a>
+<a id="7113" class="Comment">--   dyck→tree⊙-inj vs (⟩ xs) (⟩ ys) xs≡ys = cong ⟩_ (dyck→tree⊙-inj vs xs ys (cong tail xs≡ys))</a>
+<a id="7210" class="Comment">--   dyck→tree⊙-inj vs done (⟨ ys) xs≡ys = ⊥-elim (lefts-monot (sizes vs) ys (cong sizes xs≡ys ; sizes-lefts vs (⟨ ys)))</a>
+<a id="7331" class="Comment">--   dyck→tree⊙-inj vs (⟨ xs) done xs≡ys = ⊥-elim (lefts-monot (sizes vs) xs (cong sizes (sym xs≡ys) ; sizes-lefts vs (⟨ xs)))</a>
+<a id="7458" class="Comment">--   dyck→tree⊙-inj vs (⟨ xs) (⟩ ys) xs≡ys = ⊥-elim (reduce≢shift xs≡ys)</a>
+<a id="7531" class="Comment">--   dyck→tree⊙-inj vs (⟩ xs) (⟨ ys) xs≡ys = ⊥-elim (reduce≢shift (sym xs≡ys))</a>
+
+<a id="7611" class="Comment">--   dyck→tree-inj : (xs ys : Dyck 0) → dyck→tree xs ≡ dyck→tree ys → xs ≡ ys</a>
+<a id="7689" class="Comment">--   dyck→tree-inj xs ys xs≡ys = dyck→tree⊙-inj (leaf ∷ []) xs ys (cong (_∷ []) xs≡ys)</a>
+
+<a id="7777" class="Comment">--   dyck⇔tree : Dyck 0 ⇔ Tree</a>
+<a id="7808" class="Comment">--   dyck⇔tree = surj×inj⇒iso dyck→tree (λ y → tree→dyck y , dyck→tree→dyck y) dyck→tree-inj</a>
+
+<a id="7902" class="Keyword">module</a> <a id="Left"></a><a id="7909" href="Data.Dyck.Payload.html#7909" class="Module">Left</a> <a id="7914" class="Keyword">where</a>
+  <a id="Left.dyck→tree⊙"></a><a id="7922" href="Data.Dyck.Payload.html#7922" class="Function">dyck→tree⊙</a> <a id="7933" class="Symbol">:</a> <a id="7935" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="7940" href="Level.html#388" class="Generalizable">A</a> <a id="7942" href="Data.Dyck.Payload.html#493" class="Generalizable">n</a> <a id="7944" class="Symbol">→</a> <a id="7946" href="Data.Vec.Iterated.html#250" class="Function">Vec</a> <a id="7950" class="Symbol">(</a><a id="7951" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="7956" href="Level.html#388" class="Generalizable">A</a><a id="7957" class="Symbol">)</a> <a id="7959" class="Symbol">(</a><a id="7960" class="Number">1</a> <a id="7962" href="Agda.Builtin.Nat.html#325" class="Primitive Operator">+</a> <a id="7964" href="Data.Dyck.Payload.html#493" class="Generalizable">n</a><a id="7965" class="Symbol">)</a> <a id="7967" class="Symbol">→</a> <a id="7969" href="Data.Vec.Iterated.html#250" class="Function">Vec</a> <a id="7973" class="Symbol">(</a><a id="7974" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="7979" href="Level.html#388" class="Generalizable">A</a><a id="7980" class="Symbol">)</a> <a id="7982" class="Number">1</a>
+  <a id="7986" href="Data.Dyck.Payload.html#7922" class="Function">dyck→tree⊙</a> <a id="7997" href="Data.Dyck.Payload.html#906" class="InductiveConstructor">done</a>                <a id="8017" href="Data.Dyck.Payload.html#8017" class="Bound">s</a>  <a id="8020" class="Symbol">=</a> <a id="8022" href="Data.Dyck.Payload.html#8017" class="Bound">s</a>
+  <a id="8026" href="Data.Dyck.Payload.html#7922" class="Function">dyck→tree⊙</a> <a id="8037" class="Symbol">(</a><a id="8038" href="Data.Dyck.Payload.html#8038" class="Bound">x</a> <a id="8040" href="Data.Dyck.Payload.html#927" class="InductiveConstructor Operator">⟨</a> <a id="8042" href="Data.Dyck.Payload.html#8042" class="Bound">ds</a><a id="8044" class="Symbol">)</a>            <a id="8057" href="Data.Dyck.Payload.html#8057" class="Bound">s</a>  <a id="8060" class="Symbol">=</a> <a id="8062" href="Data.Dyck.Payload.html#7922" class="Function">dyck→tree⊙</a> <a id="8073" href="Data.Dyck.Payload.html#8042" class="Bound">ds</a> <a id="8076" class="Symbol">(</a><a id="8077" href="Data.Dyck.Payload.html#3037" class="InductiveConstructor Operator">[</a> <a id="8079" href="Data.Dyck.Payload.html#8038" class="Bound">x</a> <a id="8081" href="Data.Dyck.Payload.html#3037" class="InductiveConstructor Operator">]</a> <a id="8083" href="Data.Vec.Iterated.html#499" class="InductiveConstructor Operator">∷</a> <a id="8085" href="Data.Dyck.Payload.html#8057" class="Bound">s</a><a id="8086" class="Symbol">)</a>
+  <a id="8090" href="Data.Dyck.Payload.html#7922" class="Function">dyck→tree⊙</a> <a id="8101" class="Symbol">(</a>  <a id="8104" href="Data.Dyck.Payload.html#965" class="InductiveConstructor Operator">⟩</a> <a id="8106" href="Data.Dyck.Payload.html#8106" class="Bound">ds</a><a id="8108" class="Symbol">)</a> <a id="8110" class="Symbol">(</a><a id="8111" href="Data.Dyck.Payload.html#8111" class="Bound">t₁</a> <a id="8114" href="Data.Vec.Iterated.html#499" class="InductiveConstructor Operator">∷</a> <a id="8116" href="Data.Dyck.Payload.html#8116" class="Bound">t₂</a> <a id="8119" href="Data.Vec.Iterated.html#499" class="InductiveConstructor Operator">∷</a> <a id="8121" href="Data.Dyck.Payload.html#8121" class="Bound">s</a><a id="8122" class="Symbol">)</a> <a id="8124" class="Symbol">=</a> <a id="8126" href="Data.Dyck.Payload.html#7922" class="Function">dyck→tree⊙</a> <a id="8137" href="Data.Dyck.Payload.html#8106" class="Bound">ds</a> <a id="8140" class="Symbol">((</a><a id="8142" href="Data.Dyck.Payload.html#8116" class="Bound">t₂</a> <a id="8145" href="Data.Dyck.Payload.html#3056" class="InductiveConstructor Operator">*</a> <a id="8147" href="Data.Dyck.Payload.html#8111" class="Bound">t₁</a><a id="8149" class="Symbol">)</a> <a id="8151" href="Data.Vec.Iterated.html#499" class="InductiveConstructor Operator">∷</a> <a id="8153" href="Data.Dyck.Payload.html#8121" class="Bound">s</a><a id="8154" class="Symbol">)</a>
+
+  <a id="Left.dyck→tree"></a><a id="8159" href="Data.Dyck.Payload.html#8159" class="Function">dyck→tree</a> <a id="8169" class="Symbol">:</a> <a id="8171" href="Level.html#388" class="Generalizable">A</a> <a id="8173" href="Data.Sigma.Base.html#534" class="Function Operator">×</a> <a id="8175" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="8180" href="Level.html#388" class="Generalizable">A</a> <a id="8182" href="Agda.Builtin.Nat.html#210" class="InductiveConstructor">zero</a> <a id="8187" class="Symbol">→</a> <a id="8189" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="8194" href="Level.html#388" class="Generalizable">A</a>
+  <a id="8198" href="Data.Dyck.Payload.html#8159" class="Function">dyck→tree</a> <a id="8208" class="Symbol">(</a><a id="8209" href="Data.Dyck.Payload.html#8209" class="Bound">x</a> <a id="8211" href="Agda.Builtin.Sigma.html#236" class="InductiveConstructor Operator">,</a> <a id="8213" href="Data.Dyck.Payload.html#8213" class="Bound">ds</a><a id="8215" class="Symbol">)</a> <a id="8217" class="Symbol">=</a> <a id="8219" href="Data.Vec.Iterated.html#519" class="Field">head</a> <a id="8224" class="Symbol">(</a><a id="8225" href="Data.Dyck.Payload.html#7922" class="Function">dyck→tree⊙</a> <a id="8236" href="Data.Dyck.Payload.html#8213" class="Bound">ds</a> <a id="8239" class="Symbol">(</a><a id="8240" href="Data.Dyck.Payload.html#3037" class="InductiveConstructor Operator">[</a> <a id="8242" href="Data.Dyck.Payload.html#8209" class="Bound">x</a> <a id="8244" href="Data.Dyck.Payload.html#3037" class="InductiveConstructor Operator">]</a> <a id="8246" href="Data.Vec.Iterated.html#499" class="InductiveConstructor Operator">∷</a> <a id="8248" href="Data.Vec.Iterated.html#379" class="InductiveConstructor">[]</a><a id="8250" class="Symbol">))</a>
+
+  <a id="Left.tree→dyck⊙"></a><a id="8256" href="Data.Dyck.Payload.html#8256" class="Function">tree→dyck⊙</a> <a id="8267" class="Symbol">:</a> <a id="8269" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="8274" href="Level.html#388" class="Generalizable">A</a> <a id="8276" class="Symbol">→</a> <a id="8278" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="8283" href="Level.html#388" class="Generalizable">A</a> <a id="8285" href="Data.Dyck.Payload.html#493" class="Generalizable">n</a> <a id="8287" class="Symbol">→</a> <a id="8289" href="Level.html#388" class="Generalizable">A</a> <a id="8291" href="Data.Sigma.Base.html#534" class="Function Operator">×</a> <a id="8293" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="8298" href="Level.html#388" class="Generalizable">A</a> <a id="8300" href="Data.Dyck.Payload.html#493" class="Generalizable">n</a>
+  <a id="8304" href="Data.Dyck.Payload.html#8256" class="Function">tree→dyck⊙</a> <a id="8315" href="Data.Dyck.Payload.html#3037" class="InductiveConstructor Operator">[</a> <a id="8317" href="Data.Dyck.Payload.html#8317" class="Bound">x</a> <a id="8319" href="Data.Dyck.Payload.html#3037" class="InductiveConstructor Operator">]</a>     <a id="8325" href="Data.Dyck.Payload.html#8325" class="Bound">d</a> <a id="8327" class="Symbol">=</a> <a id="8329" href="Data.Dyck.Payload.html#8317" class="Bound">x</a> <a id="8331" href="Agda.Builtin.Sigma.html#236" class="InductiveConstructor Operator">,</a> <a id="8333" href="Data.Dyck.Payload.html#8325" class="Bound">d</a>
+  <a id="8337" href="Data.Dyck.Payload.html#8256" class="Function">tree→dyck⊙</a> <a id="8348" class="Symbol">(</a><a id="8349" href="Data.Dyck.Payload.html#8349" class="Bound">xs</a> <a id="8352" href="Data.Dyck.Payload.html#3056" class="InductiveConstructor Operator">*</a> <a id="8354" href="Data.Dyck.Payload.html#8354" class="Bound">ys</a><a id="8356" class="Symbol">)</a> <a id="8358" href="Data.Dyck.Payload.html#8358" class="Bound">d</a> <a id="8360" class="Symbol">=</a> <a id="8362" href="Data.Dyck.Payload.html#8256" class="Function">tree→dyck⊙</a> <a id="8373" href="Data.Dyck.Payload.html#8349" class="Bound">xs</a> <a id="8376" class="Symbol">(</a><a id="8377" href="Data.Sigma.Base.html#769" class="Function">uncurry</a> <a id="8385" href="Data.Dyck.Payload.html#927" class="InductiveConstructor Operator">_⟨_</a> <a id="8389" class="Symbol">(</a><a id="8390" href="Data.Dyck.Payload.html#8256" class="Function">tree→dyck⊙</a> <a id="8401" href="Data.Dyck.Payload.html#8354" class="Bound">ys</a> <a id="8404" class="Symbol">(</a><a id="8405" href="Data.Dyck.Payload.html#965" class="InductiveConstructor Operator">⟩</a> <a id="8407" href="Data.Dyck.Payload.html#8358" class="Bound">d</a><a id="8408" class="Symbol">)))</a>
+
+  <a id="Left.tree→dyck"></a><a id="8415" href="Data.Dyck.Payload.html#8415" class="Function">tree→dyck</a> <a id="8425" class="Symbol">:</a> <a id="8427" href="Data.Dyck.Payload.html#3002" class="Datatype">Tree</a> <a id="8432" href="Level.html#388" class="Generalizable">A</a> <a id="8434" class="Symbol">→</a> <a id="8436" href="Level.html#388" class="Generalizable">A</a> <a id="8438" href="Data.Sigma.Base.html#534" class="Function Operator">×</a> <a id="8440" href="Data.Dyck.Payload.html#863" class="Datatype">Dyck</a> <a id="8445" href="Level.html#388" class="Generalizable">A</a> <a id="8447" href="Agda.Builtin.Nat.html#210" class="InductiveConstructor">zero</a>
+  <a id="8454" href="Data.Dyck.Payload.html#8415" class="Function">tree→dyck</a> <a id="8464" href="Data.Dyck.Payload.html#8464" class="Bound">tr</a> <a id="8467" class="Symbol">=</a> <a id="8469" href="Data.Dyck.Payload.html#8256" class="Function">tree→dyck⊙</a> <a id="8480" href="Data.Dyck.Payload.html#8464" class="Bound">tr</a> <a id="8483" href="Data.Dyck.Payload.html#906" class="InductiveConstructor">done</a>
+</pre></body></html>
