@@ -6,7 +6,7 @@
 module Data.Dyck.Payload where
 
 open import Prelude
-open import Data.List using (List)
+open import Data.List using (List; _∷_; [])
 open import Data.Nat using (_+_)
 open import Path.Reasoning
 open import Function.Surjective
@@ -26,14 +26,6 @@ private
 data Tree (A : Type a) : Type a where
   [_] : A → Tree A
   _*_ : Tree A → Tree A → Tree A
-
--- Counts the number of branches in the tree
-size⊙ : Tree A → ℕ → ℕ
-size⊙ [ _ ]     = id
-size⊙ (xs * ys) = suc ∘ size⊙ xs ∘ size⊙ ys
-
-size : Tree A → ℕ
-size t = size⊙ t zero
 
 --------------------------------------------------------------------------------
 -- Conversion between binary trees and Progs. (leftwards)
@@ -64,10 +56,6 @@ shift x s = [ x ] ∷ s
 prog→tree⊙ : Prog A n → Vec (Tree A) (1 + n) → Vec (Tree A) 1
 prog→tree⊙ p s = foldlProg (λ n → Vec (Tree _) (1 + n)) reduce shift s p
 
--- prog→tree⊙ halt                   s  = s
--- prog→tree⊙ (push x ds)            s  = prog→tree⊙ ds ([ x ] ∷ s)
--- prog→tree⊙ (pull   ds) (t₁ ∷ t₂ ∷ s) = prog→tree⊙ ds ((t₂ * t₁) ∷ s)
-
 prog→tree : A × Prog A zero → Tree A
 prog→tree (x , ds) = head (prog→tree⊙ ds ([ x ] ∷ []))
 
@@ -95,9 +83,31 @@ tree→prog→tree-ε (xs * ys) is st =
 tree→prog→tree : (t : Tree A) → prog→tree (tree→prog t) ≡ t
 tree→prog→tree t = cong head (tree→prog→tree-ε t halt [])
 
--- prog→tree→prog : (x : A × Prog A zero) → tree→prog (prog→tree x) ≡ x
--- prog→tree→prog (x , xs) =
---   tree→prog (prog→tree (x , xs)) ≡⟨⟩
---   tree→prog (head (prog→tree⊙ xs ([ x ] ∷ []))) ≡⟨⟩
---   tree→prog⊙ (head (prog→tree⊙ xs ([ x ] ∷ []))) halt ≡⟨ {!!} ⟩
---   x , xs ∎
+unreduce : Vec (Tree A) (1 + n) → Vec (Tree A) (2 + n)
+unreduce ([ x ] ∷ xs) = [ x ] ∷ [ x ] ∷ xs
+unreduce ((x₁ * x₂) ∷ xs) = x₂ ∷ x₁ ∷ xs
+
+reduce-inj : {xs ys : Vec (Tree A) (2 + n)} → reduce xs ≡ reduce ys → xs ≡ ys
+reduce-inj xs≡ys = cong unreduce xs≡ys
+
+tree-vars⊙ : Tree A → List A → List A
+tree-vars⊙ [ x ] ks = x ∷ ks
+tree-vars⊙ (xs * ys) = tree-vars⊙ xs ∘ tree-vars⊙ ys
+
+tree-vars : Tree A → List A
+tree-vars xs = tree-vars⊙ xs []
+
+vars⊙ : Vec (Tree A) n → List A → List A
+vars⊙ xs ks = foldr′ tree-vars⊙ ks xs
+
+vars : Vec (Tree A) n → List A
+vars xs = vars⊙ xs []
+
+-- prog→tree-inj : (xs ys : Prog A n) (st : Vec (Tree A) (1 + n)) → prog→tree⊙ xs st ≡ prog→tree⊙ ys st → xs ≡ ys
+-- prog→tree-inj halt        halt        st xs≡ys = refl
+-- prog→tree-inj (pull xs)   (pull ys)   st xs≡ys = cong pull (prog→tree-inj xs ys (reduce st) xs≡ys)
+-- prog→tree-inj (push x xs) (push y ys) st xs≡ys = cong₂ push {!!} (prog→tree-inj xs ys ([ x ] ∷ st) {!xs≡ys!})
+-- prog→tree-inj halt        (push x ys) st xs≡ys = {!!}
+-- prog→tree-inj (push x xs) halt        st xs≡ys = let p = cong vars xs≡ys in {!!}
+-- prog→tree-inj (push x xs) (pull ys)   st xs≡ys = {!!}
+-- prog→tree-inj (pull xs)   (push x ys) st xs≡ys = {!!}
