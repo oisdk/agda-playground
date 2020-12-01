@@ -78,6 +78,16 @@ tree→prog⊙ (xs * ys) = tree→prog⊙ xs ∘ uncurry push ∘ tree→prog⊙
 tree→prog : Tree A → A × Prog A zero
 tree→prog tr = tree→prog⊙ tr halt
 
+shuttle : A × Prog A n → Vec (Tree A) m → Prog A n × Vec (Tree A) (suc m)
+shuttle (x , xs) ys = xs , [ x ] ∷ ys
+
+-- tree→prog→tree⊙ : ∀ (e : Tree A) (is : Prog A n) (st : Vec (Tree A) n) → uncurry prog→tree⊙ (shuttle (tree→prog⊙ e is) st) ≡ prog→tree⊙ is (e ∷ st)
+-- tree→prog→tree⊙ [ x ]     is st = refl
+-- tree→prog→tree⊙ (xs * ys) is st =
+--   uncurry prog→tree⊙ (shuttle (tree→prog⊙ xs (uncurry push (tree→prog⊙ ys (pull is)))) st) ≡⟨ tree→prog→tree⊙ xs _ st ⟩
+--   prog→tree⊙  (uncurry push (tree→prog⊙ ys (pull is))) (xs ∷ st) ≡⟨ {!!} ⟩
+--   prog→tree⊙ is ((xs * ys) ∷ st) ∎
+
 -- tree→prog→tree : (t : Tree A) → prog→tree (tree→prog t) ≡ t
 -- tree→prog→tree t = {!!}
 
