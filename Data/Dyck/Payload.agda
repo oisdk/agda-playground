@@ -96,4 +96,8 @@ tree→prog→tree : (t : Tree A) → prog→tree (tree→prog t) ≡ t
 tree→prog→tree t = cong head (tree→prog→tree-ε t halt [])
 
 -- prog→tree→prog : (x : A × Prog A zero) → tree→prog (prog→tree x) ≡ x
--- prog→tree→prog = {!!}
+-- prog→tree→prog (x , xs) =
+--   tree→prog (prog→tree (x , xs)) ≡⟨⟩
+--   tree→prog (head (prog→tree⊙ xs ([ x ] ∷ []))) ≡⟨⟩
+--   tree→prog⊙ (head (prog→tree⊙ xs ([ x ] ∷ []))) halt ≡⟨ {!!} ⟩
+--   x , xs ∎
