@@ -36,7 +36,7 @@ size : Tree A → ℕ
 size t = size⊙ t zero
 
 --------------------------------------------------------------------------------
--- Conversion between binary trees and Progs. (rightwards)
+-- Conversion between binary trees and Progs. (leftwards)
 --------------------------------------------------------------------------------
 
 data Prog {a} (A : Type a) : ℕ → Type a where
