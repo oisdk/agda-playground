@@ -81,15 +81,19 @@ tree→prog tr = tree→prog⊙ tr halt
 shuttle : A × Prog A n → Vec (Tree A) m → Prog A n × Vec (Tree A) (suc m)
 shuttle (x , xs) ys = xs , [ x ] ∷ ys
 
--- tree→prog→tree⊙ : (e : Tree A) (is : Prog A n) (st : Vec (Tree A) n) → uncurry prog→tree⊙ (shuttle (tree→prog⊙ e is) st) ≡ prog→tree⊙ is (e ∷ st)
--- tree→prog→tree⊙ [ x ]     is st = refl
--- tree→prog→tree⊙ (xs * ys) is st =
---   uncurry prog→tree⊙ (shuttle (tree→prog⊙ xs (uncurry push (tree→prog⊙ ys (pull is)))) st) ≡⟨ tree→prog→tree⊙ xs _ st ⟩
---   prog→tree⊙  (uncurry push (tree→prog⊙ ys (pull is))) (xs ∷ st) ≡⟨ {!!} ⟩
---   prog→tree⊙ is ((xs * ys) ∷ st) ∎
+tree→prog→tree-assoc : (xs : Tree A) (is : Prog A (1 + n)) (st : Vec (Tree A) (1 + n)) → prog→tree⊙ (uncurry push (tree→prog⊙ xs is)) st ≡ prog→tree⊙ is (xs ∷ st)
+tree→prog→tree-assoc [ x ]     is st = refl
+tree→prog→tree-assoc (xs * ys) is st = tree→prog→tree-assoc xs _ st ; tree→prog→tree-assoc ys (pull is) (xs ∷ st)
 
--- tree→prog→tree : (t : Tree A) → prog→tree (tree→prog t) ≡ t
--- tree→prog→tree t = cong head (tree→prog→tree⊙ t halt [])
+tree→prog→tree-ε : (e : Tree A) (is : Prog A n) (st : Vec (Tree A) n) → uncurry prog→tree⊙ (shuttle (tree→prog⊙ e is) st) ≡ prog→tree⊙ is (e ∷ st)
+tree→prog→tree-ε [ x ]     is st = refl
+tree→prog→tree-ε (xs * ys) is st =
+  uncurry prog→tree⊙ (shuttle (tree→prog⊙ xs (uncurry push (tree→prog⊙ ys (pull is)))) st) ≡⟨ tree→prog→tree-ε xs _ st ⟩
+  prog→tree⊙  (uncurry push (tree→prog⊙ ys (pull is))) (xs ∷ st) ≡⟨ tree→prog→tree-assoc ys (pull is) (xs ∷ st) ⟩
+  prog→tree⊙ is ((xs * ys) ∷ st) ∎
+
+tree→prog→tree : (t : Tree A) → prog→tree (tree→prog t) ≡ t
+tree→prog→tree t = cong head (tree→prog→tree-ε t halt [])
 
 -- prog→tree→prog : (x : A × Prog A zero) → tree→prog (prog→tree x) ≡ x
 -- prog→tree→prog = {!!}
