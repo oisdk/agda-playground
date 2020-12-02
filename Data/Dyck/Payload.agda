@@ -36,16 +36,37 @@ data Prog {a} (A : Type a) : ℕ → Type a where
   push : A → Prog A (suc n) → Prog A n
   pull : Prog A n → Prog A (suc n)
 
-foldlProg : ∀ {p} (P : ℕ → Type p)
-            (lbrack : ∀ {n} → P (suc n) → P n)
-            (rbrack : ∀ {n} → A → P n → P (suc n))
-            (base : P n) →
-            Prog A n → P zero
-foldlProg P lb rb bs halt = bs
-foldlProg P lb rb bs (push x xs) = foldlProg P lb rb (rb x bs) xs
-foldlProg P lb rb bs (pull   xs) = foldlProg P lb rb (lb bs) xs
+module _{p} (P : ℕ → Type p)
+             (lbrack : ∀ {n} → P (suc n) → P n)
+             (rbrack : ∀ {n} → A → P n → P (suc n))
+             where
+  foldlProg : P n → Prog A n → P zero
+  foldlProg bs halt = bs
+  foldlProg bs (push x xs) = foldlProg (rbrack x bs) xs
+  foldlProg bs (pull   xs) = foldlProg (lbrack bs) xs
 -- In terms of foldr:
 -- foldlProg P lb rb bs xs = foldrProg (λ n → P n → P zero) (λ x k bs → k (rb x bs)) (λ k bs → k (lb bs)) id xs bs
+
+  -- module _ (linj : ∀ {n} {xs ys : P (suc n)} → lbrack xs ≡ lbrack ys → xs ≡ ys)
+  --          (rinj : ∀ {n} {x y : A} {xs ys : P n} → rbrack x xs ≡ rbrack y ys → (x , xs) ≡ (y , ys)) where
+
+  --   foldl-inj′ : (bs₁ bs₂ : P n) (is₁ is₂ : Prog A n) → foldlProg bs₁ is₁ ≡ foldlProg bs₂ is₂ → bs₁ ≡ bs₂
+  --   foldl-inj′ bs₁ bs₂ halt halt fxs≡fys = fxs≡fys
+  --   foldl-inj′ bs₁ bs₂ (pull xs) (pull ys) fxs≡fys = linj (foldl-inj′ (lbrack bs₁) (lbrack bs₂) xs ys fxs≡fys)
+  --   foldl-inj′ bs₁ bs₂ (push x xs) (push y ys) fxs≡fys = cong snd (rinj (foldl-inj′ (rbrack x bs₁) (rbrack y bs₂) xs ys fxs≡fys))
+  --   foldl-inj′ bs₁ bs₂ halt (push x ys) fxs≡fys = {!!}
+  --   foldl-inj′ bs₁ bs₂ (push x xs) halt fxs≡fys = {!!}
+  --   foldl-inj′ bs₁ bs₂ (push x xs) (pull ys) fxs≡fys = {!!}
+  --   foldl-inj′ bs₁ bs₂ (pull xs) (push x ys) fxs≡fys = {!!}
+
+  --   foldl-inj : (bs₁ bs₂ : P n) (is₁ is₂ : Prog A n) → foldlProg bs₁ is₁ ≡ foldlProg bs₂ is₂ → is₁ ≡ is₂
+  --   foldl-inj bs₁ bs₂ halt halt fxs≡fys = refl
+  --   foldl-inj bs₁ bs₂ (pull xs) (pull ys) fxs≡fys = cong pull (foldl-inj (lbrack bs₁) (lbrack bs₂)  xs ys fxs≡fys)
+  --   foldl-inj bs₁ bs₂ (push x xs) (push y ys) fxs≡fys = cong₂ push (cong fst (rinj (foldl-inj′ (rbrack x bs₁) (rbrack y bs₂) xs ys fxs≡fys))) (foldl-inj (rbrack x bs₁) (rbrack y bs₂) xs ys fxs≡fys)
+  --   foldl-inj bs₁ bs₂ halt (push x ys) fxs≡fys = {!!}
+  --   foldl-inj bs₁ bs₂ (push x xs) halt fxs≡fys = {!!}
+  --   foldl-inj bs₁ bs₂ (push x xs) (pull ys) fxs≡fys = {!!}
+  --   foldl-inj bs₁ bs₂ (pull xs) (push x ys) fxs≡fys = {!!}
 
 reduce : Vec (Tree A) (2 + n) → Vec (Tree A) (1 + n)
 reduce (t₁ ∷ t₂ ∷ s) = (t₂ * t₁) ∷ s
@@ -90,24 +111,10 @@ unreduce ((x₁ * x₂) ∷ xs) = x₂ ∷ x₁ ∷ xs
 reduce-inj : {xs ys : Vec (Tree A) (2 + n)} → reduce xs ≡ reduce ys → xs ≡ ys
 reduce-inj xs≡ys = cong unreduce xs≡ys
 
-tree-vars⊙ : Tree A → List A → List A
-tree-vars⊙ [ x ] ks = x ∷ ks
-tree-vars⊙ (xs * ys) = tree-vars⊙ xs ∘ tree-vars⊙ ys
+root : Tree A → A
+root [ x ] = x
+root (xs * _) = root xs
 
-tree-vars : Tree A → List A
-tree-vars xs = tree-vars⊙ xs []
+shift-inj : ∀ {A : Type a} {x y : A} {xs ys : Vec (Tree A) n} → shift x xs ≡ shift y ys → (x , xs) ≡ (y , ys)
+shift-inj = cong λ where (z ∷ zs) → root z , zs
 
-vars⊙ : Vec (Tree A) n → List A → List A
-vars⊙ xs ks = foldr′ tree-vars⊙ ks xs
-
-vars : Vec (Tree A) n → List A
-vars xs = vars⊙ xs []
-
--- prog→tree-inj : (xs ys : Prog A n) (st : Vec (Tree A) (1 + n)) → prog→tree⊙ xs st ≡ prog→tree⊙ ys st → xs ≡ ys
--- prog→tree-inj halt        halt        st xs≡ys = refl
--- prog→tree-inj (pull xs)   (pull ys)   st xs≡ys = cong pull (prog→tree-inj xs ys (reduce st) xs≡ys)
--- prog→tree-inj (push x xs) (push y ys) st xs≡ys = cong₂ push {!!} (prog→tree-inj xs ys ([ x ] ∷ st) {!xs≡ys!})
--- prog→tree-inj halt        (push x ys) st xs≡ys = {!!}
--- prog→tree-inj (push x xs) halt        st xs≡ys = let p = cong vars xs≡ys in {!!}
--- prog→tree-inj (push x xs) (pull ys)   st xs≡ys = {!!}
--- prog→tree-inj (pull xs)   (push x ys) st xs≡ys = {!!}
