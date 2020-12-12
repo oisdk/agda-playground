@@ -82,16 +82,16 @@ tree→prog→tree⊙ : (e : Tree A) (is : Prog A (1 + n)) (st : Vec (Tree A) n)
 tree→prog→tree⊙ [ x ]     is st = refl
 tree→prog→tree⊙ (xs * ys) is st = tree→prog→tree⊙ xs _ st ; tree→prog→tree⊙ ys (pull is) (xs ∷ st)
 
-tree→prog→tree : (t : Tree A) → prog→tree (tree→prog t) ≡ t
-tree→prog→tree t = cong head (tree→prog→tree⊙ t halt [])
+tree→prog→tree : (e : Tree A) → prog→tree (tree→prog e) ≡ e
+tree→prog→tree e = cong head (tree→prog→tree⊙ e halt [])
 
-prog→tree→prog⊙ : (vs : Vec (Tree A) n) (xs : Prog A n) → tree→prog (head (prog→tree⊙ xs vs)) ≡ foldlN (Prog A) tree→prog⊙ xs vs
-prog→tree→prog⊙ vs  halt       = refl
-prog→tree→prog⊙ vs (push x xs) = prog→tree→prog⊙ (shift x vs) xs
-prog→tree→prog⊙ vs (pull   xs) = prog→tree→prog⊙ (reduce  vs) xs
+prog→tree→prog⊙ : (is : Prog A n) (st : Vec (Tree A) n) → tree→prog (head (prog→tree⊙ is st)) ≡ foldlN (Prog A) tree→prog⊙ is st
+prog→tree→prog⊙  halt       st = refl
+prog→tree→prog⊙ (push i is) st = prog→tree→prog⊙ is (shift i st)
+prog→tree→prog⊙ (pull   is) st = prog→tree→prog⊙ is (reduce  st)
 
-prog→tree→prog : (xs : Prog A 0) → tree→prog (prog→tree xs) ≡ xs
-prog→tree→prog = prog→tree→prog⊙ []
+prog→tree→prog : (is : Prog A 0) → tree→prog (prog→tree is) ≡ is
+prog→tree→prog is = prog→tree→prog⊙ is []
 
 prog-iso : Prog A zero ⇔ Tree A
 prog-iso .fun = prog→tree
