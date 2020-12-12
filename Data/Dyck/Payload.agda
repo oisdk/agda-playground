@@ -106,18 +106,21 @@ encodes⊙-inj : {A : Type a} (vs : Vec (Tree A) n) → Injective (encodes⊙ vs
 encodes⊙-inj {n = zero } vs       xs ys fxs≡fys = fxs≡fys
 encodes⊙-inj {n = suc n} (v ∷ vs) xs ys fxs≡fys = encode⊙-inj v xs ys (encodes⊙-inj vs (encode⊙ v xs) (encode⊙ v ys) fxs≡fys)
 
-unind : Prog A n → List (Maybe A)
-unind halt        = []
-unind (push x xs) = just x  ∷ unind xs
-unind (pull   xs) = nothing ∷ unind xs
+unind⊙ : Prog A n → List (Maybe A) → List (Maybe A)
+unind⊙ halt        ks = ks
+unind⊙ (push x xs) ks = just x  ∷ unind⊙ xs ks
+unind⊙ (pull   xs) ks = nothing ∷ unind⊙ xs ks
 
-unind-conv : {A : Type a} (vs : Vec (Tree A) n) (xs : Prog A n) → encodes (prog→tree⊙ xs vs) ≡ encodes⊙ vs (unind xs)
-unind-conv vs  halt       = refl
-unind-conv vs (push x xs) = unind-conv (shift x vs) xs
-unind-conv vs (pull   xs) = unind-conv (reduce  vs) xs
+unind : Prog A n → List (Maybe A)
+unind xs = unind⊙ xs []
+
+unind-conv : {A : Type a} (vs : Vec (Tree A) n) (xs : Prog A n) (zs : List (Maybe A)) → encodes⊙ (prog→tree⊙ xs vs) zs ≡ encodes⊙ vs (unind⊙ xs zs)
+unind-conv vs  halt       zs = refl
+unind-conv vs (push x xs) zs = unind-conv (shift x vs) xs zs
+unind-conv vs (pull   xs) zs = unind-conv (reduce  vs) xs zs
 
 prog→tree→unind→inj : (vs : Vec (Tree A) n) (xs ys : Prog A n) → prog→tree⊙ xs vs ≡ prog→tree⊙ ys vs → unind xs ≡ unind ys
-prog→tree→unind→inj vs xs ys prf = encodes⊙-inj vs (unind xs) (unind ys) (sym (unind-conv vs xs) ; cong encodes prf ; unind-conv vs ys)
+prog→tree→unind→inj vs xs ys prf = encodes⊙-inj vs (unind xs) (unind ys) (sym (unind-conv vs xs []) ; cong encodes prf ; unind-conv vs ys [])
 
 open import Data.Maybe.Properties
 
