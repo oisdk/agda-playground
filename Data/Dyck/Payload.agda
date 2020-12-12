@@ -34,12 +34,12 @@ module _{p} (P : ℕ → Type p)
             (lb : ∀ {n} → P (2 + n) → P (1 + n))
             (rb : ∀ {n} → A → P n → P (1 + n))
             where
-  foldlProg : P n → Prog A n → P 1
-  foldlProg bs halt = bs
-  foldlProg bs (push x xs) = foldlProg (rb x bs) xs
-  foldlProg bs (pull   xs) = foldlProg (lb   bs) xs
+  runl : P n → Prog A n → P 1
+  runl bs halt        = bs
+  runl bs (push x xs) = runl (rb x bs) xs
+  runl bs (pull   xs) = runl (lb   bs) xs
 -- In terms of foldr:
--- foldlProg P lb rb bs xs =
+-- runl P lb rb bs xs =
 --     foldrProg
 --       (λ n → P n → P zero)
 --       (λ x k bs → k (rb x bs))
@@ -57,7 +57,7 @@ shift : A → Vec (Tree A) n → Vec (Tree A) (1 + n)
 shift x s = [ x ] ∷ s
 
 prog→tree⊙ : Prog A n → Vec (Tree A) n → Vec (Tree A) 1
-prog→tree⊙ p s = foldlProg (λ n → Vec (Tree _) n) reduce shift s p
+prog→tree⊙ p s = runl (λ n → Vec (Tree _) n) reduce shift s p
 
 prog→tree : Prog A zero → Tree A
 prog→tree ds = head (prog→tree⊙ ds [])
