@@ -55,7 +55,7 @@ shift : A → Vec (Tree A) n → Vec (Tree A) (1 + n)
 shift x s = [ x ] ∷ s
 
 prog→tree⊙ : Prog A n → Vec (Tree A) ( n) → Vec (Tree A) 1
-prog→tree⊙ p s = foldlProg (λ n → Vec (Tree _) ( n)) reduce shift s p
+prog→tree⊙ p s = foldlProg (λ n → Vec (Tree _) n) reduce shift s p
 
 prog→tree : Prog A zero → Tree A
 prog→tree ds = head (prog→tree⊙ ds [])
@@ -78,39 +78,16 @@ tree→prog→tree-ε (xs * ys) is st = tree→prog→tree-ε xs _ st ; tree→
 tree→prog→tree : (t : Tree A) → prog→tree (tree→prog t) ≡ t
 tree→prog→tree t = cong head (tree→prog→tree-ε t halt [])
 
-push-inj : ∀ {x y : A} (xs ys : Prog A (suc n)) → push x xs ≡ push y ys → xs ≡ ys
-push-inj xs ys = cong (λ { halt → ys ; (push x pr) → pr ; (pull pr) → ys})
+prog→tree→prog⊙ : (vs : Vec (Tree A) n) (xs : Prog A n) → tree→prog (head (prog→tree⊙ xs vs)) ≡ foldlN (Prog A) tree→prog⊙ xs vs
+prog→tree→prog⊙ vs  halt       = refl
+prog→tree→prog⊙ vs (push x xs) = prog→tree→prog⊙ (shift x vs) xs
+prog→tree→prog⊙ vs (pull   xs) = prog→tree→prog⊙ (reduce  vs) xs
 
-pull-inj : ∀ (xs ys : Prog A (suc n)) → pull xs ≡ pull ys → xs ≡ ys
-pull-inj xs ys = cong (λ { (push x pr) → ys ; (pull pr) → pr})
-
-tree→prog⊙-inj : (ts : Tree A) → Injective (tree→prog⊙ {n = n} ts)
-tree→prog⊙-inj [ v ] x y = push-inj _ _
-tree→prog⊙-inj (ts₁ * ts₂) x y f⟨x⟩≡f⟨y⟩ =
-  let p = tree→prog⊙-inj ts₁ (tree→prog⊙ ts₂ (pull x)) (tree→prog⊙ ts₂ (pull y)) f⟨x⟩≡f⟨y⟩
-      q = tree→prog⊙-inj ts₂ (pull x) (pull y) p
-  in pull-inj _ _ q
-
-trees→prog⊙ : Vec (Tree A) n → Prog A n → Prog A 0
-trees→prog⊙ vs xs = foldlN (Prog _) tree→prog⊙ xs vs
-
-trees→prog-one : Vec (Tree A) 1 → Prog A zero
-trees→prog-one xs = tree→prog⊙ (head xs) halt
-
-trees→prog⊙-inj : {A : Type a} (vs : Vec (Tree A) n) → Injective (trees→prog⊙ vs)
-trees→prog⊙-inj {n = zero}       vs  x y f⟨x⟩≡f⟨y⟩ = f⟨x⟩≡f⟨y⟩
-trees→prog⊙-inj {n = suc n} (v ∷ vs) x y f⟨x⟩≡f⟨y⟩ = tree→prog⊙-inj v x y (trees→prog⊙-inj vs (tree→prog⊙ v x) (tree→prog⊙ v y) f⟨x⟩≡f⟨y⟩)
-
-conv : {A : Type a} (vs : Vec (Tree A) n) (xs : Prog A n) → tree→prog (head (prog→tree⊙ xs vs)) ≡ trees→prog⊙ vs xs
-conv vs  halt       = refl
-conv vs (push x xs) = conv (shift x vs) xs
-conv vs (pull   xs) = conv (reduce  vs) xs
-
-prog→tree⊙-inj : (vs : Vec (Tree A) n) (xs ys : Prog A n) → prog→tree⊙ xs vs ≡ prog→tree⊙ ys vs → xs ≡ ys
-prog→tree⊙-inj vs xs ys prf = trees→prog⊙-inj vs xs ys (sym (conv vs xs) ; cong trees→prog-one prf ; conv vs ys)
-
-prog→tree-inj : Injective (prog→tree {A = A})
-prog→tree-inj xs ys fx≡fy = prog→tree⊙-inj [] xs ys (cong (_∷ []) fx≡fy)
+prog→tree→prog : (xs : Prog A 0) → tree→prog (prog→tree xs) ≡ xs
+prog→tree→prog = prog→tree→prog⊙ []
 
 prog-iso : Prog A zero ⇔ Tree A
-prog-iso = surj×inj⇒iso prog→tree (λ y → tree→prog y , tree→prog→tree y) prog→tree-inj
+prog-iso .fun = prog→tree
+prog-iso .inv = tree→prog
+prog-iso .rightInv = tree→prog→tree
+prog-iso .leftInv  = prog→tree→prog
