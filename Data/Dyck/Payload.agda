@@ -94,6 +94,10 @@ tail′ : List A → List A
 tail′ (_ ∷ xs) = xs
 tail′ [] = []
 
+head′ : List (Maybe A) → Maybe A
+head′ [] = nothing
+head′ (x ∷ _) = x
+
 encode⊙-inj : (ts : Tree A) → Injective (encode⊙ ts)
 encode⊙-inj [ x ]       xs ys xs≡ys = ∷-inj (just x) xs ys xs≡ys
 encode⊙-inj (ts₁ * ts₂) xs ys xs≡ys = cong tail′ (encode⊙-inj ts₂ (nothing ∷ xs) (nothing ∷ ys) (encode⊙-inj ts₁ (encode⊙ ts₂ (nothing ∷ xs)) (encode⊙ ts₂ (nothing ∷ ys)) xs≡ys))
@@ -107,31 +111,28 @@ unind halt        = []
 unind (push x xs) = just x  ∷ unind xs
 unind (pull   xs) = nothing ∷ unind xs
 
-unind-conv : {A : Type a} (vs : Vec (Tree A) ( n)) (xs : Prog A n) → encodes (prog→tree⊙ xs vs) ≡ encodes⊙ vs (unind xs)
+unind-conv : {A : Type a} (vs : Vec (Tree A) n) (xs : Prog A n) → encodes (prog→tree⊙ xs vs) ≡ encodes⊙ vs (unind xs)
 unind-conv vs  halt       = refl
 unind-conv vs (push x xs) = unind-conv (shift x vs) xs
 unind-conv vs (pull   xs) = unind-conv (reduce  vs) xs
 
-prog→tree→unind→inj : (vs : Vec (Tree A) ( n)) (xs ys : Prog A n) → prog→tree⊙ xs vs ≡ prog→tree⊙ ys vs → unind xs ≡ unind ys
+prog→tree→unind→inj : (vs : Vec (Tree A) n) (xs ys : Prog A n) → prog→tree⊙ xs vs ≡ prog→tree⊙ ys vs → unind xs ≡ unind ys
 prog→tree→unind→inj vs xs ys prf = encodes⊙-inj vs (unind xs) (unind ys) (sym (unind-conv vs xs) ; cong encodes prf ; unind-conv vs ys)
-
-head′ : List (Maybe A) → Maybe A
-head′ [] = nothing
-head′ (x ∷ _) = x
 
 open import Data.Maybe.Properties
 
+unind-inj : Injective (unind {A = A} {n = n})
+unind-inj halt         halt       f⟨x⟩≡f⟨y⟩ = refl
+unind-inj halt        (push y ys) f⟨x⟩≡f⟨y⟩ = ⊥-elim (znots (cong length f⟨x⟩≡f⟨y⟩))
+unind-inj (push x xs)  halt       f⟨x⟩≡f⟨y⟩ = ⊥-elim (snotz (cong length f⟨x⟩≡f⟨y⟩))
+unind-inj (push x xs) (push y ys) f⟨x⟩≡f⟨y⟩ = cong₂ push (cong (λ { nothing → y ; (just x) → x}) (cong head′ f⟨x⟩≡f⟨y⟩)) (unind-inj _ _ (cong tail′ f⟨x⟩≡f⟨y⟩))
+unind-inj (push x xs) (pull   ys) f⟨x⟩≡f⟨y⟩ = ⊥-elim (just≢nothing (cong head′ f⟨x⟩≡f⟨y⟩))
+unind-inj (pull   xs) (push y ys) f⟨x⟩≡f⟨y⟩ = ⊥-elim (nothing≢just (cong head′ f⟨x⟩≡f⟨y⟩))
+unind-inj (pull   xs) (pull   ys) f⟨x⟩≡f⟨y⟩ = cong pull (unind-inj xs ys (cong tail′ f⟨x⟩≡f⟨y⟩))
+
+
 prog→tree⊙-inj : (vs : Vec (Tree A) ( n)) → (xs ys : Prog A n) → prog→tree⊙ xs vs ≡ prog→tree⊙ ys vs → xs ≡ ys
-prog→tree⊙-inj vs  halt        halt       fxs≡fys = refl
-prog→tree⊙-inj vs (pull xs)   (pull ys)   fxs≡fys = cong pull (prog→tree⊙-inj (reduce vs) xs ys fxs≡fys)
-prog→tree⊙-inj vs (push x xs) (push y ys) fxs≡fys = cong₂ push prf (prog→tree⊙-inj (shift x vs) xs ys (fxs≡fys ; cong (λ xy → prog→tree⊙ ys ([ xy ] ∷ vs)) (sym prf)))
-  where
-  prf : x ≡ y
-  prf = cong (λ { ((just z) ∷ _) → z ; _ → x }) (prog→tree→unind→inj vs (push x xs) (push y ys) fxs≡fys)
-prog→tree⊙-inj vs halt (push y ys) fxs≡fys = ⊥-elim (nothing≢just (cong head′ (prog→tree→unind→inj vs halt (push y ys) fxs≡fys)))
-prog→tree⊙-inj vs (push x xs) halt fxs≡fys = ⊥-elim (just≢nothing (cong head′ (prog→tree→unind→inj vs (push x xs) halt fxs≡fys)))
-prog→tree⊙-inj vs (push x xs) (pull ys) fxs≡fys = ⊥-elim (just≢nothing (cong head′ (prog→tree→unind→inj vs (push x xs) (pull ys) fxs≡fys)))
-prog→tree⊙-inj vs (pull xs) (push y ys) fxs≡fys = ⊥-elim (nothing≢just (cong head′ (prog→tree→unind→inj vs (pull xs) (push y ys) fxs≡fys)))
+prog→tree⊙-inj vs xs ys fxs≡fys = unind-inj xs ys (prog→tree→unind→inj vs xs ys fxs≡fys)
 
 head-zero : (xs ys : Vec A 1) → head xs ≡ head ys → xs ≡ ys
 head-zero (x ∷ []) (y ∷ []) prf = cong (_∷ []) prf
