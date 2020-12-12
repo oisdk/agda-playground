@@ -7,7 +7,7 @@ open import Path
 open import Data.Sigma
 
 Injective : (A → B) → Type _
-Injective f = ∀ x y → f x ≡ f y → x ≡ y
+Injective f = ∀ x y → (f⟨x⟩≡f⟨y⟩ : f x ≡ f y) → x ≡ y
 
 infixr 0 _↣_
 _↣_ : Type a → Type b → Type (a ℓ⊔ b)

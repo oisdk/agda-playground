@@ -44,6 +44,13 @@ foldl : ∀ {p} (P : ℕ → Type p) →
 foldl {n = zero } P f b _ = b
 foldl {n = suc n} P f b (x ∷ xs) = foldl (P ∘ suc) f (f x b) xs
 
+foldlN : ∀ {p} (P : ℕ → Type p) →
+          (∀ {n} → A → P (suc n) → P n) →
+          P n →
+          Vec A n → P zero
+foldlN {n = zero } P f b _ = b
+foldlN {n = suc n} P f b (x ∷ xs) = foldlN P f (f x b) xs
+
 module _ (f : A → B → B) (e : B) where
   foldr′ : Vec A n → B
   foldr′ {n = zero } xs = e
