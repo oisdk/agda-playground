@@ -20,16 +20,15 @@ private
     n m k : ℕ
 
 --------------------------------------------------------------------------------
--- Binary trees: definition and associated functions.
+-- Binary trees: definition and associated functions
 --------------------------------------------------------------------------------
 
--- A basic binary tree type.
 data Tree (A : Type a) : Type a where
   [_] : A → Tree A
   _*_ : Tree A → Tree A → Tree A
 
 --------------------------------------------------------------------------------
--- Conversion between binary trees and Progs. (leftwards)
+-- Programs: definition and associated functions
 --------------------------------------------------------------------------------
 
 data Prog {a} (A : Type a) : ℕ → Type a where
@@ -38,15 +37,19 @@ data Prog {a} (A : Type a) : ℕ → Type a where
   pull : Prog A (1 + n) → Prog A (2 + n)
 
 module _{p} (P : ℕ → Type p)
-             (lbrack : ∀ {n} → P (2 + n) → P (1 + n))
-             (rbrack : ∀ {n} → A → P n → P (1 + n))
-             where
+            (lb : ∀ {n} → P (2 + n) → P (1 + n))
+            (rb : ∀ {n} → A → P n → P (1 + n))
+            where
   foldlProg : P n → Prog A n → P 1
   foldlProg bs halt = bs
-  foldlProg bs (push x xs) = foldlProg (rbrack x bs) xs
-  foldlProg bs (pull   xs) = foldlProg (lbrack bs) xs
+  foldlProg bs (push x xs) = foldlProg (rb x bs) xs
+  foldlProg bs (pull   xs) = foldlProg (lb   bs) xs
 -- In terms of foldr:
 -- foldlProg P lb rb bs xs = foldrProg (λ n → P n → P zero) (λ x k bs → k (rb x bs)) (λ k bs → k (lb bs)) id xs bs
+
+--------------------------------------------------------------------------------
+-- Conversion from a Prog to a Tree
+--------------------------------------------------------------------------------
 
 reduce : Vec (Tree A) (2 + n) → Vec (Tree A) (1 + n)
 reduce (t₁ ∷ t₂ ∷ s) = (t₂ * t₁) ∷ s
@@ -54,11 +57,15 @@ reduce (t₁ ∷ t₂ ∷ s) = (t₂ * t₁) ∷ s
 shift : A → Vec (Tree A) n → Vec (Tree A) (1 + n)
 shift x s = [ x ] ∷ s
 
-prog→tree⊙ : Prog A n → Vec (Tree A) ( n) → Vec (Tree A) 1
+prog→tree⊙ : Prog A n → Vec (Tree A) n → Vec (Tree A) 1
 prog→tree⊙ p s = foldlProg (λ n → Vec (Tree _) n) reduce shift s p
 
 prog→tree : Prog A zero → Tree A
 prog→tree ds = head (prog→tree⊙ ds [])
+
+--------------------------------------------------------------------------------
+-- Conversion from a Tree to a Prog
+--------------------------------------------------------------------------------
 
 tree→prog⊙ : Tree A → Prog A (suc n) → Prog A n
 tree→prog⊙ [ x ]     = push x
@@ -67,16 +74,16 @@ tree→prog⊙ (xs * ys) = tree→prog⊙ xs ∘ tree→prog⊙ ys ∘ pull
 tree→prog : Tree A → Prog A zero
 tree→prog tr = tree→prog⊙ tr halt
 
-tree→prog→tree-assoc : (xs : Tree A) (is : Prog A (1 + n)) (st : Vec (Tree A) n) → prog→tree⊙ (tree→prog⊙ xs is) st ≡ prog→tree⊙ is (xs ∷ st)
-tree→prog→tree-assoc [ x ]     is st = refl
-tree→prog→tree-assoc (xs * ys) is st = tree→prog→tree-assoc xs _ st ; tree→prog→tree-assoc ys (pull is) (xs ∷ st)
+--------------------------------------------------------------------------------
+-- Proof of isomorphism
+--------------------------------------------------------------------------------
 
-tree→prog→tree-ε : (e : Tree A) (is : Prog A (1 + n)) (st : Vec (Tree A) n) → prog→tree⊙ (tree→prog⊙ e is) st ≡ prog→tree⊙ is (e ∷ st)
-tree→prog→tree-ε [ x ]     is st = refl
-tree→prog→tree-ε (xs * ys) is st = tree→prog→tree-ε xs _ st ; tree→prog→tree-assoc ys (pull is) (xs ∷ st)
+tree→prog→tree⊙ : (e : Tree A) (is : Prog A (1 + n)) (st : Vec (Tree A) n) → prog→tree⊙ (tree→prog⊙ e is) st ≡ prog→tree⊙ is (e ∷ st)
+tree→prog→tree⊙ [ x ]     is st = refl
+tree→prog→tree⊙ (xs * ys) is st = tree→prog→tree⊙ xs _ st ; tree→prog→tree⊙ ys (pull is) (xs ∷ st)
 
 tree→prog→tree : (t : Tree A) → prog→tree (tree→prog t) ≡ t
-tree→prog→tree t = cong head (tree→prog→tree-ε t halt [])
+tree→prog→tree t = cong head (tree→prog→tree⊙ t halt [])
 
 prog→tree→prog⊙ : (vs : Vec (Tree A) n) (xs : Prog A n) → tree→prog (head (prog→tree⊙ xs vs)) ≡ foldlN (Prog A) tree→prog⊙ xs vs
 prog→tree→prog⊙ vs  halt       = refl
