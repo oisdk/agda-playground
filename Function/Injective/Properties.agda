@@ -15,3 +15,6 @@ Discrete-pull-inj (f , inj) _≟_ x y =
   case (f x ≟ f y) of
     λ  { (no ¬p) → no (¬p ∘ cong f)
        ; (yes p) → yes (inj x y p) }
+
+inject-contrapositive : (f : A → B) → Injective f → ∀ x y → x ≢ y → f x ≢ f y
+inject-contrapositive f inj x y x≢y fx≡fy = x≢y (inj x y fx≡fy)

@@ -49,3 +49,17 @@ foldr-fusion h {f} {g} e fuse =
 
 map-fusion : ∀ f (b : C) (g : A → B) xs → foldr f b (map g xs) ≡ foldr (f ∘ g) b xs
 map-fusion f b g  = foldr-fusion (foldr f b) [] λ _ _ → refl
+
+++-idʳ : (xs : List A) → xs ++ [] ≡ xs
+++-idʳ [] = refl
+++-idʳ (x ∷ xs) = cong (x ∷_) (++-idʳ xs)
+
+open import Function.Injective
+
+∷-inj : (x : A) → Injective (x ∷_)
+∷-inj x xs ys = cong λ where [] → []
+                             (_ ∷ zs) → zs
+
+++-inj : (xs : List A) → Injective (xs ++_)
+++-inj []       ys zs ys≡zs = ys≡zs
+++-inj (x ∷ xs) ys zs ys≡zs = ++-inj xs ys zs (∷-inj x (xs ++ ys) (xs ++ zs) ys≡zs)

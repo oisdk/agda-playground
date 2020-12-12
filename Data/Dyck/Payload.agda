@@ -6,11 +6,12 @@
 module Data.Dyck.Payload where
 
 open import Prelude
-open import Data.List using (List; _∷_; [])
+open import Data.List using (List; _∷_; []; _++_; length)
 open import Data.Nat using (_+_)
 open import Path.Reasoning
 open import Function.Surjective
 open import Function.Injective
+open import Function.Injective.Properties using (inject-contrapositive)
 open import Data.Nat.Properties using (snotz; znots; pred)
 open import Data.Vec.Iterated
 
@@ -46,27 +47,6 @@ module _{p} (P : ℕ → Type p)
   foldlProg bs (pull   xs) = foldlProg (lbrack bs) xs
 -- In terms of foldr:
 -- foldlProg P lb rb bs xs = foldrProg (λ n → P n → P zero) (λ x k bs → k (rb x bs)) (λ k bs → k (lb bs)) id xs bs
-
-  -- module _ (linj : ∀ {n} {xs ys : P (suc n)} → lbrack xs ≡ lbrack ys → xs ≡ ys)
-  --          (rinj : ∀ {n} {x y : A} {xs ys : P n} → rbrack x xs ≡ rbrack y ys → (x , xs) ≡ (y , ys)) where
-
-  --   foldl-inj′ : (bs₁ bs₂ : P n) (is₁ is₂ : Prog A n) → foldlProg bs₁ is₁ ≡ foldlProg bs₂ is₂ → bs₁ ≡ bs₂
-  --   foldl-inj′ bs₁ bs₂ halt halt fxs≡fys = fxs≡fys
-  --   foldl-inj′ bs₁ bs₂ (pull xs) (pull ys) fxs≡fys = linj (foldl-inj′ (lbrack bs₁) (lbrack bs₂) xs ys fxs≡fys)
-  --   foldl-inj′ bs₁ bs₂ (push x xs) (push y ys) fxs≡fys = cong snd (rinj (foldl-inj′ (rbrack x bs₁) (rbrack y bs₂) xs ys fxs≡fys))
-  --   foldl-inj′ bs₁ bs₂ halt (push x ys) fxs≡fys = {!!}
-  --   foldl-inj′ bs₁ bs₂ (push x xs) halt fxs≡fys = {!!}
-  --   foldl-inj′ bs₁ bs₂ (push x xs) (pull ys) fxs≡fys = {!!}
-  --   foldl-inj′ bs₁ bs₂ (pull xs) (push x ys) fxs≡fys = {!!}
-
-  --   foldl-inj : (bs₁ bs₂ : P n) (is₁ is₂ : Prog A n) → foldlProg bs₁ is₁ ≡ foldlProg bs₂ is₂ → is₁ ≡ is₂
-  --   foldl-inj bs₁ bs₂ halt halt fxs≡fys = refl
-  --   foldl-inj bs₁ bs₂ (pull xs) (pull ys) fxs≡fys = cong pull (foldl-inj (lbrack bs₁) (lbrack bs₂)  xs ys fxs≡fys)
-  --   foldl-inj bs₁ bs₂ (push x xs) (push y ys) fxs≡fys = cong₂ push (cong fst (rinj (foldl-inj′ (rbrack x bs₁) (rbrack y bs₂) xs ys fxs≡fys))) (foldl-inj (rbrack x bs₁) (rbrack y bs₂) xs ys fxs≡fys)
-  --   foldl-inj bs₁ bs₂ halt (push x ys) fxs≡fys = {!!}
-  --   foldl-inj bs₁ bs₂ (push x xs) halt fxs≡fys = {!!}
-  --   foldl-inj bs₁ bs₂ (push x xs) (pull ys) fxs≡fys = {!!}
-  --   foldl-inj bs₁ bs₂ (pull xs) (push x ys) fxs≡fys = {!!}
 
 reduce : Vec (Tree A) (2 + n) → Vec (Tree A) (1 + n)
 reduce (t₁ ∷ t₂ ∷ s) = (t₂ * t₁) ∷ s
@@ -118,3 +98,81 @@ root (xs * _) = root xs
 shift-inj : ∀ {A : Type a} {x y : A} {xs ys : Vec (Tree A) n} → shift x xs ≡ shift y ys → (x , xs) ≡ (y , ys)
 shift-inj = cong λ where (z ∷ zs) → root z , zs
 
+payload : Prog A n → List A
+payload halt = []
+payload (push x xs) = x ∷ payload xs
+payload (pull xs) = payload xs
+
+content⊙ : Tree A → List A → List A
+content⊙ [ x ] = x ∷_
+content⊙ (xs * ys) = content⊙ xs ∘ content⊙ ys
+
+contents⊙ : Vec (Tree A) n → List A → List A
+contents⊙ xs ks = foldl′ content⊙ ks xs
+
+contents : Vec (Tree A) n → List A
+contents xs = contents⊙ xs []
+
+open import Data.List.Properties using (∷-inj)
+
+content⊙-inj : (ts : Tree A) → Injective (content⊙ ts)
+content⊙-inj [ x ]       xs ys xs≡ys = ∷-inj x xs ys xs≡ys
+content⊙-inj (ts₁ * ts₂) xs ys xs≡ys = content⊙-inj ts₂ xs ys (content⊙-inj ts₁ (content⊙ ts₂ xs) (content⊙ ts₂ ys) xs≡ys)
+
+contents⊙-inj : {A : Type a} (vs : Vec (Tree A) n) → Injective (contents⊙ vs)
+contents⊙-inj {n = zero}  vs       xs ys fxs≡fys = fxs≡fys
+contents⊙-inj {n = suc n} (v ∷ vs) xs ys fxs≡fys = content⊙-inj v xs ys (contents⊙-inj vs (content⊙ v xs) (content⊙ v ys) fxs≡fys)
+
+contents-conv : (vs : Vec (Tree A) (1 + n)) (xs : Prog A n) → contents (prog→tree⊙ xs vs) ≡ foldl′ content⊙ (payload xs) vs
+contents-conv vs halt = refl
+contents-conv vs (push x xs) = contents-conv (shift x vs) xs
+contents-conv vs (pull xs)   = contents-conv (reduce  vs) xs
+
+prog→tree→contents→inj : (vs : Vec (Tree A) (1 + n)) (xs ys : Prog A n) → prog→tree⊙ xs vs ≡ prog→tree⊙ ys vs → payload xs ≡ payload ys
+prog→tree→contents→inj vs xs ys prf = contents⊙-inj vs (payload xs) (payload ys) (sym (contents-conv vs xs) ; cong contents prf ; contents-conv vs ys)
+
+branches⊙ : Tree A → ℕ → ℕ
+branches⊙ [ _ ] = id
+branches⊙ (xs * ys) = branches⊙ xs ∘ branches⊙ ys ∘ suc
+
+pulls : Prog A n → ℕ
+pulls halt = zero
+pulls (push x xs) = pulls xs
+pulls (pull xs) = suc (pulls xs)
+
+branchess⊙ : Vec (Tree A) n → ℕ → ℕ
+branchess⊙ vs n = foldl′ branches⊙ n vs
+
+branchess : Vec (Tree A) n → ℕ
+branchess vs = branchess⊙ vs zero
+
+branches-conv : (vs : Vec (Tree A) (1 + n)) (xs : Prog A n) → foldl′ branches⊙ zero (prog→tree⊙ xs vs) ≡ foldl′ branches⊙ (pulls xs) vs
+branches-conv vs halt = refl
+branches-conv vs (push x xs) = branches-conv (shift x vs) xs
+branches-conv vs (pull   xs) = branches-conv (reduce  vs) xs
+
+branches⊙-inj : (t : Tree A) → Injective (branches⊙ t)
+branches⊙-inj [ x ]       xs ys xs≡ys = xs≡ys
+branches⊙-inj (ts₁ * ts₂) xs ys xs≡ys = cong pred (branches⊙-inj ts₂ (suc xs) (suc ys) (branches⊙-inj ts₁ (branches⊙ ts₂ (suc xs)) (branches⊙ ts₂ (suc ys)) xs≡ys))
+
+branchess⊙-inj : {A : Type a} (vs : Vec (Tree A) n) → Injective (branchess⊙ vs)
+branchess⊙-inj {n = zero } vs       x y x≡y = x≡y
+branchess⊙-inj {n = suc n} (v ∷ vs) x y x≡y = branches⊙-inj v x y (branchess⊙-inj vs (branches⊙ v x) (branches⊙ v y) x≡y)
+
+prog→tree→branches→inj : (vs : Vec (Tree A) (1 + n)) (xs ys : Prog A n) → prog→tree⊙ xs vs ≡ prog→tree⊙ ys vs → pulls xs ≡ pulls ys
+prog→tree→branches→inj vs xs ys prf = branchess⊙-inj vs (pulls xs) (pulls ys) (sym (branches-conv vs xs) ; cong branchess prf ; branches-conv vs ys)
+
+-- push≢pull : (x : A) (xs : Prog A (2 + n)) (ys : Prog A n) (vs : Vec (Tree A) (2 + n)) → prog→tree⊙ (push x xs) vs ≢ prog→tree⊙ (pull ys) vs
+-- push≢pull x xs ys vs = {!!}
+
+-- prog→tree⊙-inj : (vs : Vec (Tree A) (1 + n)) → (xs ys : Prog A n) → prog→tree⊙ xs vs ≡ prog→tree⊙ ys vs → xs ≡ ys
+-- prog→tree⊙-inj vs  halt        halt       fxs≡fys = refl
+-- prog→tree⊙-inj vs (pull xs)   (pull ys)   fxs≡fys = cong pull (prog→tree⊙-inj (reduce vs) xs ys fxs≡fys)
+-- prog→tree⊙-inj vs (push x xs) (push y ys) fxs≡fys = cong₂ push prf (prog→tree⊙-inj (shift x vs) xs ys (fxs≡fys ; cong (λ xy → prog→tree⊙ ys ([ xy ] ∷ vs)) (sym prf)))
+--   where
+--   prf : x ≡ y
+--   prf = cong (λ { [] → x ; (z ∷ _) → z}) (prog→tree→contents→inj vs (push x xs) (push y ys) fxs≡fys)
+-- prog→tree⊙-inj vs halt (push y ys) fxs≡fys = ⊥-elim (znots (cong length (prog→tree→contents→inj vs halt (push y ys) fxs≡fys)))
+-- prog→tree⊙-inj vs (push x xs) halt fxs≡fys = ⊥-elim (snotz (cong length (prog→tree→contents→inj vs (push x xs) halt fxs≡fys)))
+-- prog→tree⊙-inj vs (push x xs) (pull ys) fxs≡fys = {!!}
+-- prog→tree⊙-inj vs (pull xs) (push x ys) fxs≡fys = {!!}

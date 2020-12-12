@@ -42,7 +42,7 @@ foldl : ∀ {p} (P : ℕ → Type p) →
           P zero →
           Vec A n → P n
 foldl {n = zero } P f b _ = b
-foldl {n = suc n} P f b (x ∷ xs) = foldrP (P ∘ suc) f (f x b) xs
+foldl {n = suc n} P f b (x ∷ xs) = foldl (P ∘ suc) f (f x b) xs
 
 module _ (f : A → B → B) (e : B) where
   foldr′ : Vec A n → B
@@ -50,7 +50,8 @@ module _ (f : A → B → B) (e : B) where
   foldr′ {n = suc n} (x ∷ xs) = f x (foldr′ xs)
 
 foldl′ : (A → B → B) → B → Vec A n → B
-foldl′ f = foldl (const _) (λ x xs → f x xs)
+foldl′ {n = zero}  f b xs = b
+foldl′ {n = suc n} f b (x ∷ xs) = foldl′ f (f x b) xs
 
 vecFromList : (xs : List A) → Vec A (length xs)
 vecFromList List.[] = []
