@@ -6,18 +6,12 @@
 module Data.Dyck.Payload where
 
 open import Prelude
-open import Data.List using (List; _∷_; []; _++_; length)
 open import Data.Nat using (_+_)
-open import Path.Reasoning
-open import Function.Surjective
-open import Function.Injective
-open import Function.Injective.Properties using (inject-contrapositive)
-open import Data.Nat.Properties using (snotz; znots; pred)
-open import Data.Vec.Iterated
+open import Data.Vec.Iterated using (Vec; _∷_; []; foldlN; head)
 
 private
   variable
-    n m k : ℕ
+    n : ℕ
 
 --------------------------------------------------------------------------------
 -- Binary trees: definition and associated functions
@@ -45,7 +39,12 @@ module _{p} (P : ℕ → Type p)
   foldlProg bs (push x xs) = foldlProg (rb x bs) xs
   foldlProg bs (pull   xs) = foldlProg (lb   bs) xs
 -- In terms of foldr:
--- foldlProg P lb rb bs xs = foldrProg (λ n → P n → P zero) (λ x k bs → k (rb x bs)) (λ k bs → k (lb bs)) id xs bs
+-- foldlProg P lb rb bs xs =
+--     foldrProg
+--       (λ n → P n → P zero)
+--       (λ x k bs → k (rb x bs))
+--       (λ k bs → k (lb bs))
+--       id xs bs
 
 --------------------------------------------------------------------------------
 -- Conversion from a Prog to a Tree
