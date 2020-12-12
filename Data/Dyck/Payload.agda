@@ -78,14 +78,17 @@ tree→prog tr = tree→prog⊙ tr halt
 -- Proof of isomorphism
 --------------------------------------------------------------------------------
 
-tree→prog→tree⊙ : (e : Tree A) (is : Prog A (1 + n)) (st : Vec (Tree A) n) → prog→tree⊙ (tree→prog⊙ e is) st ≡ prog→tree⊙ is (e ∷ st)
+tree→prog→tree⊙ : (e : Tree A) (is : Prog A (1 + n)) (st : Vec (Tree A) n) →
+  prog→tree⊙ (tree→prog⊙ e is) st ≡ prog→tree⊙ is (e ∷ st)
 tree→prog→tree⊙ [ x ]     is st = refl
-tree→prog→tree⊙ (xs * ys) is st = tree→prog→tree⊙ xs _ st ; tree→prog→tree⊙ ys (pull is) (xs ∷ st)
+tree→prog→tree⊙ (xs * ys) is st = tree→prog→tree⊙ xs _ st ;
+                                  tree→prog→tree⊙ ys (pull is) (xs ∷ st)
 
 tree→prog→tree : (e : Tree A) → prog→tree (tree→prog e) ≡ e
 tree→prog→tree e = cong head (tree→prog→tree⊙ e halt [])
 
-prog→tree→prog⊙ : (is : Prog A n) (st : Vec (Tree A) n) → tree→prog (head (prog→tree⊙ is st)) ≡ foldlN (Prog A) tree→prog⊙ is st
+prog→tree→prog⊙ : (is : Prog A n) (st : Vec (Tree A) n) →
+ tree→prog (head (prog→tree⊙ is st)) ≡ foldlN (Prog A) tree→prog⊙ is st
 prog→tree→prog⊙  halt       st = refl
 prog→tree→prog⊙ (push i is) st = prog→tree→prog⊙ is (shift i st)
 prog→tree→prog⊙ (pull   is) st = prog→tree→prog⊙ is (reduce  st)
