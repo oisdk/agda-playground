@@ -30,12 +30,12 @@ mutual
 
 open Vec⁺ public
 
-foldrP : ∀ {p} (P : ℕ → Type p) →
+foldr : ∀ {p} (P : ℕ → Type p) →
           (∀ {n} → A → P n → P (suc n)) →
           P zero →
           Vec A n → P n
-foldrP {n = zero} P f b _         = b
-foldrP {n = suc n} P f b (x ∷ xs) = f x (foldrP P f b xs)
+foldr {n = zero} P f b _         = b
+foldr {n = suc n} P f b (x ∷ xs) = f x (foldr P f b xs)
 
 foldl : ∀ {p} (P : ℕ → Type p) →
           (∀ {n} → A → P n → P (suc n)) →
@@ -48,8 +48,7 @@ foldlN : ∀ {p} (P : ℕ → Type p) →
           (∀ {n} → A → P (suc n) → P n) →
           P n →
           Vec A n → P zero
-foldlN {n = zero } P f b _ = b
-foldlN {n = suc n} P f b (x ∷ xs) = foldlN P f (f x b) xs
+foldlN P f b xs = foldr (λ n → P n → P zero) (λ x k xs → k (f x xs)) id xs b
 
 module _ (f : A → B → B) (e : B) where
   foldr′ : Vec A n → B

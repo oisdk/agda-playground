@@ -25,42 +25,22 @@ data Tree (A : Type a) : Type a where
 -- Programs: definition and associated functions
 --------------------------------------------------------------------------------
 
-data Prog {a} (A : Type a) : ℕ → Type a where
+data Prog (A : Type a) : ℕ → Type a where
   halt : Prog A 1
   push : A → Prog A (1 + n) → Prog A n
   pull : Prog A (1 + n) → Prog A (2 + n)
-
-module _{p} (P : ℕ → Type p)
-            (lb : ∀ {n} → P (2 + n) → P (1 + n))
-            (rb : ∀ {n} → A → P n → P (1 + n))
-            where
-  runl : P n → Prog A n → P 1
-  runl bs halt        = bs
-  runl bs (push x xs) = runl (rb x bs) xs
-  runl bs (pull   xs) = runl (lb   bs) xs
--- In terms of foldr:
--- runl P lb rb bs xs =
---     foldrProg
---       (λ n → P n → P zero)
---       (λ x k bs → k (rb x bs))
---       (λ k bs → k (lb bs))
---       id xs bs
 
 --------------------------------------------------------------------------------
 -- Conversion from a Prog to a Tree
 --------------------------------------------------------------------------------
 
-reduce : Vec (Tree A) (2 + n) → Vec (Tree A) (1 + n)
-reduce (t₁ ∷ t₂ ∷ s) = (t₂ * t₁) ∷ s
-
-shift : A → Vec (Tree A) n → Vec (Tree A) (1 + n)
-shift x s = [ x ] ∷ s
-
-prog→tree⊙ : Prog A n → Vec (Tree A) n → Vec (Tree A) 1
-prog→tree⊙ p s = runl (λ n → Vec (Tree _) n) reduce shift s p
+prog→tree⊙ : Prog A n → Vec (Tree A) n → Tree A
+prog→tree⊙ halt        (v ∷ [])       = v
+prog→tree⊙ (push v is) st             = prog→tree⊙ is ([ v ] ∷ st)
+prog→tree⊙ (pull   is) (t₁ ∷ t₂ ∷ st) = prog→tree⊙ is (t₂ * t₁ ∷ st)
 
 prog→tree : Prog A zero → Tree A
-prog→tree ds = head (prog→tree⊙ ds [])
+prog→tree ds = prog→tree⊙ ds []
 
 --------------------------------------------------------------------------------
 -- Conversion from a Tree to a Prog
@@ -84,13 +64,13 @@ tree→prog→tree⊙ (xs * ys) is st = tree→prog→tree⊙ xs _ st ;
                                   tree→prog→tree⊙ ys (pull is) (xs ∷ st)
 
 tree→prog→tree : (e : Tree A) → prog→tree (tree→prog e) ≡ e
-tree→prog→tree e = cong head (tree→prog→tree⊙ e halt [])
+tree→prog→tree e = tree→prog→tree⊙ e halt []
 
 prog→tree→prog⊙ : (is : Prog A n) (st : Vec (Tree A) n) →
- tree→prog (head (prog→tree⊙ is st)) ≡ foldlN (Prog A) tree→prog⊙ is st
+ tree→prog (prog→tree⊙ is st) ≡ foldlN (Prog A) tree→prog⊙ is st
 prog→tree→prog⊙  halt       st = refl
-prog→tree→prog⊙ (push i is) st = prog→tree→prog⊙ is (shift i st)
-prog→tree→prog⊙ (pull   is) st = prog→tree→prog⊙ is (reduce  st)
+prog→tree→prog⊙ (push i is) st = prog→tree→prog⊙ is ([ i ] ∷ st)
+prog→tree→prog⊙ (pull is) (t₁ ∷ t₂ ∷ ts) = prog→tree→prog⊙ is ((t₂ * t₁) ∷ ts)
 
 prog→tree→prog : (is : Prog A 0) → tree→prog (prog→tree is) ≡ is
 prog→tree→prog is = prog→tree→prog⊙ is []
