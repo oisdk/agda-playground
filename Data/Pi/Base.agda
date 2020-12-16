@@ -21,3 +21,7 @@ infixr 4.5 Π⦂-syntax
 Π⦂-syntax = Π
 
 syntax Π⦂-syntax t (λ x → e) = Π[ x ⦂ t ] e
+
+infixr -1 _⇒_
+_⇒_ : (A → Type b) → (A → Type c) → Type _
+F ⇒ G = ∀ {x} → F x → G x

@@ -150,7 +150,7 @@ open import Data.List using (_++_; concatMap)
 _<+>_ : Heap⋆ V → Heap⋆ V → Heap⋆ V
 _<+>_ = _++_
 
-multIn : (p : 𝑆 → 𝑆) → (c : ∀ {x y} → V (p x) → V y → V (p (x ∙ y))) → (fn : ∀ {w} → V w → V (p w)) → Heap⋆ (V ∘ p) → Heap⋆ V → Heap⋆ (V ∘ p)
+multIn : (p : 𝑆 → 𝑆) → (c : ∀ {x y} → V (p x) → V y → V (p (x ∙ y))) → (V ⇒ V ∘ p) → Heap⋆ (V ∘ p) → Heap⋆ V → Heap⋆ (V ∘ p)
 multIn {V = V} p c f [] ys = []
 multIn {V = V} p c f ([] ∷ xs) ys = maps f ys ++ multIn p c f xs ys
 multIn {V = V} p c f (x ∹ xv & xc ∷ xs) ys = x ∹ xv & multIn (p ∘ ⟦ x ⇑⟧) (λ v₁ v₂ → subst V (cong p (assoc x _ _)) (c v₁ v₂)) (c xv) xc ys ∷ multIn p c f xs ys
