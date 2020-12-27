@@ -3,12 +3,11 @@
 
 open import Algebra
 open import Relation.Binary
-import Algebra.Construct.OrderedMonoid as OrdMon
+open import Algebra.Monus
 
-module Data.MonoidalHeap {s} (mon : Monoid s) (_≤?_ : Total (OrdMon._≤_ mon)) where
+module Data.MonoidalHeap {s} (monus : Monus s) where
 
-open Monoid mon
-open OrdMon mon
+open Monus monus
 
 open import Prelude
 open import Data.List using (List; _∷_; [])

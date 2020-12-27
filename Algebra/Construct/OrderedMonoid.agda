@@ -10,10 +10,14 @@ open import Path.Reasoning
 
 open Monoid monoid
 
-infix 4 _≤_ _≥_
+infix 4 _≤_ _≥_ _<_ _>_
 _≤_ : 𝑆 → 𝑆 → Type ℓ
 x ≤ y = ∃[ z ] (y ≡ x ∙ z)
 
+_<_ : 𝑆 → 𝑆 → Type ℓ
+x < y = ∃[ z ] ((z ≢ ε) × (y ≡ x ∙ z))
+
+_>_ = flip _<_
 _≥_ = flip _≤_
 
 ≤-refl : Reflexive _≤_
@@ -31,3 +35,6 @@ _≥_ = flip _≤_
 
 ∙-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
 ∙-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
+
+Trichotomous : Type _
+Trichotomous = (x y : 𝑆) → Tri _<_ _≡_ _>_ x y
