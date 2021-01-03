@@ -95,6 +95,15 @@ div-helper-lemma k m (suc n) (suc j) = div-helper-lemma k m n j
 even : ℕ → Bool
 even n = rem n 2 ≡ᴮ 0
 
+Even : ℕ → Type₀
+Even n = T (even n)
+
+odd : ℕ → Bool
+odd n = not (rem n 2 ≡ᴮ 0)
+
+Odd : ℕ → Type₀
+Odd n = T (odd n)
+
 s≤s : ∀ n m → n ≤ m → suc n ≤ suc m
 s≤s zero m p = tt
 s≤s (suc n) m p = p
