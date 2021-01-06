@@ -35,12 +35,8 @@ module _ {a b} {A : Type a} {B : Type b} where
   zip : Vec A n → Vec B n → List (A × B)
   zip xs ys = xfld xs (yfld ys)
 
-module _ {A : Type a} {B : Type b} {C : Type c} where
-  cata : Even n → (((C → A) → B) → C) → n # A ↬ B → C
-  cata e phi = f e
-    where
-    f : Even n → n # A ↬ B → C
-    f {n = suc (suc n)} e h = phi (λ g → h (g ∘ f e))
+cata : Even n → (((C → A) → B) → C) → n # A ↬ B → C
+cata {n = suc (suc n)} e ϕ h = ϕ (λ g → h (g ∘ cata e ϕ))
 
 push : (A → B) -> n # A ↬ B -> 2 + n # A ↬ B
 push {n = suc n} f q k = f (k q)
