@@ -9,6 +9,7 @@ open import Data.Vec.Iterated
 open import Data.Nat using (_*_; _+_)
 open import Data.Nat.Properties using (Even; Odd)
 
+
 private
   variable n m : ℕ
 
@@ -38,7 +39,7 @@ module _ {a b} {A : Type a} {B : Type b} where
 cata : Even n → (((C → A) → B) → C) → n # A ↬ B → C
 cata {n = suc (suc n)} e ϕ h = ϕ (λ g → h (g ∘ cata e ϕ))
 
-push : (A → B) -> n # A ↬ B -> 2 + n # A ↬ B
+push : (A → B) → n # A ↬ B → 2 + n # A ↬ B
 push {n = suc n} f q k = f (k q)
 
 one : Odd n → n # A ↬ A
