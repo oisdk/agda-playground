@@ -19,10 +19,10 @@ zero  # A ↬ B = ⊥
 suc n # A ↬ B = n # B ↬ A → B
 
 module _ {a b} {A : Type a} {B : Type b} where
-  yfld : Vec B n → 1 + n * 2 # List (A × B) ↬ (A → List (A × B))
+  yfld : Vec B n → 1 + (n * 2) # List (A × B) ↬ (A → List (A × B))
   yfld =
     foldr
-      (λ n → 1 + n * 2 # List (A × B) ↬ (A → List (A × B)))
+      (λ n → 1 + (n * 2) # List (A × B) ↬ (A → List (A × B)))
       (λ y yk xk x → (x , y) ∷ xk yk)
       (λ ())
 
