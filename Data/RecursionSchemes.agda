@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --postfix-projections --guardedness #-}
+{-# OPTIONS --cubical --postfix-projections --guardedness --allow-unsolved-metas #-}
 
 module Data.RecursionSchemes where
 
