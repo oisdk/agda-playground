@@ -1,0 +1,17 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.RecursionSchemes</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+
+<a id="35" class="Keyword">module</a> <a id="42" href="Data.RecursionSchemes.html" class="Module">Data.RecursionSchemes</a> <a id="64" class="Keyword">where</a>
+
+<a id="71" class="Keyword">open</a> <a id="76" class="Keyword">import</a> <a id="83" href="Prelude.html" class="Module">Prelude</a>
+<a id="91" class="Keyword">open</a> <a id="96" class="Keyword">import</a> <a id="103" href="Data.Functor.html" class="Module">Data.Functor</a>
+
+<a id="117" class="Keyword">record</a> <a id="Recursive"></a><a id="124" href="Data.RecursionSchemes.html#124" class="Record">Recursive</a> <a id="134" href="Data.RecursionSchemes.html#134" class="Bound">ℓ₁</a> <a id="137" class="Symbol">:</a> <a id="139" href="Level.html#192" class="Function">Type</a> <a id="144" class="Symbol">(</a><a id="145" href="Agda.Primitive.html#606" class="Primitive">ℓsuc</a> <a id="150" href="Data.RecursionSchemes.html#134" class="Bound">ℓ₁</a><a id="152" class="Symbol">)</a> <a id="154" class="Keyword">where</a>
+  <a id="162" class="Keyword">field</a>
+    <a id="Recursive.R"></a><a id="172" href="Data.RecursionSchemes.html#172" class="Field">R</a>  <a id="175" class="Symbol">:</a> <a id="177" href="Level.html#192" class="Function">Type</a> <a id="182" href="Data.RecursionSchemes.html#134" class="Bound">ℓ₁</a>
+    <a id="Recursive.functor"></a><a id="189" href="Data.RecursionSchemes.html#189" class="Field">functor</a> <a id="197" class="Symbol">:</a> <a id="199" href="Data.Functor.html#90" class="Record">Functor</a> <a id="207" href="Data.RecursionSchemes.html#134" class="Bound">ℓ₁</a> <a id="210" href="Data.RecursionSchemes.html#134" class="Bound">ℓ₁</a>
+  <a id="215" class="Keyword">open</a> <a id="220" href="Data.Functor.html#90" class="Module">Functor</a> <a id="228" href="Data.RecursionSchemes.html#189" class="Field">functor</a> <a id="236" class="Keyword">public</a>
+  <a id="245" class="Keyword">field</a>
+    <a id="Recursive.cata"></a><a id="255" href="Data.RecursionSchemes.html#255" class="Field">cata</a> <a id="260" class="Symbol">:</a> <a id="262" class="Symbol">(</a><a id="263" href="Data.Functor.html#147" class="Function">F</a> <a id="265" href="Level.html#388" class="Generalizable">A</a> <a id="267" class="Symbol">→</a> <a id="269" href="Level.html#388" class="Generalizable">A</a><a id="270" class="Symbol">)</a> <a id="272" class="Symbol">→</a> <a id="274" href="Data.RecursionSchemes.html#172" class="Field">R</a> <a id="276" class="Symbol">→</a> <a id="278" href="Level.html#388" class="Generalizable">A</a>
+
+</pre></body></html>
