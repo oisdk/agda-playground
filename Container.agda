@@ -9,3 +9,4 @@ Container s p = Σ[ Shape ⦂ Type s ] (Shape → Type p)
 
 ⟦_⟧ : ∀ {s p ℓ} → Container s p → Set ℓ → Set (s ℓ⊔ p ℓ⊔ ℓ)
 ⟦ S , P ⟧ X = Σ[ s ⦂ S ] (P s → X)
+
