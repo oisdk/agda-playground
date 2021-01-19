@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --cubical #-}
 
 module Data.RecursionSchemes where
 
@@ -38,13 +38,26 @@ record Wrap (A : Type₀) : Type₀  where
   field unwrap : A
 open Wrap
 
-fmap : ∀ F G → (f : ⟦ F ⟧ A → A) → Wrap (⟦ G ⟧ (μ F)) → ⟦ G ⟧ A
-cata : ∀ F   → (f : ⟦ F ⟧ A → A) → μ F → A
+map : (A → B) → ⟦ F ⟧ A → ⟦ F ⟧ B
+map {F = U}     f x = tt
+map {F = I}     f (recur x) = recur (f x)
+map {F = F ⊕ G} f (inl x) = inl (map f x)
+map {F = F ⊕ G} f (inr x) = inr (map f x)
+map {F = F ⊗ G} f (x , y) = map f x , map f y
 
-fmap F U         f x = tt
-fmap F (G₁ ⊕ G₂) f (wrap (inl x)) = inl (fmap F G₁ f (wrap x))
-fmap F (G₁ ⊕ G₂) f (wrap (inr x)) = inr (fmap F G₂ f (wrap x))
-fmap F (G₁ ⊗ G₂) f (wrap (x , y)) = fmap F G₁ f (wrap x) , fmap F G₂ f (wrap y)
-fmap F I         f (wrap (recur x)) = recur (cata F f x)
+module NonStructuralTermCata where
+  {-# TERMINATING #-}
+  cata : (⟦ F ⟧ A → A) → μ F → A
+  cata alg ⟨ x ⟩ = alg (map (cata alg) x)
 
-cata F f ⟨ x ⟩ = f (fmap F F f (wrap x))
+mutual
+  cata : (⟦ F ⟧ A → A) → μ F → A
+  cata f ⟨ x ⟩ = f (catamap _ _ f (wrap x))
+
+  catamap : ∀ F G → (f : ⟦ F ⟧ A → A) → Wrap (⟦ G ⟧ (μ F)) → ⟦ G ⟧ A
+  catamap F U         f x = tt
+  catamap F (G₁ ⊕ G₂) f (wrap (inl x)) = inl (catamap F G₁ f (wrap x))
+  catamap F (G₁ ⊕ G₂) f (wrap (inr x)) = inr (catamap F G₂ f (wrap x))
+  catamap F (G₁ ⊗ G₂) f (wrap (x , y)) = catamap F G₁ f (wrap x) , catamap F G₂ f (wrap y)
+  catamap F I         f (wrap (recur x)) = recur (cata f x)
+
