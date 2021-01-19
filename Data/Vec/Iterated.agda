@@ -65,3 +65,19 @@ vecFromList (x List.∷ xs) = x ∷ vecFromList xs
 
 vecToList : Vec A n → List A
 vecToList = foldr′ List._∷_ List.[]
+
+open import Data.Fin
+
+infixl 4 lookup
+lookup : Fin n → Vec A n → A
+lookup {n = suc n} f0     (x ∷ _ ) = x
+lookup {n = suc n} (fs i) (_ ∷ xs) = lookup i xs
+
+syntax lookup i xs = xs [ i ]
+
+infixl 4 replace
+replace : Fin n → Vec A n → A → Vec A n
+replace {n = suc n} f0     (_ ∷ xs) x = x ∷ xs
+replace {n = suc n} (fs i) (x ∷ xs) y = x ∷ replace i xs y
+
+syntax replace i xs x = xs [ i ]≔ x
