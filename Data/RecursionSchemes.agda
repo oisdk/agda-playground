@@ -1,64 +1,76 @@
-{-# OPTIONS --cubical --postfix-projections --guardedness #-}
+{-# OPTIONS --cubical --postfix-projections --guardedness --allow-unsolved-metas #-}
 
 module Data.RecursionSchemes where
 
-open import Prelude
-
-data Functor : Type (ℓsuc ℓzero) where
-  _⊗_ : Functor → Functor → Functor
-  _⊕_ : Functor → Functor → Functor
-  Id : Functor
-  Kn : Type₀ → Functor
-  1# : Functor
-  0# : Functor
+open import Prelude hiding (I)
+open import Data.Fin
+open import Data.Vec.Iterated
+open import Lens
 
 record Identity (A : Type₀) : Type ℓzero where
+  inductive
   constructor identity
   field runIdentity : A
 open Identity
 
-record Constant (A : Type₀) : Type ℓzero where
-  constructor constant
-  field runConstant : A
-open Constant
+private
+  variable
+    n : ℕ
 
 
-⟦_⟧ : Functor → Type₀ → Type₀
-⟦ f ⊗ g ⟧ x = ⟦ f ⟧ x × ⟦ g ⟧ x
-⟦ f ⊕ g ⟧ x = ⟦ f ⟧ x ⊎ ⟦ g ⟧ x
-⟦ Id ⟧ x = Identity x
-⟦ Kn x ⟧ _ = Constant x
-⟦ 1# ⟧ x = ⊤
-⟦ 0# ⟧ x = ⊥
+data Functor : Type₀ where
+  U I P : Functor
+  _⊗_ _⊕_ _⊚_ : Functor → Functor → Functor
+
+mutual
+  ⟦_⟧ : Functor → Type₀ → Type₀ → Type₀
+  ⟦ U ⟧ A R = ⊤
+  ⟦ I ⟧ A R = R
+  ⟦ P ⟧ A R = A
+  ⟦ F ⊕ G ⟧ A R = ⟦ F ⟧ A R ⊎ ⟦ G ⟧ A R
+  ⟦ F ⊗ G ⟧ A R = ⟦ F ⟧ A R × ⟦ G ⟧ A R
+  ⟦ F ⊚ G ⟧ A R = μ F (⟦ G ⟧ A R)
+
+  data μ (F : Functor) (A : Type₀) : Type _ where
+    ⟨_⟩ : ⟦ F ⟧ A (μ F A) → μ F A
 
 variable
+  R S : Type₀
   F G : Functor
 
-map : (A → B) → ⟦ F ⟧ A → ⟦ F ⟧ B
-map {F = p₁ ⊗ p₂} f (xs , ys) = map {F = p₁} f xs , map {F = p₂} f ys
-map {F = p₁ ⊕ p₂} f (inl x) = inl (map {F = p₁} f x)
-map {F = p₁ ⊕ p₂} f (inr x) = inr (map {F = p₂} f x)
-map {F = Id} f x = identity (f (runIdentity x ))
-map {F = Kn x₁} f x = x
-map {F = 1#} f x = tt
 
-data μ (F : Functor) : Type _ where
-  sup : ⟦ F ⟧ (μ F) → μ F
+-- map : (A → B) → (R → S) → ⟦ F ⟧ A R → ⟦ F ⟧ B S
+-- map {F = U}     f g x = tt
+-- map {F = I}     f g x = g x
+-- map {F = P}     f g x = f x
+-- map {F = F ⊕ G} f g (inl x) = inl (map f g x)
+-- map {F = F ⊕ G} f g (inr x) = inr (map f g x)
+-- map {F = F ⊗ G} f g (x , y) = map f g x , map f g y
+-- map {F = F ⊚ G} f g ⟨ x ⟩ = ⟨ map {F = F} (map {F = G} f g) (map {F = F ⊚ G} f g) x ⟩
 
 {-# TERMINATING #-}
-mapFold : ∀ G F → (⟦ G ⟧ A → A) → ⟦ F ⟧ (μ G) → ⟦ F ⟧ A
-mapFold G Id        alg (identity (sup x)) = identity (alg (mapFold G G alg x))
-mapFold G (F₁ ⊗ F₂) alg (x , y) = mapFold G F₁ alg x , mapFold G F₂ alg y
+mapFold : ∀ G F → (⟦ G ⟧ A R → R) → ⟦ F ⟧ B (μ G A) → ⟦ F ⟧ B R
+mapFold G U         alg xs = tt
+mapFold G I         alg ⟨ xs ⟩ = alg (mapFold G G alg xs)
+mapFold G P         alg xs = xs
+mapFold G (F₁ ⊗ F₂) alg (xs , ys) = mapFold G F₁ alg xs , mapFold G F₂ alg ys
 mapFold G (F₁ ⊕ F₂) alg (inl x) = inl (mapFold G F₁ alg x)
 mapFold G (F₁ ⊕ F₂) alg (inr x) = inr (mapFold G F₂ alg x)
-mapFold G (Kn x)    alg xs = xs
-mapFold G 1#        alg xs = xs
+mapFold G (F₁ ⊚ F₂) alg ⟨ xs ⟩ = {!!} -- ⟨ mapFold F₂ {!G ⊚ F₁ !} (mapFold {!!} {!!} alg) xs ⟩
 
-cata : (⟦ F ⟧ A → A) → μ F → A
-cata alg (sup x) = alg (mapFold _ _ alg x)
+-- mapFold : ∀ G F → (⟦ G ⟧ A → A) → ⟦ F ⟧ (μ G) → ⟦ F ⟧ A
+-- mapFold G F alg xs = {!!}
+-- mapFold G (F₁ ⊕ F₂) alg (x , y) = mapFold G F₁ alg x , mapFold G F₂ alg y
+-- mapFold G (F₁ ⊗ F₂) alg (inl x) = inl (mapFold G F₁ alg x)
+-- mapFold G (F₁ ⊗ F₂) alg (inr x) = inr (mapFold G F₂ alg x)
+-- mapFold G (Val i)   alg xs = xs
+-- mapFold G 1#        alg xs = xs
 
-LIST : Type₀ → Type₀
-LIST A = μ (1# ⊕ (Kn A ⊗ Id))
+-- -- cata : (⟦ F ⟧ A → A) → μ F → A
+-- -- cata alg (sup x) = alg (mapFold _ _ alg x)
 
-foldr : {A B : Type₀} → (A → B → B) → B → LIST A → B
-foldr f b = cata (either (const b) {!!})
+-- -- LIST : Type₀ → Type₀
+-- -- LIST A = μ (1# ⊗ (Kn A ⊕ Id))
+
+-- -- foldr : {A B : Type₀} → (A → B → B) → B → LIST A → B
+-- -- foldr f b = cata (either (const b) {!!})
