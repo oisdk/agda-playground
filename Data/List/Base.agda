@@ -1,23 +1,11 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Data.List.Base where
 
-open import Prelude
-
-private
-  module DisplayDefinition where
-    data List (A : Type a) : Type a where
-      []   : List A
-      _∷_  : A → List A → List A
-
+open import Level
 open import Agda.Builtin.List using (List; _∷_; []) public
-open import Data.Fin
-
-module _ {p} (P : List A → Type p) (f : ∀ x {xs} → P xs → P (x ∷ xs)) (base : P []) where
-  foldrP : ∀ xs → P xs
-  foldrP [] = base
-  foldrP (x ∷ xs) = f x (foldrP xs)
-
+open import Data.Nat.Base
+open import Function
 
 foldr : (A → B → B) → B → List A → B
 foldr f b [] = b
@@ -33,15 +21,6 @@ xs ++ ys = foldr _∷_ ys xs
 
 length : List A → ℕ
 length = foldr (const suc) zero
-
-infixl 6 _!_
-_!_ : (xs : List A) → Fin (length xs) → A
-(x ∷ xs) ! f0 = x
-(x ∷ xs) ! fs i = xs ! i
-
-tabulate : ∀ n → (Fin n → A) → List A
-tabulate zero f = []
-tabulate (suc n) f = f f0 ∷ tabulate n (f ∘ fs)
 
 concat : List (List A) → List A
 concat = foldr _++_ []

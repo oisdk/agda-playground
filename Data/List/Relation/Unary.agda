@@ -7,6 +7,7 @@ open import Data.List.Base
 open import Data.Fin
 open import Relation.Nullary
 open import Data.Sum
+open import Data.List.Indexing
 
 private
   variable p : Level
