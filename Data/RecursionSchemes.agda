@@ -7,7 +7,7 @@ open import Data.Sum
 open import Data.Sigma.Base
 open import Level
 open import Data.Unit
-open import Data.List.Base using (List; _∷_; []; foldr)
+open import Data.List.Base using (List; _∷_; []; foldr; foldl)
 
 data Functor : Type₀ where
   U I P : Functor
@@ -46,36 +46,19 @@ record Wrap (A : Type₀) : Type₀  where
   field unwrap : A
 open Wrap
 
--- alg : Functor → Type₀ → Type₀
--- alg G x = μ G x
+comps : List (Functor × Functor) → Type₀ → Type₀
+comps xs A = foldr (λ { (F , G) A → ⟦ F ⟧ A (μ G A) }) A xs
 
+go : ∀ Gs → (A → B) → Wrap (comps Gs A) → comps Gs B
+go [] f (wrap xs) = f xs
+go ((U       , F) ∷ Fs) f xs = tt
+go ((G₁ ⊕ G₂ , F) ∷ Fs) f (wrap (inl x)) = inl (go ((G₁ , F) ∷ Fs) f (wrap x))
+go ((G₁ ⊕ G₂ , F) ∷ Fs) f (wrap (inr x)) = inr (go ((G₂ , F) ∷ Fs) f (wrap x))
+go ((G₁ ⊗ G₂ , F) ∷ Fs) f (wrap (x , y)) = go ((G₁ , F) ∷ Fs) f (wrap x) , go ((G₂ , F) ∷ Fs) f (wrap y)
+go ((P       , F) ∷ Fs) f (wrap (param xs)) = param (go Fs f (wrap xs))
+go ((I       , F) ∷ Fs) f (wrap (recur ⟨ xs ⟩)) = recur ⟨ go ((F , F) ∷ Fs) f (wrap xs) ⟩
+go ((G₁ ⊚ G₂ , F) ∷ Fs) f (wrap ⟨ xs ⟩) = ⟨ go ((G₁ , G₁) ∷ (G₂ , F) ∷ Fs) f (wrap xs) ⟩
 
--- comps : Functor → List Functor → Type₀ → Type₀
--- comps F xs A = foldr alg ( A) xs
+mapμ : (A → B) → μ F A → μ F B
+mapμ {F = F} f ⟨ xs ⟩ = ⟨ go ((F , F) ∷ []) f (wrap xs) ⟩
 
--- go : ∀ G Fs → (A → B) → Wrap (⟦ G ⟧ (comps F Fs A) (comps F Fs (μ F A))) → ⟦ G ⟧ (comps F Fs B) (comps F Fs (μ F B))
--- go U         Fs f xs = tt
--- go (G₁ ⊕ G₂) Fs f (wrap (inl x)) = inl (go G₁ Fs f (wrap x))
--- go (G₁ ⊕ G₂) Fs f (wrap (inr x)) = inr (go G₂ Fs f (wrap x))
-
--- go (G₁ ⊗ G₂) Fs f (wrap (x , y)) = go G₁ Fs f (wrap x) , go G₂ Fs f (wrap y)
-
--- go P         Fs f        (wrap (param xs))            = {!!} -- param (f xs)
--- -- go P         (F₂ ∷ Fs) f (wrap (param ⟨ xs ⟩)) =  param  ⟨ go F₂ Fs f (wrap xs) ⟩
-
--- go I         Fs       f (wrap (recur xs)) = {!!} -- recur ⟨ go _ [] f (wrap xs) ⟩
--- -- go I         (F ∷ Fs) f (wrap (recur ⟨ xs ⟩)) = recur ⟨ go _ (F ∷ Fs) f (wrap xs) ⟩
-
--- go (G₁ ⊚ G₂) Fs f (wrap ⟨ xs ⟩) =  ⟨ go G₁ {!Fs!} {!f!} (wrap xs) ⟩
-
--- -- cata : (⟦ F ⟧ A R → R) → μ F A → R
--- -- cata alg ⟨ x ⟩ = alg (go _ _ id alg (wrap x))
--- --   where
--- --   go : ∀ F G → (A → B) → (⟦ F ⟧ A R → R) → Wrap (⟦ G ⟧ A (μ F A)) → ⟦ G ⟧ B R
--- --   go F U         g _ xs = tt
--- --   go F I         g f (wrap (recur xs)) = recur (cata f xs)
--- --   go F P         g f (wrap (param xs)) = param (g xs)
--- --   go F (G₁ ⊕ G₂) g f (wrap (inl x)) = inl (go F G₁ g f (wrap x))
--- --   go F (G₁ ⊕ G₂) g f (wrap (inr x)) = inr (go F G₂ g f (wrap x))
--- --   go F (G₁ ⊗ G₂) g f (wrap (x , y)) = go F G₁ g f (wrap x) , go F G₂ g f (wrap y)
--- --   go F (G₁ ⊚ G₂) g f (wrap xs) = {!!} -- mapμ (go F G₂ g f ∘′ wrap) xs
