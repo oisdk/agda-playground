@@ -5,8 +5,9 @@ module Data.RecursionSchemes where
 open import Prelude hiding (I)
 
 data Functor : Type₀ where
-  U I : Functor
+  U I P : Functor
   _⊕_ _⊗_ : (F G : Functor) → Functor
+  -- _⊚_ : (F G : Functor) → Functor
 
 variable
   F G : Functor
@@ -23,41 +24,30 @@ record Recur (A : Type₀) : Type₀ where
 open Recur
 
 mutual
-  ⟦_⟧ : Functor → Type₀ → Type₀
-  ⟦ U ⟧ A = ⊤
-  ⟦ I ⟧ A = Recur A
-  ⟦ F ⊕ G ⟧ A = ⟦ F ⟧ A ⊎ ⟦ G ⟧ A
-  ⟦ F ⊗ G ⟧ A = ⟦ F ⟧ A × ⟦ G ⟧ A
+  ⟦_⟧ : Functor → Type₀ → Type₀ → Type₀
+  ⟦ U     ⟧ A R = ⊤
+  ⟦ I     ⟧ A R = Recur R
+  ⟦ P     ⟧ A R = Param A
+  ⟦ F ⊕ G ⟧ A R = ⟦ F ⟧ A R ⊎ ⟦ G ⟧ A R
+  ⟦ F ⊗ G ⟧ A R = ⟦ F ⟧ A R × ⟦ G ⟧ A R
+  -- ⟦ F ⊚ G ⟧ A R = μ F (⟦ G ⟧ A R)
 
-
-data μ (F : Functor) : Type₀  where
-  ⟨_⟩ : ⟦ F ⟧ (μ F) → μ F
+  data μ (F : Functor) (A : Type₀) : Type₀  where
+    ⟨_⟩ : ⟦ F ⟧ A (μ F A) → μ F A
 
 record Wrap (A : Type₀) : Type₀  where
   constructor wrap
   field unwrap : A
 open Wrap
 
-map : (A → B) → ⟦ F ⟧ A → ⟦ F ⟧ B
-map {F = U}     f x = tt
-map {F = I}     f (recur x) = recur (f x)
-map {F = F ⊕ G} f (inl x) = inl (map f x)
-map {F = F ⊕ G} f (inr x) = inr (map f x)
-map {F = F ⊗ G} f (x , y) = map f x , map f y
-
-module NonStructuralTermCata where
-  {-# TERMINATING #-}
-  cata : (⟦ F ⟧ A → A) → μ F → A
-  cata alg ⟨ x ⟩ = alg (map (cata alg) x)
-
-mutual
-  cata : (⟦ F ⟧ A → A) → μ F → A
-  cata f ⟨ x ⟩ = f (catamap _ _ f (wrap x))
-
-  catamap : ∀ F G → (f : ⟦ F ⟧ A → A) → Wrap (⟦ G ⟧ (μ F)) → ⟦ G ⟧ A
-  catamap F U         f x = tt
-  catamap F (G₁ ⊕ G₂) f (wrap (inl x)) = inl (catamap F G₁ f (wrap x))
-  catamap F (G₁ ⊕ G₂) f (wrap (inr x)) = inr (catamap F G₂ f (wrap x))
-  catamap F (G₁ ⊗ G₂) f (wrap (x , y)) = catamap F G₁ f (wrap x) , catamap F G₂ f (wrap y)
-  catamap F I         f (wrap (recur x)) = recur (cata f x)
+cata : (⟦ F ⟧ A R → R) → μ F A → R
+cata alg ⟨ x ⟩ = alg (go _ _ id alg (wrap x))
+  where
+  go : ∀ F G → (A → B) → (⟦ F ⟧ A R → R) → Wrap (⟦ G ⟧ A (μ F A)) → ⟦ G ⟧ B R
+  go F U         g _ xs = tt
+  go F I         g f (wrap (recur xs)) = recur (cata f xs)
+  go F P         g f (wrap (param xs)) = param (g xs)
+  go F (G₁ ⊕ G₂) g f (wrap (inl x)) = inl (go F G₁ g f (wrap x))
+  go F (G₁ ⊕ G₂) g f (wrap (inr x)) = inr (go F G₂ g f (wrap x))
+  go F (G₁ ⊗ G₂) g f (wrap (x , y)) = go F G₁ g f (wrap x) , go F G₂ g f (wrap y)
 
