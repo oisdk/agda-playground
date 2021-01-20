@@ -1,11 +1,14 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Data.Sum where
 
 open import Level
-open import Cubical.Data.Sum using (_⊎_; inl; inr) public
-open import Data.Bool using (Bool; true; false)
+open import Data.Bool.Base using (Bool; true; false)
 open import Function using (const)
+
+data _⊎_ (A : Type a) (B : Type b) : Type (a ℓ⊔ b) where
+  inl : A → A ⊎ B
+  inr : B → A ⊎ B
 
 either : ∀ {ℓ} {C : A ⊎ B → Type ℓ} →  ((a : A) → C (inl a)) → ((b : B) → C (inr b))
         → (x : A ⊎ B) → C x

@@ -1,9 +1,8 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Function where
 
 open import Level
-open import Path
 
 infixr 9 _∘_ _∘′_
 _∘_ : ∀ {A : Type a} {B : A → Type b} {C : {x : A} → B x → Type c} →
@@ -42,10 +41,3 @@ A ∋ x = x
 infix 0 case_of_
 case_of_ : A → (A → B) → B
 case x of f = f x
-
-record Reveal_·_is_ {A : Type a} {B : A → Type b} (f : (x : A) → B x) (x : A) (y : B x) : Type b where
-  constructor 〖_〗
-  field eq : f x ≡ y
-
-inspect : {A : Type a} {B : A → Type b} (f : (x : A) → B x) (x : A) → Reveal f · x is f x
-inspect f x = 〖 refl 〗

@@ -11,6 +11,7 @@ open import Data.Bool as Bool using (Bool; true; false; T; bool)
 open import Relation.Nullary.Decidable
 open import Relation.Nullary.Discrete
 open import Data.Empty
+open import Inspect
 
 module _ (_~_ : A → A → Type b) where
   Reflexive : Type _

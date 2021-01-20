@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Data.Sigma.Base where
 
@@ -6,7 +6,6 @@ open import Agda.Builtin.Sigma
   using (Σ; _,_; fst; snd)
   public
 open import Level
-open import Path
 
 ∃ : ∀ {a b} {A : Type a} (B : A → Type b) → Type (a ℓ⊔ b)
 ∃ {A = A} = Σ A
@@ -52,12 +51,3 @@ map₁-Σ f (x , y) = f x , y
 map₂ : ∀ {A : Set a} {B : A → Set b} {C : A → Set c} →
         (∀ {x} → B x → C x) → Σ A B → Σ A C
 map₂ f = map-Σ (λ x → x) f
-
-∃! : ∀ {a b} {A : Type a} → (A → Type b) → Type (a ℓ⊔ b)
-∃! B = ∃ λ x → B x × (∀ {y} → B y → x ≡ y)
-
-infixr 4.5 ∃!-syntax
-∃!-syntax : ∀ {a b} {A : Type a} (B : A → Type b) → Type (a ℓ⊔ b)
-∃!-syntax = ∃!
-
-syntax ∃!-syntax (λ x → e) = ∃![ x ] e

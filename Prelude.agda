@@ -21,6 +21,7 @@ open import Data.Pi public
 open import Function.Isomorphism public
 open import Path public
 open import Function public
+open import Inspect public
 open import Relation.Nullary.Decidable public
 open import Relation.Nullary.Discrete public using (Discrete)
 open import Relation.Nullary.Discrete.Properties public using (Discrete→isSet)

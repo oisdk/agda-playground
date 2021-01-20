@@ -2,7 +2,11 @@
 
 module Data.RecursionSchemes where
 
-open import Prelude hiding (I)
+open import Function
+open import Data.Sum
+open import Data.Sigma.Base
+open import Level
+open import Data.Unit
 
 data Functor : Type₀ where
   U I P : Functor
@@ -52,8 +56,6 @@ mapμ f ⟨ x ⟩ = ⟨ go _ f (wrap x) ⟩
   go (G₁ ⊗ G₂) f (wrap (x , y)) = go G₁ f (wrap x) , go G₂ f (wrap y)
   go (G₁ ⊚ G₂) f (wrap xs) = {!!} -- mapμ (go G₂ f ∘′ wrap) xs
 
-
-
 cata : (⟦ F ⟧ A R → R) → μ F A → R
 cata alg ⟨ x ⟩ = alg (go _ _ id alg (wrap x))
   where
@@ -65,5 +67,3 @@ cata alg ⟨ x ⟩ = alg (go _ _ id alg (wrap x))
   go F (G₁ ⊕ G₂) g f (wrap (inr x)) = inr (go F G₂ g f (wrap x))
   go F (G₁ ⊗ G₂) g f (wrap (x , y)) = go F G₁ g f (wrap x) , go F G₂ g f (wrap y)
   go F (G₁ ⊚ G₂) g f (wrap xs) = {!!} -- mapμ (go F G₂ g f ∘′ wrap) xs
-
-
