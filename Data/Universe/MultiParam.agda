@@ -16,6 +16,7 @@ open import Data.Maybe
 
 open import Literals.Number
 open import Data.Fin.Literals
+open import Data.Nat.Literals
 
 infixl 6 _⊕_
 infixl 7 _⊗_
@@ -40,7 +41,7 @@ data Compose (A : Type₀) : Type₀ where
 
 mutual
   ⟦_⟧ : Functor n → Vec Type₀ n → Type₀
-  ⟦ [? i ] ⟧ xs = Value (xs [ i ])
+  ⟦ [? i ] ⟧ xs = (xs [ i ])
   ⟦ F ⊕ G ⟧ xs = ⟦ F ⟧ xs ⊎ ⟦ G ⟧ xs
   ⟦ F ⊗ G ⟧ xs = ⟦ F ⟧ xs × ⟦ G ⟧ xs
   ⟦ F ⊚ G ⟧ xs = Compose (⟦ F ⟧ (⟦ G ⟧ xs ∷ xs))
@@ -89,7 +90,7 @@ mutual
   map′ : ∀ (F : Functor n) (Fs : Fixes m n) →
           ((i : Fin m) → As [ i ] → Bs [ i ]) →
           <! ⟦ F ⟧ (toTypes Fs As) !> → ⟦ F ⟧ (toTypes Fs Bs)
-  map′ [? i  ] Fs f [! value xs !] = value (mapTy Fs f i [! xs !])
+  map′ [? i  ] Fs f [! xs !] = (mapTy Fs f i [! xs !])
   map′ (F ⊕ G) Fs f [! inl x !] = inl (map′ F Fs f [! x !])
   map′ (F ⊕ G) Fs f [! inr x !] = inr (map′ G Fs f [! x !])
   map′ (F ⊗ G) Fs f [! x , y !] = map′ F Fs f [! x !] , map′ G Fs f [! y !]
@@ -98,7 +99,7 @@ mutual
   map′ 1# Fs f xs = tt
 
 map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
-map f x = map′ _ flat f [! x !]
+map {F = F} f x = map′ F flat f [! x !]
 
 mutual
   cataTy : {F : Functor (suc k)} {As : Vec Type₀ k} {Rs : Vec Type₀ m} →
@@ -106,7 +107,7 @@ mutual
            (Gs : Fixes (suc m) n) →
            (i : Fin n) →
            <! toTypes Gs (μ F As ∷ Rs) [ i ] !> → toTypes Gs (A ∷ Rs) [ i ]
-  cataTy {n = suc n} f flat       f0     [! ⟨ x ⟩ !] = f (cata′ f _ flat [! x !])
+  cataTy {n = suc n} {F = F} f flat       f0     [! ⟨ x ⟩ !] = f (cata′ f F flat [! x !])
   cataTy {n = suc n} f flat       (fs i) [! x     !] = x
   cataTy {n = suc n} f (G ⊚∷″ Gs) f0     [! x     !] = cata′ f G Gs [! x !]
   cataTy {n = suc n} f (G ⊚∷″ Gs) (fs i) [! x     !] = cataTy f Gs i [! x !]
@@ -123,11 +124,11 @@ mutual
   cata′ f (G₁ ⊚ G₂) Gs [! compose xs !] = compose (cata′ f G₁ (G₂ ⊚∷″ Gs) [! xs !])
   cata′ f (Fix G) Gs [! ⟨ xs ⟩ !] = ⟨ cata′ f G (G μ∷″ Gs) [! xs !] ⟩
   cata′ f 1# Gs [! xs !] = tt
-  cata′ f [? i ] Gs [! value xs !] = value (cataTy f Gs i [! xs !])
+  cata′ f [? i ] Gs [! xs !] = (cataTy f Gs i [! xs !])
 
 
 cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
-cata alg ⟨ x ⟩ = alg (cata′ alg _ flat [! x !])
+cata {F = F} alg ⟨ x ⟩ = alg (cata′ alg F flat [! x !])
 
 
 fkind : ℕ → Type₁
@@ -149,6 +150,17 @@ LIST = ⟦ Fix (1# ⊕ [? 1 ] ⊗ [? 0 ]) ⟧~
 
 ROSE : Type₀ → Type₀
 ROSE = ⟦ Fix ([? 1 ] ⊗ Fix (1# ⊕ [? 1 ] ⊗ [? 0 ])) ⟧~
+
+foldr″ : {A B : Type₀} → (A → B → B) → B → LIST A → B
+foldr″ f b = cata (const b ▿ uncurry f)
+
+infixr 5 _∷″_
+pattern []″ = ⟨ inl tt ⟩
+pattern _∷″_ x xs = ⟨ inr (x , xs) ⟩
+
+
+example : LIST ℕ
+example = 1 ∷″ 2 ∷″ 3 ∷″ []″
 
 -- cata : {F : Functor (suc n)} {As : Vec Type₀ n} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
 -- cata = {!!}
