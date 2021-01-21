@@ -19,21 +19,11 @@ variable
   Fs : List Functor
   R S : Type₀
 
-record Param (A : Type₀) : Type₀ where
-  constructor param
-  field getParam : A
-open Param
-
-record Recur (A : Type₀) : Type₀ where
-  constructor recur
-  field getRecur : A
-open Recur
-
 mutual
   ⟦_⟧ : Functor → Type₀ → Type₀ → Type₀
   ⟦ U     ⟧ A R = ⊤
-  ⟦ I     ⟧ A R = Recur R
-  ⟦ P     ⟧ A R = Param A
+  ⟦ I     ⟧ A R = R -- If these are wrapped in data types it makes the function
+  ⟦ P     ⟧ A R = A -- injective, which can help with type inference.
   ⟦ F ⊕ G ⟧ A R = ⟦ F ⟧ A R ⊎ ⟦ G ⟧ A R
   ⟦ F ⊗ G ⟧ A R = ⟦ F ⟧ A R × ⟦ G ⟧ A R
   ⟦ F ⊚ G ⟧ A R = μ F (⟦ G ⟧ A R)
@@ -41,46 +31,58 @@ mutual
   data μ (F : Functor) (A : Type₀) : Type₀  where
     ⟨_⟩ : ⟦ F ⟧ A (μ F A) → μ F A
 
-record Wrap (A : Type₀) : Type₀  where
-  constructor wrap
+-- We need this type to wrap the type given to some of
+-- the functions on the functors.
+-- This fixes those types (instead of allowing them to be
+-- made by arbitrary functions), and so will allow
+-- agda to determine that they're terminating.
+-- i.e. without it we won't pass the termination checker.
+record <!_!> (A : Type₀) : Type₀  where
+  constructor [!_!]
   field unwrap : A
-open Wrap
+open <!_!>
 
-comp : (Functor × Functor) → Type₀ → Type₀
-comp (F , G) A = ⟦ F ⟧ A (μ G A)
+⟦_⊚⟧ : List (Functor × Functor) → Type₀ → Type₀
+⟦_⊚⟧ = flip (foldr (λ { (F , G) A → ⟦ F ⟧ A (μ G A)}))
 
-comps : List (Functor × Functor) → Type₀ → Type₀
-comps xs A = foldr comp A xs
+map′ : ∀ Fs → (A → B) → <! ⟦ Fs ⊚⟧ A !> → ⟦ Fs ⊚⟧ B
+map′ []                   f [! xs     !] = f xs
+map′ ((U       , F) ∷ Fs) f [! xs     !] = tt
+map′ ((G₁ ⊕ G₂ , F) ∷ Fs) f [! inl x  !] = inl (map′ ((G₁ , F) ∷ Fs) f [! x !])
+map′ ((G₁ ⊕ G₂ , F) ∷ Fs) f [! inr x  !] = inr (map′ ((G₂ , F) ∷ Fs) f [! x !])
+map′ ((G₁ ⊗ G₂ , F) ∷ Fs) f [! x , y  !] = map′ ((G₁ , F) ∷ Fs) f [! x !] , map′ ((G₂ , F) ∷ Fs) f [! y !]
+map′ ((P       , F) ∷ Fs) f [! xs     !] = map′ Fs f [! xs !]
+map′ ((I       , F) ∷ Fs) f [! ⟨ xs ⟩ !] = ⟨ map′ ((F , F) ∷ Fs) f [! xs !] ⟩
+map′ ((G₁ ⊚ G₂ , F) ∷ Fs) f [! ⟨ xs ⟩ !] = ⟨ map′ ((G₁ , G₁) ∷ (G₂ , F) ∷ Fs) f [! xs !] ⟩
 
-go : ∀ Gs → (A → B) → Wrap (comps Gs A) → comps Gs B
-go [] f (wrap xs) = f xs
-go ((U       , F) ∷ Fs) f xs = tt
-go ((G₁ ⊕ G₂ , F) ∷ Fs) f (wrap (inl x)) = inl (go ((G₁ , F) ∷ Fs) f (wrap x))
-go ((G₁ ⊕ G₂ , F) ∷ Fs) f (wrap (inr x)) = inr (go ((G₂ , F) ∷ Fs) f (wrap x))
-go ((G₁ ⊗ G₂ , F) ∷ Fs) f (wrap (x , y)) = go ((G₁ , F) ∷ Fs) f (wrap x) , go ((G₂ , F) ∷ Fs) f (wrap y)
-go ((P       , F) ∷ Fs) f (wrap (param xs)) = param (go Fs f (wrap xs))
-go ((I       , F) ∷ Fs) f (wrap (recur ⟨ xs ⟩)) = recur ⟨ go ((F , F) ∷ Fs) f (wrap xs) ⟩
-go ((G₁ ⊚ G₂ , F) ∷ Fs) f (wrap ⟨ xs ⟩) = ⟨ go ((G₁ , G₁) ∷ (G₂ , F) ∷ Fs) f (wrap xs) ⟩
+map : (A → B) → μ F A → μ F B
+map {F = F} f ⟨ xs ⟩ = ⟨ map′ ((F , F) ∷ []) f [! xs !] ⟩
 
-mapμ : (A → B) → μ F A → μ F B
-mapμ {F = F} f ⟨ xs ⟩ = ⟨ go ((F , F) ∷ []) f (wrap xs) ⟩
+⟦⊚_⟧ : List (Functor × Functor) → (Type₀ × Type₀) → (Type₀ × Type₀)
+⟦⊚_⟧  = flip (foldr (λ { (G , F) (A , μA) → ⟦ F ⟧ A μA , μ G (⟦ F ⟧ A μA)}))
 
-ucomp : (Functor × Functor) → (Type₀ × Type₀) → (Type₀ × Type₀)
-ucomp (G , F) (A , mA) = let B = ⟦ F ⟧ A mA in B , μ G B
+cata′ : ∀ G Gs → (⟦ F ⟧ A R → R) → <! uncurry ⟦ G ⟧ (⟦⊚ Gs ⟧ (A , μ F A)) !> → uncurry ⟦ G ⟧ (⟦⊚ Gs ⟧ (A , R))
+cata′         (U      ) Gs               f [! _      !] = tt
+cata′         (G₁ ⊕ G₂) Gs               f [! inl x  !] = inl (cata′ G₁ Gs f [! x !])
+cata′         (G₁ ⊕ G₂) Gs               f [! inr x  !] = inr (cata′ G₂ Gs f [! x !])
+cata′         (G₁ ⊗ G₂) Gs               f [! x , y  !] = cata′ G₁ Gs f [! x !] , cata′ G₂ Gs f [! y !]
+cata′         P         []               f [! xs     !] = xs
+cata′         P         ((F₁ , F₂) ∷ Fs) f [! xs     !] = cata′ F₂ Fs f [! xs !]
+cata′ {F = F} I         []               f [! ⟨ xs ⟩ !] = f (cata′ F [] f [! xs !])
+cata′         I         ((F₁ , F₂) ∷ Fs) f [! xs     !] = cata′ (F₁ ⊚ F₂) Fs f [! xs !]
+cata′         (G₁ ⊚ G₂) Fs               f [! ⟨ xs ⟩ !] = ⟨ cata′ G₁ ((G₁ , G₂) ∷ Fs) f [! xs !] ⟩
 
-ucomps : List (Functor × Functor) → (Type₀ × Type₀) → (Type₀ × Type₀)
-ucomps  = flip (foldr ucomp)
+cata : (⟦ F ⟧ A R → R) → μ F A → R
+cata {F = F} f ⟨ x ⟩ = f (cata′ F [] f [! x !])
 
-fmap : ∀ G Gs → (⟦ F ⟧ A R → R) → Wrap (uncurry ⟦ G ⟧ (ucomps Gs (A , μ F A))) → uncurry ⟦ G ⟧ (ucomps Gs (A , R))
-fmap (U      ) Fs f xs = tt
-fmap (G₁ ⊕ G₂) Fs f (wrap (inl x)) = inl (fmap G₁ Fs f (wrap x))
-fmap (G₁ ⊕ G₂) Fs f (wrap (inr x)) = inr (fmap G₂ Fs f (wrap x))
-fmap (G₁ ⊗ G₂) Fs f (wrap (x , y)) = fmap G₁ Fs f (wrap x) , fmap G₂ Fs f (wrap y)
-fmap P [] f (wrap (param xs)) = param xs
-fmap P ((F₁ , F₂) ∷ Fs) f (wrap (param xs)) = param (fmap F₂ Fs f (wrap xs) )
-fmap I [] f (wrap (recur ⟨ x ⟩)) = recur (f (fmap _ [] f (wrap x)))
-fmap I ((F₁ , F₂) ∷ Fs) f (wrap (recur xs)) = recur (fmap (F₁ ⊚ F₂) Fs f (wrap xs) )
-fmap (G₁ ⊚ G₂) Fs f (wrap ⟨ xs ⟩) = ⟨ fmap G₁ ((G₁ , G₂) ∷ Fs) f (wrap xs) ⟩
+LIST : Type₀ → Type₀
+LIST = μ (U ⊕ (P ⊗ I))
 
-cata : ∀ F → (f : ⟦ F ⟧ A R → R) → μ F A → R
-cata F f ⟨ x ⟩ = f (fmap F [] f (wrap x))
+foldr′ : {B : Type₀} → (A → B → B) → B → LIST A → B
+foldr′ f b = cata λ { (inl x) → b ; (inr (x , xs)) → f x xs }
+
+ROSE : Type₀ → Type₀
+ROSE = μ (P ⊗ ((U ⊕ (P ⊗ I)) ⊚ I))
+
+foldRose : (A → LIST B → B) → ROSE A → B
+foldRose f = cata (uncurry f)
