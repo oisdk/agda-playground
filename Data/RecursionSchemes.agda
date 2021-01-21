@@ -9,6 +9,7 @@ open import Level
 open import Data.Unit
 open import Data.List.Base using (List; _∷_; []; foldr; foldl)
 
+-- The PolyP approach
 data Functor : Type₀ where
   U I P : Functor
   _⊕_ _⊗_ : (F G : Functor) → Functor
@@ -77,11 +78,29 @@ cata′         (G₁ ⊚ G₂) Fs               f [! ⟨ xs ⟩ !] = ⟨ cata�
 cata : (⟦ F ⟧ A R → R) → μ F A → R
 cata {F = F} f ⟨ x ⟩ = f (cata′ F [] f [! x !])
 
+mapr : ∀ F → (R → S) → ⟦ F ⟧ A R → ⟦ F ⟧ A S
+mapr U       f xs = tt
+mapr I       f xs = f xs
+mapr P       f xs = xs
+mapr (F ⊕ G) f (inl x) = inl (mapr F f x)
+mapr (F ⊕ G) f (inr x) = inr (mapr G f x)
+mapr (F ⊗ G) f (x , y) = mapr F f x , mapr G f y
+mapr (F ⊚ G) f x = map {F = F} (mapr G f) x
+
+mapl : ∀ F → (A → B) → ⟦ F ⟧ A R → ⟦ F ⟧ B R
+mapl U       f xs = tt
+mapl I       f xs = xs
+mapl P       f xs = f xs
+mapl (F ⊕ G) f (inl x) = inl (mapl F f x)
+mapl (F ⊕ G) f (inr x) = inr (mapl G f x)
+mapl (F ⊗ G) f (x , y) = mapl F f x , mapl G f y
+mapl (F ⊚ G) f x = map {F = F} (mapl G f) x
+
 LIST : Type₀ → Type₀
 LIST = μ (U ⊕ (P ⊗ I))
 
 foldr′ : {B : Type₀} → (A → B → B) → B → LIST A → B
-foldr′ f b = cata λ { (inl x) → b ; (inr (x , xs)) → f x xs }
+foldr′ f b = cata (const b ▿ uncurry f)
 
 ROSE : Type₀ → Type₀
 ROSE = μ (P ⊗ ((U ⊕ (P ⊗ I)) ⊚ I))
