@@ -7,13 +7,15 @@ open import Data.Sum
 open import Data.Sigma.Base
 open import Level
 open import Data.Unit
-open import Data.List.Base using (List; _∷_; []; foldr)
 open import WellFounded
 open import Data.Fin
 open import Data.Nat
 open import Data.Vec.Iterated
 open import Data.Empty
 open import Data.Maybe
+
+open import Literals.Number
+open import Data.Fin.Literals
 
 infixl 6 _⊕_
 infixl 7 _⊗_
@@ -101,114 +103,22 @@ map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
 map f x = map′ _ flat f [! x !]
 
 
--- map′ : ∀ F (Fs : Fixes n) → ⟦ F ⟧ (As) → ⟦ F ⟧ Bs
--- map′ {F = [? i ]} f (value x) = value (f i x)
--- map′ {F = F ⊕ G} f (inl x) = inl (map f x)
--- map′ {F = F ⊕ G} f (inr x) = inr (map f x)
--- map′ {F = F ⊗ G} f (x , y) = map f x , map f y
--- map′ {F = 1#   } f xs = tt
--- map′ {F = F ⊚ G} f (compose xs) = compose (map (maybe (map f) f) xs)
--- map′ {F = Fix F} f ⟨ xs ⟩ = ⟨ {!!} ⟩
+fkind : ℕ → Type₁
+fkind zero    = Type₀
+fkind (suc n) = Type₀ → fkind n
 
--- ⟦_⊚⟧ : List (Functor × Functor) → Type₀ → Type₀
--- ⟦_⊚⟧ = flip (foldr (λ { (F , G) A → ⟦ F ⟧ A (μ G A)}))
+curried : Vec Type₀ n → Type₀ → Type₀
+curried xs x = foldr′ (λ y ys → y → ys) x xs
 
--- map′ : ∀ Fs → (A → B) → <! ⟦ Fs ⊚⟧ A !> → ⟦ Fs ⊚⟧ B
--- map′ []                   f [! xs     !] = f xs
--- map′ ((U       , F) ∷ Fs) f [! xs     !] = tt
--- map′ ((G₁ ⊕ G₂ , F) ∷ Fs) f [! inl x  !] = inl (map′ ((G₁ , F) ∷ Fs) f [! x !])
--- map′ ((G₁ ⊕ G₂ , F) ∷ Fs) f [! inr x  !] = inr (map′ ((G₂ , F) ∷ Fs) f [! x !])
--- map′ ((G₁ ⊗ G₂ , F) ∷ Fs) f [! x , y  !] = map′ ((G₁ , F) ∷ Fs) f [! x !] , map′ ((G₂ , F) ∷ Fs) f [! y !]
--- map′ ((P       , F) ∷ Fs) f [! xs     !] = map′ Fs f [! xs !]
--- map′ ((I       , F) ∷ Fs) f [! ⟨ xs ⟩ !] = ⟨ map′ ((F , F) ∷ Fs) f [! xs !] ⟩
--- map′ ((G₁ ⊚ G₂ , F) ∷ Fs) f [! ⟨ xs ⟩ !] = ⟨ map′ ((G₁ , G₁) ∷ (G₂ , F) ∷ Fs) f [! xs !] ⟩
+curries : ∀ n → (Vec Type₀ n → Type₀) → fkind n
+curries zero    f = f []
+curries (suc n) f A = curries n (f ∘ (A ∷_))
 
--- map : (A → B) → μ F A → μ F B
--- map {F = F} f ⟨ xs ⟩ = ⟨ map′ ((F , F) ∷ []) f [! xs !] ⟩
+⟦_⟧~ : Functor n → fkind n
+⟦_⟧~ {n = n} F = curries n ⟦ F ⟧
 
--- ⟦⊚_⟧ : List (Functor × Functor) → (Type₀ × Type₀) → (Type₀ × Type₀)
--- ⟦⊚_⟧  = flip (foldr (λ { (G , F) (A , μA) → ⟦ F ⟧ A μA , μ G (⟦ F ⟧ A μA)}))
+LIST : Type₀ → Type₀
+LIST = ⟦ Fix (1# ⊕ [? 1 ] ⊗ [? 0 ]) ⟧~
 
--- cata′ : ∀ G Gs → (⟦ F ⟧ A R → R) → <! uncurry ⟦ G ⟧ (⟦⊚ Gs ⟧ (A , μ F A)) !> → uncurry ⟦ G ⟧ (⟦⊚ Gs ⟧ (A , R))
--- cata′         (U      ) Gs               f [! _      !] = tt
--- cata′         (G₁ ⊕ G₂) Gs               f [! inl x  !] = inl (cata′ G₁ Gs f [! x !])
--- cata′         (G₁ ⊕ G₂) Gs               f [! inr x  !] = inr (cata′ G₂ Gs f [! x !])
--- cata′         (G₁ ⊗ G₂) Gs               f [! x , y  !] = cata′ G₁ Gs f [! x !] , cata′ G₂ Gs f [! y !]
--- cata′         P         []               f [! xs     !] = xs
--- cata′         P         ((F₁ , F₂) ∷ Fs) f [! xs     !] = cata′ F₂ Fs f [! xs !]
--- cata′ {F = F} I         []               f [! ⟨ xs ⟩ !] = f (cata′ F [] f [! xs !])
--- cata′         I         ((F₁ , F₂) ∷ Fs) f [! xs     !] = cata′ (F₁ ⊚ F₂) Fs f [! xs !]
--- cata′         (G₁ ⊚ G₂) Fs               f [! ⟨ xs ⟩ !] = ⟨ cata′ G₁ ((G₁ , G₂) ∷ Fs) f [! xs !] ⟩
-
--- cata : (⟦ F ⟧ A R → R) → μ F A → R
--- cata {F = F} f ⟨ x ⟩ = f (cata′ F [] f [! x !])
-
-
--- module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_) where
---   ana′ : ∀ G Gs → ((x : B) → ⟦ F ⟧ A (∃ (_< x))) → ∀ {x} → Acc _<_ x → <! uncurry ⟦ G ⟧ (⟦⊚ Gs ⟧ (A , ∃ (_< x))) !> → uncurry ⟦ G ⟧ (⟦⊚ Gs ⟧ (A , μ F A))
---   ana′         (U      ) Gs               f a        [! _       !] = tt
---   ana′         (G₁ ⊕ G₂) Gs               f a        [! inl x   !] = inl (ana′ G₁ Gs f a [! x !])
---   ana′         (G₁ ⊕ G₂) Gs               f a        [! inr x   !] = inr (ana′ G₂ Gs f a [! x !])
---   ana′         (G₁ ⊗ G₂) Gs               f a        [! x , y   !] = ana′ G₁ Gs f a [! x !] , ana′ G₂ Gs f a [! y !]
---   ana′         P         []               f a        [! xs      !] = xs
---   ana′         P         ((F₁ , F₂) ∷ Fs) f a        [! xs      !] = ana′ F₂ Fs f a [! xs !]
---   ana′ {F = F} I         []               f (acc wf) [! y , y<x !] = ⟨ ana′ F [] f (wf y y<x) [! f y !] ⟩
---   ana′         I         ((F₁ , F₂) ∷ Fs) f a        [! xs      !] = ana′ (F₁ ⊚ F₂) Fs f a [! xs !]
---   ana′         (G₁ ⊚ G₂) Fs               f a        [! ⟨ xs  ⟩ !] = ⟨ ana′ G₁ ((G₁ , G₂) ∷ Fs) f a [! xs !] ⟩
-
---   ana : ((x : B) → ⟦ F ⟧ A (∃ (_< x))) → B → μ F A
---   ana {F = F} f x = ⟨ ana′ F [] f (<-wellFounded x) [! f x !] ⟩
-
--- mapr : ∀ F → (R → S) → ⟦ F ⟧ A R → ⟦ F ⟧ A S
--- mapr U       f xs = tt
--- mapr I       f xs = f xs
--- mapr P       f xs = xs
--- mapr (F ⊕ G) f (inl x) = inl (mapr F f x)
--- mapr (F ⊕ G) f (inr x) = inr (mapr G f x)
--- mapr (F ⊗ G) f (x , y) = mapr F f x , mapr G f y
--- mapr (F ⊚ G) f x = map {F = F} (mapr G f) x
-
--- mapl : ∀ F → (A → B) → ⟦ F ⟧ A R → ⟦ F ⟧ B R
--- mapl U       f xs = tt
--- mapl I       f xs = xs
--- mapl P       f xs = f xs
--- mapl (F ⊕ G) f (inl x) = inl (mapl F f x)
--- mapl (F ⊕ G) f (inr x) = inr (mapl G f x)
--- mapl (F ⊗ G) f (x , y) = mapl F f x , mapl G f y
--- mapl (F ⊚ G) f x = map {F = F} (mapl G f) x
-
--- LIST : Type₀ → Type₀
--- LIST = μ (U ⊕ (P ⊗ I))
-
--- foldr′ : {B : Type₀} → (A → B → B) → B → LIST A → B
--- foldr′ f b = cata (const b ▿ uncurry f)
-
--- ROSE : Type₀ → Type₀
--- ROSE = μ (P ⊗ ((U ⊕ (P ⊗ I)) ⊚ I))
-
--- foldRose : (A → LIST B → B) → ROSE A → B
--- foldRose f = cata (uncurry f)
-
--- -- LISTLIST A = LIST (LIST A)
--- LISTLIST : Type₀ → Type₀
--- LISTLIST = μ (U ⊕ (((U ⊕ (P ⊗ I)) ⊚ P) ⊗ I))
-
--- pattern []′ = ⟨ inl tt ⟩
--- pattern _∷′_ x xs = ⟨ inr (x , xs) ⟩
-
--- levels : ROSE A → LISTLIST A
--- levels t = cata alg t []′
---   where
---   alg : A × μ (U ⊕ (P ⊗ I)) (LISTLIST A → LISTLIST A) → LISTLIST A → LISTLIST A
---   alg (x , xs) []′       = (x ∷′ []′) ∷′ foldr′ id []′ xs
---   alg (x , xs) (q ∷′ qs) = (x ∷′ q  ) ∷′ foldr′ id qs  xs
-
-
--- ROSE₂ : Type₀ → Type₀
--- ROSE₂ = COFREE ((U ⊕ (P ⊗ I)) ⊚ I)
-
--- -- hylo : ∀ F →
--- --        (R → ⟦ F ⟧ A R) →
--- --        (⟦ F ⟧ A S → S) →
--- --        R → S
--- -- hylo F f g = g ∘ mapr F (hylo F f g) ∘ f
+-- cata : {F : Functor (suc n)} {As : Vec Type₀ n} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
+-- cata = {!!}
