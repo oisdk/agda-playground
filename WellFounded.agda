@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module WellFounded where
 

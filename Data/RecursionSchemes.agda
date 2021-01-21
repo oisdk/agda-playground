@@ -7,7 +7,8 @@ open import Data.Sum
 open import Data.Sigma.Base
 open import Level
 open import Data.Unit
-open import Data.List.Base using (List; _∷_; []; foldr; foldl)
+open import Data.List.Base using (List; _∷_; []; foldr)
+open import WellFounded
 
 -- The PolyP approach
 data Functor : Type₀ where
@@ -77,6 +78,22 @@ cata′         (G₁ ⊚ G₂) Fs               f [! ⟨ xs ⟩ !] = ⟨ cata�
 
 cata : (⟦ F ⟧ A R → R) → μ F A → R
 cata {F = F} f ⟨ x ⟩ = f (cata′ F [] f [! x !])
+
+
+module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_) where
+  ana′ : ∀ G Gs → ((x : B) → ⟦ F ⟧ A (∃ (_< x))) → ∀ {x} → Acc _<_ x → <! uncurry ⟦ G ⟧ (⟦⊚ Gs ⟧ (A , ∃ (_< x))) !> → uncurry ⟦ G ⟧ (⟦⊚ Gs ⟧ (A , μ F A))
+  ana′         (U      ) Gs               f a        [! _       !] = tt
+  ana′         (G₁ ⊕ G₂) Gs               f a        [! inl x   !] = inl (ana′ G₁ Gs f a [! x !])
+  ana′         (G₁ ⊕ G₂) Gs               f a        [! inr x   !] = inr (ana′ G₂ Gs f a [! x !])
+  ana′         (G₁ ⊗ G₂) Gs               f a        [! x , y   !] = ana′ G₁ Gs f a [! x !] , ana′ G₂ Gs f a [! y !]
+  ana′         P         []               f a        [! xs      !] = xs
+  ana′         P         ((F₁ , F₂) ∷ Fs) f a        [! xs      !] = ana′ F₂ Fs f a [! xs !]
+  ana′ {F = F} I         []               f (acc wf) [! y , y<x !] = ⟨ ana′ F [] f (wf y y<x) [! f y !] ⟩
+  ana′         I         ((F₁ , F₂) ∷ Fs) f a        [! xs      !] = ana′ (F₁ ⊚ F₂) Fs f a [! xs !]
+  ana′         (G₁ ⊚ G₂) Fs               f a        [! ⟨ xs  ⟩ !] = ⟨ ana′ G₁ ((G₁ , G₂) ∷ Fs) f a [! xs !] ⟩
+
+  ana : ((x : B) → ⟦ F ⟧ A (∃ (_< x))) → B → μ F A
+  ana {F = F} f x = ⟨ ana′ F [] f (<-wellFounded x) [! f x !] ⟩
 
 mapr : ∀ F → (R → S) → ⟦ F ⟧ A R → ⟦ F ⟧ A S
 mapr U       f xs = tt
