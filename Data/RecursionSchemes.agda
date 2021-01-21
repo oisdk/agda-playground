@@ -28,9 +28,11 @@ mutual
   ⟦ F ⊗ G ⟧ A R = ⟦ F ⟧ A R × ⟦ G ⟧ A R
   ⟦ F ⊚ G ⟧ A R = μ F (⟦ G ⟧ A R)
 
-  data μ (F : Functor) (A : Type₀) : Type₀  where
-    ⟨_⟩ : ⟦ F ⟧ A (μ F A) → μ F A
-
+  record μ (F : Functor) (A : Type₀) : Type₀  where
+    inductive
+    constructor ⟨_⟩
+    field unwrap : ⟦ F ⟧ A (μ F A)
+open μ
 -- We need this type to wrap the type given to some of
 -- the functions on the functors.
 -- This fixes those types (instead of allowing them to be
@@ -39,7 +41,7 @@ mutual
 -- i.e. without it we won't pass the termination checker.
 record <!_!> (A : Type₀) : Type₀  where
   constructor [!_!]
-  field unwrap : A
+  field value : A
 open <!_!>
 
 ⟦_⊚⟧ : List (Functor × Functor) → Type₀ → Type₀
