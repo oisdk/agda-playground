@@ -28,14 +28,12 @@ data Functor (n : ℕ) : Type₀ where
   0# 1# : Functor n
 
 variable
-  n m : ℕ
+  n m k : ℕ
   F G : Functor n
   As Bs : Vec Type₀ n
 
-record Value (A : Type₀) : Type₀ where
-  constructor value
-  field getValue : A
-open Value
+data Value (A : Type₀) : Type₀ where
+  value : A → Value A
 
 data Compose (A : Type₀) : Type₀ where
   compose : A → Compose A
@@ -101,6 +99,35 @@ mutual
 
 map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
 map f x = map′ _ flat f [! x !]
+
+mutual
+  cataTy : {F : Functor (suc k)} {As : Vec Type₀ k} {Rs : Vec Type₀ m} →
+           (⟦ F ⟧ (A ∷ As) → A) →
+           (Gs : Fixes (suc m) n) →
+           (i : Fin n) →
+           <! toTypes Gs (μ F As ∷ Rs) [ i ] !> → toTypes Gs (A ∷ Rs) [ i ]
+  cataTy {n = suc n} f flat       f0     [! ⟨ x ⟩ !] = f (cata′ f _ flat [! x !])
+  cataTy {n = suc n} f flat       (fs i) [! x     !] = x
+  cataTy {n = suc n} f (G ⊚∷″ Gs) f0     [! x     !] = cata′ f G Gs [! x !]
+  cataTy {n = suc n} f (G ⊚∷″ Gs) (fs i) [! x     !] = cataTy f Gs i [! x !]
+  cataTy {n = suc n} f (G μ∷″ Gs) (fs i) [! x     !] = cataTy f Gs i [! x !]
+  cataTy {n = suc n} f (G μ∷″ Gs) f0     [! ⟨ x ⟩ !] = ⟨ cata′ f G (G μ∷″ Gs) [! x !] ⟩
+
+  cata′ : ∀ {F : Functor (suc k)} {As : Vec Type₀ k} {Rs : Vec Type₀ m} →
+            (⟦ F ⟧ (A ∷ As) → A) →
+            (G : Functor n) (Gs : Fixes (suc m) n) →
+            <! ⟦ G ⟧ (toTypes Gs (μ F As ∷ Rs)) !> → ⟦ G ⟧ (toTypes Gs (A ∷ Rs))
+  cata′ f (G₁ ⊕ G₂) Gs [! inl x !] = inl (cata′ f G₁ Gs [! x !])
+  cata′ f (G₁ ⊕ G₂) Gs [! inr x !] = inr (cata′ f G₂ Gs [! x !])
+  cata′ f (G₁ ⊗ G₂) Gs [! x , y !] = cata′ f G₁ Gs [! x !] , cata′ f G₂ Gs [! y !]
+  cata′ f (G₁ ⊚ G₂) Gs [! compose xs !] = compose (cata′ f G₁ (G₂ ⊚∷″ Gs) [! xs !])
+  cata′ f (Fix G) Gs [! ⟨ xs ⟩ !] = ⟨ cata′ f G (G μ∷″ Gs) [! xs !] ⟩
+  cata′ f 1# Gs [! xs !] = tt
+  cata′ f [? i ] Gs [! value xs !] = value (cataTy f Gs i [! xs !])
+
+
+cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
+cata alg ⟨ x ⟩ = alg (cata′ alg _ flat [! x !])
 
 
 fkind : ℕ → Type₁
