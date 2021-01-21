@@ -124,3 +124,17 @@ ROSE = μ (P ⊗ ((U ⊕ (P ⊗ I)) ⊚ I))
 
 foldRose : (A → LIST B → B) → ROSE A → B
 foldRose f = cata (uncurry f)
+
+-- LISTLIST A = LIST (LIST A)
+LISTLIST : Type₀ → Type₀
+LISTLIST = μ (U ⊕ (((U ⊕ (P ⊗ I)) ⊚ P) ⊗ I))
+
+pattern []′ = ⟨ inl tt ⟩
+pattern _∷′_ x xs = ⟨ inr (x , xs) ⟩
+
+levels : ROSE A → LISTLIST A
+levels t = cata alg t ⟨ inl tt ⟩
+  where
+  alg : A × μ (U ⊕ (P ⊗ I)) (LISTLIST A → LISTLIST A) → LISTLIST A → LISTLIST A
+  alg (x , xs) []′       = (x ∷′ []′) ∷′ foldr′ id []′ xs
+  alg (x , xs) (q ∷′ qs) = (x ∷′ q  ) ∷′ foldr′ id qs  xs
