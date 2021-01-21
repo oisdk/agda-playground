@@ -120,5 +120,8 @@ curries (suc n) f A = curries n (f ∘ (A ∷_))
 LIST : Type₀ → Type₀
 LIST = ⟦ Fix (1# ⊕ [? 1 ] ⊗ [? 0 ]) ⟧~
 
+ROSE : Type₀ → Type₀
+ROSE = ⟦ Fix ([? 1 ] ⊗ Fix (1# ⊕ [? 1 ] ⊗ [? 0 ])) ⟧~
+
 -- cata : {F : Functor (suc n)} {As : Vec Type₀ n} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
 -- cata = {!!}
