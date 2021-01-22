@@ -2,7 +2,7 @@
 
 module Data.Universe.MultiParam where
 
-open import Function
+open import Function hiding (_⟨_⟩_)
 open import Data.Sum
 open import Data.Sigma.Base
 open import Level
