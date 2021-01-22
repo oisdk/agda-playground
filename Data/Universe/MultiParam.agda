@@ -7,13 +7,14 @@ open import Data.Sum
 open import Data.Sigma.Base
 open import Level
 open import Data.Unit
-open import Data.Fin
 open import Data.Nat
 open import Data.Vec.Iterated hiding (foldr′)
 open import Data.Empty
 open import WellFounded
 open import Literals.Number
-open import Data.Fin.Literals
+open import Data.Fin.Indexed.Literals
+open import Data.Fin.Indexed.Properties
+open import Data.Fin.Indexed
 open import Data.Nat.Literals
 
 -- The universe of functors we're interested in.
@@ -97,11 +98,11 @@ module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) wher
     mapArg : (Fs : Layers m n) →
             (j : Fin n) →
             <! Fs ++∙ As [ j ] !> → Fs ++∙ Bs [ j ]
-    mapArg {n = suc n} flat      i      [! xs     !] = f i xs
-    mapArg {n = suc n} (F ⊚∷ Fs) f0     [! xs     !] = mapRec F Fs [! xs !]
-    mapArg {n = suc n} (F μ∷ Fs) f0     [! ⟨ xs ⟩ !] = ⟨ mapRec F (F μ∷ Fs) [! xs !] ⟩
-    mapArg {n = suc n} (F ⊚∷ Fs) (fs i) [! xs     !] = mapArg Fs i [! xs !]
-    mapArg {n = suc n} (F μ∷ Fs) (fs i) [! xs     !] = mapArg Fs i [! xs !]
+    mapArg flat      i      [! xs     !] = f i xs
+    mapArg (F ⊚∷ Fs) f0     [! xs     !] = mapRec F Fs [! xs !]
+    mapArg (F μ∷ Fs) f0     [! ⟨ xs ⟩ !] = ⟨ mapRec F (F μ∷ Fs) [! xs !] ⟩
+    mapArg (F ⊚∷ Fs) (fs i) [! xs     !] = mapArg Fs i [! xs !]
+    mapArg (F μ∷ Fs) (fs i) [! xs     !] = mapArg Fs i [! xs !]
 
     mapRec : ∀ (F : Functor n) (Fs : Layers m n) →
             <! ⟦ F ⟧ (Fs ++∙ As) !> → ⟦ F ⟧ (Fs ++∙ Bs)
@@ -117,10 +118,10 @@ map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
 map {F = F} f xs = mapRec f F flat [! xs !]
 
 mapParamAt : (i : Fin n) → (As [ i ] → A) → (j : Fin n) → As [ j ] → As [ i ]≔ A [ j ]
-mapParamAt {n = suc n} f0     f f0     x = f x
-mapParamAt {n = suc n} f0     f (fs _) x = x
-mapParamAt {n = suc n} (fs _) f f0     x = x
-mapParamAt {n = suc n} (fs i) f (fs j) x = mapParamAt i f j x
+mapParamAt f0     f f0     x = f x
+mapParamAt f0     f (fs _) x = x
+mapParamAt (fs _) f f0     x = x
+mapParamAt (fs i) f (fs j) x = mapParamAt i f j x
 
 mapAt : (i : Fin n) → (As [ i ] → A) → ⟦ F ⟧ As → ⟦ F ⟧ (As [ i ]≔ A)
 mapAt {F = F} i f = map {F = F} (mapParamAt i f)
@@ -129,12 +130,12 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
   mutual
     cataArg : (Gs : Layers (suc m) n) → (i : Fin n) →
               <! Gs ++∙ μ F As ∷ Bs [ i ] !> → Gs ++∙ A ∷ Bs [ i ]
-    cataArg {n = suc n} flat       f0     [! ⟨ x ⟩ !] = alg (cataRec F flat [! x !])
-    cataArg {n = suc n} flat       (fs i) [! x     !] = x
-    cataArg {n = suc n} (G ⊚∷ Gs) f0      [! x     !] = cataRec G Gs [! x !]
-    cataArg {n = suc n} (G ⊚∷ Gs) (fs i)  [! x     !] = cataArg Gs i [! x !]
-    cataArg {n = suc n} (G μ∷ Gs) (fs i)  [! x     !] = cataArg Gs i [! x !]
-    cataArg {n = suc n} (G μ∷ Gs) f0      [! ⟨ x ⟩ !] = ⟨ cataRec G (G μ∷ Gs) [! x !] ⟩
+    cataArg flat       f0     [! ⟨ x ⟩ !] = alg (cataRec F flat [! x !])
+    cataArg flat       (fs i) [! x     !] = x
+    cataArg (G ⊚∷ Gs) f0      [! x     !] = cataRec G Gs [! x !]
+    cataArg (G ⊚∷ Gs) (fs i)  [! x     !] = cataArg Gs i [! x !]
+    cataArg (G μ∷ Gs) (fs i)  [! x     !] = cataArg Gs i [! x !]
+    cataArg (G μ∷ Gs) f0      [! ⟨ x ⟩ !] = ⟨ cataRec G (G μ∷ Gs) [! x !] ⟩
 
     cataRec : (G : Functor n) (Gs : Layers (suc m) n) →
              <! ⟦ G ⟧ (Gs ++∙ μ F As ∷ Bs) !> → ⟦ G ⟧ (Gs ++∙ A ∷ Bs)
@@ -166,12 +167,12 @@ module _ {As : Params k}
     elidArg : (Gs : Layers (suc m) n) → (i : Fin n) →
               (x : <! Gs ++∙ μ F As ∷ Bs [ i ] !>) →
               getty x ≡ mapArg (mapParamAt 0 fst) Gs i [! cataArg alg Gs i x !]
-    elidArg {n = suc n} flat       f0     [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec F flat [! x !])
-    elidArg {n = suc n} flat       (fs i) [! x     !] = refl
-    elidArg {n = suc n} (G ⊚∷ Gs) f0      [! x     !] = elidRec G Gs [! x !]
-    elidArg {n = suc n} (G ⊚∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
-    elidArg {n = suc n} (G μ∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
-    elidArg {n = suc n} (G μ∷ Gs) f0      [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec G (G μ∷ Gs) [! x !])
+    elidArg flat       f0     [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec F flat [! x !])
+    elidArg flat       (fs i) [! x     !] = refl
+    elidArg (G ⊚∷ Gs) f0      [! x     !] = elidRec G Gs [! x !]
+    elidArg (G ⊚∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
+    elidArg (G μ∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
+    elidArg (G μ∷ Gs) f0      [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec G (G μ∷ Gs) [! x !])
 
     elidRec : (G : Functor n) (Gs : Layers (suc m) n) →
               (x : <! ⟦ G ⟧ (Gs ++∙ μ F As ∷ Bs) !>) →
@@ -201,22 +202,36 @@ module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded 
   ana : B → μ F As
   ana x = anaAcc x (<-wellFounded x)
 
-arrs : ℕ → Type₁
-arrs zero    = Type₀
-arrs (suc n) = Type₀ → arrs n
+Curriedⁿ : ℕ → Type₁
+Curriedⁿ zero    = Type₀
+Curriedⁿ (suc n) = Type₀ → Curriedⁿ n
 
-curries : ∀ n → (Params n → Type₀) → arrs n
-curries zero    f = f []
-curries (suc n) f A = curries n (f ∘ (A ∷_))
+Curryⁿ : ∀ n → (Params n → Type₀) → Curriedⁿ n
+Curryⁿ zero    f = f []
+Curryⁿ (suc n) f A = Curryⁿ n (f ∘ (A ∷_))
 
-⟦_⟧~ : Functor n → arrs n
-⟦_⟧~ {n = n} F = curries n ⟦ F ⟧
+⟦_⟧~ : Functor n → Curriedⁿ n
+⟦_⟧~ {n = n} F = Curryⁿ n ⟦ F ⟧
+
+open import Data.Nat.Properties using (_≤_)
+
+⇑ : ⦃ _ : n ≤ m ⦄ → Functor n → Functor m
+⇑ ⦃ p ⦄ x = go p x
+  where
+  go : n ≤ m → Functor n → Functor m
+  go p (! x) = ! (weaken p x)
+  go p (x ⊕ y) = go p x ⊕ go p y
+  go p (x ⊗ y) = go p x ⊗ go p y
+  go p (x ⊚ y) = go p x ⊚ go p y
+  go p μ⟨ x ⟩ = μ⟨ go p x ⟩
+  go p ⓪ = ⓪
+  go p ① = ①
 
 LIST :  Functor 1
 LIST = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩
 
 ROSE : Functor 1
-ROSE = μ⟨ ! 1 ⊗ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⟩
+ROSE = μ⟨ ! 1 ⊗ ⇑ LIST ⟩
 
 foldr′ : {A B : Type₀} → (A → B → B) → B → ⟦ LIST ⟧~ A → B
 foldr′ f b = cata (const b ▿ uncurry f)
@@ -242,7 +257,6 @@ fun list-list = foldr′ _∷_ []
 inv list-list = List.foldr _∷′_ []′
 rightInv list-list = rinv
 leftInv  list-list = linv
-
 
 -- foldRose : (A → ⟦ LIST ⟧~ B → B) → ⟦ ROSE ⟧~ A → B
 -- foldRose f = cata (λ { (x , xs) → f x xs })

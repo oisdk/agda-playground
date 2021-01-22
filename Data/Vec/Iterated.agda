@@ -1,11 +1,11 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Data.Vec.Iterated where
 
-open import Prelude hiding (⊤)
 open import Data.Unit.UniversePolymorphic
-open import Data.List using (List; length)
-import Data.List as List
+open import Level
+open import Data.Nat.Base
+open import Function
 
 private
   variable
@@ -59,25 +59,25 @@ foldl′ : (A → B → B) → B → Vec A n → B
 foldl′ {n = zero}  f b xs = b
 foldl′ {n = suc n} f b (x ∷ xs) = foldl′ f (f x b) xs
 
-vecFromList : (xs : List A) → Vec A (length xs)
-vecFromList List.[] = []
-vecFromList (x List.∷ xs) = x ∷ vecFromList xs
+-- vecFromList : (xs : List A) → Vec A (length xs)
+-- vecFromList List.[] = []
+-- vecFromList (x List.∷ xs) = x ∷ vecFromList xs
 
-vecToList : Vec A n → List A
-vecToList = foldr′ List._∷_ List.[]
+-- vecToList : Vec A n → List A
+-- vecToList = foldr′ List._∷_ List.[]
 
-open import Data.Fin
+open import Data.Fin.Indexed
 
 infixl 4 lookup
 lookup : Fin n → Vec A n → A
-lookup {n = suc n} f0     (x ∷ _ ) = x
-lookup {n = suc n} (fs i) (_ ∷ xs) = lookup i xs
+lookup f0     (x ∷ _ ) = x
+lookup (fs i) (_ ∷ xs) = lookup i xs
 
 syntax lookup i xs = xs [ i ]
 
 infixl 4 replace
 replace : Fin n → Vec A n → A → Vec A n
-replace {n = suc n} f0     (_ ∷ xs) x = x ∷ xs
-replace {n = suc n} (fs i) (x ∷ xs) y = x ∷ replace i xs y
+replace f0     (_ ∷ xs) x = x ∷ xs
+replace (fs i) (x ∷ xs) y = x ∷ replace i xs y
 
 syntax replace i xs x = xs [ i ]≔ x
