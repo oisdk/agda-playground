@@ -24,7 +24,7 @@ data Functor (n : ℕ) : Type₀ where
   _⊕_ _⊗_ : (F G : Functor n) → Functor n       -- Sums and Products
   _⊚_ : Functor (suc n) → Functor n → Functor n -- Composition
   μ⟨_⟩ : Functor (suc n) → Functor n            -- Fixpoints
-  ⓪ ① : Functor n                               -- ⊥ and ⊤
+  𝟘 𝟙 : Functor n                               -- ⊥ and ⊤
 
 infixl 6 _⊕_
 infixl 7 _⊗_
@@ -55,8 +55,8 @@ mutual
   ⟦ F ⊗ G ⟧ xs = ⟦ F ⟧ xs × ⟦ G ⟧ xs
   ⟦ F ⊚ G ⟧ xs = (F ⊙ G) xs
   ⟦ μ⟨ F ⟩ ⟧ xs = μ F xs
-  ⟦ ⓪ ⟧ xs = ⊥
-  ⟦ ① ⟧ xs = ⊤
+  ⟦ 𝟘 ⟧ xs = ⊥
+  ⟦ 𝟙 ⟧ xs = ⊤
 
   record μ (F : Functor (suc n)) (As : Params n) : Type₀  where
     inductive
@@ -112,7 +112,7 @@ module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) wher
     mapRec (F ⊗ G) Fs [! x , y   !] = mapRec F Fs [! x !] , mapRec G Fs [! y !]
     mapRec μ⟨ F ⟩  Fs [!  ⟨ xs ⟩ !] =  ⟨ mapRec F (F μ∷ Fs) [! xs !] ⟩
     mapRec (F ⊚ G) Fs [! ∘⟨ xs ⟩ !] = ∘⟨ mapRec F (G ∘∷ Fs) [! xs !] ⟩
-    mapRec ①      Fs _             = tt
+    mapRec 𝟙      Fs _             = tt
 
 map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
 map {F = F} f xs = mapRec f F flat [! xs !]
@@ -144,7 +144,7 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
     cataRec (G₁ ⊗ G₂) Gs [! x , y   !] = cataRec G₁ Gs [! x !] , cataRec G₂ Gs [! y !]
     cataRec (G₁ ⊚ G₂) Gs [! ∘⟨ xs ⟩ !] = ∘⟨ cataRec G₁ (G₂ ∘∷ Gs) [! xs !] ⟩
     cataRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] =  ⟨ cataRec G (G μ∷ Gs) [! xs !] ⟩
-    cataRec ①         Gs [! xs      !] = tt
+    cataRec 𝟙         Gs [! xs      !] = tt
     cataRec (! i)     Gs [! xs      !] = cataArg Gs i [! xs !]
 
 cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
@@ -182,7 +182,7 @@ module _ {As : Params k}
     elidRec (G₁ ⊗ G₂) Gs [! x , y   !] = cong₂ _,_ (elidRec G₁ Gs [! x !]) (elidRec G₂ Gs [! y !])
     elidRec (G₁ ⊚ G₂) Gs [! ∘⟨ xs ⟩ !] = cong ∘⟨_⟩ (elidRec G₁ (G₂ ∘∷ Gs) [! xs !])
     elidRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] = cong ⟨_⟩  (elidRec G (G μ∷ Gs) [! xs !])
-    elidRec ①         Gs [! tt      !] = refl
+    elidRec 𝟙         Gs [! tt      !] = refl
     elidRec (! i)     Gs [!   xs    !] = elidArg Gs i [! xs !]
 
   elimId : ∀ x → x ≡ fst (elimProp x)
@@ -216,19 +216,16 @@ Curryⁿ (suc n) f A = Curryⁿ n (f ∘ (A ∷_))
 open import Data.Nat.Properties using (_≤_)
 
 ⇑ : ⦃ _ : n ≤ m ⦄ → Functor n → Functor m
-⇑ ⦃ p ⦄ x = go p x
-  where
-  go : n ≤ m → Functor n → Functor m
-  go p (! x) = ! (weaken p x)
-  go p (x ⊕ y) = go p x ⊕ go p y
-  go p (x ⊗ y) = go p x ⊗ go p y
-  go p (x ⊚ y) = go p x ⊚ go p y
-  go p μ⟨ x ⟩ = μ⟨ go p x ⟩
-  go p ⓪ = ⓪
-  go p ① = ①
+⇑ ⦃ p ⦄ (! x) = ! (weaken p x)
+⇑ (x ⊕ y) = ⇑ x ⊕ ⇑ y
+⇑ (x ⊗ y) = ⇑ x ⊗ ⇑ y
+⇑ (x ⊚ y) = ⇑ x ⊚ ⇑ y
+⇑ μ⟨ x ⟩ = μ⟨ ⇑ x ⟩
+⇑ 𝟘 = 𝟘
+⇑ 𝟙 = 𝟙
 
 LIST :  Functor 1
-LIST = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩
+LIST = μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩
 
 ROSE : Functor 1
 ROSE = μ⟨ ! 1 ⊗ ⇑ LIST ⟩
