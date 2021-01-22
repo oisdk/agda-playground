@@ -64,7 +64,7 @@ mutual
     field unwrap : ⟦ F ⟧ (μ F As ∷ As)
 
   data _⊙_ (F : Functor (suc n)) (G : Functor n) (xs : Params n) : Type₀ where
-    ⊙⟨_⟩ : ⟦ F ⟧ (⟦ G ⟧ xs ∷ xs) → (F ⊙ G) xs
+    ∘⟨_⟩ : ⟦ F ⟧ (⟦ G ⟧ xs ∷ xs) → (F ⊙ G) xs
 open μ
 
 record <!_!> (A : Type₀) : Type₀  where
@@ -83,15 +83,15 @@ open <!_!>
 -- tell whether we should do f or fmap f.
 data Layers (n : ℕ) : ℕ → Type₁ where
   flat : Layers n n
-  _⊚∷_ : Functor m       → Layers n m → Layers n (suc m)
+  _∘∷_ : Functor m       → Layers n m → Layers n (suc m)
   _μ∷_ : Functor (suc m) → Layers n m → Layers n (suc m)
 
 _++∙_ : Layers n m → Params n → Params m
 flat      ++∙ ys = ys
-(x ⊚∷ xs) ++∙ ys = let zs = xs ++∙ ys in ⟦ x ⟧ zs ∷ zs
+(x ∘∷ xs) ++∙ ys = let zs = xs ++∙ ys in ⟦ x ⟧ zs ∷ zs
 (x μ∷ xs) ++∙ ys = let zs = xs ++∙ ys in μ x zs ∷ zs
 
-infixr 5 _⊚∷_ _μ∷_ _++∙_
+infixr 5 _∘∷_ _μ∷_ _++∙_
 
 module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) where
   mutual
@@ -99,9 +99,9 @@ module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) wher
             (j : Fin n) →
             <! Fs ++∙ As [ j ] !> → Fs ++∙ Bs [ j ]
     mapArg flat      i      [! xs     !] = f i xs
-    mapArg (F ⊚∷ Fs) f0     [! xs     !] = mapRec F Fs [! xs !]
+    mapArg (F ∘∷ Fs) f0     [! xs     !] = mapRec F Fs [! xs !]
     mapArg (F μ∷ Fs) f0     [! ⟨ xs ⟩ !] = ⟨ mapRec F (F μ∷ Fs) [! xs !] ⟩
-    mapArg (F ⊚∷ Fs) (fs i) [! xs     !] = mapArg Fs i [! xs !]
+    mapArg (F ∘∷ Fs) (fs i) [! xs     !] = mapArg Fs i [! xs !]
     mapArg (F μ∷ Fs) (fs i) [! xs     !] = mapArg Fs i [! xs !]
 
     mapRec : ∀ (F : Functor n) (Fs : Layers m n) →
@@ -111,7 +111,7 @@ module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) wher
     mapRec (F ⊕ G) Fs [! inr x   !] = inr (mapRec G Fs [! x !])
     mapRec (F ⊗ G) Fs [! x , y   !] = mapRec F Fs [! x !] , mapRec G Fs [! y !]
     mapRec μ⟨ F ⟩  Fs [!  ⟨ xs ⟩ !] =  ⟨ mapRec F (F μ∷ Fs) [! xs !] ⟩
-    mapRec (F ⊚ G) Fs [! ⊙⟨ xs ⟩ !] = ⊙⟨ mapRec F (G ⊚∷ Fs) [! xs !] ⟩
+    mapRec (F ⊚ G) Fs [! ∘⟨ xs ⟩ !] = ∘⟨ mapRec F (G ∘∷ Fs) [! xs !] ⟩
     mapRec ①      Fs _             = tt
 
 map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
@@ -132,8 +132,8 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
               <! Gs ++∙ μ F As ∷ Bs [ i ] !> → Gs ++∙ A ∷ Bs [ i ]
     cataArg flat       f0     [! ⟨ x ⟩ !] = alg (cataRec F flat [! x !])
     cataArg flat       (fs i) [! x     !] = x
-    cataArg (G ⊚∷ Gs) f0      [! x     !] = cataRec G Gs [! x !]
-    cataArg (G ⊚∷ Gs) (fs i)  [! x     !] = cataArg Gs i [! x !]
+    cataArg (G ∘∷ Gs) f0      [! x     !] = cataRec G Gs [! x !]
+    cataArg (G ∘∷ Gs) (fs i)  [! x     !] = cataArg Gs i [! x !]
     cataArg (G μ∷ Gs) (fs i)  [! x     !] = cataArg Gs i [! x !]
     cataArg (G μ∷ Gs) f0      [! ⟨ x ⟩ !] = ⟨ cataRec G (G μ∷ Gs) [! x !] ⟩
 
@@ -142,7 +142,7 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
     cataRec (G₁ ⊕ G₂) Gs [! inl x   !] = inl (cataRec G₁ Gs [! x !])
     cataRec (G₁ ⊕ G₂) Gs [! inr x   !] = inr (cataRec G₂ Gs [! x !])
     cataRec (G₁ ⊗ G₂) Gs [! x , y   !] = cataRec G₁ Gs [! x !] , cataRec G₂ Gs [! y !]
-    cataRec (G₁ ⊚ G₂) Gs [! ⊙⟨ xs ⟩ !] = ⊙⟨ cataRec G₁ (G₂ ⊚∷ Gs) [! xs !] ⟩
+    cataRec (G₁ ⊚ G₂) Gs [! ∘⟨ xs ⟩ !] = ∘⟨ cataRec G₁ (G₂ ∘∷ Gs) [! xs !] ⟩
     cataRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] =  ⟨ cataRec G (G μ∷ Gs) [! xs !] ⟩
     cataRec ①         Gs [! xs      !] = tt
     cataRec (! i)     Gs [! xs      !] = cataArg Gs i [! xs !]
@@ -169,8 +169,8 @@ module _ {As : Params k}
               getty x ≡ mapArg (mapParamAt 0 fst) Gs i [! cataArg alg Gs i x !]
     elidArg flat       f0     [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec F flat [! x !])
     elidArg flat       (fs i) [! x     !] = refl
-    elidArg (G ⊚∷ Gs) f0      [! x     !] = elidRec G Gs [! x !]
-    elidArg (G ⊚∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
+    elidArg (G ∘∷ Gs) f0      [! x     !] = elidRec G Gs [! x !]
+    elidArg (G ∘∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
     elidArg (G μ∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
     elidArg (G μ∷ Gs) f0      [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec G (G μ∷ Gs) [! x !])
 
@@ -180,7 +180,7 @@ module _ {As : Params k}
     elidRec (G₁ ⊕ G₂) Gs [! inl x   !] = cong inl (elidRec G₁ Gs [! x !])
     elidRec (G₁ ⊕ G₂) Gs [! inr x   !] = cong inr (elidRec G₂ Gs [! x !])
     elidRec (G₁ ⊗ G₂) Gs [! x , y   !] = cong₂ _,_ (elidRec G₁ Gs [! x !]) (elidRec G₂ Gs [! y !])
-    elidRec (G₁ ⊚ G₂) Gs [! ⊙⟨ xs ⟩ !] = cong ⊙⟨_⟩ (elidRec G₁ (G₂ ⊚∷ Gs) [! xs !])
+    elidRec (G₁ ⊚ G₂) Gs [! ∘⟨ xs ⟩ !] = cong ∘⟨_⟩ (elidRec G₁ (G₂ ∘∷ Gs) [! xs !])
     elidRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] = cong ⟨_⟩  (elidRec G (G μ∷ Gs) [! xs !])
     elidRec ①         Gs [! tt      !] = refl
     elidRec (! i)     Gs [!   xs    !] = elidArg Gs i [! xs !]
