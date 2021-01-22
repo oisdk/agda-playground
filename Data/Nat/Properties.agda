@@ -7,6 +7,14 @@ open import Agda.Builtin.Nat using () renaming (_<_ to _<ᴮ_; _==_ to _≡ᴮ_)
 open import Prelude
 open import Cubical.Data.Nat using (caseNat; injSuc) public
 
+mutual
+  _-1⊔_ : ℕ → ℕ → ℕ
+  zero  -1⊔ n = n
+  suc m -1⊔ n = n ⊔ m
+
+  _⊔_ : ℕ → ℕ → ℕ
+  zero  ⊔ m = m
+  suc n ⊔ m = suc (m -1⊔ n)
 
 znots : ∀ {n} → zero ≢ suc n
 znots z≡s = subst (caseNat ⊤ ⊥) z≡s tt
