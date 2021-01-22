@@ -58,7 +58,6 @@ mutual
   ⟦ ① ⟧ xs = ⊤
 
   record μ (F : Functor (suc n)) (As : Params n) : Type₀  where
-    no-eta-equality -- needed for termination
     inductive
     constructor ⟨_⟩
     field unwrap : ⟦ F ⟧ (μ F As ∷ As)
@@ -145,7 +144,7 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
     cataRec (G₁ ⊚ G₂) Gs [! ⊙⟨ xs ⟩ !] = ⊙⟨ cataRec G₁ (G₂ ⊚∷ Gs) [! xs !] ⟩
     cataRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] =  ⟨ cataRec G (G μ∷ Gs) [! xs !] ⟩
     cataRec ①         Gs [! xs      !] = tt
-    cataRec (! i)     Gs [!   xs     !] = cataArg Gs i [! xs !]
+    cataRec (! i)     Gs [! xs      !] = cataArg Gs i [! xs !]
 
 cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
 cata {As = As} alg x = cataArg alg {Bs = As} flat f0 [! x !]

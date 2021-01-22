@@ -5,7 +5,14 @@ module Data.Nat.Properties where
 open import Data.Nat.Base
 open import Agda.Builtin.Nat using () renaming (_<_ to _<ᴮ_; _==_ to _≡ᴮ_) public
 open import Prelude
-open import Cubical.Data.Nat using (caseNat; znots; snotz; injSuc) public
+open import Cubical.Data.Nat using (caseNat; injSuc) public
+
+
+znots : ∀ {n} → zero ≢ suc n
+znots z≡s = subst (caseNat ⊤ ⊥) z≡s tt
+
+snotz : ∀ {n} → suc n ≢ zero
+snotz s≡z = subst (caseNat ⊥ ⊤) s≡z tt
 
 pred : ℕ → ℕ
 pred (suc n) = n

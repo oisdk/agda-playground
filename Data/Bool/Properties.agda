@@ -5,6 +5,7 @@ module Data.Bool.Properties where
 open import Prelude
 open import Data.Bool.Base
 open import Data.Unit.Properties
+open import Data.Empty.Properties using (isProp⊥)
 
 isPropT : ∀ x → isProp (T x)
 isPropT false = isProp⊥

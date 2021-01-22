@@ -4,6 +4,7 @@ module HITs.PropositionalTruncation.Properties where
 
 open import HITs.PropositionalTruncation
 open import Prelude
+open import Data.Empty.Properties using (isProp⊥)
 
 refute-trunc : ¬ A → ¬ ∥ A ∥
 refute-trunc = rec isProp⊥
