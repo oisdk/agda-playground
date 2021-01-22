@@ -115,9 +115,9 @@ map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
 map {F = F} f xs = mapRec f F flat [! xs !]
 
 mapParamAt : (i j : Fin n) → (As [ i ] → A) → As [ j ] → As [ i ]≔ A [ j ]
-mapParamAt {n = suc n} f0 f0 f x = f x
-mapParamAt {n = suc n} f0 (fs j) f x = x
-mapParamAt {n = suc n} (fs x₁) f0 f x = x
+mapParamAt {n = suc n} f0     f0     f x = f x
+mapParamAt {n = suc n} f0     (fs _) f x = x
+mapParamAt {n = suc n} (fs _) f0     f x = x
 mapParamAt {n = suc n} (fs i) (fs j) f x = mapParamAt i j f x
 
 mapAt : (i : Fin n) → (As [ i ] → A) → ⟦ F ⟧ As → ⟦ F ⟧ (As [ i ]≔ A)
