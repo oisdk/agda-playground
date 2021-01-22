@@ -46,6 +46,7 @@ variable
 --     when it's just a type family Agda (under --without-K)
 --     won't use it for termination checking.
 
+
 mutual
   ⟦_⟧ : Functor n → Params n → Type₀
   ⟦ ! i ⟧ xs = xs [ i ]
@@ -114,14 +115,14 @@ module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) wher
 map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
 map {F = F} f xs = mapRec f F flat [! xs !]
 
-mapParamAt : (i j : Fin n) → (As [ i ] → A) → As [ j ] → As [ i ]≔ A [ j ]
-mapParamAt {n = suc n} f0     f0     f x = f x
-mapParamAt {n = suc n} f0     (fs _) f x = x
-mapParamAt {n = suc n} (fs _) f0     f x = x
-mapParamAt {n = suc n} (fs i) (fs j) f x = mapParamAt i j f x
+mapParamAt : (i : Fin n) → (As [ i ] → A) → (j : Fin n) → As [ j ] → As [ i ]≔ A [ j ]
+mapParamAt {n = suc n} f0     f f0     x = f x
+mapParamAt {n = suc n} f0     f (fs _) x = x
+mapParamAt {n = suc n} (fs _) f f0     x = x
+mapParamAt {n = suc n} (fs i) f (fs j) x = mapParamAt i f j x
 
 mapAt : (i : Fin n) → (As [ i ] → A) → ⟦ F ⟧ As → ⟦ F ⟧ (As [ i ]≔ A)
-mapAt {F = F} i f = map {F = F} λ j → mapParamAt i j f
+mapAt {F = F} i f = map {F = F} (mapParamAt i f)
 
 module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) → A) where
   mutual
@@ -142,10 +143,51 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
     cataRec (G₁ ⊚ G₂) Gs [! ⊙⟨ xs ⟩ !] = ⊙⟨ cataRec G₁ (G₂ ⊚∷ Gs) [! xs !] ⟩
     cataRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] =  ⟨ cataRec G (G μ∷ Gs) [! xs !] ⟩
     cataRec ①         Gs [! xs      !] = tt
-    cataRec (! i)     Gs [! xs      !] = cataArg Gs i [! xs !]
+    cataRec (! i)     Gs [!   xs     !] = cataArg Gs i [! xs !]
 
 cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
 cata {F = F} alg ⟨ x ⟩ = alg (cataRec alg F flat [! x !])
+
+module _ {As : Params k}
+         {F : Functor (suc k)}
+         (P : μ F As → Type₀)
+         (f : (x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ mapAt {F = F} 0 fst x ⟩)
+         where
+  open import Path
+
+  alg : ⟦ F ⟧ (∃ P ∷ As) → ∃ P
+  alg x = ⟨ mapAt {F = F} 0 fst x ⟩ , f x
+
+  elimProp : μ F As → ∃ P
+  elimProp = cata alg
+
+  mutual
+    elidArg : (Gs : Layers (suc m) n) → (i : Fin n) →
+              (x : <! Gs ++∙ μ F As ∷ Bs [ i ] !>) →
+              getty x ≡ mapArg (mapParamAt 0 fst) Gs i [! cataArg alg Gs i x !]
+    elidArg {n = suc n} flat       f0     [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec F flat [! x !])
+    elidArg {n = suc n} flat       (fs i) [! x     !] = refl
+    elidArg {n = suc n} (G ⊚∷ Gs) f0      [! x     !] = elidRec G Gs [! x !]
+    elidArg {n = suc n} (G ⊚∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
+    elidArg {n = suc n} (G μ∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
+    elidArg {n = suc n} (G μ∷ Gs) f0      [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec G (G μ∷ Gs) [! x !])
+
+    elidRec : (G : Functor n) (Gs : Layers (suc m) n) →
+              (x : <! ⟦ G ⟧ (Gs ++∙ μ F As ∷ Bs) !>) →
+              getty x ≡ mapRec (mapParamAt 0 fst) G Gs [! cataRec alg G Gs x !]
+    elidRec (G₁ ⊕ G₂) Gs [! inl x   !] = cong inl (elidRec G₁ Gs [! x !])
+    elidRec (G₁ ⊕ G₂) Gs [! inr x   !] = cong inr (elidRec G₂ Gs [! x !])
+    elidRec (G₁ ⊗ G₂) Gs [! x , y   !] = cong₂ _,_ (elidRec G₁ Gs [! x !]) (elidRec G₂ Gs [! y !])
+    elidRec (G₁ ⊚ G₂) Gs [! ⊙⟨ xs ⟩ !] = cong ⊙⟨_⟩ (elidRec G₁ (G₂ ⊚∷ Gs) [! xs !])
+    elidRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] = cong ⟨_⟩  (elidRec G (G μ∷ Gs) [! xs !])
+    elidRec ①         Gs [! tt      !] = refl
+    elidRec (! i)     Gs [!   xs    !] = elidArg Gs i [! xs !]
+
+  elimId : ∀ x → x ≡ fst (elimProp x)
+  elimId ⟨ x ⟩ = cong ⟨_⟩ (elidRec F flat [! x !])
+
+  elim : ∀ x → P x
+  elim x = subst P (sym (elimId x)) (snd (elimProp x))
 
 module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_)
          {k} {F : Functor (suc k)}
@@ -178,12 +220,27 @@ ROSE = μ⟨ ! 1 ⊗ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⟩
 foldr′ : {A B : Type₀} → (A → B → B) → B → ⟦ LIST ⟧~ A → B
 foldr′ f b = cata (const b ▿ uncurry f)
 
--- foldRose : (A → ⟦ LIST ⟧~ B → B) → ⟦ ROSE ⟧~ A → B
--- foldRose f = cata (λ { (x , xs) → f x })
-
 infixr 5 _∷′_
 pattern []′ = ⟨ inl tt ⟩
 pattern _∷′_ x xs = ⟨ inr (x , xs) ⟩
 
-example : ⟦ LIST ⟧~ ℕ
-example = 1 ∷′ 2 ∷′ 3 ∷′ []′
+-- open import Data.List using (List; _∷_; [])
+-- import Data.List as List
+-- open import Prelude
+
+-- -- linv : (x : ⟦ LIST ⟧~ A) → List.foldr _∷′_ []′ (foldr′ _∷_ [] x) ≡ x
+-- -- linv = elim _ λ { (inl tt) → refl ; (inr (x , (xs , p))) → cong₂ _∷′_ (refl {x = x}) p }
+
+
+-- list-list : {A : Type₀} → ⟦ LIST ⟧~ A ⇔ List A
+-- fun list-list = foldr′ _∷_ []
+-- inv list-list = List.foldr _∷′_ []′
+-- rightInv list-list x = {!!}
+-- leftInv list-list x = {!!}
+
+
+-- -- foldRose : (A → ⟦ LIST ⟧~ B → B) → ⟦ ROSE ⟧~ A → B
+-- -- foldRose f = cata (λ { (x , xs) → f x })
+
+-- -- example : ⟦ LIST ⟧~ ℕ
+-- -- example = 1 ∷′ 2 ∷′ 3 ∷′ []′

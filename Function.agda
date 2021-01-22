@@ -30,10 +30,6 @@ _$_ : ∀ {A : Type a} {B : A → Type b}
       → B x
 f $ x = f x
 
-infixl 1 _⟨_⟩_
-_⟨_⟩_ : A → (A → B → C) → B → C
-x ⟨ f ⟩ y = f x y
-
 infixl 0 _∋_
 _∋_ : (A : Type a) → A → A
 A ∋ x = x
