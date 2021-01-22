@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical #-}
+{-# OPTIONS --cubical --safe #-}
 
 module Data.Universe.MultiParam where
 
@@ -11,8 +11,7 @@ open import Data.Fin
 open import Data.Nat
 open import Data.Vec.Iterated hiding (foldr′)
 open import Data.Empty
-open import Data.Maybe
-
+open import WellFounded
 open import Literals.Number
 open import Data.Fin.Literals
 open import Data.Nat.Literals
@@ -38,7 +37,7 @@ variable
   F G : Functor n
   As Bs : Params n
 
--- These are both the identity functor.
+-- There are two types here that are basically the identity functor.
 -- We need to use them basically to prove termination.
 --
 --   * The compose type is there to provide an inductive
@@ -108,19 +107,26 @@ module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) wher
     mapRec (F ⊕ G) Fs [! inl x   !] = inl (mapRec F Fs [! x !])
     mapRec (F ⊕ G) Fs [! inr x   !] = inr (mapRec G Fs [! x !])
     mapRec (F ⊗ G) Fs [! x , y   !] = mapRec F Fs [! x !] , mapRec G Fs [! y !]
-    mapRec μ⟨ F ⟩  Fs [!  ⟨ xs ⟩ !] =  ⟨ mapRec F (F μ∷ Fs) [! xs !]  ⟩
+    mapRec μ⟨ F ⟩  Fs [!  ⟨ xs ⟩ !] =  ⟨ mapRec F (F μ∷ Fs) [! xs !] ⟩
     mapRec (F ⊚ G) Fs [! ⊙⟨ xs ⟩ !] = ⊙⟨ mapRec F (G ⊚∷ Fs) [! xs !] ⟩
     mapRec ①      Fs _             = tt
 
 map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
 map {F = F} f xs = mapRec f F flat [! xs !]
 
-module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) → A) where
+mapParamAt : (i j : Fin n) → (As [ i ] → A) → As [ j ] → As [ i ]≔ A [ j ]
+mapParamAt {n = suc n} f0 f0 f x = f x
+mapParamAt {n = suc n} f0 (fs j) f x = x
+mapParamAt {n = suc n} (fs x₁) f0 f x = x
+mapParamAt {n = suc n} (fs i) (fs j) f x = mapParamAt i j f x
 
+mapAt : (i : Fin n) → (As [ i ] → A) → ⟦ F ⟧ As → ⟦ F ⟧ (As [ i ]≔ A)
+mapAt {F = F} i f = map {F = F} λ j → mapParamAt i j f
+
+module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) → A) where
   mutual
-    cataArg : (Gs : Layers (suc m) n) →
-            (i : Fin n) →
-            <! Gs ++∙ μ F As ∷ Bs [ i ] !> → Gs ++∙ A ∷ Bs [ i ]
+    cataArg : (Gs : Layers (suc m) n) → (i : Fin n) →
+              <! Gs ++∙ μ F As ∷ Bs [ i ] !> → Gs ++∙ A ∷ Bs [ i ]
     cataArg {n = suc n} flat       f0     [! ⟨ x ⟩ !] = alg (cataRec F flat [! x !])
     cataArg {n = suc n} flat       (fs i) [! x     !] = x
     cataArg {n = suc n} (G ⊚∷ Gs) f0      [! x     !] = cataRec G Gs [! x !]
@@ -134,12 +140,23 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
     cataRec (G₁ ⊕ G₂) Gs [! inr x   !] = inr (cataRec G₂ Gs [! x !])
     cataRec (G₁ ⊗ G₂) Gs [! x , y   !] = cataRec G₁ Gs [! x !] , cataRec G₂ Gs [! y !]
     cataRec (G₁ ⊚ G₂) Gs [! ⊙⟨ xs ⟩ !] = ⊙⟨ cataRec G₁ (G₂ ⊚∷ Gs) [! xs !] ⟩
-    cataRec μ⟨ G ⟩    Gs [! ⟨ xs ⟩  !] =  ⟨ cataRec G (G μ∷ Gs) [! xs !] ⟩
+    cataRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] =  ⟨ cataRec G (G μ∷ Gs) [! xs !] ⟩
     cataRec ①         Gs [! xs      !] = tt
     cataRec (! i)     Gs [! xs      !] = cataArg Gs i [! xs !]
 
 cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
 cata {F = F} alg ⟨ x ⟩ = alg (cataRec alg F flat [! x !])
+
+module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_)
+         {k} {F : Functor (suc k)}
+         {As : Params k}
+         (coalg : (x : B) → ⟦ F ⟧ (∃ (_< x)  ∷ As)) where
+
+  anaAcc : (x : B) → Acc _<_ x → μ F As
+  anaAcc x (acc wf) = ⟨ mapAt {F = F} 0 (λ { (x , p) → anaAcc x (wf x p) }) (coalg x)  ⟩
+
+  ana : B → μ F As
+  ana x = anaAcc x (<-wellFounded x)
 
 arrs : ℕ → Type₁
 arrs zero    = Type₀
@@ -152,21 +169,21 @@ curries (suc n) f A = curries n (f ∘ (A ∷_))
 ⟦_⟧~ : Functor n → arrs n
 ⟦_⟧~ {n = n} F = curries n ⟦ F ⟧
 
-LIST : Type₀ → Type₀
-LIST = ⟦ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⟧~
+LIST :  Functor 1
+LIST = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩
 
-ROSE : Type₀ → Type₀
-ROSE = ⟦ μ⟨ ! 1 ⊗ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⟩ ⟧~
+ROSE : Functor 1
+ROSE = μ⟨ ! 1 ⊗ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⟩
 
-foldr′ : {A B : Type₀} → (A → B → B) → B → LIST A → B
+foldr′ : {A B : Type₀} → (A → B → B) → B → ⟦ LIST ⟧~ A → B
 foldr′ f b = cata (const b ▿ uncurry f)
 
--- foldRose : (A → LIST B → B) → ROSE A → B
--- foldRose f = cata {!uncurry f!}
+-- foldRose : (A → ⟦ LIST ⟧~ B → B) → ⟦ ROSE ⟧~ A → B
+-- foldRose f = cata (λ { (x , xs) → f x })
 
 infixr 5 _∷′_
 pattern []′ = ⟨ inl tt ⟩
 pattern _∷′_ x xs = ⟨ inr (x , xs) ⟩
 
-example : LIST ℕ
+example : ⟦ LIST ⟧~ ℕ
 example = 1 ∷′ 2 ∷′ 3 ∷′ []′
