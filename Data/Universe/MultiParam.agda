@@ -58,6 +58,7 @@ mutual
   ⟦ ① ⟧ xs = ⊤
 
   record μ (F : Functor (suc n)) (As : Params n) : Type₀  where
+    no-eta-equality -- needed for termination
     inductive
     constructor ⟨_⟩
     field unwrap : ⟦ F ⟧ (μ F As ∷ As)
@@ -67,6 +68,7 @@ mutual
 open μ
 
 record <!_!> (A : Type₀) : Type₀  where
+  eta-equality
   constructor [!_!]
   field getty : A
 open <!_!>
@@ -146,7 +148,7 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
     cataRec (! i)     Gs [!   xs     !] = cataArg Gs i [! xs !]
 
 cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
-cata {F = F} alg ⟨ x ⟩ = alg (cataRec alg F flat [! x !])
+cata {As = As} alg x = cataArg alg {Bs = As} flat f0 [! x !]
 
 module _ {As : Params k}
          {F : Functor (suc k)}
@@ -184,7 +186,7 @@ module _ {As : Params k}
     elidRec (! i)     Gs [!   xs    !] = elidArg Gs i [! xs !]
 
   elimId : ∀ x → x ≡ fst (elimProp x)
-  elimId ⟨ x ⟩ = cong ⟨_⟩ (elidRec F flat [! x !])
+  elimId x = elidArg {Bs = As} flat 0 [! x !]
 
   elim : ∀ x → P x
   elim x = subst P (sym (elimId x)) (snd (elimProp x))
@@ -224,23 +226,27 @@ infixr 5 _∷′_
 pattern []′ = ⟨ inl tt ⟩
 pattern _∷′_ x xs = ⟨ inr (x , xs) ⟩
 
--- open import Data.List using (List; _∷_; [])
--- import Data.List as List
--- open import Prelude
+open import Data.List using (List; _∷_; [])
+import Data.List as List
+open import Prelude
 
--- -- linv : (x : ⟦ LIST ⟧~ A) → List.foldr _∷′_ []′ (foldr′ _∷_ [] x) ≡ x
--- -- linv = elim _ λ { (inl tt) → refl ; (inr (x , (xs , p))) → cong₂ _∷′_ (refl {x = x}) p }
+linv : (x : ⟦ LIST ⟧~ A) → List.foldr _∷′_ []′ (foldr′ _∷_ [] x) ≡ x
+linv = elim _ λ { (inl tt) → refl ; (inr (x , (xs , p))) → cong (x ∷′_) p }
 
-
--- list-list : {A : Type₀} → ⟦ LIST ⟧~ A ⇔ List A
--- fun list-list = foldr′ _∷_ []
--- inv list-list = List.foldr _∷′_ []′
--- rightInv list-list x = {!!}
--- leftInv list-list x = {!!}
+rinv : (x : List A) → foldr′ _∷_ [] (List.foldr _∷′_ []′ x) ≡ x
+rinv [] = refl
+rinv (x ∷ xs) = cong (x ∷_) (rinv xs)
 
 
--- -- foldRose : (A → ⟦ LIST ⟧~ B → B) → ⟦ ROSE ⟧~ A → B
--- -- foldRose f = cata (λ { (x , xs) → f x })
+list-list : {A : Type₀} → ⟦ LIST ⟧~ A ⇔ List A
+fun list-list = foldr′ _∷_ []
+inv list-list = List.foldr _∷′_ []′
+rightInv list-list = rinv
+leftInv  list-list = linv
 
--- -- example : ⟦ LIST ⟧~ ℕ
--- -- example = 1 ∷′ 2 ∷′ 3 ∷′ []′
+
+-- foldRose : (A → ⟦ LIST ⟧~ B → B) → ⟦ ROSE ⟧~ A → B
+-- foldRose f = cata (λ { (x , xs) → f x xs })
+
+example : ⟦ LIST ⟧~ ℕ
+example = 1 ∷′ 2 ∷′ 3 ∷′ []′
