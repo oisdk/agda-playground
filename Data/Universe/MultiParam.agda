@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --cubical --safe --guardedness #-}
 
 module Data.Universe.MultiParam where
 
@@ -177,7 +177,7 @@ module Eliminator {As : Params k}
   elim x = subst P (elidRec {Bs = As} (! 0) [] [! x !]) (snd (cata alg x))
 open Eliminator using (elim) public
 
-module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_)
+module AnaTerm {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_)
          {k} {F : Functor (suc k)}
          {As : Params k}
          (coalg : (x : B) → ⟦ F ⟧ (∃ (_< x)  ∷ As)) where
@@ -187,6 +187,32 @@ module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded 
 
   ana : B → μ F As
   ana x = anaAcc x (<-wellFounded x)
+
+module AnaInf {k} {F : Functor (suc k)} {As : Params k} (coalg : A → ⟦ F ⟧ (A  ∷ As)) where
+
+  record ν (F : Functor (suc n)) (As : Params n) : Type₀ where
+    coinductive
+    constructor ⟪_⟫
+    field unfold : ⟦ F ⟧ (ν F As ∷ As)
+  open ν public
+
+  mutual
+    anaRec : (G : Functor n) (Gs : Layers (suc m) n) →
+             <! ⟦ G ⟧ (Gs ++∙ A ∷ Bs) !> → <! ⟦ G ⟧ (Gs ++∙ ν F As ∷ Bs) !>
+    anaRec (G₁ ⊕ G₂)  Gs       [! inl x !] .getty = inl (anaRec G₁ Gs [! x !] .getty )
+    anaRec (G₁ ⊕ G₂)  Gs       [! inr x !] .getty = inr (anaRec G₂ Gs [! x !] .getty )
+    anaRec (G₁ ⊗ G₂)  Gs       [! x , y !] .getty .fst = anaRec G₁ Gs [! x !] .getty
+    anaRec (G₁ ⊗ G₂)  Gs       [! x , y !] .getty .snd = anaRec G₂ Gs [! y !] .getty
+    anaRec μ⟨ G ⟩     Gs       [! ⟨ x ⟩ !] .getty = ⟨ anaRec G (G ∷ Gs) [! x !] .getty ⟩
+    anaRec (! f0    ) []       [! x     !] .getty = ana x
+    anaRec (! (fs i)) []       [! x     !] .getty = x
+    anaRec (! (fs i)) (G ∷ Gs) [! x     !] .getty = anaRec (! i) Gs [! x !] .getty
+    anaRec (! f0    ) (G ∷ Gs) [! ⟨ x ⟩ !] .getty = ⟨ anaRec G (G ∷ Gs) [! x !] .getty ⟩
+    anaRec ①          Gs       [! _     !] .getty = tt
+
+    ana : A → ν F As
+    ana x .unfold = anaRec F [] [! coalg x !] .getty
+
 
 bnd : {F : Functor (suc (suc n))} → (⟦ F ⟧ (μ F (B ∷ As) ∷ μ F (B ∷ As) ∷ As) → ⟦ F ⟧ (μ F (B ∷ As) ∷ B ∷ As)) → μ F (A ∷ As) → (A → μ F (B ∷ As)) → μ F (B ∷ As)
 bnd {F = F} alg xs f = cata (⟨_⟩ ∘′ alg ∘′ mapAt {F = F} 1 f) xs
