@@ -159,7 +159,7 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
 cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
 cata {As = As} alg x = cataArg alg {Bs = As} [] f0 [! x !]
 
-module _ {As : Params k}
+module Eliminator {As : Params k}
          {F : Functor (suc k)}
          (P : μ F As → Type₀)
          (f : (x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ mapAt {F = F} 0 fst x ⟩)
@@ -196,6 +196,7 @@ module _ {As : Params k}
 
   elim : ∀ x → P x
   elim x = subst P (sym (elimId x)) (snd (elimProp x))
+open Eliminator using (elim) public
 
 module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_)
          {k} {F : Functor (suc k)}
