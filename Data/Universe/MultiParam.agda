@@ -47,6 +47,14 @@ variable
 ⇑ 𝟘 = 𝟘
 ⇑ 𝟙 = 𝟙
 
+⇓ : Functor n → Functor (suc n)
+⇓ (! x) = ! (weaken x)
+⇓ (x ⊕ y) = ⇓ x ⊕ ⇓ y
+⇓ (x ⊗ y) = ⇓ x ⊗ ⇓ y
+⇓ μ⟨ x ⟩ = μ⟨ ⇑ x ⟩
+⇓ 𝟘 = 𝟘
+⇓ 𝟙 = 𝟙
+
 paramSubst : Fin (suc n) → Fin (suc n) → Maybe (Fin n)
 paramSubst f0     f0     = nothing
 paramSubst f0     (fs j) = just j
@@ -221,6 +229,25 @@ Curryⁿ (suc n) f A = Curryⁿ n (f ∘ (A ∷_))
 LIST :  Functor 1
 LIST = μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩
 
+TREE : Functor 1
+TREE = μ⟨ μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ (𝟙 ⊕ ! 1 ⊗ ! 0) ⟩
+
+LEVELS : Functor 1
+LEVELS = μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩
+
+FREE : Functor 1 → Functor 1
+FREE f = μ⟨ ! 1 ⊕ ⇑ f ⟩
+
+FREEP : Functor 1 → Functor 1
+FREEP f = μ⟨ μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ (! 1 ⊕ ⇓ f) ⟩
+
+FREEPC : Functor 1 → Functor 1
+FREEPC f = μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ μ⟨ ! 1 ⊕ ⇓ f ⟩
+
+MON : Functor 1
+MON = FREEPC (! 0)
+
+
 ROSE : Functor 1
 ROSE = μ⟨ ! 1 ⊗ ⇑ LIST ⟩
 
@@ -255,10 +282,3 @@ leftInv  list-list = linv
 example : ⟦ LIST ⟧~ ℕ
 example = 1 ∷′ 2 ∷′ 3 ∷′ []′
 
-TREE : Functor 1
-TREE = μ⟨ μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ (𝟙 ⊕ ! 1 ⊗ ! 0) ⟩
-
--- μ⟨ μ⟨ 𝟙 ⊕ (𝟙 ⊕ ! (fs (fs f0)) ⊗ ! (fs f0)) ⊗ ! f0 ⟩ ⟩
-
--- grabTree : ⟦ TREE ⟧~ ℕ  → Bool
--- grabTree = cata λ { ∘⟨ x ⟩ → {!!}}

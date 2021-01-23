@@ -15,6 +15,6 @@ FinToℕ : ∀ {n} → Fin n → ℕ
 FinToℕ f0     = zero
 FinToℕ (fs x) = suc (FinToℕ x)
 
-weaken : ∀ {m n} → (p : T (not (m < n))) → Fin n → Fin m
-weaken {suc m} p f0 = f0
-weaken {suc m} p (fs x) = fs (weaken p x)
+weaken : ∀ {n} → Fin n → Fin (suc n)
+weaken {suc n} f0 = f0
+weaken {suc n} (fs x) = fs (weaken x)
