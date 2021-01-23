@@ -1,5 +1,60 @@
 {-# OPTIONS --cubical --safe --guardedness #-}
 
+--------------------------------------------------------------------------------
+--
+-- A Universe for n-ary Functors
+--
+-- *****************************************************************************
+--
+-- This module defines a "universe" (in the generic programing sense) for
+-- regular trees which can include multiple variables and recursion.
+--
+-- We also have composition, and currently we can do top-level corecursion.
+--
+-- This means that we have:
+--
+--   * Lists
+--   * Recursive data types made by composition, like the free monad, or rose
+--     trees.
+--   * Types with one level of corecursion (like infinite lists, but not
+--     infinite lists of infinite lists).
+--
+-- And we can do catamorphisms, anamorphisms, mapping, and dependent
+-- elimination:
+--
+--   elim : ((x : F (∃[ y : μ F ] (P y))) → P x) → (x : μ F) → P x
+--
+-- For lists, this type is equivalent to:
+--
+--   elim : P [] -> (∀ x xs → P xs → P (x ∷ xs)) → ∀ xs → P xs
+--
+-- *****************************************************************************
+--
+-- Yet to do:
+--
+--   * Possibly multi-level coinductive types
+--
+--        Shouldn't be too difficult, but might overcomplicate the model and I
+--        can't think of a place where I need multi-level coinductive type.
+--
+--   * Maybe a solver for isomorphisms
+--
+--        Likely a good bit of not-important work here, but it might be fun to
+--        implement.
+--
+--   * Figure out the variable binding situation.
+--
+--        I'm quite sure my variable binding/scoping stuff here with de Bruijn
+--        indices is bad and wrong: it would be worth asking someone who knows
+--        about this stuff what's the normal technique.
+--
+--   * Make it all universe polymorphic.
+--
+--        I haven't spotted any place where universe polymorphism would be an
+--        obstacle, so it should just slot in easily. It is tedious to add.
+--
+--------------------------------------------------------------------------------
+
 module Data.Universe.MultiParam where
 
 open import Function hiding (_⟨_⟩_)
@@ -19,17 +74,22 @@ open import Data.Nat.Literals
 open import Data.Maybe
 import Data.Maybe.Sugar as Maybe
 
--- The universe of functors we're interested in.
--- We have
+--------------------------------------------------------------------------------
+--
+--  The Universe of functors we're interested in.
+--
+--------------------------------------------------------------------------------
+
 data Functor (n : ℕ) : Type₀ where
-  ! : Fin n → Functor n                         -- Type variables
-  _⊕_ _⊗_ : (F G : Functor n) → Functor n       -- Sums and Products
-  μ⟨_⟩ : Functor (suc n) → Functor n            -- Fixpoints
-  ⓪ ① : Functor n                               -- ⊥ and ⊤
+  ! : Fin n → Functor n               -- Type variables (de Bruijn indexed)
+  _⊕_ : (F G : Functor n) → Functor n -- Sums
+  _⊗_ : (F G : Functor n) → Functor n -- Products
+  μ⟨_⟩ : Functor (suc n) → Functor n  -- Inductive fixpoint
+  ⓪ : Functor n                      -- ⊥
+  ① : Functor n                      -- ⊤
 
 infixl 6 _⊕_
 infixl 7 _⊗_
-infixr 9 _⊚_
 
 Params : ℕ → Type₁
 Params = Vec Type₀
@@ -38,6 +98,128 @@ variable
   n m k : ℕ
   F G : Functor n
   As Bs : Params n
+
+---------------------------------------------------------------------------------
+--
+-- Interpretation
+--
+---------------------------------------------------------------------------------
+
+mutual
+  ⟦_⟧ : Functor n → Params n → Type₀
+  ⟦ ! i    ⟧ xs = xs [ i ]
+  ⟦ F ⊕ G  ⟧ xs = ⟦ F ⟧ xs ⊎ ⟦ G ⟧ xs
+  ⟦ F ⊗ G  ⟧ xs = ⟦ F ⟧ xs × ⟦ G ⟧ xs
+  ⟦ μ⟨ F ⟩ ⟧ xs = μ F xs
+  ⟦ ⓪     ⟧ xs = ⊥
+  ⟦ ①     ⟧ xs = ⊤
+
+  record μ (F : Functor (suc n)) (As : Params n) : Type₀  where
+    inductive
+    constructor ⟨_⟩
+    field unwrap : ⟦ F ⟧ (μ F As ∷ As)
+open μ
+
+-- Note:
+--
+--    The ⟦_⟧ function is almost injective on its first argument. If we changed
+--    the first clause from
+--
+--        ⟦ ! i ⟧ xs = xs [ i ]
+--
+--    to
+--
+--        ⟦ ! i ⟧ xs = Value (xs [ i ])
+--
+--    (or something), then the typechecker would regard the function as
+--    injective and type inference would work slightly better. We wouldn't have
+--    to pass the Functor itself anywhere, i.e. we could call map 0 f instead of
+--    map F 0 f.
+--
+--    However, this also means that the types defined by this interpretation
+--    function have wrappers all over the place, which is a little annoying to
+--    work with.
+
+---------------------------------------------------------------------------------
+--
+-- Helpers for Termination
+--
+---------------------------------------------------------------------------------
+
+-- This is just the identity type. We need to use it because, if --without-K is
+-- turned on, Agda will only use an argument to a function to prove structural
+-- descent if that argument is a concrete data type.
+--
+--   wont-pass : (x : Bool) → (if x then ℕ else ℕ) → ℕ
+--   wont-pass false zero    = zero
+--   wont-pass false (suc n) = wont-pass true n
+--   wont-pass true  zero    = zero
+--   wont-pass true  (suc n) = wont-pass false n
+--
+-- Even though we're clearly structurally descending on the second argument
+-- there, Agda won't use it unless we make it concrete, like so:
+--
+--   will-pass : (x : Bool) → <! (if x then ℕ else ℕ) !> → ℕ
+--   will-pass false [! zero  !] = zero
+--   will-pass false [! suc n !] = will-pass true  [! n !]
+--   will-pass true  [! zero  !] = zero
+--   will-pass true  [! suc n !] = will-pass false [! n !]
+record <!_!> (A : Type₀) : Type₀  where
+  eta-equality
+  constructor [!_!]
+  field !! : A
+open <!_!>
+
+-- For the map and cata functions to be structurally
+-- terminating, we can't do things like:
+--
+--   cata f = f ∘ fmap (cata f) ∘ unwrap
+--
+-- So instead we need to carry a stack of all of the functors
+-- we're under at any given point, and pattern match on that to
+-- tell whether we should do f or fmap f.
+data Layers (n : ℕ) : ℕ → Type₁ where
+  [] : Layers n n
+  _∷_ : Functor (suc m) → Layers n m → Layers n (suc m)
+
+_++∙_ : Layers n m → Params n → Params m
+[]       ++∙ ys = ys
+(x ∷ xs) ++∙ ys = let zs = xs ++∙ ys in μ x zs ∷ zs
+
+infixr 5 _∷_ _++∙_
+
+---------------------------------------------------------------------------------
+--
+-- Mapping
+--
+---------------------------------------------------------------------------------
+
+module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) where
+  mapRec : ∀ (F : Functor n) (Fs : Layers m n) →
+          <! ⟦ F ⟧ (Fs ++∙ As) !> → ⟦ F ⟧ (Fs ++∙ Bs)
+  mapRec (F ⊕ G)    Fs       [! inl x  !] = inl (mapRec F Fs [! x !])
+  mapRec (F ⊕ G)    Fs       [! inr x  !] = inr (mapRec G Fs [! x !])
+  mapRec (F ⊗ G)    Fs       [! x , y  !] = mapRec F Fs [! x !] , mapRec G Fs [! y !]
+  mapRec μ⟨ F ⟩     Fs       [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
+  mapRec (! i     ) []       [! xs     !] = f i xs
+  mapRec (! f0    ) (F ∷ Fs) [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
+  mapRec (! (fs i)) (F ∷ Fs) [! xs     !] = mapRec (! i) Fs [! xs !]
+  mapRec ①          Fs       _            = tt
+
+mapAt : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
+mapAt {F = F} f xs = mapRec f F [] [! xs !]
+
+mapParamAt : (i : Fin n) → (As [ i ] → A) → (j : Fin n) → As [ j ] → As [ i ]≔ A [ j ]
+mapParamAt f0     f f0     x = f x
+mapParamAt f0     f (fs _) x = x
+mapParamAt (fs _) f f0     x = x
+mapParamAt (fs i) f (fs j) x = mapParamAt i f j x
+
+map : ∀ F → (i : Fin n) → (As [ i ] → A) → ⟦ F ⟧ As → ⟦ F ⟧ (As [ i ]≔ A)
+map F i f = mapAt {F = F} (mapParamAt i f)
+
+infixr 9 _⊚_
+
 
 _⇑_ : Fin (suc n) → Functor n → Functor (suc n)
 i ⇑ (! j) = ! (insert i j)
@@ -66,71 +248,8 @@ substAt i ①         xs = ①
 _⊚_ : Functor (suc n) → Functor n → Functor n
 _⊚_ = substAt 0
 
-mutual
-  ⟦_⟧ : Functor n → Params n → Type₀
-  ⟦ ! i ⟧ xs = xs [ i ]
-  ⟦ F ⊕ G ⟧ xs = ⟦ F ⟧ xs ⊎ ⟦ G ⟧ xs
-  ⟦ F ⊗ G ⟧ xs = ⟦ F ⟧ xs × ⟦ G ⟧ xs
-  ⟦ μ⟨ F ⟩ ⟧ xs = μ F xs
-  ⟦ ⓪ ⟧ xs = ⊥
-  ⟦ ① ⟧ xs = ⊤
 
-  record μ (F : Functor (suc n)) (As : Params n) : Type₀  where
-    inductive
-    constructor ⟨_⟩
-    field unwrap : ⟦ F ⟧ (μ F As ∷ As)
-open μ
 
---   * The <!_!> type makes the type of its argument concrete;
---     when it's just a type family Agda (under --without-K)
---     won't use it for termination checking.
-record <!_!> (A : Type₀) : Type₀  where
-  eta-equality
-  constructor [!_!]
-  field getty : A
-open <!_!>
-
--- For the map and cata functions to be structurally
--- terminating, we can't do things like:
---
---   cata f = f ∘ fmap (cata f) ∘ unwrap
---
--- So instead we need to carry a stack of all of the functors
--- we're under at any given point, and pattern match on that to
--- tell whether we should do f or fmap f.
-data Layers (n : ℕ) : ℕ → Type₁ where
-  [] : Layers n n
-  _∷_ : Functor (suc m) → Layers n m → Layers n (suc m)
-
-_++∙_ : Layers n m → Params n → Params m
-[]       ++∙ ys = ys
-(x ∷ xs) ++∙ ys = let zs = xs ++∙ ys in μ x zs ∷ zs
-
-infixr 5 _∷_ _++∙_
-
-module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) where
-  mapRec : ∀ (F : Functor n) (Fs : Layers m n) →
-          <! ⟦ F ⟧ (Fs ++∙ As) !> → ⟦ F ⟧ (Fs ++∙ Bs)
-  mapRec (F ⊕ G)    Fs       [! inl x  !] = inl (mapRec F Fs [! x !])
-  mapRec (F ⊕ G)    Fs       [! inr x  !] = inr (mapRec G Fs [! x !])
-  mapRec (F ⊗ G)    Fs       [! x , y  !] = mapRec F Fs [! x !] , mapRec G Fs [! y !]
-  mapRec μ⟨ F ⟩     Fs       [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
-  mapRec (! i     ) []       [! xs     !] = f i xs
-  mapRec (! f0    ) (F ∷ Fs) [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
-  mapRec (! (fs i)) (F ∷ Fs) [! xs     !] = mapRec (! i) Fs [! xs !]
-  mapRec ①          Fs       _            = tt
-
-map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
-map {F = F} f xs = mapRec f F [] [! xs !]
-
-mapParamAt : (i : Fin n) → (As [ i ] → A) → (j : Fin n) → As [ j ] → As [ i ]≔ A [ j ]
-mapParamAt f0     f f0     x = f x
-mapParamAt f0     f (fs _) x = x
-mapParamAt (fs _) f f0     x = x
-mapParamAt (fs i) f (fs j) x = mapParamAt i f j x
-
-mapAt : (i : Fin n) → (As [ i ] → A) → ⟦ F ⟧ As → ⟦ F ⟧ (As [ i ]≔ A)
-mapAt {F = F} i f = map {F = F} (mapParamAt i f)
 
 module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) → A) where
   mutual
@@ -152,17 +271,17 @@ cata {As = As} alg x = cataRec alg {Bs = As} (! f0) [] [! x !]
 module Eliminator {As : Params k}
          {F : Functor (suc k)}
          (P : μ F As → Type₀)
-         (f : (x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ mapAt {F = F} 0 fst x ⟩)
+         (f : (x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ map F 0 fst x ⟩)
          where
   open import Path
 
   alg : ⟦ F ⟧ (∃ P ∷ As) → ∃ P
-  alg x = ⟨ mapAt {F = F} 0 fst x ⟩ , f x
+  alg x = ⟨ map F 0 fst x ⟩ , f x
 
   mutual
     elidRec : (G : Functor n) (Gs : Layers (suc m) n) →
               (x : <! ⟦ G ⟧ (Gs ++∙ μ F As ∷ Bs) !>) →
-              mapRec (mapParamAt 0 fst) G Gs [! cataRec alg G Gs x !] ≡ getty x
+              mapRec (mapParamAt 0 fst) G Gs [! cataRec alg G Gs x !] ≡ !! x
     elidRec (G₁ ⊕ G₂)   Gs       [! inl x !] = cong inl (elidRec G₁ Gs [! x !])
     elidRec (G₁ ⊕ G₂)   Gs       [! inr x !] = cong inr (elidRec G₂ Gs [! x !])
     elidRec (G₁ ⊗ G₂)   Gs       [! x , y !] = cong₂ _,_ (elidRec G₁ Gs [! x !]) (elidRec G₂ Gs [! y !])
@@ -183,7 +302,7 @@ module AnaTerm {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFo
          (coalg : (x : B) → ⟦ F ⟧ (∃ (_< x)  ∷ As)) where
 
   anaAcc : (x : B) → Acc _<_ x → μ F As
-  anaAcc x (acc wf) = ⟨ mapAt {F = F} 0 (λ { (x , p) → anaAcc x (wf x p) }) (coalg x)  ⟩
+  anaAcc x (acc wf) = ⟨ map F 0 (λ { (x , p) → anaAcc x (wf x p) }) (coalg x)  ⟩
 
   ana : B → μ F As
   ana x = anaAcc x (<-wellFounded x)
@@ -199,23 +318,23 @@ module AnaInf {k} {F : Functor (suc k)} {As : Params k} (coalg : A → ⟦ F ⟧
   mutual
     anaRec : (G : Functor n) (Gs : Layers (suc m) n) →
              <! ⟦ G ⟧ (Gs ++∙ A ∷ Bs) !> → <! ⟦ G ⟧ (Gs ++∙ ν F As ∷ Bs) !>
-    anaRec (G₁ ⊕ G₂)  Gs       [! inl x !] .getty = inl (anaRec G₁ Gs [! x !] .getty )
-    anaRec (G₁ ⊕ G₂)  Gs       [! inr x !] .getty = inr (anaRec G₂ Gs [! x !] .getty )
-    anaRec (G₁ ⊗ G₂)  Gs       [! x , y !] .getty .fst = anaRec G₁ Gs [! x !] .getty
-    anaRec (G₁ ⊗ G₂)  Gs       [! x , y !] .getty .snd = anaRec G₂ Gs [! y !] .getty
-    anaRec μ⟨ G ⟩     Gs       [! ⟨ x ⟩ !] .getty = ⟨ anaRec G (G ∷ Gs) [! x !] .getty ⟩
-    anaRec (! f0    ) []       [! x     !] .getty = ana x
-    anaRec (! (fs i)) []       [! x     !] .getty = x
-    anaRec (! (fs i)) (G ∷ Gs) [! x     !] .getty = anaRec (! i) Gs [! x !] .getty
-    anaRec (! f0    ) (G ∷ Gs) [! ⟨ x ⟩ !] .getty = ⟨ anaRec G (G ∷ Gs) [! x !] .getty ⟩
-    anaRec ①          Gs       [! _     !] .getty = tt
+    anaRec (G₁ ⊕ G₂)  Gs       [! inl x !] .!! = inl (anaRec G₁ Gs [! x !] .!!)
+    anaRec (G₁ ⊕ G₂)  Gs       [! inr x !] .!! = inr (anaRec G₂ Gs [! x !] .!!)
+    anaRec (G₁ ⊗ G₂)  Gs       [! x , y !] .!! .fst = anaRec G₁ Gs [! x !] .!!
+    anaRec (G₁ ⊗ G₂)  Gs       [! x , y !] .!! .snd = anaRec G₂ Gs [! y !] .!!
+    anaRec μ⟨ G ⟩     Gs       [! ⟨ x ⟩ !] .!! = ⟨ anaRec G (G ∷ Gs) [! x !] .!! ⟩
+    anaRec (! f0    ) []       [! x     !] .!! = ana x
+    anaRec (! (fs i)) []       [! x     !] .!! = x
+    anaRec (! (fs i)) (G ∷ Gs) [! x     !] .!! = anaRec (! i) Gs [! x !] .!!
+    anaRec (! f0    ) (G ∷ Gs) [! ⟨ x ⟩ !] .!! = ⟨ anaRec G (G ∷ Gs) [! x !] .!! ⟩
+    anaRec ①          Gs       [! _     !] .!! = tt
 
     ana : A → ν F As
-    ana x .unfold = anaRec F [] [! coalg x !] .getty
+    ana x .unfold = anaRec F [] [! coalg x !] .!!
 
 
 bnd : {F : Functor (suc (suc n))} → (⟦ F ⟧ (μ F (B ∷ As) ∷ μ F (B ∷ As) ∷ As) → ⟦ F ⟧ (μ F (B ∷ As) ∷ B ∷ As)) → μ F (A ∷ As) → (A → μ F (B ∷ As)) → μ F (B ∷ As)
-bnd {F = F} alg xs f = cata (⟨_⟩ ∘′ alg ∘′ mapAt {F = F} 1 f) xs
+bnd {F = F} alg xs f = cata (⟨_⟩ ∘′ alg ∘′ map F 1 f) xs
 
 Curriedⁿ : ℕ → Type₁
 Curriedⁿ zero    = Type₀
