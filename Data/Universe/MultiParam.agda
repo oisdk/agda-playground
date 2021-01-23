@@ -282,18 +282,6 @@ open Eliminator using (elim) public
 --
 ---------------------------------------------------------------------------------
 
--- The terminating anamorphism: uses well-founded recursion to ensure we're
--- building a finite type.
-module AnaTerm {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_)
-         {k} {F : Functor (suc k)}
-         {As : Params k}
-         (coalg : (x : B) → ⟦ F ⟧ (∃ (_< x)  ∷ As)) where
-
-  anaAcc : (x : B) → Acc _<_ x → μ F As
-  anaAcc x (acc wf) = ⟨ map F 0 (λ { (x , p) → anaAcc x (wf x p) }) (coalg x)  ⟩
-
-  ana : B → μ F As
-  ana x = anaAcc x (<-wellFounded x)
 
 -- Coinductive fixpoint
 record ν (F : Functor (suc n)) (As : Params n) : Type₀ where
@@ -321,6 +309,28 @@ module AnaInf {k} {F : Functor (suc k)} {As : Params k} (coalg : A → ⟦ F ⟧
     ana : A → ν F As
     ana x .unfold = anaRec F [] [! coalg x !] .!!
 
+-- The terminating anamorphism: uses well-founded recursion to ensure we're
+-- building a finite type.
+module AnaTerm {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_)
+         {k} {F : Functor (suc k)}
+         {As : Params k}
+         (coalg : (x : B) → ⟦ F ⟧ (∃ (_< x)  ∷ As)) where
+
+  anaAcc : (x : B) → Acc _<_ x → μ F As
+  anaAcc x (acc wf) = ⟨ map F 0 (λ { (x , p) → anaAcc x (wf x p) }) (coalg x)  ⟩
+
+  ana : B → μ F As
+  ana x = anaAcc x (<-wellFounded x)
+
+module Truncate {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_)
+                {k} {F : Functor (suc k)}
+                {As : Params k} (step : (x : B) -> ⟦ F ⟧ (ν F As ∷ As) → ⟦ F ⟧ ((ν F As × ∃ (_< x)) ∷ As)) where
+
+  truncAcc : (x : B) → Acc _<_ x → ν F As → μ F As
+  truncAcc x (acc wf) xs = ⟨ map F 0 (λ { (ys , z , z<x) → truncAcc z (wf z z<x) ys}) (step x (xs .unfold)) ⟩
+
+  trunc : B → ν F As → μ F As
+  trunc x = truncAcc x (<-wellFounded x)
 ---------------------------------------------------------------------------------
 --
 -- Composition
