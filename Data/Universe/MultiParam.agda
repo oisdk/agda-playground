@@ -109,22 +109,16 @@ _++∙_ : Layers n m → Params n → Params m
 infixr 5 _∷_ _++∙_
 
 module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) where
-  mutual
-    mapArg : (Fs : Layers m n) →
-            (j : Fin n) →
-            <! Fs ++∙ As [ j ] !>  → Fs ++∙ Bs [ j ]
-    mapArg []      i        [! xs     !] = f i xs
-    mapArg (F ∷ Fs) f0      [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
-    mapArg (F ∷ Fs) (fs i)  [! xs     !] = mapArg Fs i [! xs !]
-
-    mapRec : ∀ (F : Functor n) (Fs : Layers m n) →
-            <! ⟦ F ⟧ (Fs ++∙ As) !> → ⟦ F ⟧ (Fs ++∙ Bs)
-    mapRec (!   i) Fs [! xs     !] = mapArg Fs i [! xs !]
-    mapRec (F ⊕ G) Fs [! inl x  !] = inl (mapRec F Fs [! x !])
-    mapRec (F ⊕ G) Fs [! inr x  !] = inr (mapRec G Fs [! x !])
-    mapRec (F ⊗ G) Fs [! x , y  !] = mapRec F Fs [! x !] , mapRec G Fs [! y !]
-    mapRec μ⟨ F ⟩  Fs [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
-    mapRec ①       Fs _            = tt
+  mapRec : ∀ (F : Functor n) (Fs : Layers m n) →
+          <! ⟦ F ⟧ (Fs ++∙ As) !> → ⟦ F ⟧ (Fs ++∙ Bs)
+  mapRec (F ⊕ G)    Fs       [! inl x  !] = inl (mapRec F Fs [! x !])
+  mapRec (F ⊕ G)    Fs       [! inr x  !] = inr (mapRec G Fs [! x !])
+  mapRec (F ⊗ G)    Fs       [! x , y  !] = mapRec F Fs [! x !] , mapRec G Fs [! y !]
+  mapRec μ⟨ F ⟩     Fs       [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
+  mapRec (! i     ) []       [! xs     !] = f i xs
+  mapRec (! f0    ) (F ∷ Fs) [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
+  mapRec (! (fs i)) (F ∷ Fs) [! xs     !] = mapRec (! i) Fs [! xs !]
+  mapRec ①          Fs       _            = tt
 
 map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
 map {F = F} f xs = mapRec f F [] [! xs !]
@@ -140,24 +134,20 @@ mapAt {F = F} i f = map {F = F} (mapParamAt i f)
 
 module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) → A) where
   mutual
-    cataArg : (Gs : Layers (suc m) n) → (i : Fin n) →
-              <! Gs ++∙ μ F As ∷ Bs [ i ] !> → Gs ++∙ A ∷ Bs [ i ]
-    cataArg []       f0     [! ⟨ x ⟩ !] = alg (cataRec F [] [! x !])
-    cataArg []       (fs i) [! x     !] = x
-    cataArg (G ∷ Gs) (fs i)  [! x     !] = cataArg Gs i [! x !]
-    cataArg (G ∷ Gs) f0      [! ⟨ x ⟩ !] = ⟨ cataRec G (G ∷ Gs) [! x !] ⟩
-
     cataRec : (G : Functor n) (Gs : Layers (suc m) n) →
              <! ⟦ G ⟧ (Gs ++∙ μ F As ∷ Bs) !> → ⟦ G ⟧ (Gs ++∙ A ∷ Bs)
-    cataRec (G₁ ⊕ G₂) Gs [! inl x   !] = inl (cataRec G₁ Gs [! x !])
-    cataRec (G₁ ⊕ G₂) Gs [! inr x   !] = inr (cataRec G₂ Gs [! x !])
-    cataRec (G₁ ⊗ G₂) Gs [! x , y   !] = cataRec G₁ Gs [! x !] , cataRec G₂ Gs [! y !]
-    cataRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] =  ⟨ cataRec G (G ∷ Gs) [! xs !] ⟩
-    cataRec ①         Gs [! xs      !] = tt
-    cataRec (! i)     Gs [! xs      !] = cataArg Gs i [! xs !]
+    cataRec (G₁ ⊕ G₂)  Gs       [! inl x !] = inl (cataRec G₁ Gs [! x !])
+    cataRec (G₁ ⊕ G₂)  Gs       [! inr x !] = inr (cataRec G₂ Gs [! x !])
+    cataRec (G₁ ⊗ G₂)  Gs       [! x , y !] = cataRec G₁ Gs [! x !] , cataRec G₂ Gs [! y !]
+    cataRec μ⟨ G ⟩     Gs       [! ⟨ x ⟩ !] = ⟨ cataRec G (G ∷ Gs) [! x !] ⟩
+    cataRec (! f0    ) []       [! ⟨ x ⟩ !] = alg (cataRec F [] [! x !])
+    cataRec (! (fs i)) []       [! x     !] = x
+    cataRec (! (fs i)) (G ∷ Gs) [! x     !] = cataRec (! i) Gs [! x !]
+    cataRec (! f0    ) (G ∷ Gs) [! ⟨ x ⟩ !] = ⟨ cataRec G (G ∷ Gs) [! x !] ⟩
+    cataRec ①          Gs       [! _     !] = tt
 
 cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
-cata {As = As} alg x = cataArg alg {Bs = As} [] f0 [! x !]
+cata {As = As} alg x = cataRec alg {Bs = As} (! f0) [] [! x !]
 
 module Eliminator {As : Params k}
          {F : Functor (suc k)}
@@ -169,33 +159,22 @@ module Eliminator {As : Params k}
   alg : ⟦ F ⟧ (∃ P ∷ As) → ∃ P
   alg x = ⟨ mapAt {F = F} 0 fst x ⟩ , f x
 
-  elimProp : μ F As → ∃ P
-  elimProp = cata alg
-
   mutual
-    elidArg : (Gs : Layers (suc m) n) → (i : Fin n) →
-              (x : <! Gs ++∙ μ F As ∷ Bs [ i ] !>) →
-              getty x ≡ mapArg (mapParamAt 0 fst) Gs i [! cataArg alg Gs i x !]
-    elidArg []       f0     [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec F [] [! x !])
-    elidArg []       (fs i) [! x     !] = refl
-    elidArg (G ∷ Gs) (fs i)  [! x     !] = elidArg Gs i [! x !]
-    elidArg (G ∷ Gs) f0      [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec G (G ∷ Gs) [! x !])
-
     elidRec : (G : Functor n) (Gs : Layers (suc m) n) →
               (x : <! ⟦ G ⟧ (Gs ++∙ μ F As ∷ Bs) !>) →
-              getty x ≡ mapRec (mapParamAt 0 fst) G Gs [! cataRec alg G Gs x !]
-    elidRec (G₁ ⊕ G₂) Gs [! inl x   !] = cong inl (elidRec G₁ Gs [! x !])
-    elidRec (G₁ ⊕ G₂) Gs [! inr x   !] = cong inr (elidRec G₂ Gs [! x !])
-    elidRec (G₁ ⊗ G₂) Gs [! x , y   !] = cong₂ _,_ (elidRec G₁ Gs [! x !]) (elidRec G₂ Gs [! y !])
-    elidRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] = cong ⟨_⟩  (elidRec G (G ∷ Gs) [! xs !])
-    elidRec ①         Gs [! tt      !] = refl
-    elidRec (! i)     Gs [!   xs    !] = elidArg Gs i [! xs !]
-
-  elimId : ∀ x → x ≡ fst (elimProp x)
-  elimId x = elidArg {Bs = As} [] 0 [! x !]
+              mapRec (mapParamAt 0 fst) G Gs [! cataRec alg G Gs x !] ≡ getty x
+    elidRec (G₁ ⊕ G₂)   Gs       [! inl x !] = cong inl (elidRec G₁ Gs [! x !])
+    elidRec (G₁ ⊕ G₂)   Gs       [! inr x !] = cong inr (elidRec G₂ Gs [! x !])
+    elidRec (G₁ ⊗ G₂)   Gs       [! x , y !] = cong₂ _,_ (elidRec G₁ Gs [! x !]) (elidRec G₂ Gs [! y !])
+    elidRec μ⟨ G ⟩      Gs       [! ⟨ x ⟩ !] = cong ⟨_⟩  (elidRec G (G ∷ Gs) [! x !])
+    elidRec (! f0    )  []       [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec F [] [! x !])
+    elidRec (! (fs i))  []       [! x     !] = refl
+    elidRec (! (fs i))  (G ∷ Gs) [! x     !] = elidRec (! i) Gs [! x !]
+    elidRec (! f0    )  (G ∷ Gs) [! ⟨ x ⟩ !] = cong ⟨_⟩ (elidRec G (G ∷ Gs) [! x !])
+    elidRec ①          Gs        [! _     !] = refl
 
   elim : ∀ x → P x
-  elim x = subst P (sym (elimId x)) (snd (elimProp x))
+  elim x = subst P (elidRec {Bs = As} (! 0) [] [! x !]) (snd (cata alg x))
 open Eliminator using (elim) public
 
 module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded _<_)
@@ -209,6 +188,9 @@ module _ {B : Type₀} {_<_ : B → B → Type₀} (<-wellFounded : WellFounded 
   ana : B → μ F As
   ana x = anaAcc x (<-wellFounded x)
 
+bnd : {F : Functor (suc (suc n))} → (⟦ F ⟧ (μ F (B ∷ As) ∷ μ F (B ∷ As) ∷ As) → ⟦ F ⟧ (μ F (B ∷ As) ∷ B ∷ As)) → μ F (A ∷ As) → (A → μ F (B ∷ As)) → μ F (B ∷ As)
+bnd {F = F} alg xs f = cata (⟨_⟩ ∘′ alg ∘′ mapAt {F = F} 1 f) xs
+
 Curriedⁿ : ℕ → Type₁
 Curriedⁿ zero    = Type₀
 Curriedⁿ (suc n) = Type₀ → Curriedⁿ n
@@ -220,9 +202,9 @@ Curryⁿ (suc n) f A = Curryⁿ n (f ∘ (A ∷_))
 ⟦_⟧~ : Functor n → Curriedⁿ n
 ⟦_⟧~ {n = n} F = Curryⁿ n ⟦ F ⟧
 
-
 LIST :  Functor 1
 LIST = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩
+
 
 TREE : Functor 1
 TREE = μ⟨ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ (① ⊕ ! 1 ⊗ ! 0) ⟩
@@ -252,6 +234,13 @@ foldr′ f b = cata (const b ▿ uncurry f)
 infixr 5 _∷′_
 pattern []′ = ⟨ inl tt ⟩
 pattern _∷′_ x xs = ⟨ inr (x , xs) ⟩
+
+
+_++_ : ⟦ LIST ⟧~ A → ⟦ LIST ⟧~ A → ⟦ LIST ⟧~ A
+xs ++ ys = cata (const ys ▿ uncurry _∷′_) xs
+
+list-bnd : ⟦ LIST ⟧~ A → (A → ⟦ LIST ⟧~ B) → ⟦ LIST ⟧~ B
+list-bnd = bnd (inl ▿ (unwrap ∘′ uncurry _++_))
 
 open import Data.List using (List; _∷_; [])
 import Data.List as List
