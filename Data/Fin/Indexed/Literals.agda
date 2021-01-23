@@ -5,7 +5,6 @@ module Data.Fin.Indexed.Literals where
 -- import Data.Nat as ℕ
 -- import Data.Nat.Properties as ℕ
 open import Data.Fin.Indexed.Base
-open import Data.Fin.Indexed.Properties
 open import Literals.Number
 -- open import Relation.Nullary
 open import Agda.Builtin.Nat renaming (_<_ to _<ᵇ_)

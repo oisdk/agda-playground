@@ -39,19 +39,19 @@ variable
   F G : Functor n
   As Bs : Params n
 
-⇑ : Functor n → Functor (suc n)
-⇑ (! x) = ! (fs x)
-⇑ (x ⊕ y) = ⇑ x ⊕ ⇑ y
-⇑ (x ⊗ y) = ⇑ x ⊗ ⇑ y
-⇑ μ⟨ x ⟩ = μ⟨ ⇑ x ⟩
-⇑ ⓪ = ⓪
-⇑ ① = ①
+_⇑_ : Fin (suc n) → Functor n → Functor (suc n)
+i ⇑ (! j) = ! (insert i j)
+i ⇑ (x ⊕ y) = i ⇑ x ⊕ i ⇑ y
+i ⇑ (x ⊗ y) = i ⇑ x ⊗ i ⇑ y
+i ⇑ μ⟨ x ⟩ = μ⟨ fs i ⇑ x ⟩
+i ⇑ ⓪ = ⓪
+i ⇑ ① = ①
 
 ⇓ : Functor n → Functor (suc n)
 ⇓ (! x) = ! (weaken x)
 ⇓ (x ⊕ y) = ⇓ x ⊕ ⇓ y
 ⇓ (x ⊗ y) = ⇓ x ⊗ ⇓ y
-⇓ μ⟨ x ⟩ = μ⟨ ⇑ x ⟩
+⇓ μ⟨ x ⟩ = μ⟨ f0 ⇑ x ⟩
 ⇓ ⓪ = ⓪
 ⇓ ① = ①
 
@@ -59,7 +59,7 @@ substAt : Fin (suc n) → Functor (suc n) → Functor n → Functor n
 substAt i (! j)     xs = maybe xs ! (j \\ i)
 substAt i (ys ⊕ zs) xs = substAt i ys xs ⊕ substAt i zs xs
 substAt i (ys ⊗ zs) xs = substAt i ys xs ⊗ substAt i zs xs
-substAt i μ⟨ ys ⟩   xs = μ⟨ substAt (fs i)  ys  (⇑ xs) ⟩
+substAt i μ⟨ ys ⟩   xs = μ⟨ substAt (fs i) ys (0 ⇑ xs) ⟩
 substAt i ⓪         xs = ⓪
 substAt i ①         xs = ①
 
@@ -230,7 +230,7 @@ LEVELS : Functor 1
 LEVELS = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩
 
 FREE : Functor 1 → Functor 1
-FREE f = μ⟨ ! 1 ⊕ ⇑ f ⟩
+FREE f = μ⟨ ! 1 ⊕ f0 ⇑ f ⟩
 
 FREEP : Functor 1 → Functor 1
 FREEP f = μ⟨ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ (! 1 ⊕ ⇓ f) ⟩
@@ -243,7 +243,7 @@ MON = FREEPC (! 0)
 
 
 ROSE : Functor 1
-ROSE = μ⟨ ! 1 ⊗ ⇑ LIST ⟩
+ROSE = μ⟨ ! 1 ⊗ f0 ⇑ LIST ⟩
 
 foldr′ : {A B : Type₀} → (A → B → B) → B → ⟦ LIST ⟧~ A → B
 foldr′ f b = cata (const b ▿ uncurry f)
@@ -275,4 +275,3 @@ leftInv  list-list = linv
 
 example : ⟦ LIST ⟧~ ℕ
 example = 1 ∷′ 2 ∷′ 3 ∷′ []′
-

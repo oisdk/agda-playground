@@ -3,7 +3,9 @@
 module Data.Fin.Indexed.Base where
 
 open import Data.Nat using (ℕ; suc; zero)
+open import Agda.Builtin.Nat using (_<_)
 open import Level
+open import Data.Bool.Truth
 
 private variable n m : ℕ
 
@@ -22,3 +24,7 @@ FinToℕ (fs i) = suc (FinToℕ i)
 
 {-# DISPLAY f0 = zero #-}
 {-# DISPLAY fs n = suc n #-}
+
+FinFromℕ : ∀ {m} → (n : ℕ) → T (n < m) → Fin m
+FinFromℕ {m = suc m} zero    p = f0
+FinFromℕ {m = suc m} (suc n) p = fs (FinFromℕ n p)
