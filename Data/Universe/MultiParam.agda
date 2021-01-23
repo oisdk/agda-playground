@@ -224,6 +224,15 @@ map F i f xs = Mapping.mapRec (mapParamAt i f) F [] [! xs !]
 --
 ---------------------------------------------------------------------------------
 
+open import Path
+
+_-Alg : Functor 1 → Type₁
+F -Alg = Σ[ A ⦂ Type₀ ] (⟦ F ⟧ (A ∷ []) → A)
+
+_-Homo : (F : Functor 1) → F -Alg → F -Alg → Type₀
+(F -Homo) (A , a) (B , b) = Σ[ h ⦂ (A → B) ] (h ∘ a ≡ b ∘ map F 0 h)
+
+
 module Cata {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) → A) where
   cataRec : (G : Functor n) (Gs : Layers (suc m) n) →
             <! ⟦ G ⟧ (Gs ++∙ μ F As ∷ Bs) !> → ⟦ G ⟧ (Gs ++∙ A ∷ Bs)
