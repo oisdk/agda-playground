@@ -11,3 +11,7 @@ data Maybe (A : Type a) : Type a where
 maybe : {B : Maybe A → Type b} → B nothing → ((x : A) → B (just x)) → (x : Maybe A) → B x
 maybe b f nothing = b
 maybe b f (just x) = f x
+
+mapMaybe : (A → B) → Maybe A → Maybe B
+mapMaybe f nothing  = nothing
+mapMaybe f (just x) = just (f x)

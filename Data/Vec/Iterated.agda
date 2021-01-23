@@ -17,6 +17,7 @@ mutual
   Vec A (suc n)  = Vec⁺ A n
 
   record Vec⁰ {a} : Type a where
+    eta-equality
     constructor []
 
   infixr 5 _∷_
@@ -70,14 +71,16 @@ open import Data.Fin.Indexed
 
 infixl 4 lookup
 lookup : Fin n → Vec A n → A
-lookup f0     (x ∷ _ ) = x
-lookup (fs i) (_ ∷ xs) = lookup i xs
+lookup f0     = head
+lookup (fs i) = lookup i ∘ tail
 
 syntax lookup i xs = xs [ i ]
 
 infixl 4 replace
-replace : Fin n → Vec A n → A → Vec A n
-replace f0     (_ ∷ xs) x = x ∷ xs
-replace (fs i) (x ∷ xs) y = x ∷ replace i xs y
+replace : Fin n → A → Vec A n → Vec A n
+replace f0     x xs .head = x
+replace f0     x xs .tail = xs .tail
+replace (fs i) x xs .head = xs .head
+replace (fs i) x xs .tail = replace i x (xs .tail)
 
-syntax replace i xs x = xs [ i ]≔ x
+syntax replace i x xs = xs [ i ]≔ x

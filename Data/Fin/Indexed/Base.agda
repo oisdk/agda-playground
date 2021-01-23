@@ -15,3 +15,10 @@ private variable n m : ℕ
 data Fin : ℕ → Type₀ where
   f0 : Fin (suc n)
   fs : Fin n → Fin (suc n)
+
+FinToℕ : Fin n → ℕ
+FinToℕ f0 = zero
+FinToℕ (fs i) = suc (FinToℕ i)
+
+{-# DISPLAY f0 = zero #-}
+{-# DISPLAY fs n = suc n #-}

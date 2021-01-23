@@ -25,7 +25,7 @@ data Functor (n : ℕ) : Type₀ where
   ! : Fin n → Functor n                         -- Type variables
   _⊕_ _⊗_ : (F G : Functor n) → Functor n       -- Sums and Products
   μ⟨_⟩ : Functor (suc n) → Functor n            -- Fixpoints
-  𝟘 𝟙 : Functor n                               -- ⊥ and ⊤
+  ⓪ ① : Functor n                               -- ⊥ and ⊤
 
 infixl 6 _⊕_
 infixl 7 _⊗_
@@ -44,33 +44,27 @@ variable
 ⇑ (x ⊕ y) = ⇑ x ⊕ ⇑ y
 ⇑ (x ⊗ y) = ⇑ x ⊗ ⇑ y
 ⇑ μ⟨ x ⟩ = μ⟨ ⇑ x ⟩
-⇑ 𝟘 = 𝟘
-⇑ 𝟙 = 𝟙
+⇑ ⓪ = ⓪
+⇑ ① = ①
 
 ⇓ : Functor n → Functor (suc n)
 ⇓ (! x) = ! (weaken x)
 ⇓ (x ⊕ y) = ⇓ x ⊕ ⇓ y
 ⇓ (x ⊗ y) = ⇓ x ⊗ ⇓ y
 ⇓ μ⟨ x ⟩ = μ⟨ ⇑ x ⟩
-⇓ 𝟘 = 𝟘
-⇓ 𝟙 = 𝟙
+⇓ ⓪ = ⓪
+⇓ ① = ①
 
-paramSubst : Fin (suc n) → Fin (suc n) → Maybe (Fin n)
-paramSubst f0     f0     = nothing
-paramSubst f0     (fs j) = just j
-paramSubst {n = suc n} (fs i) f0     = just f0
-paramSubst {n = suc n} (fs i) (fs j) = maybe nothing (just ∘ fs) (paramSubst i j)
-
-functorSubst : Fin (suc n) → Functor n → Functor (suc n) → Functor n
-functorSubst i xs (! j) = maybe xs ! (paramSubst i j)
-functorSubst i xs (ys ⊕ zs) = functorSubst i xs ys ⊕ functorSubst i xs zs
-functorSubst i xs (ys ⊗ zs) = functorSubst i xs ys ⊗ functorSubst i xs zs
-functorSubst i xs μ⟨ ys ⟩ = μ⟨ functorSubst (fs i) (⇑ xs) ys ⟩
-functorSubst i xs 𝟘 = 𝟘
-functorSubst i xs 𝟙 = 𝟙
+substAt : Fin (suc n) → Functor (suc n) → Functor n → Functor n
+substAt i (! j)     xs = maybe xs ! (j \\ i)
+substAt i (ys ⊕ zs) xs = substAt i ys xs ⊕ substAt i zs xs
+substAt i (ys ⊗ zs) xs = substAt i ys xs ⊗ substAt i zs xs
+substAt i μ⟨ ys ⟩   xs = μ⟨ substAt (fs i)  ys  (⇑ xs) ⟩
+substAt i ⓪         xs = ⓪
+substAt i ①         xs = ①
 
 _⊚_ : Functor (suc n) → Functor n → Functor n
-xs ⊚ ys = functorSubst 0 ys xs
+_⊚_ = substAt 0
 
 mutual
   ⟦_⟧ : Functor n → Params n → Type₀
@@ -78,8 +72,8 @@ mutual
   ⟦ F ⊕ G ⟧ xs = ⟦ F ⟧ xs ⊎ ⟦ G ⟧ xs
   ⟦ F ⊗ G ⟧ xs = ⟦ F ⟧ xs × ⟦ G ⟧ xs
   ⟦ μ⟨ F ⟩ ⟧ xs = μ F xs
-  ⟦ 𝟘 ⟧ xs = ⊥
-  ⟦ 𝟙 ⟧ xs = ⊤
+  ⟦ ⓪ ⟧ xs = ⊥
+  ⟦ ① ⟧ xs = ⊤
 
   record μ (F : Functor (suc n)) (As : Params n) : Type₀  where
     inductive
@@ -109,7 +103,7 @@ data Layers (n : ℕ) : ℕ → Type₁ where
   _∷_ : Functor (suc m) → Layers n m → Layers n (suc m)
 
 _++∙_ : Layers n m → Params n → Params m
-[]      ++∙ ys = ys
+[]       ++∙ ys = ys
 (x ∷ xs) ++∙ ys = let zs = xs ++∙ ys in μ x zs ∷ zs
 
 infixr 5 _∷_ _++∙_
@@ -118,19 +112,19 @@ module _ {m} {As Bs : Params m} (f : (i : Fin m) → As [ i ] → Bs [ i ]) wher
   mutual
     mapArg : (Fs : Layers m n) →
             (j : Fin n) →
-            <! Fs ++∙ As [ j ] !> → Fs ++∙ Bs [ j ]
-    mapArg []      i       [! xs     !] = f i xs
-    mapArg (F ∷ Fs) f0     [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
-    mapArg (F ∷ Fs) (fs i) [! xs     !] = mapArg Fs i [! xs !]
+            <! Fs ++∙ As [ j ] !>  → Fs ++∙ Bs [ j ]
+    mapArg []      i        [! xs     !] = f i xs
+    mapArg (F ∷ Fs) f0      [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
+    mapArg (F ∷ Fs) (fs i)  [! xs     !] = mapArg Fs i [! xs !]
 
     mapRec : ∀ (F : Functor n) (Fs : Layers m n) →
             <! ⟦ F ⟧ (Fs ++∙ As) !> → ⟦ F ⟧ (Fs ++∙ Bs)
-    mapRec (!   i) Fs [! xs      !] = mapArg Fs i [! xs !]
-    mapRec (F ⊕ G) Fs [! inl x   !] = inl (mapRec F Fs [! x !])
-    mapRec (F ⊕ G) Fs [! inr x   !] = inr (mapRec G Fs [! x !])
-    mapRec (F ⊗ G) Fs [! x , y   !] = mapRec F Fs [! x !] , mapRec G Fs [! y !]
-    mapRec μ⟨ F ⟩  Fs [!  ⟨ xs ⟩ !] =  ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
-    mapRec 𝟙       Fs _             = tt
+    mapRec (!   i) Fs [! xs     !] = mapArg Fs i [! xs !]
+    mapRec (F ⊕ G) Fs [! inl x  !] = inl (mapRec F Fs [! x !])
+    mapRec (F ⊕ G) Fs [! inr x  !] = inr (mapRec G Fs [! x !])
+    mapRec (F ⊗ G) Fs [! x , y  !] = mapRec F Fs [! x !] , mapRec G Fs [! y !]
+    mapRec μ⟨ F ⟩  Fs [! ⟨ xs ⟩ !] = ⟨ mapRec F (F ∷ Fs) [! xs !] ⟩
+    mapRec ①       Fs _            = tt
 
 map : ((i : Fin n) → As [ i ] → Bs [ i ]) → ⟦ F ⟧ As → ⟦ F ⟧ Bs
 map {F = F} f xs = mapRec f F [] [! xs !]
@@ -159,7 +153,7 @@ module _ {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As) �
     cataRec (G₁ ⊕ G₂) Gs [! inr x   !] = inr (cataRec G₂ Gs [! x !])
     cataRec (G₁ ⊗ G₂) Gs [! x , y   !] = cataRec G₁ Gs [! x !] , cataRec G₂ Gs [! y !]
     cataRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] =  ⟨ cataRec G (G ∷ Gs) [! xs !] ⟩
-    cataRec 𝟙         Gs [! xs      !] = tt
+    cataRec ①         Gs [! xs      !] = tt
     cataRec (! i)     Gs [! xs      !] = cataArg Gs i [! xs !]
 
 cata : {F : Functor (suc n)} → (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
@@ -194,7 +188,7 @@ module _ {As : Params k}
     elidRec (G₁ ⊕ G₂) Gs [! inr x   !] = cong inr (elidRec G₂ Gs [! x !])
     elidRec (G₁ ⊗ G₂) Gs [! x , y   !] = cong₂ _,_ (elidRec G₁ Gs [! x !]) (elidRec G₂ Gs [! y !])
     elidRec μ⟨ G ⟩    Gs [!  ⟨ xs ⟩ !] = cong ⟨_⟩  (elidRec G (G ∷ Gs) [! xs !])
-    elidRec 𝟙         Gs [! tt      !] = refl
+    elidRec ①         Gs [! tt      !] = refl
     elidRec (! i)     Gs [!   xs    !] = elidArg Gs i [! xs !]
 
   elimId : ∀ x → x ≡ fst (elimProp x)
@@ -227,22 +221,22 @@ Curryⁿ (suc n) f A = Curryⁿ n (f ∘ (A ∷_))
 
 
 LIST :  Functor 1
-LIST = μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩
+LIST = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩
 
 TREE : Functor 1
-TREE = μ⟨ μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ (𝟙 ⊕ ! 1 ⊗ ! 0) ⟩
+TREE = μ⟨ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ (① ⊕ ! 1 ⊗ ! 0) ⟩
 
 LEVELS : Functor 1
-LEVELS = μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩
+LEVELS = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩
 
 FREE : Functor 1 → Functor 1
 FREE f = μ⟨ ! 1 ⊕ ⇑ f ⟩
 
 FREEP : Functor 1 → Functor 1
-FREEP f = μ⟨ μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ (! 1 ⊕ ⇓ f) ⟩
+FREEP f = μ⟨ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ (! 1 ⊕ ⇓ f) ⟩
 
 FREEPC : Functor 1 → Functor 1
-FREEPC f = μ⟨ 𝟙 ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ μ⟨ ! 1 ⊕ ⇓ f ⟩
+FREEPC f = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ μ⟨ ! 1 ⊕ ⇓ f ⟩
 
 MON : Functor 1
 MON = FREEPC (! 0)
