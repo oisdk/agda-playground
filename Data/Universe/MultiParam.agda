@@ -56,6 +56,9 @@
 --   * Do eliminators for the anamorphism.
 --
 --   * Consider adding indexed types.
+--
+--   * Consider adding quotients
+--
 --------------------------------------------------------------------------------
 
 module Data.Universe.MultiParam where
