@@ -2,7 +2,7 @@
 
 open import Algebra
 
-module Control.Monad.Dist.Definition {ℓ} (rng : Semiring ℓ) where
+module Control.Monad.Weighted.Definition {ℓ} (rng : Semiring ℓ) where
 
 open Semiring rng
 

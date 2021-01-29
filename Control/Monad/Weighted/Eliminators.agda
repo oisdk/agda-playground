@@ -2,14 +2,14 @@
 
 open import Algebra
 
-module Control.Monad.Dist.Eliminators {ℓ} (rng : Semiring ℓ) where
+module Control.Monad.Weighted.Eliminators {ℓ} (rng : Semiring ℓ) where
 
 open Semiring rng
 
 open import Level
 open import Path
 open import HLevels
-open import Control.Monad.Dist.Definition rng
+open import Control.Monad.Weighted.Definition rng
 
 private variable p : Level
 
