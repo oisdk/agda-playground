@@ -9,6 +9,11 @@ open import Data.Unit
 bool : ∀ {ℓ} {P : Bool → Type ℓ} (f : P false) (t : P true) → (x : Bool) → P x
 bool f t false = f
 bool f t true = t
+{-# INLINE bool #-}
+
+bool′ : A → A → Bool → A
+bool′ = bool
+{-# INLINE bool′ #-}
 
 not : Bool → Bool
 not false = true
@@ -26,7 +31,6 @@ true  and y = y
 
 infixr 0 if_then_else_
 if_then_else_ : ∀ {a} {A : Set a} → Bool → A → A → A
-if true  then x else _ = x
-if false then _ else x = x
+if p then x else y = bool y x p
 {-# INLINE if_then_else_ #-}
 

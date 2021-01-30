@@ -21,8 +21,7 @@ either′ : (A → C) → (B → C) → (A ⊎ B) → C
 either′ = either
 
 _▿_ : (A → C) → (B → C) → A ⊎ B → C
-(f ▿ g) (inl x) = f x
-(f ▿ g) (inr x) = g x
+_▿_ = either
 
 is-l : A ⊎ B → Bool
 is-l = either′ (const true) (const false)
