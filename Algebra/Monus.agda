@@ -33,7 +33,8 @@ record Monus ℓ : Type (ℓsuc ℓ) where
   open import Path.Reasoning
 
   ≤-trans : Transitive _≤_
-  ≤-trans {x} {y} {z} (k₁ , y≡x∙k₁) (k₂ , z≡y∙k₂) = k₁ ∙ k₂ ,_ $
+  ≤-trans (k₁ , _) (k₂ , _) .fst = k₁ ∙ k₂
+  ≤-trans {x} {y} {z} (k₁ , y≡x∙k₁) (k₂ , z≡y∙k₂) .snd =
     z ≡⟨ z≡y∙k₂ ⟩
     y ∙ k₂ ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
     (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
@@ -65,6 +66,29 @@ record Monus ℓ : Type (ℓsuc ℓ) where
 
   Sup : Type _
   Sup = Σ[ Ω ⦂ 𝑆 ] (∀ x → x ≤ Ω )
+
+--   divisive : ∀ x y → x ∙ y ≡ x → y ≡ ε
+--   divisive x y p = {!!}
+-- -- 
+
+--   module _ (zeroSumFree : ∀ x → x ≤ ε → x ≡ ε) where
+--     lim : ∀ x y → x ∙ y ≡ x → y ≡ ε
+--     lim x y p = zeroSumFree y ({!!} , {!!})
+
+--   module _  (lim : ∀ x y → x ∙ y ≡ x → y ≡ ε) where
+--     zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
+--     zeroSumFree x y p = {!!}
+
+  module _ (zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε)
+           (absorbative : ∀ x y → x ∙ y ≡ x → y ≡ ε)
+           where
+    antisym : Antisymmetric _≤_
+    antisym {x} {y} (k₁ , x≤y) (k₂ , y≤x) =
+      let p = zeroSumFree k₂ k₁ (absorbative y (k₂ ∙ k₁) (sym (x≤y ; cong (_∙ k₁) y≤x ; assoc y k₂ k₁)))
+      in y≤x ; cong (y ∙_) p ; ∙ε y
+
+    -- divisive : ∀ x y z → x ∙ y ≡ x ∙ z → y ≡ z
+    -- divisive x y z p = {!!}
 
   module _ (antisym : Antisymmetric _≤_) where
     ⊓-assoc : Associative _⊓_
