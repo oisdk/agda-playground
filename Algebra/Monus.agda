@@ -87,6 +87,15 @@ record Monus ℓ : Type (ℓsuc ℓ) where
       let p = zeroSumFree k₂ k₁ (absorbative y (k₂ ∙ k₁) (sym (x≤y ; cong (_∙ k₁) y≤x ; assoc y k₂ k₁)))
       in y≤x ; cong (y ∙_) p ; ∙ε y
 
+    partialOrder : PartialOrder 𝑆 ℓ
+    PartialOrder._≤_ partialOrder = _≤_
+    PartialOrder.refl partialOrder = ≤-refl
+    PartialOrder.antisym partialOrder = antisym
+    PartialOrder.trans partialOrder = ≤-trans
+
+    totalOrder : TotalOrder 𝑆 ℓ ℓ
+    totalOrder = fromPartialOrder partialOrder _≤?_
+
     -- divisive : ∀ x y z → x ∙ y ≡ x ∙ z → y ≡ z
     -- divisive x y z p = {!!}
 
