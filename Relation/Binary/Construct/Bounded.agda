@@ -64,18 +64,15 @@ b-sord .StrictPartialOrder.conn {[ x ]} {[ x₁ ]} x≮y y≮x = cong [_] (conn 
 b-ord : TotalOrder [∙] _ _
 b-ord .TotalOrder.strictPartialOrder = b-sord
 b-ord .TotalOrder.partialOrder = b-pord
-b-ord .TotalOrder.compare [⊥] [⊥] = eq refl
-b-ord .TotalOrder.compare [⊥] [⊤] = lt Poly.tt
-b-ord .TotalOrder.compare [⊥] [ x ] = lt Poly.tt
-b-ord .TotalOrder.compare [⊤] [⊥] = gt Poly.tt
-b-ord .TotalOrder.compare [⊤] [⊤] = eq refl
-b-ord .TotalOrder.compare [⊤] [ x ] = gt Poly.tt
-b-ord .TotalOrder.compare [ x ] [⊥] = gt Poly.tt
-b-ord .TotalOrder.compare [ x ] [⊤] = lt Poly.tt
-b-ord .TotalOrder.compare [ x ] [ y ] with compare x y
-b-ord .TotalOrder.compare [ x ] [ y ] | lt x<y = lt x<y
-b-ord .TotalOrder.compare [ x ] [ y ] | eq x≡y = eq (cong [_] x≡y)
-b-ord .TotalOrder.compare [ x ] [ y ] | gt x>y = gt x>y
+b-ord .TotalOrder._<?_ [⊥] [⊥] = no λ ()
+b-ord .TotalOrder._<?_ [⊥] [⊤] = yes _
+b-ord .TotalOrder._<?_ [⊥] [ y ] = yes _
+b-ord .TotalOrder._<?_ [⊤] [⊥] = no λ ()
+b-ord .TotalOrder._<?_ [⊤] [⊤] = no λ ()
+b-ord .TotalOrder._<?_ [⊤] [ y ] = no λ ()
+b-ord .TotalOrder._<?_ [ x ] [⊥] = no λ ()
+b-ord .TotalOrder._<?_ [ x ] [⊤] = yes _
+b-ord .TotalOrder._<?_ [ x ] [ y ] = x <? y
 b-ord .TotalOrder.≰⇒> {[⊥]} {y} x≰y = ⊥-elim (x≰y Poly.tt)
 b-ord .TotalOrder.≰⇒> {[⊤]} {[⊥]} x≰y = Poly.tt
 b-ord .TotalOrder.≰⇒> {[⊤]} {[⊤]} x≰y = ⊥-elim (x≰y Poly.tt)

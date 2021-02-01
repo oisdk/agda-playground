@@ -6,7 +6,7 @@ open import Relation.Binary
 
 module Relation.Binary.Construct.LowerBound {e} {E : Type e} {r₁ r₂} (totalOrder : TotalOrder E r₁ r₂) where
 
-open TotalOrder totalOrder renaming (refl to ≤-refl)
+open TotalOrder totalOrder renaming (refl to <-refl)
 import Data.Unit.UniversePolymorphic as Poly
 import Data.Empty.UniversePolymorphic as Poly
 
@@ -14,31 +14,58 @@ data ⌊∙⌋ : Type e where
   ⌊⊥⌋ : ⌊∙⌋
   ⌊_⌋ : E → ⌊∙⌋
 
-_≤⌊_⌋ : ⌊∙⌋ → E → Type _
-⌊⊥⌋   ≤⌊ y ⌋ = Poly.⊤
-⌊ x ⌋ ≤⌊ y ⌋ = x ≤ y
+⌊_⌋≤_ : E → ⌊∙⌋ → Type _
+⌊ x ⌋≤ ⌊⊥⌋ = Poly.⊥
+⌊ x ⌋≤ ⌊ y ⌋ = x ≤ y
 
 _⌊≤⌋_ : ⌊∙⌋ → ⌊∙⌋ → Type _
-x     ⌊≤⌋ ⌊ y ⌋ = x ≤⌊ y ⌋
-⌊⊥⌋   ⌊≤⌋ ⌊⊥⌋   = Poly.⊤
-⌊ x ⌋ ⌊≤⌋ ⌊⊥⌋   = Poly.⊥
+⌊⊥⌋   ⌊≤⌋ y = Poly.⊤
+⌊ x ⌋ ⌊≤⌋ y = ⌊ x ⌋≤ y
+
+_<⌊_⌋ : ⌊∙⌋ → E → Type _
+⌊⊥⌋   <⌊ y ⌋ = Poly.⊤
+⌊ x ⌋ <⌊ y ⌋ = x < y
+
+_⌊<⌋_ : ⌊∙⌋ → ⌊∙⌋ → Type _
+_     ⌊<⌋ ⌊⊥⌋   = Poly.⊥
+x     ⌊<⌋ ⌊ y ⌋ = x <⌊ y ⌋
 
 lb-pord : PartialOrder ⌊∙⌋ _
 PartialOrder._≤_ lb-pord = _⌊≤⌋_
-PartialOrder.refl lb-pord {⌊⊥⌋} = Poly.tt
-PartialOrder.refl lb-pord {⌊ x ⌋} = ≤-refl
-PartialOrder.antisym lb-pord {⌊⊥⌋} {⌊⊥⌋} x≤y y≤x _ = ⌊⊥⌋
-PartialOrder.antisym lb-pord {⌊ x ⌋} {⌊ x₁ ⌋} x≤y y≤x i = ⌊ antisym x≤y y≤x i ⌋
-PartialOrder.trans lb-pord {⌊⊥⌋} {⌊⊥⌋} {⌊⊥⌋} x≤y y≤z = Poly.tt
-PartialOrder.trans lb-pord {⌊⊥⌋} {⌊⊥⌋} {⌊ x ⌋} x≤y y≤z = Poly.tt
-PartialOrder.trans lb-pord {⌊⊥⌋} {⌊ x ⌋} {⌊ x₁ ⌋} x≤y y≤z = Poly.tt
-PartialOrder.trans lb-pord {⌊ x ⌋} {⌊ x₁ ⌋} {⌊ x₂ ⌋} x≤y y≤z = ≤-trans x≤y y≤z
+PartialOrder.refl lb-pord {⌊⊥⌋} = _
+PartialOrder.refl lb-pord {⌊ x ⌋} = <-refl
+PartialOrder.antisym lb-pord {⌊⊥⌋} {⌊⊥⌋} p q = refl
+PartialOrder.antisym lb-pord {⌊ x ⌋} {⌊ x₁ ⌋} p q = cong ⌊_⌋ (antisym p q)
+PartialOrder.trans lb-pord {⌊⊥⌋} {_} {_} p q = _
+PartialOrder.trans lb-pord {⌊ x ⌋} {⌊ y ⌋} {⌊ z ⌋} p q = ≤-trans p q
 
-lb-lte : Total _⌊≤⌋_
-lb-lte ⌊⊥⌋ ⌊⊥⌋ = inl Poly.tt
-lb-lte ⌊⊥⌋ ⌊ x ⌋ = inl Poly.tt
-lb-lte ⌊ x ⌋ ⌊⊥⌋ = inr Poly.tt
-lb-lte ⌊ x ⌋ ⌊ y ⌋ = ≤-total x y
+
+
+lb-sord : StrictPartialOrder ⌊∙⌋ _
+StrictPartialOrder._<_ lb-sord = _⌊<⌋_
+StrictPartialOrder.trans lb-sord {⌊⊥⌋} {⌊⊥⌋} {⌊⊥⌋} p q = q
+StrictPartialOrder.trans lb-sord {⌊⊥⌋} {⌊⊥⌋} {⌊ x ⌋} p q = q
+StrictPartialOrder.trans lb-sord {⌊⊥⌋} {⌊ x ⌋} {⌊ x₁ ⌋} p q = p
+StrictPartialOrder.trans lb-sord {⌊ x ⌋} {⌊ x₁ ⌋} {⌊ x₂ ⌋} p q = <-trans p q
+StrictPartialOrder.asym lb-sord {⌊ x ⌋} {⌊ y ⌋} p q = asym p q
+StrictPartialOrder.conn lb-sord {⌊⊥⌋} {⌊⊥⌋} p q = refl
+StrictPartialOrder.conn lb-sord {⌊⊥⌋} {⌊ x ⌋} p q = ⊥-elim (p _)
+StrictPartialOrder.conn lb-sord {⌊ x ⌋} {⌊⊥⌋} p q = ⊥-elim (q _)
+StrictPartialOrder.conn lb-sord {⌊ x ⌋} {⌊ x₁ ⌋} p q = cong ⌊_⌋ (conn p q)
+
+lb-lt : ∀ x y → Dec (x ⌊<⌋ y)
+lb-lt x ⌊⊥⌋ = no (λ ())
+lb-lt ⌊⊥⌋ ⌊ y ⌋ = yes Poly.tt
+lb-lt ⌊ x ⌋ ⌊ y ⌋ = x <? y
 
 lb-ord : TotalOrder ⌊∙⌋ _ _
-lb-ord = fromPartialOrder lb-pord lb-lte
+TotalOrder.strictPartialOrder lb-ord = lb-sord
+TotalOrder.partialOrder lb-ord = lb-pord
+TotalOrder._<?_ lb-ord = lb-lt
+TotalOrder.≰⇒> lb-ord {⌊⊥⌋} {⌊⊥⌋} p = ⊥-elim (p _)
+TotalOrder.≰⇒> lb-ord {⌊⊥⌋} {⌊ x ⌋} p = ⊥-elim (p _ )
+TotalOrder.≰⇒> lb-ord {⌊ x ⌋} {⌊⊥⌋} p = _
+TotalOrder.≰⇒> lb-ord {⌊ x ⌋} {⌊ x₁ ⌋} p = ≰⇒> p
+TotalOrder.≮⇒≥ lb-ord {x} {⌊⊥⌋} p = _
+TotalOrder.≮⇒≥ lb-ord {⌊⊥⌋} {⌊ y ⌋} p = ⊥-elim (p _)
+TotalOrder.≮⇒≥ lb-ord {⌊ x ⌋} {⌊ y ⌋} p = ≮⇒≥ p

@@ -29,7 +29,7 @@ insert x (y ∷ xs) with x ≤ᵇ y
 insert-sort : List E → List E
 insert-sort = foldr insert []
 
-insert-sorts : ∀ x xs → lb ≤⌊ x ⌋ → SortedFrom lb xs → SortedFrom lb (insert x xs)
+insert-sorts : ∀ x xs → lb ⌊≤⌋ ⌊ x ⌋ → SortedFrom lb xs → SortedFrom lb (insert x xs)
 insert-sorts x [] lb≤x Pxs = lb≤x , tt
 insert-sorts x (y ∷ xs) lb≤x (lb≤y , Sxs) with x ≤? y
 ... | yes x≤y = lb≤x , x≤y , Sxs

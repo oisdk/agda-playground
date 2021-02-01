@@ -20,7 +20,7 @@ open import Data.List.Membership
 private variable lb : ⌊∙⌋
 
 Sorted-cons : E → (⌊∙⌋ → Type (r₁ ℓ⊔ r₂)) → ⌊∙⌋ → Type (r₁ ℓ⊔ r₂)
-Sorted-cons x xs lb = (lb ≤⌊ x ⌋) × xs ⌊ x ⌋
+Sorted-cons x xs lb = (lb ⌊≤⌋ ⌊ x ⌋) × xs ⌊ x ⌋
 
 SortedFrom : ⌊∙⌋ → List E → Type _
 SortedFrom = flip (foldr Sorted-cons (const Poly.⊤))
@@ -28,8 +28,8 @@ SortedFrom = flip (foldr Sorted-cons (const Poly.⊤))
 Sorted : List E → Type _
 Sorted = SortedFrom ⌊⊥⌋
 
-ord-in : ∀ x xs → SortedFrom lb xs → x ∈ xs → lb ≤⌊ x ⌋
-ord-in {lb = lb} x (x₁ ∷ xs) p (f0 , x∈xs) = subst (lb ≤⌊_⌋) x∈xs (p .fst)
+ord-in : ∀ x xs → SortedFrom lb xs → x ∈ xs → lb ⌊≤⌋ ⌊ x ⌋
+ord-in {lb = lb} x (x₁ ∷ xs) p (f0 , x∈xs) = subst (λ z → lb ⌊≤⌋ ⌊ z ⌋) x∈xs (p .fst)
 ord-in {lb} x (y ∷ xs) p (fs n , x∈xs) = ⌊trans⌋ {lb} (p .fst) (ord-in x xs (p .snd) (n , x∈xs))
 
 perm-head : ∀ {lbˣ lbʸ} x xs y ys → SortedFrom lbˣ (x ∷ xs) → SortedFrom lbʸ (y ∷ ys) → (x ∷ xs ↭ y ∷ ys) → x ≡ y

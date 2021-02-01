@@ -42,10 +42,6 @@ totalOrder .TotalOrder.partialOrder .PartialOrder._≤_ = _≤_
 totalOrder .TotalOrder.partialOrder .PartialOrder.refl {x} = ≤-refl x
 totalOrder .TotalOrder.partialOrder .PartialOrder.antisym = ≤-antisym
 totalOrder .TotalOrder.partialOrder .PartialOrder.trans {x} {y} {z} = ≤-trans x y z
-totalOrder .TotalOrder.compare x y with T? (x <ᴮ y)
-totalOrder .TotalOrder.compare x y | yes x<y = lt x<y
-totalOrder .TotalOrder.compare x y | no  x≮y with T? (y <ᴮ x)
-totalOrder .TotalOrder.compare x y | no  x≮y | yes x>y = gt x>y
-totalOrder .TotalOrder.compare x y | no  x≮y | no  x≯y = eq (<-conn x≮y x≯y)
+totalOrder .TotalOrder._<?_ x y = T? (x <ᴮ y)
 totalOrder .TotalOrder.≰⇒> {x} {y} = ℕ-≰⇒> x y
 totalOrder .TotalOrder.≮⇒≥ {x} {y} = ℕ-≮⇒≥ x y

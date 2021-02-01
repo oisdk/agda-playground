@@ -178,12 +178,12 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = cong (bool z y) yzp ; antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z)
   ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no x≥z = cong (bool z y) yzp
 
-  -- ⊓-comm : ∀ x y → x ⊓ y ≡ y ⊓ x
-  -- ⊓-comm x y with x ≤? y | inspect (x ≤ᵇ_) y | y ≤? x | inspect (y ≤ᵇ_) x
-  -- ⊓-comm x y | yes x₁ | 〖 xyp 〗 | yes x₂ | 〖 yxp 〗 = antisym x₁ x₂
-  -- ⊓-comm x y | no  x₁ | 〖 xyp 〗 | yes x₂ | 〖 yxp 〗 = ≡.refl
-  -- ⊓-comm x y | yes x₁ | 〖 xyp 〗 | no  x₂ | 〖 yxp 〗 = ≡.refl
-  -- ⊓-comm x y | no  x₁ | 〖 xyp 〗 | no  x₂ | 〖 yxp 〗 = antisym x₁ x₂
+  ⊓-comm : ∀ x y → x ⊓ y ≡ y ⊓ x
+  ⊓-comm x y with x <? y | inspect (x <ᵇ_) y | y <? x | inspect (y <ᵇ_) x
+  ⊓-comm x y | yes x₁ | 〖 xyp 〗 | yes x₂ | 〖 yxp 〗 = ⊥-elim (asym x₁ x₂)
+  ⊓-comm x y | no  x₁ | 〖 xyp 〗 | yes x₂ | 〖 yxp 〗 = ≡.refl
+  ⊓-comm x y | yes x₁ | 〖 xyp 〗 | no  x₂ | 〖 yxp 〗 = ≡.refl
+  ⊓-comm x y | no  x₁ | 〖 xyp 〗 | no  x₂ | 〖 yxp 〗 = conn x₂ x₁
 
 module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder 𝑆 ℓ₂) where
   open PartialOrder partialOrder
