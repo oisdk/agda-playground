@@ -62,18 +62,6 @@ record Monus ℓ : Type (ℓsuc ℓ) where
   Sup : Type _
   Sup = Σ[ Ω ⦂ 𝑆 ] (∀ x → x ≤ Ω )
 
---   divisive : ∀ x y → x ∙ y ≡ x → y ≡ ε
---   divisive x y p = {!!}
--- -- 
-
---   module _ (zeroSumFree : ∀ x → x ≤ ε → x ≡ ε) where
---     lim : ∀ x y → x ∙ y ≡ x → y ≡ ε
---     lim x y p = zeroSumFree y ({!!} , {!!})
-
---   module _  (lim : ∀ x y → x ∙ y ≡ x → y ≡ ε) where
---     zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
---     zeroSumFree x y p = {!!}
-
   module _ (zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε)
            (absorbative : ∀ x y → x ∙ y ≡ x → y ≡ ε)
            where

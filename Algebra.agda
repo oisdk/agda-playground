@@ -134,9 +134,7 @@ record CommutativeSemiring ℓ : Type (ℓsuc ℓ) where
   field
     *-comm : Commutative _*_
 
-record LeftSemimodule ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field
-    semiring : Semiring ℓ₁
+record LeftSemimodule {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   open Semiring semiring public
   field
     semimodule : CommutativeMonoid ℓ₂

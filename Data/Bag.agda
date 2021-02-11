@@ -40,7 +40,7 @@ record Elim {a ℓ}
       (trunc xs ys x y)
       i j
 
-open Elim public
+open Elim
 
 
 infixr 0 elim-syntax
@@ -66,7 +66,7 @@ record ElimProp {a ℓ} (A : Type a) (P : ⟅ A ⟆ → Type ℓ) : Type (a ℓ�
             (f x (y ∷ xs) (f y xs pxs))) (f y (x ∷ xs) (f x xs pxs))))
   ⟦_⟧⇓ = ⟅ ⟦_⟧⇑ ⟆⇓
 
-open ElimProp public
+open ElimProp
 
 infixr 0 elim-prop-syntax
 elim-prop-syntax : ∀ {a ℓ} → (A : Type a) → (⟅ A ⟆ → Type ℓ) → Type (a ℓ⊔ ℓ)
@@ -85,7 +85,7 @@ record [⟅_⟆→_] {a b} (A : Type a) (B : Type b) : Type (a ℓ⊔ b) where
     [_]-com : ∀ x y xs → f x (f y xs) ≡ f y (f x xs)
   [_]⇑ = elim [_]-set z (λ x _ → f x) (λ x y _ → [_]-com x y)
   [_]↓ = ⟅ [_]⇑ ⟆⇓
-open [⟅_⟆→_] public
+open [⟅_⟆→_]
 
 infixr 5 _∪_
 _∪_ : ⟅ A ⟆ → ⟅ A ⟆ → ⟅ A ⟆
@@ -179,7 +179,7 @@ record ⟦_≡_⟧ {a b} {A : Type a} {B : Type b}
     ⟦ ≡⇓′ ⟧-prop = [ xf ]-set _ _
     ⟦ ≡⇓′ ⟧[] = ⟦_≡⟧[]
     ⟦ ≡⇓′ ⟧ x ∷ xs ⟨ P ⟩ = ⟦_≡⟧_∷_ x _ ; cong ([ xf ] x ∷_) P
-open ⟦_≡_⟧ public
+open ⟦_≡_⟧
 
 record ⟦_⊚_≡_⟧ {a b c} {A : Type a} {B : Type b} {C : Type c}
                (h : B → C)
@@ -198,7 +198,7 @@ record ⟦_⊚_≡_⟧ {a b c} {A : Type a} {B : Type b} {C : Type c}
     ⟦ ≡⇓′ ⟧-prop = [ yf ]-set _ _
     ⟦ ≡⇓′ ⟧[] = ⟦_∘≡⟧[]
     ⟦ ≡⇓′ ⟧ x ∷ xs ⟨ P ⟩ = ⟦_∘≡⟧_∷_ x _ ; cong ([ yf ] x ∷_) P
-open ⟦_⊚_≡_⟧ public
+open ⟦_⊚_≡_⟧
 
 map-alg : (A → B) → [⟅ A ⟆→ ⟅ B ⟆ ]
 [ map-alg f ]-set = trunc
