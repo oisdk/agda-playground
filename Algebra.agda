@@ -166,7 +166,7 @@ record SemimoduleHomomorphism[_]_⟶_
 
   field mon-homo : MonoidHomomorphism monoid ⟶ monoid′
 
-  open MonoidHomomorphism_⟶_ mon-homo
+  open MonoidHomomorphism_⟶_ mon-homo public
 
   field ⋊-homo : ∀ r x → f (r ⋊ x) ≡ r ⋊′ f x
 
