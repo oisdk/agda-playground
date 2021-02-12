@@ -74,19 +74,31 @@ module Proof {ℓ} (mod : LeftSemimodule rng ℓ) (vIsSet : isSet (LeftSemimodul
       1# ⋊ h x ≡⟨ Mod.1⋊ _ ⟩
       h x ∎
 
+    ∪-hom-alg : (ys : W A) → W-ψ[ xs ⦂ A ] ⟦ xs <|> ys ⟧ ≡ ⟦ xs ⟧ ∪ ⟦ ys ⟧
+    ∥ ∪-hom-alg ys ∥-prop = vIsSet _ _
+    ∥ ∪-hom-alg ys ∥ p & x ∷ xs ⟨ pxs ⟩ =
+      ⟦ (p & x ∷ xs) <|> ys ⟧ ≡⟨⟩
+      ⟦ p & x ∷ (xs <|> ys) ⟧ ≡⟨⟩
+      p ⋊ h x ∪ ⟦ xs <|> ys ⟧ ≡⟨ cong ((p ⋊ h x) ∪_) pxs ⟩
+      p ⋊ h x ∪ (⟦ xs ⟧ ∪ ⟦ ys ⟧) ≡˘⟨ Mod.∪-assoc (p ⋊ h x) ⟦ xs ⟧ ⟦ ys ⟧ ⟩
+      p ⋊ h x ∪ ⟦ xs ⟧ ∪ ⟦ ys ⟧ ≡⟨⟩
+      ⟦ p & x ∷ xs ⟧ ∪ ⟦ ys ⟧ ∎
+    ∥ ∪-hom-alg ys ∥[] = sym (Mod.∅∪ ⟦ ys ⟧)
 
-    -- ∪-hom-alg : (ys : W A) → W-ψ[ xs ⦂ A ] ⟦ xs <|> ys ⟧ ≡ ⟦ xs ⟧ ∪ ⟦ ys ⟧
-    -- ∥ ∪-hom-alg ys ∥-prop = vIsSet _ _
-    -- ∥ ∪-hom-alg ys ∥ p & x ∷ xs ⟨ pxs ⟩ = {!!}
-    -- ∥ ∪-hom-alg ys ∥[] = {!!}
+    ⋊-hom-alg : (r : 𝑅) → W-ψ[ xs ⦂ A ] ⟦ r ⋊′ xs ⟧ ≡ r ⋊ ⟦ xs ⟧
+    ∥ ⋊-hom-alg r ∥-prop = vIsSet _ _
+    ∥ ⋊-hom-alg r ∥[] = sym (Mod.⋊∅ r)
+    ∥ ⋊-hom-alg r ∥ p & x ∷ xs ⟨ pxs ⟩ =
+      ⟦ r ⋊′ (p & x ∷ xs) ⟧ ≡⟨⟩
+      ⟦ r * p & x ∷ r ⋊′ xs ⟧ ≡⟨⟩
+      (r * p) ⋊ h x ∪ ⟦ r ⋊′ xs ⟧ ≡⟨ cong ((r * p) ⋊ h x ∪_) pxs ⟩
+      (r * p) ⋊ h x ∪ r ⋊ ⟦ xs ⟧ ≡⟨ cong (_∪ r ⋊ ⟦ xs ⟧) (Mod.⟨*⟩⋊ _ _ _) ⟩
+      r ⋊ (p ⋊ h x) ∪ r ⋊ ⟦ xs ⟧ ≡˘⟨ Mod.⋊⟨∪⟩ r _ _ ⟩
+      r ⋊ (p ⋊ h x ∪ ⟦ xs ⟧) ≡⟨⟩
+      r ⋊ ⟦ p & x ∷ xs ⟧ ∎
 
-    -- ⋊-hom-alg : (r : 𝑅) → W-ψ[ xs ⦂ A ] ⟦ r ⋊′ xs ⟧ ≡ r ⋊ ⟦ xs ⟧
-    -- ∥ ⋊-hom-alg r ∥-prop = vIsSet _ _
-    -- ∥ ⋊-hom-alg r ∥ p & x ∷ xs ⟨ pxs ⟩ = {!!}
-    -- ∥ ⋊-hom-alg r ∥[] = {!!}
-
-    -- hom : SemimoduleHomomorphism[ rng ] semimodule {A = A} ⟶ mod
-    -- MonoidHomomorphism_⟶_.f (SemimoduleHomomorphism[_]_⟶_.mon-homo hom) = ⟦_⟧
-    -- MonoidHomomorphism_⟶_.∙-homo (SemimoduleHomomorphism[_]_⟶_.mon-homo hom) x y = ∥ ∪-hom-alg y ∥⇓ x
-    -- MonoidHomomorphism_⟶_.ε-homo (SemimoduleHomomorphism[_]_⟶_.mon-homo hom) = refl
-    -- SemimoduleHomomorphism[_]_⟶_.⋊-homo hom r = ∥ ⋊-hom-alg r ∥⇓
+    hom : SemimoduleHomomorphism[ rng ] semimodule {A = A} ⟶ mod
+    MonoidHomomorphism_⟶_.f (SemimoduleHomomorphism[_]_⟶_.mon-homo hom) = ⟦_⟧
+    MonoidHomomorphism_⟶_.∙-homo (SemimoduleHomomorphism[_]_⟶_.mon-homo hom) x y = ∥ ∪-hom-alg y ∥⇓ x
+    MonoidHomomorphism_⟶_.ε-homo (SemimoduleHomomorphism[_]_⟶_.mon-homo hom) = refl
+    SemimoduleHomomorphism[_]_⟶_.⋊-homo hom r = ∥ ⋊-hom-alg r ∥⇓

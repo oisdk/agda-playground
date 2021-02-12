@@ -153,6 +153,7 @@ record LeftSemimodule {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ : Type (ℓ�
     ⋊⟨∪⟩ : _⋊_ Distributesʳ _∪_
     1⋊ : Identityˡ _⋊_ 1#
     0⋊ : ∀ x → 0# ⋊ x ≡ ∅
+    ⋊∅ : ∀ x → x ⋊ ∅ ≡ ∅
 
 record SemimoduleHomomorphism[_]_⟶_
          {ℓ₁ ℓ₂ ℓ₃}

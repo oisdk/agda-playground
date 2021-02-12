@@ -30,3 +30,4 @@ module _ {a} {A : Type a} where
   LeftSemimodule.⋊⟨∪⟩ semimodule x y xs = sym (⋊-distribˡ x y xs)
   LeftSemimodule.1⋊ semimodule = 1⋊
   LeftSemimodule.0⋊ semimodule = 0⋊
+  LeftSemimodule.⋊∅ semimodule = ⋊∅
