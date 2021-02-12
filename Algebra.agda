@@ -134,9 +134,7 @@ record CommutativeSemiring ℓ : Type (ℓsuc ℓ) where
   field
     *-comm : Commutative _*_
 
-record LeftSemimodule ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field
-    semiring : Semiring ℓ₁
+record LeftSemimodule {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   open Semiring semiring public
   field
     semimodule : CommutativeMonoid ℓ₂
@@ -155,6 +153,22 @@ record LeftSemimodule ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
     ⋊⟨∪⟩ : _⋊_ Distributesʳ _∪_
     1⋊ : Identityˡ _⋊_ 1#
     0⋊ : ∀ x → 0# ⋊ x ≡ ∅
+
+record SemimoduleHomomorphism[_]_⟶_
+         {ℓ₁ ℓ₂ ℓ₃}
+         (rng : Semiring ℓ₁)
+         (from : LeftSemimodule rng ℓ₂)
+         (to : LeftSemimodule rng ℓ₃) : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
+
+  open Semiring rng
+  open LeftSemimodule from using (_⋊_; monoid)
+  open LeftSemimodule to using () renaming (_⋊_ to _⋊′_; monoid to monoid′)
+
+  field mon-homo : MonoidHomomorphism monoid ⟶ monoid′
+
+  open MonoidHomomorphism_⟶_ mon-homo public
+
+  field ⋊-homo : ∀ r x → f (r ⋊ x) ≡ r ⋊′ f x
 
 record StarSemiring ℓ : Type (ℓsuc ℓ) where
   field

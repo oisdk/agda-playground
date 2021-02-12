@@ -17,17 +17,17 @@ record Eliminator (A : Type a) (P : W A → Type p) : Type (p ℓ⊔ a ℓ⊔ �
   constructor elim
   field
     ⟦_⟧-set : ∀ {xs} → isSet (P xs)
-    ⟦_⟧_&_∷_⟨_⟩ : ∀ w x xs → P xs → P (w & x ∷ xs)
+    ⟦_⟧_&_∷_⟨_⟩ : ∀ w x wxs → P wxs → P (w & x ∷ wxs)
     ⟦_⟧[] : P []
-  private f = ⟦_⟧_&_∷_⟨_⟩; z = ⟦_⟧[]
+  private _&_∷_⟨_⟩ = ⟦_⟧_&_∷_⟨_⟩; []⟨⟩ = ⟦_⟧[]
   field
-    ⟦_⟧-dup : ∀ p q x xs   pxs → f p x (q & x ∷ xs) (f q x xs pxs) ≡[ i ≔ P (dup p q x xs i) ]≡ f (p + q) x xs pxs
-    ⟦_⟧-com : ∀ p x q y xs pxs → f p x (q & y ∷ xs) (f q y xs pxs) ≡[ i ≔ P (com p x q y xs i) ]≡ f q y (p & x ∷ xs) (f p x xs pxs)
-    ⟦_⟧-del : ∀ x xs       pxs → f 0# x xs pxs                     ≡[ i ≔ P (del x xs i) ]≡ pxs
+    ⟦_⟧-dup : ∀ p q x xs   pxs → p & x ∷ (q & x ∷ xs) ⟨ q & x ∷ xs ⟨ pxs ⟩ ⟩ ≡[ i ≔ P (dup p q x xs   i) ]≡ (p + q) & x ∷ xs ⟨ pxs ⟩
+    ⟦_⟧-com : ∀ p x q y xs pxs → p & x ∷ (q & y ∷ xs) ⟨ q & y ∷ xs ⟨ pxs ⟩ ⟩ ≡[ i ≔ P (com p x q y xs i) ]≡ q & y ∷ (p & x ∷ xs) ⟨ p & x ∷ xs ⟨ pxs ⟩ ⟩
+    ⟦_⟧-del : ∀ x xs       pxs → 0# & x ∷ xs ⟨ pxs ⟩                         ≡[ i ≔ P (del x xs       i) ]≡ pxs
 
   run : (xs : W A) → P xs
-  run [] = z
-  run (p & x ∷ xs) = f p x xs (run xs)
+  run [] = []⟨⟩
+  run (p & x ∷ xs) = p & x ∷ xs ⟨ run xs ⟩
   run (dup p q x xs i) = ⟦_⟧-dup p q x xs (run xs) i
   run (com p x q y xs i) = ⟦_⟧-com p x q y xs (run xs) i
   run (del x xs i) = ⟦_⟧-del x xs (run xs) i
@@ -54,14 +54,15 @@ record Recursor (A : Type a) (B : Type b) : Type (a ℓ⊔ b ℓ⊔ ℓ) where
     [_]-set : isSet B
     [_]_&_∷_⟨_⟩ : (p : 𝑅) → (x : A) → (xs : W A) → B → B
     [_][] : B
-  private f = [_]_&_∷_⟨_⟩; z = [_][]
+
+  private _&_∷_⟨_⟩ = [_]_&_∷_⟨_⟩; []⟨⟩ = [_][]
   field
-    [_]-dup : ∀ p q x xs   pxs → f p x (q & x ∷ xs) (f q x xs pxs) ≡ f (p + q) x xs pxs
-    [_]-com : ∀ p x q y xs pxs → f p x (q & y ∷ xs) (f q y xs pxs) ≡ f q y (p & x ∷ xs) (f p x xs pxs)
-    [_]-del : ∀ x xs       pxs → f 0# x xs pxs                     ≡ pxs
+    [_]-dup : ∀ p q x xs   pxs → p & x ∷ (q & x ∷ xs) ⟨ q & x ∷ xs ⟨ pxs ⟩ ⟩ ≡ (p + q) & x ∷ xs ⟨ pxs ⟩
+    [_]-com : ∀ p x q y xs pxs → p & x ∷ (q & y ∷ xs) ⟨ q & y ∷ xs ⟨ pxs ⟩ ⟩ ≡ q & y ∷ (p & x ∷ xs) ⟨ p & x ∷ xs ⟨ pxs ⟩ ⟩
+    [_]-del : ∀ x xs       pxs → 0# & x ∷ xs ⟨ pxs ⟩                         ≡ pxs
 
   _↑ : Eliminator A (λ _ → B)
-  _↑ = elim [_]-set f z [_]-dup [_]-com [_]-del
+  _↑ = elim [_]-set _&_∷_⟨_⟩ []⟨⟩ [_]-dup [_]-com [_]-del
 
   _↓_ : W A → B
   _↓_ = run _↑
