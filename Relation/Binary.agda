@@ -188,42 +188,58 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
 module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder 𝑆 ℓ₂) where
   open PartialOrder partialOrder
   open import Data.Sigma
+  open import Relation.Nullary.Stable.Base
 
 
   open import Data.Unit
 
-  module _ (_≤?_ : Total _≤_) where
-    ≤-b : 𝑆 → 𝑆 → Bool
-    ≤-b x y = is-l (x ≤? y)
+  module FromDec (_≤?_ : Decidable _≤_) (asym : ∀ {x y} → x ≰ y → y ≰ x → ⊥) where
+    ≤-stable : ∀ {x y} → Stable (x ≤ y)
+    ≤-stable {x} {y} ¬¬x≤y with x ≤? y
+    ≤-stable {x} {y} ¬¬x≤y | yes x≤y = x≤y
+    ≤-stable {x} {y} ¬¬x≤y | no  x≰y = ⊥-elim (¬¬x≤y x≰y)
 
     toStrict : StrictPartialOrder 𝑆 ℓ₂
     toStrict .StrictPartialOrder._<_ x y = ¬ (y ≤ x)
-    toStrict .StrictPartialOrder.trans {x} {y} {z} y≰x z≰y z≤x = either (y≰x ∘ flip trans z≤x)  z≰y (y ≤? z)
-    toStrict .StrictPartialOrder.asym {x} {y} y≰x x≰y = either x≰y y≰x (x ≤? y)
-    toStrict .StrictPartialOrder.conn {x} {y} x<y y<x with x ≤? y | inspect (x ≤?_) y | y ≤? x | inspect (y ≤?_) x
-    toStrict .StrictPartialOrder.conn {x} {y} x<y y<x | inl x₁ | xy | inl x₂ | yx = antisym x₁ x₂
-    toStrict .StrictPartialOrder.conn {x} {y} x<y y<x | inl x₁ | 〖 xy 〗 | inr x₂ | 〖 yx 〗 = ⊥-elim (x<y (x≢y ∘ antisym x₂))
-      where
-      x≢y : x ≢ y
-      x≢y = (λ p → subst (bool ⊥ ⊤) (cong is-l (≡.sym xy) ; cong₂ ≤-b p (≡.sym p) ; cong is-l yx) tt)
-    toStrict .StrictPartialOrder.conn {x} {y} x<y y<x | inr x₁ | 〖 xy 〗 | inl x₂ | 〖 yx 〗 = ⊥-elim (y<x (y≢x ∘ antisym x₂))
-      where
-      y≢x : y ≢ x
-      y≢x = (λ p → subst (bool ⊤ ⊥) (cong is-l (≡.sym xy) ; cong₂ ≤-b (≡.sym p) p ; cong is-l yx) tt)
-    toStrict .StrictPartialOrder.conn {x} {y} x<y y<x | inr x₁ | xy | inr x₂ | yx = antisym x₂ x₁
+    toStrict .StrictPartialOrder.conn x<y y<x = antisym (≤-stable y<x) (≤-stable x<y)
+    toStrict .StrictPartialOrder.asym = asym
+    toStrict .StrictPartialOrder.trans {x} {y} {z} y≰x z≰y z≤x with y ≤? z
+    ... | yes y≤z = y≰x (trans y≤z z≤x)
+    ... | no  y≰z = asym z≰y y≰z
 
     fromPartialOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
     fromPartialOrder .TotalOrder.strictPartialOrder = toStrict
     fromPartialOrder .TotalOrder.partialOrder = partialOrder
     fromPartialOrder .TotalOrder.≰⇒> x≤y = x≤y
-    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y with x ≤? y | inspect (x ≤?_) y | y ≤? x | inspect (y ≤?_) x
-    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y | inl x₁ | xy | inl x₂ | yx = x₂
-    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y | inl x₁ | 〖 xy 〗 | inr x₂ | 〖 yx 〗 = ⊥-elim (x<y (x≢y ∘ antisym x₂))
+    fromPartialOrder .TotalOrder.≮⇒≥ = ≤-stable
+    fromPartialOrder .TotalOrder._<?_ x y with y ≤? x
+    ... | yes y≤x = no λ y≰x → y≰x y≤x
+    ... | no  y≰x = yes y≰x
+
+  module _ (_≤?_ : Total _≤_) where
+    ≤-b : 𝑆 → 𝑆 → Bool
+    ≤-b x y = is-l (x ≤? y)
+
+    ≤-stable : ∀ {x y} → Stable (x ≤ y)
+    ≤-stable {x} {y} ¬¬x≤y with x ≤? y | inspect (x ≤?_) y | y ≤? x | inspect (y ≤?_) x
+    ≤-stable {x} {y} ¬¬x≤y | inl x≤y | _ | _ | _ = x≤y
+    ≤-stable {x} {y} ¬¬x≤y | _ | _ | inr y≥x | _ = y≥x
+    ≤-stable {x} {y} ¬¬x≤y | inr x≥y | 〖 xy 〗 | inl y≤x | 〖 yx 〗 = ⊥-elim (¬¬x≤y (y≢x ∘ antisym y≤x))
       where
-      x≢y : x ≢ y
-      x≢y = (λ p → subst (bool ⊥ ⊤) (cong is-l (≡.sym xy) ; cong₂ ≤-b p (≡.sym p) ; cong is-l yx) tt)
-    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y | inr x₁ | xy | inl x₂ | yx = x₂
-    fromPartialOrder .TotalOrder.≮⇒≥ {x} {y} x<y | inr x₁ | xy | inr x₂ | yx = x₁
+      y≢x : y ≢ x
+      y≢x p = subst (bool ⊥ ⊤) (cong is-l (≡.sym yx) ; cong₂ ≤-b p (≡.sym p) ; cong is-l xy) tt
+
+    toStrict : StrictPartialOrder 𝑆 ℓ₂
+    toStrict .StrictPartialOrder._<_ x y = ¬ (y ≤ x)
+    toStrict .StrictPartialOrder.trans {x} {y} {z} y≰x z≰y z≤x = either (y≰x ∘ flip trans z≤x)  z≰y (y ≤? z)
+    toStrict .StrictPartialOrder.asym {x} {y} y≰x x≰y = either x≰y y≰x (x ≤? y)
+    toStrict .StrictPartialOrder.conn x<y y<x = antisym (≤-stable y<x) (≤-stable x<y)
+
+    fromPartialOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
+    fromPartialOrder .TotalOrder.strictPartialOrder = toStrict
+    fromPartialOrder .TotalOrder.partialOrder = partialOrder
+    fromPartialOrder .TotalOrder.≰⇒> x≤y = x≤y
+    fromPartialOrder .TotalOrder.≮⇒≥ = ≤-stable
     fromPartialOrder .TotalOrder._<?_ x y with x ≤? y | inspect (x ≤?_) y
     fromPartialOrder .TotalOrder._<?_ x y | inr y≤x | _ = no λ y≰x → y≰x y≤x
     fromPartialOrder .TotalOrder._<?_ x y | inl x≤y | _ with y ≤? x | inspect (y ≤?_) x
