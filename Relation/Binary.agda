@@ -190,14 +190,13 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
   open import Data.Sigma
   open import Relation.Nullary.Stable.Base
 
-
   open import Data.Unit
 
   module FromDec (_≤?_ : Decidable _≤_) (asym : ∀ {x y} → x ≰ y → y ≰ x → ⊥) where
     ≤-stable : ∀ {x y} → Stable (x ≤ y)
     ≤-stable {x} {y} ¬¬x≤y with x ≤? y
-    ≤-stable {x} {y} ¬¬x≤y | yes x≤y = x≤y
-    ≤-stable {x} {y} ¬¬x≤y | no  x≰y = ⊥-elim (¬¬x≤y x≰y)
+    ... | yes x≤y = x≤y
+    ... | no  x≰y = ⊥-elim (¬¬x≤y x≰y)
 
     toStrict : StrictPartialOrder 𝑆 ℓ₂
     toStrict .StrictPartialOrder._<_ x y = ¬ (y ≤ x)
@@ -217,37 +216,23 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
     ... | no  y≰x = yes y≰x
 
   module _ (_≤?_ : Total _≤_) where
-    ≤-b : 𝑆 → 𝑆 → Bool
-    ≤-b x y = is-l (x ≤? y)
-
-    ≤-stable : ∀ {x y} → Stable (x ≤ y)
-    ≤-stable {x} {y} ¬¬x≤y with x ≤? y | inspect (x ≤?_) y | y ≤? x | inspect (y ≤?_) x
-    ≤-stable {x} {y} ¬¬x≤y | inl x≤y | _ | _ | _ = x≤y
-    ≤-stable {x} {y} ¬¬x≤y | _ | _ | inr y≥x | _ = y≥x
-    ≤-stable {x} {y} ¬¬x≤y | inr x≥y | 〖 xy 〗 | inl y≤x | 〖 yx 〗 = ⊥-elim (¬¬x≤y (y≢x ∘ antisym y≤x))
+    ≤-dec : Decidable _≤_
+    ≤-dec x y with x ≤? y | inspect (x ≤?_) y
+    ≤-dec x y | inl x≤y | _ = yes x≤y
+    ≤-dec x y | inr x≥y | _ with y ≤? x | inspect (y ≤?_) x
+    ≤-dec x y | inr x≥y | _ | inr y≥x | _ = yes y≥x
+    ≤-dec x y | inr x≥y | 〖 pxy 〗 | inl y≤x | 〖 pyx 〗 = no λ x≤y → x≢y (antisym x≤y x≥y)
       where
-      y≢x : y ≢ x
-      y≢x p = subst (bool ⊥ ⊤) (cong is-l (≡.sym yx) ; cong₂ ≤-b p (≡.sym p) ; cong is-l xy) tt
+      ≤-b : 𝑆 → 𝑆 → Bool
+      ≤-b x y = is-l (x ≤? y)
 
-    toStrict : StrictPartialOrder 𝑆 ℓ₂
-    toStrict .StrictPartialOrder._<_ x y = ¬ (y ≤ x)
-    toStrict .StrictPartialOrder.trans {x} {y} {z} y≰x z≰y z≤x = either (y≰x ∘ flip trans z≤x)  z≰y (y ≤? z)
-    toStrict .StrictPartialOrder.asym {x} {y} y≰x x≰y = either x≰y y≰x (x ≤? y)
-    toStrict .StrictPartialOrder.conn x<y y<x = antisym (≤-stable y<x) (≤-stable x<y)
-
-    fromPartialOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
-    fromPartialOrder .TotalOrder.strictPartialOrder = toStrict
-    fromPartialOrder .TotalOrder.partialOrder = partialOrder
-    fromPartialOrder .TotalOrder.≰⇒> x≤y = x≤y
-    fromPartialOrder .TotalOrder.≮⇒≥ = ≤-stable
-    fromPartialOrder .TotalOrder._<?_ x y with x ≤? y | inspect (x ≤?_) y
-    fromPartialOrder .TotalOrder._<?_ x y | inr y≤x | _ = no λ y≰x → y≰x y≤x
-    fromPartialOrder .TotalOrder._<?_ x y | inl x≤y | _ with y ≤? x | inspect (y ≤?_) x
-    fromPartialOrder .TotalOrder._<?_ x y | inl x≤y | _ | inl y≤x | _ = no (λ y≰x → y≰x y≤x)
-    fromPartialOrder .TotalOrder._<?_ x y | inl x≤y | 〖 xy 〗 | inr y≥x | 〖 yx 〗 = yes λ y≤x → x≢y (antisym x≤y y≤x)
-      where
       x≢y : x ≢ y
-      x≢y p = subst (bool ⊥ ⊤) (cong is-l (≡.sym xy) ; cong₂ ≤-b p (≡.sym p) ; cong is-l yx) tt
+      x≢y p = subst (bool ⊤ ⊥) (cong is-l (≡.sym pxy) ; cong₂ ≤-b p (≡.sym p) ; cong is-l pyx) tt
+
+    asym-≰ : Asymmetric _≰_
+    asym-≰ {x} {y} x≰y y≰x = either x≰y y≰x (x ≤? y)
+
+    open FromDec ≤-dec asym-≰ public using (fromPartialOrder)
 
 module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (strictPartialOrder : StrictPartialOrder 𝑆 ℓ₂) where
   open StrictPartialOrder strictPartialOrder
@@ -256,21 +241,13 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (strictPartialOrder : StrictPart
   open import Relation.Nullary.Decidable.Properties using (Dec→DoubleNegElim)
 
   module _ (_<?_ : Decidable _<_) where
-
-    lt-or-eq : ∀ {x y} → ¬ (x < y) → (y < x) ⊎ (x ≡ y)
-    lt-or-eq {x} {y} x≮y with y <? x
-    lt-or-eq {x} {y} x≮y | no  why₁ = inr (conn x≮y why₁)
-    lt-or-eq {x} {y} x≮y | yes why₁ = inl why₁
-
     unStrict : PartialOrder 𝑆 _
     unStrict .PartialOrder._≤_ x y = ¬ (y < x)
     unStrict .PartialOrder.refl x<x = asym x<x x<x
     unStrict .PartialOrder.antisym = flip conn
-    unStrict .PartialOrder.trans {x} {y} {z} y≮x z≮y z<x with lt-or-eq y≮x | lt-or-eq z≮y
-    unStrict .PartialOrder.trans {x} {y} {z} y≮x z≮y z<x | inl x₁ | inl x₂ = z≮y (trans z<x x₁)
-    unStrict .PartialOrder.trans {x} {y} {z} y≮x z≮y z<x | inl x₁ | inr x₂ = z≮y (trans z<x x₁)
-    unStrict .PartialOrder.trans {x} {y} {z} y≮x z≮y z<x | inr x₁ | inl x₂ = y≮x (trans x₂ z<x)
-    unStrict .PartialOrder.trans {x} {y} {z} y≮x z≮y z<x | inr x₁ | inr x₂ = z≮y (subst (z <_) (≡.sym x₁) z<x)
+    unStrict .PartialOrder.trans {x} {y} y≮x z≮y z<x with x <? y
+    ... | yes x<y = z≮y (trans z<x x<y)
+    ... | no  x≮y = z≮y (subst (z <_) (conn x≮y y≮x) z<x)
 
     fromStrictPartialOrder : TotalOrder 𝑆 _ _
     fromStrictPartialOrder .TotalOrder.strictPartialOrder = strictPartialOrder
