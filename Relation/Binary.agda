@@ -245,7 +245,7 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (strictPartialOrder : StrictPart
     unStrict .PartialOrder._≤_ x y = ¬ (y < x)
     unStrict .PartialOrder.refl x<x = asym x<x x<x
     unStrict .PartialOrder.antisym = flip conn
-    unStrict .PartialOrder.trans {x} {y} y≮x z≮y z<x with x <? y
+    unStrict .PartialOrder.trans {x} {y} {z} y≮x z≮y z<x with x <? y
     ... | yes x<y = z≮y (trans z<x x<y)
     ... | no  x≮y = z≮y (subst (z <_) (conn x≮y y≮x) z<x)
 
