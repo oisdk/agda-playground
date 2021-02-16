@@ -22,4 +22,3 @@ record Lens (A : Type a) (B : Type b) : Type (a ℓ⊔ b) where
     set-get : ∀ s → into s .set (into s .get) ≡ s
     set-set : ∀ s v₁ v₂ → into (into s .set v₁) .set v₂ ≡ into s .set v₂
 open Lens public
-

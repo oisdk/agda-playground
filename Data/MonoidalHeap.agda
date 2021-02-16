@@ -27,12 +27,10 @@ infixl 10 _⊙_
 _⊙_ : (𝑆 → A) → 𝑆 → 𝑆 → A
 f ⊙ x = λ y → f (x ∙ y)
 
-
 infixr 6 _∹_&_
 data Heap (V : 𝑆 → Type a) : Type (a ℓ⊔ s) where
   [] : Heap V
   _∹_&_ : (key : 𝑆) (val : V key) (children : List (Heap (V ⊙ key))) → Heap V
-
 
 Heap⋆ : (V : 𝑆 → Type a) → Type (a ℓ⊔ s)
 Heap⋆ V = List (Heap V)
@@ -118,7 +116,6 @@ merge-size {V = V} (x ∹ xv & xs) (y ∹ yv & ys) | inl (k , x≤y) =
   suc (sizes ys) ℕ.+ suc (sizes xs) ≡⟨ ℕ.+-comm (suc (sizes ys)) (suc (sizes xs)) ⟩
   suc (sizes xs) ℕ.+ suc (sizes ys) ∎
 
-
 mutual
   minViewSizes : (xs : Heap⋆ V) → sizes xs ≡ size (mergeQs xs)
   minViewSizes [] = refl
@@ -153,7 +150,6 @@ multIn : (p : 𝑆 → 𝑆) → (c : ∀ {x y} → V (p x) → V y → V (p (x 
 multIn {V = V} p c f [] ys = []
 multIn {V = V} p c f ([] ∷ xs) ys = maps f ys ++ multIn p c f xs ys
 multIn {V = V} p c f (x ∹ xv & xc ∷ xs) ys = x ∹ xv & multIn (p ∘ ⟦ x ⇑⟧) (λ v₁ v₂ → subst V (cong p (assoc x _ _)) (c v₁ v₂)) (c xv) xc ys ∷ multIn p c f xs ys
-
 
 appl : (∀ {x y} → V x → V y → V (x ∙ y)) → Heap⋆ V → Heap⋆ V → Heap⋆ V
 appl {V = V} f xs ys = multIn {V = V} id f id xs ys

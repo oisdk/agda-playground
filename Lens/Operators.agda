@@ -5,9 +5,14 @@ module Lens.Operators where
 open import Prelude
 open import Lens.Definition
 
-infixl 4 _[_] _[_]≔_
-_[_] : A → Lens A B → B
-xs [ l ] = l .into xs .get
+infixl 4 getter setter
 
-_[_]≔_ : A → Lens A B → B → A
-xs [ l ]≔ x = l .into xs .set x
+getter : Lens A B → A → B
+getter l xs = get (into l xs)
+
+syntax getter xs l = xs [ l ]
+
+setter : Lens A B → A → B → A
+setter l xs = set (into l xs)
+
+syntax setter l xs x = xs [ l ]≔ x

@@ -10,6 +10,7 @@ private
     ns : 𝔹
 
 record 2× {a} (A : Type a) : Type a where
+  eta-equality
   constructor _⊛_
   field
     pr₁ pr₂ : A
@@ -19,9 +20,11 @@ infixr 5 _∷₁_ _∷₂_ _∷_
 
 mutual
   record Array0ᵇ {a} : Type a where
+    eta-equality
     constructor []
 
   record Array1ᵇ {a} (A : Type a) (ns : 𝔹) : Type a where
+    eta-equality
     inductive
     constructor _∷₁_
     field
@@ -29,6 +32,7 @@ mutual
       tail1ᵇ : Array (2× A) ns
 
   record Array2ᵇ {a} (A : Type a) (ns : 𝔹) : Type a where
+    eta-equality
     inductive
     constructor _∷₂_
     field
@@ -49,8 +53,8 @@ open import Lens
 
 ⦅head1ᵇ⦆ : Lens (Array A (1ᵇ ns)) A
 ⦅head1ᵇ⦆ .into (x ∷₁ xs) = lens-part x (_∷₁ xs)
-⦅head1ᵇ⦆ .get-set (x ∷₁ xs) v i = v
-⦅head1ᵇ⦆ .set-get (x ∷₁ xs) i = x ∷₁ xs
+⦅head1ᵇ⦆ .get-set xs v i = v
+⦅head1ᵇ⦆ .set-get xs i = xs
 ⦅head1ᵇ⦆ .set-set (x ∷₁ xs) v₁ v₂ i = v₂ ∷₁ xs
 
 ⦅head2ᵇ⦆ : Lens (Array A (2ᵇ ns)) (2× A)
