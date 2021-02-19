@@ -3,7 +3,7 @@
 open import Prelude
 open import Relation.Binary
 
-module Data.AVLTree {k} {K : Type k} {r₁ r₂} (totalOrder : TotalOrder K r₁ r₂) where
+module Data.AVLTree.Internal {k} {K : Type k} {r₁ r₂} (totalOrder : TotalOrder K r₁ r₂) where
 
 open import Relation.Binary.Construct.Bounded totalOrder
 open import Data.Nat using (_+_)
@@ -295,8 +295,3 @@ toList⊙ (node x xv bal xl xr) ks = toList⊙ xl ((x , xv) ∷ toList⊙ xr ks)
 
 toList : Tree Val lb ub n → List (∃ Val)
 toList xs = toList⊙ xs []
-
-data Mapping (Val : K → Type v) : Type (k ℓ⊔ v ℓ⊔ r₁) where
-  [_] : Tree Val [⊥] [⊤] n → Mapping Val
-  quot : (xs : Tree Val [⊥] [⊤] n) (ys : Tree Val [⊥] [⊤] m) → toList xs ≡ toList ys → [ xs ] ≡ [ ys ]
-  trunc : isSet (Mapping Val)

@@ -118,6 +118,19 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   compare x y | no  x≮y | yes y<x = gt y<x
   compare x y | no  x≮y | no  y≮x = eq (conn x≮y y≮x)
 
+  data InstOrdering (x y : 𝑆) : Type (ℓ₁ ℓ⊔ ℓ₂) where
+    lt′ : ⦃ _ : x < y ⦄ → InstOrdering x y
+    eq′ : ⦃ _ : x ≡ y ⦄ → InstOrdering x y
+    gt′ : ⦃ _ : x > y ⦄ → InstOrdering x y
+
+  toInstOrd : ∀ {x y} → Ordering x y → InstOrdering x y
+  toInstOrd (lt p) = lt′ ⦃ p ⦄
+  toInstOrd (eq p) = eq′ ⦃ p ⦄
+  toInstOrd (gt p) = gt′ ⦃ p ⦄
+
+  compare′ : ∀ x y → InstOrdering x y
+  compare′ x y = toInstOrd (compare x y)
+
   <⇒≤ : ∀ {x y} → x < y → x ≤ y
   <⇒≤ = ≮⇒≥ ∘ asym
 
@@ -158,6 +171,11 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ... | eq x≡y = yes x≡y
   ... | gt x>y = no (irrefl x>y ∘ ≡.sym)
 
+  open import HLevels using (isSet)
+  open import Relation.Nullary.Discrete.Properties using (Discrete→isSet)
+
+  total⇒isSet : isSet 𝑆
+  total⇒isSet = Discrete→isSet total⇒discrete
 
   open import Data.Bool using (bool′)
 
