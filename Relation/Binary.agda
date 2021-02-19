@@ -49,6 +49,12 @@ module _ {a r₁ r₂ r₃} {A : Type a} (R₁ : A → A → Type r₁) (R₂ : 
     is-eq : R₂ x y → ProofOfOrder EQ
     is-gt : R₃ x y → ProofOfOrder GT
 
+
+  data InstTri  : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
+    lt′ : ⦃ _ : R₁ x y ⦄ → InstTri
+    eq′ : ⦃ _ : R₂ x y ⦄ → InstTri
+    gt′ : ⦃ _ : R₃ x y ⦄ → InstTri
+
   record Tri : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
     constructor tri
     field
@@ -59,6 +65,7 @@ module _ {a r₁ r₂ r₃} {A : Type a} (R₁ : A → A → Type r₁) (R₂ : 
 pattern lt x = tri LT (is-lt x)
 pattern eq x = tri EQ (is-eq x)
 pattern gt x = tri GT (is-gt x)
+
 
 record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _<_
@@ -118,18 +125,26 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   compare x y | no  x≮y | yes y<x = gt y<x
   compare x y | no  x≮y | no  y≮x = eq (conn x≮y y≮x)
 
-  data InstOrdering (x y : 𝑆) : Type (ℓ₁ ℓ⊔ ℓ₂) where
-    lt′ : ⦃ _ : x < y ⦄ → InstOrdering x y
-    eq′ : ⦃ _ : x ≡ y ⦄ → InstOrdering x y
-    gt′ : ⦃ _ : x > y ⦄ → InstOrdering x y
+  compared : {x y : 𝑆} →
+             (⦃ lt : x < y ⦄ → A) →
+             (⦃ eq : x ≡ y ⦄ → A) →
+             (⦃ gt : x > y ⦄ → A) →
+             Ordering x y →
+             A
+  compared lt-c eq-c gt-c (lt p) = lt-c ⦃ p ⦄
+  compared lt-c eq-c gt-c (eq p) = eq-c ⦃ p ⦄
+  compared lt-c eq-c gt-c (gt p) = gt-c ⦃ p ⦄
 
-  toInstOrd : ∀ {x y} → Ordering x y → InstOrdering x y
-  toInstOrd (lt p) = lt′ ⦃ p ⦄
-  toInstOrd (eq p) = eq′ ⦃ p ⦄
-  toInstOrd (gt p) = gt′ ⦃ p ⦄
+  infixr 1 comparing_∙_|<_|≡_|>_
+  comparing_∙_|<_|≡_|>_ : (x y : 𝑆) →
+              (⦃ lt : x < y ⦄ → A) →
+              (⦃ eq : x ≡ y ⦄ → A) →
+              (⦃ gt : x > y ⦄ → A) →
+              A
+  comparing x ∙ y |< lt-c |≡ eq-c |> gt-c = compared lt-c eq-c gt-c (compare x y)
 
-  compare′ : ∀ x y → InstOrdering x y
-  compare′ x y = toInstOrd (compare x y)
+  compare′ : (x y : 𝑆) → InstTri _<_ _≡_ _>_ x y
+  compare′ x y = compared lt′ eq′ gt′ (compare x y)
 
   <⇒≤ : ∀ {x y} → x < y → x ≤ y
   <⇒≤ = ≮⇒≥ ∘ asym
