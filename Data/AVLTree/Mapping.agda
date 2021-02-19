@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe --postfix-projections #-}
+{-# OPTIONS --cubical --allow-unsolved-metas #-}
 
 open import Prelude
 open import Relation.Binary
