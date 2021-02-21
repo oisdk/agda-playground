@@ -5,11 +5,16 @@ open import Relation.Binary
 
 module Data.List.Mapping {kℓ} {K : Type kℓ} {r₁ r₂} (totalOrder : TotalOrder K r₁ r₂) where
 
-open import Relation.Binary.Construct.LowerBound totalOrder
+open import Relation.Binary.Construct.Decision totalOrder
+open import Relation.Binary.Construct.LowerBound dec-ord
 open import Data.Nat using (_+_)
-open TotalOrder totalOrder using (_<?_; compare; _<_; total⇒isSet; irrefl; comparing_∙_|<_|≡_|>_; compare′; compared)
+open TotalOrder dec-ord using (_<?_; compare; _<_; total⇒isSet; irrefl; comparing_∙_|<_|≡_|>_; compare′; compared)
 open TotalOrder lb-ord using (<-trans) renaming (refl to <-refl)
--- import Data.Empty.UniversePolymorphic as Poly
+import Data.Unit.UniversePolymorphic as Poly
+
+instance
+  top-inst : Poly.⊤ {ℓzero}
+  top-inst = Poly.tt
 
 private
   variable
@@ -65,6 +70,16 @@ module _ {v} {Val : K → Type v} where
 
   infixl 4 delete
   syntax delete k xs = xs [ k ]∅
+
+infixr 0 Map
+Map : ∀ {v} (Val : K → Type v) → Type _
+Map = MapFrom ⌊⊥⌋
+
+syntax Map (λ s → e) = s ↦ e
+
+Map′ : ∀ {v} (Val : Type v) → Type _
+Map′ V = Map (const V)
+
 
   -- open import Lens
   -- open import Lens.Operators

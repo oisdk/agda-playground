@@ -15,3 +15,8 @@ maybe b f (just x) = f x
 mapMaybe : (A → B) → Maybe A → Maybe B
 mapMaybe f nothing  = nothing
 mapMaybe f (just x) = just (f x)
+
+infixr 2 _|?_
+_|?_ : Maybe A → A → A
+nothing |? x = x
+just x  |? _ = x
