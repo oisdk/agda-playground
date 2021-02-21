@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Demo</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Symbol">#-}</a>
+
+<a id="28" class="Keyword">module</a> <a id="35" href="Demo.html" class="Module">Demo</a> <a id="40" class="Keyword">where</a>
+
+<a id="47" class="Keyword">open</a> <a id="52" class="Keyword">import</a> <a id="59" href="Level.html" class="Module">Level</a>
+<a id="65" class="Keyword">open</a> <a id="70" class="Keyword">import</a> <a id="77" href="Data.Nat.html" class="Module">Data.Nat</a>
+<a id="86" class="Keyword">open</a> <a id="91" class="Keyword">import</a> <a id="98" href="Data.String.html" class="Module">Data.String</a>
+
+<a id="111" class="Keyword">data</a> <a id="Bool"></a><a id="116" href="Demo.html#116" class="Datatype">Bool</a> <a id="121" class="Symbol">:</a> <a id="123" href="Level.html#242" class="Function">Type₀</a> <a id="129" class="Keyword">where</a>
+  <a id="Bool.false"></a><a id="137" href="Demo.html#137" class="InductiveConstructor">false</a> <a id="143" class="Symbol">:</a> <a id="145" href="Demo.html#116" class="Datatype">Bool</a>
+  <a id="Bool.true"></a><a id="152" href="Demo.html#152" class="InductiveConstructor">true</a>  <a id="158" class="Symbol">:</a> <a id="160" href="Demo.html#116" class="Datatype">Bool</a>
+
+<a id="_,not!"></a><a id="166" href="Demo.html#166" class="Function Operator">_,not!</a> <a id="173" class="Symbol">:</a> <a id="175" href="Demo.html#116" class="Datatype">Bool</a> <a id="180" class="Symbol">→</a> <a id="182" href="Demo.html#116" class="Datatype">Bool</a>
+<a id="187" href="Demo.html#137" class="InductiveConstructor">false</a> <a id="193" href="Demo.html#166" class="Function Operator">,not!</a> <a id="199" class="Symbol">=</a> <a id="201" href="Demo.html#152" class="InductiveConstructor">true</a>
+<a id="206" href="Demo.html#152" class="InductiveConstructor">true</a>  <a id="212" href="Demo.html#166" class="Function Operator">,not!</a> <a id="218" class="Symbol">=</a> <a id="220" href="Demo.html#137" class="InductiveConstructor">false</a>
+
+<a id="_∧_"></a><a id="227" href="Demo.html#227" class="Function Operator">_∧_</a> <a id="231" class="Symbol">:</a> <a id="233" href="Demo.html#116" class="Datatype">Bool</a> <a id="238" class="Symbol">→</a> <a id="240" href="Demo.html#116" class="Datatype">Bool</a> <a id="245" class="Symbol">→</a> <a id="247" href="Demo.html#116" class="Datatype">Bool</a>
+<a id="252" href="Demo.html#137" class="InductiveConstructor">false</a> <a id="258" href="Demo.html#227" class="Function Operator">∧</a> <a id="260" href="Demo.html#260" class="Bound">y</a> <a id="262" class="Symbol">=</a> <a id="264" href="Demo.html#137" class="InductiveConstructor">false</a>
+<a id="270" href="Demo.html#152" class="InductiveConstructor">true</a>  <a id="276" href="Demo.html#227" class="Function Operator">∧</a> <a id="278" href="Demo.html#278" class="Bound">y</a> <a id="280" class="Symbol">=</a> <a id="282" href="Demo.html#278" class="Bound">y</a>
+
+<a id="285" class="Keyword">infixr</a> <a id="292" class="Number">1</a> <a id="294" href="Demo.html#308" class="Function Operator">if_then_else_</a>
+<a id="if_then_else_"></a><a id="308" href="Demo.html#308" class="Function Operator">if_then_else_</a> <a id="322" class="Symbol">:</a> <a id="324" href="Demo.html#116" class="Datatype">Bool</a> <a id="329" class="Symbol">→</a> <a id="331" href="Level.html#388" class="Generalizable">A</a> <a id="333" class="Symbol">→</a> <a id="335" href="Level.html#388" class="Generalizable">A</a> <a id="337" class="Symbol">→</a> <a id="339" href="Level.html#388" class="Generalizable">A</a>
+<a id="341" href="Demo.html#308" class="Function Operator">if</a> <a id="344" href="Demo.html#137" class="InductiveConstructor">false</a> <a id="350" href="Demo.html#308" class="Function Operator">then</a> <a id="355" href="Demo.html#355" class="Bound">true-path</a> <a id="365" href="Demo.html#308" class="Function Operator">else</a> <a id="370" href="Demo.html#370" class="Bound">false-path</a> <a id="381" class="Symbol">=</a> <a id="383" href="Demo.html#370" class="Bound">false-path</a>
+<a id="394" href="Demo.html#308" class="Function Operator">if</a> <a id="397" href="Demo.html#152" class="InductiveConstructor">true</a>  <a id="403" href="Demo.html#308" class="Function Operator">then</a> <a id="408" href="Demo.html#408" class="Bound">true-path</a> <a id="418" href="Demo.html#308" class="Function Operator">else</a> <a id="423" href="Demo.html#423" class="Bound">false-path</a> <a id="434" class="Symbol">=</a> <a id="436" href="Demo.html#408" class="Bound">true-path</a>
+
+<a id="natOrString"></a><a id="447" href="Demo.html#447" class="Function">natOrString</a> <a id="459" class="Symbol">:</a> <a id="461" class="Symbol">(</a><a id="462" href="Demo.html#462" class="Bound">x</a> <a id="464" class="Symbol">:</a> <a id="466" href="Demo.html#116" class="Datatype">Bool</a><a id="470" class="Symbol">)</a> <a id="472" class="Symbol">→</a> <a id="474" href="Demo.html#308" class="Function Operator">if</a> <a id="477" href="Demo.html#462" class="Bound">x</a> <a id="479" href="Demo.html#308" class="Function Operator">then</a> <a id="484" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="486" href="Demo.html#308" class="Function Operator">else</a> <a id="491" href="Agda.Builtin.String.html#274" class="Postulate">String</a>
+<a id="498" href="Demo.html#447" class="Function">natOrString</a> <a id="510" href="Demo.html#152" class="InductiveConstructor">true</a>  <a id="516" class="Symbol">=</a> <a id="518" class="Number">4</a>
+<a id="520" href="Demo.html#447" class="Function">natOrString</a> <a id="532" href="Demo.html#137" class="InductiveConstructor">false</a> <a id="538" class="Symbol">=</a> <a id="540" class="String">&quot;false&quot;</a>
+</pre></body></html>
