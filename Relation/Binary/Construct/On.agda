@@ -18,8 +18,6 @@ x <′ y = f x < f y
 _≤′_ : A → A → Type _
 x ≤′ y = f x ≤ f y
 
-
-
 on-ord : TotalOrder A ℓ₁ ℓ₂
 StrictPartialOrder._<_ (TotalOrder.strictPartialOrder on-ord) = _<′_
 StrictPartialOrder.trans (TotalOrder.strictPartialOrder on-ord) = <-trans

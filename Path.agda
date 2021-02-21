@@ -43,3 +43,6 @@ import Agda.Builtin.Equality as MLTT
 
 builtin-eq-to-path : {A : Type a} {x y : A} → x MLTT.≡ y → x ≡ y
 builtin-eq-to-path {x = x} MLTT.refl i = x
+
+path-to-builtin-eq : {A : Type a} {x y : A} → x ≡ y → x MLTT.≡ y
+path-to-builtin-eq {x = x} x≡y = subst (x MLTT.≡_) x≡y MLTT.refl
