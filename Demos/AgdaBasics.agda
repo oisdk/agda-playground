@@ -1,6 +1,6 @@
 {-# OPTIONS --cubical #-}
 
-module Demo where
+module Demos.AgdaBasics where
 
 open import Level
 open import Data.Nat
