@@ -9,4 +9,4 @@ open import Data.Maybe
 
 
 example : Record (∅ [ "name" ]︓ String [ "age" ]︓ ℕ)
-example = {!!}
+example = ∅ [ "age" ]≔ 30 [ "name" ]≔ "Jo"

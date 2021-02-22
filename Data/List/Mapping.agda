@@ -103,13 +103,26 @@ _[_] {_} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , r) k₁ ⦃ k∈xs = p ⦄ | e | gt
     pr : _
     pr = x
 
+weaken′ : ∀ {x xs} → ⦃ _ : lb <⌊ x ⌋ ⦄ → RecordFrom ⌊ x ⌋ xs → RecordFrom lb (weaken xs)
+weaken′ ∅ = ∅
+weaken′ {lb = lb} {x = x} (k ≔ val , xs) = k ≔ val , xs
+  where
+    instance
+      p : lb <⌊ k ⌋
+      p = <-trans {x = lb} {y = ⌊ x ⌋} {z = ⌊ k ⌋} it it
+
 infixl 4 _[_]≔_
-_[_]≔_ : {xs : MapFrom lb (const Type₀)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ ⦃ k∈xs : k ∈ xs ⦄ → xs [ k ]! → RecordFrom lb xs
-_[_]≔_ {lb = lb} {xs = k₂ ︓ v , xs} r k₁ nv with (_[_]? {lb = lb} (k₂ ︓ v , xs)) k₁ | compare k₁ k₂
-_[_]≔_ {_} {k₂ ︓ v , xs} r k₁ ⦃ k∈xs = p ⦄ _ | e | lt x = ⊥-elim p
-_[_]≔_ {_} {k₂ ︓ v , xs} (.k₂ ≔ _ , r) k₁ ⦃ k∈xs = p ⦄ nv | e | eq x = k₂ ≔ nv , r
-_[_]≔_ {_} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , r) k₁ ⦃ k∈xs = p ⦄ nv | e | gt x = k₂ ≔ v₁ , (r [ k₁ ]≔ nv)
+_[_]≔_ : {xs : MapFrom lb (const Type₀)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → A → RecordFrom lb (xs [ k ]︓ A)
+_[_]≔_ {xs = ∅} ∅ k x = k ≔ x , ∅
+_[_]≔_ {xs = k₂ ︓ v , xs} rs k₁ x with compare k₁ k₂
+_[_]≔_ {A = _} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , rs) k₁ x | lt x₁ = k₁ ≔ x , k₂ ≔ v₁ , rs
   where
   instance
     pr : _
-    pr = x
+    pr = x₁
+_[_]≔_ {A = _} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , rs) k₁ x | eq x₁ = k₂ ≔ x , rs
+_[_]≔_ {A = _} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , rs) k₁ x | gt x₁ = k₂ ≔ v₁ , (rs [ k₁ ]≔ x)
+  where
+  instance
+    pr : _
+    pr = x₁
