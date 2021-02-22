@@ -118,16 +118,19 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   compared lt-c eq-c gt-c (eq p) = eq-c ⦃ p ⦄
   compared lt-c eq-c gt-c (gt p) = gt-c ⦃ p ⦄
 
+  compare′ : (x y : 𝑆) → InstTri _<_ _≡_ _>_ x y
+  compare′ x y = compared lt′ eq′ gt′ (compare x y)
+
   infixr 1 comparing_∙_|<_|≡_|>_
   comparing_∙_|<_|≡_|>_ : (x y : 𝑆) →
               (⦃ lt : x < y ⦄ → A) →
               (⦃ eq : x ≡ y ⦄ → A) →
               (⦃ gt : x > y ⦄ → A) →
               A
-  comparing x ∙ y |< lt-c |≡ eq-c |> gt-c = compared lt-c eq-c gt-c (compare x y)
-
-  compare′ : (x y : 𝑆) → InstTri _<_ _≡_ _>_ x y
-  compare′ x y = compared lt′ eq′ gt′ (compare x y)
+  comparing x ∙ y |< lt-c |≡ eq-c |> gt-c with compare′ x y
+  ... | lt′ = lt-c
+  ... | eq′ = eq-c
+  ... | gt′ = gt-c
 
   <⇒≤ : ∀ {x y} → x < y → x ≤ y
   <⇒≤ = ≮⇒≥ ∘ asym
