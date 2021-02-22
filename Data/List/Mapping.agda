@@ -78,7 +78,7 @@ Map′ V = Map (const V)
 infixr 5 _≔_,_
 data RecordFrom (lb : ⌊∙⌋) : MapFrom lb (const Type₀) → Type (kℓ ℓ⊔ r₁ ℓ⊔ ℓsuc ℓzero) where
   ∅ : RecordFrom lb ∅
-  _≔_,_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → {t : Type₀} {xs : MapFrom ⌊ k ⌋ (const Type₀)} → (v : t) → RecordFrom ⌊ k ⌋ xs → RecordFrom lb (k ︓ t , xs)
+  _≔_,_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → {xs : MapFrom ⌊ k ⌋ (const Type₀)} {t : Type₀} → (v : t) → RecordFrom ⌊ k ⌋ xs → RecordFrom lb (k ︓ t , xs)
 
 Record : Map′ Type₀ → Type _
 Record = RecordFrom ⌊⊥⌋
@@ -88,29 +88,21 @@ _∈_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → MapFrom lb Val → Type
 k ∈ xs = IsJust (xs [ k ]?)
 
 _[_]! : (xs : MapFrom lb Val) → (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → ⦃ k∈xs : k ∈ xs ⦄ → Val k
-(xs [ k ]!) ⦃ k∈xs = p ⦄ with xs [ k ]? | inspect (_[_]? xs) k
-(xs [ k ]!) ⦃ k∈xs = p ⦄ | just x | _ = x
-(xs [ k ]!) ⦃ k∈xs = p ⦄ | nothing | e = ⊥-elim p
+xs [ k ]! with xs [ k ]? | inspect (_[_]? xs) k
+xs [ k ]! | just x  | _ = x
+xs [ k ]! | nothing | _ = ⊥-elim it
 
 infixl 4 _[_]
 _[_] : {xs : MapFrom lb (const Type₀)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ ⦃ k∈xs : k ∈ xs ⦄ → xs [ k ]!
-_[_] {lb = lb} {xs = k₂ ︓ v , xs} r k₁ with (_[_]? {lb = lb} (k₂ ︓ v , xs)) k₁ | compare′ k₁ k₂
-_[_] {_} {k₂ ︓ v , xs} r k₁ ⦃ k∈xs = p ⦄ | e | lt′ = ⊥-elim p
-_[_] {_} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , r) k₁ ⦃ k∈xs = p ⦄ | e | eq′ = v₁
-_[_] {_} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , r) k₁ ⦃ k∈xs = p ⦄ | e | gt′ = r [ k₁ ]
-
-weaken′ : ∀ {x xs} → ⦃ _ : lb <⌊ x ⌋ ⦄ → RecordFrom ⌊ x ⌋ xs → RecordFrom lb (weaken xs)
-weaken′ ∅ = ∅
-weaken′ {lb = lb} {x = x} (k ≔ val , xs) = k ≔ val , xs
-  where
-    instance
-      p : lb <⌊ k ⌋
-      p = <-trans {x = lb} {y = ⌊ x ⌋} {z = ⌊ k ⌋} it it
+_[_] {xs = xs} (k₂ ≔ v , r) k₁ with xs [ k₁ ]? | compare′ k₁ k₂
+(k₂ ≔ v , r) [ k₁ ] | _ | lt′ = ⊥-elim it
+(k₂ ≔ v , r) [ k₁ ] | _ | eq′ = v
+(k₂ ≔ v , r) [ k₁ ] | _ | gt′ = r [ k₁ ]
 
 infixl 4 _[_]≔_
 _[_]≔_ : {xs : MapFrom lb (const Type₀)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → A → RecordFrom lb (xs [ k ]︓ A)
-_[_]≔_ {xs = ∅} ∅ k x = k ≔ x , ∅
-_[_]≔_ {xs = k₂ ︓ v , xs} rs k₁ x with compare′ k₁ k₂
-_[_]≔_ {A = _} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , rs) k₁ x | lt′ = k₁ ≔ x , k₂ ≔ v₁ , rs
-_[_]≔_ {A = _} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , rs) k₁ x | eq′ = k₂ ≔ x , rs
-_[_]≔_ {A = _} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , rs) k₁ x | gt′ = k₂ ≔ v₁ , (rs [ k₁ ]≔ x)
+∅ [ k ]≔ x = k ≔ x , ∅
+(k₂ ≔ v₁ , rs) [ k₁ ]≔ x with compare′ k₁ k₂
+(k₂ ≔ v₁ , rs) [ k₁ ]≔ x | lt′ = k₁ ≔ x , k₂ ≔ v₁ , rs
+(k₂ ≔ v₁ , rs) [ k₁ ]≔ x | eq′ = k₂ ≔ x , rs
+(k₂ ≔ v₁ , rs) [ k₁ ]≔ x | gt′ = k₂ ≔ v₁ , (rs [ k₁ ]≔ x)
