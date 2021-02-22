@@ -55,6 +55,6 @@ PartialOrder._≤_ (TotalOrder.partialOrder dec-ord) = _≤′_
 PartialOrder.refl (TotalOrder.partialOrder dec-ord) = compute-≤ ≤-refl
 PartialOrder.antisym (TotalOrder.partialOrder dec-ord) p q = antisym (witness-≤ p) (witness-≤ q)
 PartialOrder.trans (TotalOrder.partialOrder dec-ord) p q = compute-≤ (≤-trans (witness-≤ p) (witness-≤ q))
-TotalOrder._<?_ dec-ord _ _ = T? _
+TotalOrder._<?_ dec-ord x y = ⟦yes compute-< ,no  witness-< ⟧ (x <? y)
 TotalOrder.≰⇒> dec-ord = ≰⇒>′
 TotalOrder.≮⇒≥ dec-ord = ≮⇒≥′

@@ -44,28 +44,15 @@ module _ (_~_ : A → A → Type b) where
 data Ord : Type₀ where LT EQ GT : Ord
 
 module _ {a r₁ r₂ r₃} {A : Type a} (R₁ : A → A → Type r₁) (R₂ : A → A → Type r₂) (R₃ : A → A → Type r₃) (x y : A) where
-  data ProofOfOrder : Ord → Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
-    is-lt : R₁ x y → ProofOfOrder LT
-    is-eq : R₂ x y → ProofOfOrder EQ
-    is-gt : R₃ x y → ProofOfOrder GT
+  data Tri : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
+    lt : R₁ x y → Tri
+    eq : R₂ x y → Tri
+    gt : R₃ x y → Tri
 
-
-  data InstTri  : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
+  data InstTri : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
     lt′ : ⦃ _ : R₁ x y ⦄ → InstTri
     eq′ : ⦃ _ : R₂ x y ⦄ → InstTri
     gt′ : ⦃ _ : R₃ x y ⦄ → InstTri
-
-  record Tri : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
-    constructor tri
-    field
-      ord : Ord
-      proofOfOrder : ProofOfOrder ord
-  open Tri public
-
-pattern lt x = tri LT (is-lt x)
-pattern eq x = tri EQ (is-eq x)
-pattern gt x = tri GT (is-gt x)
-
 
 record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _<_
@@ -119,11 +106,7 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   Ordering = Tri _<_ _≡_ (flip _<_)
 
   compare : ∀ x y → Ordering x y
-  compare x y with x <? y
-  compare x y | yes x<y = lt x<y
-  compare x y | no  x≮y with y <? x
-  compare x y | no  x≮y | yes y<x = gt y<x
-  compare x y | no  x≮y | no  y≮x = eq (conn x≮y y≮x)
+  compare x y = dec lt (λ x≮y → dec gt (λ y≮x → eq (conn x≮y y≮x)) (y <? x)) (x <? y)
 
   compared : {x y : 𝑆} →
              (⦃ lt : x < y ⦄ → A) →
@@ -157,9 +140,6 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
 
   ≤⇒≯ : ∀ {x y} → x ≤ y → x ≯ y
   ≤⇒≯ {x} {y} x≤y x>y = irrefl x>y (antisym (≮⇒≥ (asym x>y)) x≤y)
-
-  cmp : 𝑆 → 𝑆 → Ord
-  cmp x y = ord (compare x y)
 
   infix 4 _≤ᵇ_ _≤?_
 

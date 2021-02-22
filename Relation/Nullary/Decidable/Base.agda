@@ -34,6 +34,10 @@ map-dec to fro dec .why = map-reflects to fro (dec .why)
 ∣_∣yes⇒_∣no⇒_ : Dec A → (A → B) → (¬ A → ¬ B) → Dec B
 ∣ d ∣yes⇒ y ∣no⇒ n = map-dec y n d
 
+dec : (A → B) → (¬ A → B) → Dec A → B
+dec t f (yes p) = t p
+dec t f (no ¬p) = f ¬p
+
 T? : (b : Bool) → Dec (T b)
 T? b .does = b
 T? false .why ()

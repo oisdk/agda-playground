@@ -8,9 +8,10 @@ module Data.List.Mapping {kℓ} {K : Type kℓ} {r₁ r₂} (totalOrder : TotalO
 open import Relation.Binary.Construct.Decision totalOrder
 open import Relation.Binary.Construct.LowerBound dec-ord
 open import Data.Nat using (_+_)
-open TotalOrder dec-ord using (_<?_; compare; _<_; total⇒isSet; irrefl; comparing_∙_|<_|≡_|>_; compare′; compared)
 open TotalOrder lb-ord using (<-trans) renaming (refl to <-refl)
 import Data.Unit.UniversePolymorphic as Poly
+open import Data.Maybe.Properties using (IsJust)
+open TotalOrder dec-ord using (_<?_; _<_; total⇒isSet; irrefl; comparing_∙_|<_|≡_|>_; compare′; compared; compare)
 
 instance
   top-inst : Poly.⊤ {ℓzero}
@@ -22,10 +23,10 @@ private
     v : Level
     Val : K → Type v
 
-infixr 5 _≔_,_
+infixr 5 _︓_,_
 data MapFrom (lb : ⌊∙⌋) {v} (Val : K → Type v) : Type (kℓ ℓ⊔ r₁ ℓ⊔ v) where
   ∅ : MapFrom lb Val
-  _≔_,_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → (v : Val k) → MapFrom ⌊ k ⌋ Val → MapFrom lb Val
+  _︓_,_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → (v : Val k) → MapFrom ⌊ k ⌋ Val → MapFrom lb Val
 
 private
   variable
@@ -33,43 +34,37 @@ private
 
 weaken : ∀ {x} → ⦃ _ : lb <⌊ x ⌋ ⦄ → MapFrom ⌊ x ⌋ Val → MapFrom lb Val
 weaken ∅ = ∅
-weaken {lb = lb} {x = x} (k ≔ val , xs) = k ≔ val , xs
+weaken {lb = lb} {x = x} (k ︓ val , xs) = k ︓ val , xs
   where
     instance
       p : lb <⌊ k ⌋
       p = <-trans {x = lb} {y = ⌊ x ⌋} {z = ⌊ k ⌋} it it
 
 module _ {v} {Val : K → Type v} where
-  lookup : (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → MapFrom lb Val → Maybe (Val k)
-  lookup k ∅ = nothing
-  lookup k₁ (k₂ ≔ v , xs) = comparing k₁ ∙ k₂
+  _[_]? : MapFrom lb Val → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → Maybe (Val k)
+  ∅ [ k ]? = nothing
+  k₂ ︓ v , xs [ k₁ ]? = comparing k₁ ∙ k₂
      |< nothing
      |≡ just (subst Val (sym it) v)
-     |> lookup k₁ xs
+     |> xs [ k₁ ]?
+  infixl 4 _[_]?
 
-  infixl 4 lookup
-  syntax lookup k xs = xs [ k ]
-
-  insert : (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → (val : Val k) → MapFrom lb Val → MapFrom lb Val
-  insert k₁ v₁ ∅ = k₁ ≔ v₁ , ∅
-  insert k₁ v₁ (k₂ ≔ v₂ , xs) =
+  _[_]︓_ : MapFrom lb Val → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → (val : Val k) → MapFrom lb Val
+  ∅ [ k₁ ]︓ v₁ = k₁ ︓ v₁ , ∅
+  (k₂ ︓ v₂ , xs) [ k₁ ]︓ v₁ =
     comparing k₁ ∙ k₂
-      |< k₁ ≔ v₁ , k₂ ≔ v₂ , xs
-      |≡ k₂ ≔ subst Val it v₁ , xs
-      |> k₂ ≔ v₂ , insert k₁ v₁ xs
+      |< k₁ ︓ v₁ , k₂ ︓ v₂ , xs
+      |≡ k₂ ︓ subst Val it v₁ , xs
+      |> k₂ ︓ v₂ , (xs [ k₁ ]︓ v₁)
+  infixl 4 _[_]︓_
 
-  infixl 4 insert
-  syntax insert k v xs = xs [ k ]≔ v
-
-  delete : (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → MapFrom lb Val → MapFrom lb Val
-  delete k₁ ∅ = ∅
-  delete k₁ (k₂ ≔ v₂ , xs) = comparing k₁ ∙ k₂
-      |< k₂ ≔ v₂ , xs
+  _[_]︓∅ : MapFrom lb Val → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → MapFrom lb Val
+  ∅ [ k₁ ]︓∅ = ∅
+  (k₂ ︓ v₂ , xs) [ k₁ ]︓∅ = comparing k₁ ∙ k₂
+      |< k₂ ︓ v₂ , xs
       |≡ weaken xs
-      |> k₂ ≔ v₂ , delete k₁ xs
-
-  infixl 4 delete
-  syntax delete k xs = xs [ k ]∅
+      |> k₂ ︓ v₂ , (xs [ k₁ ]︓∅)
+  infixl 4 _[_]︓∅
 
 infixr 0 Map
 Map : ∀ {v} (Val : K → Type v) → Type _
@@ -80,80 +75,41 @@ syntax Map (λ s → e) = s ↦ e
 Map′ : ∀ {v} (Val : Type v) → Type _
 Map′ V = Map (const V)
 
+infixr 5 _≔_,_
+data RecordFrom (lb : ⌊∙⌋) : MapFrom lb (const Type₀) → Type (kℓ ℓ⊔ r₁ ℓ⊔ ℓsuc ℓzero) where
+  ∅ : RecordFrom lb ∅
+  _≔_,_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → {t : Type₀} {xs : MapFrom ⌊ k ⌋ (const Type₀)} → (v : t) → RecordFrom ⌊ k ⌋ xs → RecordFrom lb (k ︓ t , xs)
 
-  -- open import Lens
-  -- open import Lens.Operators
+Record : Map′ Type₀ → Type _
+Record = RecordFrom ⌊⊥⌋
 
---   lookup-delete : (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → (xs : MapFrom lb Val) → lookup k (delete k xs) ≡ nothing
---   lookup-delete _ ∅ = refl
---   lookup-delete k₁ (k₂ ≔ v , xs) with compare′ k₁ k₂ | inspect (compare′ k₁) k₂
---   lookup-delete k₁ (k₂ ≔ v , xs) | lt′ | 〖 p 〗 = {!!}
---   lookup-delete k₁ (k₂ ≔ v , xs) | eq′ | p = {!!}
---   lookup-delete k₁ (k₂ ≔ v , xs) | gt′ | p = {!!}
+infixr 5 _∈_
+_∈_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → MapFrom lb Val → Type₀
+k ∈ xs = IsJust (xs [ k ]?)
 
---   delete-delete : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → (xs : MapFrom lb Val) → delete k (delete k xs) ≡ delete k xs
---   delete-delete k₁ ∅ = refl
---   delete-delete k₁ (k₂ ≔ v , xs) with compare k₁ k₂ | inspect (compare k₁) k₂
---   delete-delete k₁ (k₂ ≔ v , xs) | lt q | 〖 p 〗 = {!!}
---   delete-delete k₁ (k₂ ≔ v , xs) | eq q | 〖 p 〗 = {!!}
---   delete-delete k₁ (k₂ ≔ v , xs) | gt q | 〖 p 〗 = {!!}
+_[_]! : (xs : MapFrom lb Val) → (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → ⦃ k∈xs : k ∈ xs ⦄ → Val k
+(xs [ k ]!) ⦃ k∈xs = p ⦄ with xs [ k ]? | inspect (_[_]? xs) k
+(xs [ k ]!) ⦃ k∈xs = p ⦄ | just x | _ = x
+(xs [ k ]!) ⦃ k∈xs = p ⦄ | nothing | e = ⊥-elim p
 
+infixl 4 _[_]
+_[_] : {xs : MapFrom lb (const Type₀)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ ⦃ k∈xs : k ∈ xs ⦄ → xs [ k ]!
+_[_] {lb = lb} {xs = k₂ ︓ v , xs} r k₁ with (_[_]? {lb = lb} (k₂ ︓ v , xs)) k₁ | compare k₁ k₂
+_[_] {_} {k₂ ︓ v , xs} r k₁ ⦃ k∈xs = p ⦄ | e | lt x = ⊥-elim p
+_[_] {_} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , r) k₁ ⦃ k∈xs = p ⦄ | e | eq x = v₁
+_[_] {_} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , r) k₁ ⦃ k∈xs = p ⦄ | e | gt x = r [ k₁ ]
+  where
+  instance
+    pr : _
+    pr = x
 
---   ! : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → Lens (MapFrom lb Val) (Maybe (Val k))
---   ! k .into xs .get = lookup k xs
---   ! k .into xs .set (just v) = insert k v xs
---   ! k .into xs .set nothing  = delete k xs
---   ! k .get-set s nothing  = {!!}
---   ! k .get-set s (just x) = {!!}
---   ! k .set-get s = {!!}
---   ! k .set-set s nothing nothing = {!!}
---   ! k .set-set s nothing (just x) = {!!}
---   ! k .set-set s (just x) nothing = {!!}
---   ! k .set-set s (just x) (just y) = {!!}
-
-
--- -- -- module _ {v} {Val : K → Type v} where
--- -- --  mutual
--- -- --   viewSing : (k₁ k₂ : K) ⦃ inBounds₁ : lb <⌊ k₁ ⌋ ⦄ ⦃ inBounds₂ : lb <⌊ k₂ ⌋ ⦄ →
--- -- --             (val : Val k₂) →
--- -- --             (xs : MapFrom ⌊ k₂ ⌋ Val) →
--- -- --             InstOrdering k₁ k₂ →
--- -- --             LensPart (MapFrom lb Val) (Maybe (Val k₁))
--- -- --   viewSing k₁ k₂ val xs lt′ .get = nothing
--- -- --   viewSing k₁ k₂ val xs lt′ .set nothing = k₂ ≔ val , xs
--- -- --   viewSing k₁ k₂ val xs lt′ .set (just x) = k₁ ≔ x , k₂ ≔ val , xs
--- -- --   viewSing k₁ k₂ val xs eq′ .get = just (subst Val (sym it) val)
--- -- --   viewSing k₁ k₂ val xs eq′ .set nothing = weaken xs
--- -- --   viewSing k₁ k₂ val xs eq′ .set (just x) = k₂ ≔ (subst Val it x) , xs
--- -- --   viewSing k₁ k₂ val xs gt′ = map-lens-part (view k₁ xs) (k₂ ≔ val ,_)
-
--- -- --   view : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → MapFrom lb Val → LensPart (MapFrom lb Val) (Maybe (Val k))
--- -- --   view k₁ ∅ .get = nothing
--- -- --   view k₁ ∅ .set nothing = ∅
--- -- --   view k₁ ∅ .set (just x) = k₁ ≔ x , ∅
--- -- --   view k₁ (k₂ ≔ v , xs) = viewSing k₁ k₂ v xs (compare′ k₁ k₂)
-
--- -- -- open import Cubical.Foundations.Prelude using (substRefl)
--- -- -- open import Path.Reasoning
-
-
--- -- -- -- module _ {v} {Val : K → Type v} where
--- -- -- --   view-get-set : (k : K) (s : MapFrom lb Val) (v : Maybe (Val k)) → ⦃ _ : lb <⌊ k ⌋ ⦄ → view k (view k s .set v) .get ≡ v
--- -- -- --   view-get-set k₁ ∅ nothing = refl
--- -- -- --   view-get-set k₁ ∅ (just x) with compare k₁ k₁
--- -- -- --   view-get-set k₁ ∅ (just x) | lt p = ⊥-elim (irrefl p refl)
--- -- -- --   view-get-set k₁ ∅ (just x) | eq _ = cong just (cong (λ p → subst Val p x) (total⇒isSet  _ _ _ _) ; substRefl {B = Val} x)
--- -- -- --   view-get-set k₁ ∅ (just x) | gt p = ⊥-elim (irrefl p refl)
-
--- -- --   -- view-get-set k₁ (k₂ ≔ val , s) v with compare′ k₁ k₂ | inspect (compare′ k₁) k₂
--- -- --   -- view-get-set k₁ (k₂ ≔ val , s) nothing  | lt′ | 〖 q 〗 = cong (get ∘ viewSing k₁ k₂ val s) q
--- -- --   -- view-get-set k₁ (k₂ ≔ val , s) (just v) | lt′ | _ = {!!}
--- -- --   -- view-get-set k₁ (k₂ ≔ val , s) nothing  | eq′ | _ = {!!}
--- -- --   -- view-get-set k₁ (k₂ ≔ val , s) (just v) | eq′ | _ = {!!}
--- -- --   -- view-get-set k₁ (k₂ ≔ val , s) nothing  | gt′ | _ = {!!}
--- -- --   -- view-get-set k₁ (k₂ ≔ val , s) (just v) | gt′ | 〖 q 〗 =
--- -- --   --   viewSing k₁ k₂ val (set (view k₁ s) (just v)) (compare′ k₁ k₂) .get ≡⟨ cong (get ∘ viewSing k₁ k₂ val (set (view k₁ s) (just v))) q ⟩
--- -- --   --   viewSing k₁ k₂ val (set (view k₁ s) (just v)) gt′  .get ≡⟨ {!!} ⟩
--- -- --   --   just v ∎
-
-
+infixl 4 _[_]≔_
+_[_]≔_ : {xs : MapFrom lb (const Type₀)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ ⦃ k∈xs : k ∈ xs ⦄ → xs [ k ]! → RecordFrom lb xs
+_[_]≔_ {lb = lb} {xs = k₂ ︓ v , xs} r k₁ nv with (_[_]? {lb = lb} (k₂ ︓ v , xs)) k₁ | compare k₁ k₂
+_[_]≔_ {_} {k₂ ︓ v , xs} r k₁ ⦃ k∈xs = p ⦄ _ | e | lt x = ⊥-elim p
+_[_]≔_ {_} {k₂ ︓ v , xs} (.k₂ ≔ _ , r) k₁ ⦃ k∈xs = p ⦄ nv | e | eq x = k₂ ≔ nv , r
+_[_]≔_ {_} {k₂ ︓ v , xs} (.k₂ ≔ v₁ , r) k₁ ⦃ k∈xs = p ⦄ nv | e | gt x = k₂ ≔ v₁ , (r [ k₁ ]≔ nv)
+  where
+  instance
+    pr : _
+    pr = x
