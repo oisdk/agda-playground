@@ -39,3 +39,8 @@ format = go pack
 
 printf : (fstr : String) → Format (parse fstr)
 printf fstr = format (parse fstr)
+
+-- Example:
+--
+-- >>> printf "%s, %i: %s" "hello" 2 "you"
+-- "hello, 2: you"
