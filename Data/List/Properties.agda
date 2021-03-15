@@ -30,6 +30,13 @@ tab-id zero f _ ()
 tab-id (suc n) f i f0 = f f0
 tab-id (suc n) f i (fs m) = tab-id n (f ∘ fs) i m
 
+list-elim : ∀ {p} (P : List A → Type p) →
+                  (∀ x xs → P xs → P (x ∷ xs)) →
+                  (P []) →
+                  ∀ xs → P xs
+list-elim P f b [] = b
+list-elim P f b (x ∷ xs) = f x xs (list-elim P f b xs)
+
 foldr-universal : ∀ (h : List B → A) f e
                 → (h [] ≡ e)
                 → (∀ x xs → h (x ∷ xs) ≡ f x (h xs))
