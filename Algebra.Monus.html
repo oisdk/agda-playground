@@ -50,49 +50,71 @@
   <a id="1332" href="Relation.Binary.html#2054" class="Field">PartialOrder.trans</a> <a id="1351" href="Algebra.Monus.html#1172" class="Function">partialOrder</a> <a id="1364" class="Symbol">=</a> <a id="1366" href="Algebra.Monus.html#516" class="Function">≤-trans</a>
 
   <a id="Monus.totalOrder"></a><a id="1377" href="Algebra.Monus.html#1377" class="Function">totalOrder</a> <a id="1388" class="Symbol">:</a> <a id="1390" href="Relation.Binary.html#2196" class="Record">TotalOrder</a> <a id="1401" href="Algebra.html#1122" class="Function">𝑆</a> <a id="1403" href="Algebra.Monus.html#207" class="Bound">ℓ</a> <a id="1405" href="Algebra.Monus.html#207" class="Bound">ℓ</a>
-  <a id="1409" href="Algebra.Monus.html#1377" class="Function">totalOrder</a> <a id="1420" class="Symbol">=</a> <a id="1422" href="Relation.Binary.html#6726" class="Function">fromPartialOrder</a> <a id="1439" href="Algebra.Monus.html#1172" class="Function">partialOrder</a> <a id="1452" href="Algebra.Monus.html#411" class="Field Operator">_≤|≥_</a>
+  <a id="1409" href="Algebra.Monus.html#1377" class="Function">totalOrder</a> <a id="1420" class="Symbol">=</a> <a id="1422" href="Relation.Binary.html#6724" class="Function">fromPartialOrder</a> <a id="1439" href="Algebra.Monus.html#1172" class="Function">partialOrder</a> <a id="1452" href="Algebra.Monus.html#411" class="Field Operator">_≤|≥_</a>
 
   <a id="1461" class="Keyword">open</a> <a id="1466" href="Relation.Binary.html#2196" class="Module">TotalOrder</a> <a id="1477" href="Algebra.Monus.html#1377" class="Function">totalOrder</a> <a id="1488" class="Keyword">hiding</a> <a id="1495" class="Symbol">(</a>refl<a id="1500" class="Symbol">;</a> antisym<a id="1509" class="Symbol">;</a> _≤_<a id="1514" class="Symbol">;</a> _≤|≥_<a id="1521" class="Symbol">;</a> partialOrder<a id="1535" class="Symbol">;</a> ≤-trans<a id="1544" class="Symbol">)</a> <a id="1546" class="Keyword">public</a>
 
-  <a id="1556" class="Comment">-- Sup : Type _</a>
-  <a id="1574" class="Comment">-- Sup = Σ[ Ω ⦂ 𝑆 ] (∀ x → x ≤ Ω )</a>
-  <a id="1611" class="Comment">-- -- ∙-distrib-⊓ : _∙_ Distributesˡ _⊓_</a>
-  <a id="1654" class="Comment">-- -- ∙-distrib-⊓ x y z with x &lt;? y | (x ∙ z) &lt;? (y ∙ z)</a>
-  <a id="1713" class="Comment">-- -- ∙-distrib-⊓ x y z | yes x₁  | yes x₂ = refl</a>
-  <a id="1765" class="Comment">-- -- ∙-distrib-⊓ x y z | yes x₁  | no x₂  = antisym (∙-congʳ z (&lt;⇒≤ x₁)) (≮⇒≥ x₂)</a>
-  <a id="1850" class="Comment">-- -- ∙-distrib-⊓ x y z | no  x≥y | yes x∙z≤y∙z = antisym (∙-congʳ z (≮⇒≥ x≥y)) (&lt;⇒≤ x∙z≤y∙z)</a>
-  <a id="1946" class="Comment">-- -- ∙-distrib-⊓ x y z | no  x₁  | no x₂ = refl</a>
+  <a id="Monus.diff≢ε"></a><a id="1556" href="Algebra.Monus.html#1556" class="Function">diff≢ε</a> <a id="1563" class="Symbol">:</a> <a id="1565" class="Symbol">∀</a> <a id="1567" class="Symbol">{</a><a id="1568" href="Algebra.Monus.html#1568" class="Bound">x</a> <a id="1570" href="Algebra.Monus.html#1570" class="Bound">y</a><a id="1571" class="Symbol">}</a> <a id="1573" class="Symbol">→</a> <a id="1575" class="Symbol">(</a><a id="1576" href="Algebra.Monus.html#1576" class="Bound">x&lt;y</a> <a id="1580" class="Symbol">:</a> <a id="1582" href="Algebra.Monus.html#1568" class="Bound">x</a> <a id="1584" href="Relation.Binary.html#1546" class="Function Operator">&lt;</a> <a id="1586" href="Algebra.Monus.html#1570" class="Bound">y</a><a id="1587" class="Symbol">)</a> <a id="1589" class="Symbol">→</a> <a id="1591" href="Agda.Builtin.Sigma.html#252" class="Field">fst</a> <a id="1595" class="Symbol">(</a><a id="1596" href="Relation.Binary.html#3562" class="Function">&lt;⇒≤</a> <a id="1600" href="Algebra.Monus.html#1576" class="Bound">x&lt;y</a><a id="1603" class="Symbol">)</a> <a id="1605" href="Path.html#506" class="Function Operator">≢</a> <a id="1607" href="Algebra.html#1165" class="Function">ε</a>
+  <a id="1611" href="Algebra.Monus.html#1556" class="Function">diff≢ε</a> <a id="1618" href="Algebra.Monus.html#1618" class="Bound">x&lt;y</a> <a id="1622" class="Keyword">with</a> <a id="1627" href="Relation.Binary.html#3562" class="Function">&lt;⇒≤</a> <a id="1631" href="Algebra.Monus.html#1618" class="Bound">x&lt;y</a>
+  <a id="1637" href="Algebra.Monus.html#1556" class="Function">diff≢ε</a> <a id="1644" href="Algebra.Monus.html#1644" class="Bound">x&lt;y</a> <a id="1648" class="Symbol">|</a> <a id="1650" href="Algebra.Monus.html#1650" class="Bound">k</a> <a id="1652" href="Agda.Builtin.Sigma.html#236" class="InductiveConstructor Operator">,</a> <a id="1654" href="Algebra.Monus.html#1654" class="Bound">y≡x∙k</a> <a id="1660" class="Symbol">=</a> <a id="1662" class="Symbol">λ</a> <a id="1664" href="Algebra.Monus.html#1664" class="Bound">k≡ε</a> <a id="1668" class="Symbol">→</a> <a id="1670" href="Relation.Binary.html#1649" class="Function">irrefl</a> <a id="1677" href="Algebra.Monus.html#1644" class="Bound">x&lt;y</a> <a id="1681" class="Symbol">(</a><a id="1682" href="Cubical.Foundations.Id.html#713" class="Function">sym</a> <a id="1686" class="Symbol">(</a><a id="1687" href="Algebra.Monus.html#1654" class="Bound">y≡x∙k</a> <a id="1693" href="Cubical.Foundations.Id.html#747" class="Function Operator">;</a> <a id="1695" href="Cubical.Foundations.Id.html#782" class="Function">cong</a> <a id="1700" class="Symbol">(_</a> <a id="1703" href="Algebra.html#1142" class="Function Operator">∙_</a><a id="1705" class="Symbol">)</a> <a id="1707" href="Algebra.Monus.html#1664" class="Bound">k≡ε</a> <a id="1711" href="Cubical.Foundations.Id.html#747" class="Function Operator">;</a> <a id="1713" href="Algebra.html#1258" class="Function">∙ε</a> <a id="1716" class="Symbol">_))</a>
 
-  <a id="1998" class="Comment">-- -- module _ (sup : Sup) where</a>
-  <a id="2033" class="Comment">-- --   Ω : 𝑆</a>
-  <a id="2049" class="Comment">-- --   Ω = fst sup</a>
+  <a id="Monus.Absorbative"></a><a id="1723" href="Algebra.Monus.html#1723" class="Function">Absorbative</a> <a id="1735" class="Symbol">:</a> <a id="1737" href="Level.html#192" class="Function">Type</a> <a id="1742" class="Symbol">_</a>
+  <a id="1746" href="Algebra.Monus.html#1723" class="Function">Absorbative</a> <a id="1758" class="Symbol">=</a> <a id="1760" class="Symbol">∀</a> <a id="1762" href="Algebra.Monus.html#1762" class="Bound">x</a> <a id="1764" href="Algebra.Monus.html#1764" class="Bound">y</a> <a id="1766" class="Symbol">→</a> <a id="1768" href="Algebra.Monus.html#1762" class="Bound">x</a> <a id="1770" href="Agda.Builtin.Cubical.Path.html#381" class="Function Operator">≡</a> <a id="1772" href="Algebra.Monus.html#1762" class="Bound">x</a> <a id="1774" href="Algebra.html#1142" class="Function Operator">∙</a> <a id="1776" href="Algebra.Monus.html#1764" class="Bound">y</a> <a id="1778" class="Symbol">→</a> <a id="1780" href="Algebra.Monus.html#1764" class="Bound">y</a> <a id="1782" href="Agda.Builtin.Cubical.Path.html#381" class="Function Operator">≡</a> <a id="1784" href="Algebra.html#1165" class="Function">ε</a>
 
-  <a id="2072" class="Comment">-- --   maximal : ∀ x → x ≤ Ω</a>
-  <a id="2104" class="Comment">-- --   maximal = snd sup</a>
+  <a id="1789" class="Comment">-- _≺_ : 𝑆 → 𝑆 → Type _</a>
+  <a id="1815" class="Comment">-- x ≺ y = Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)</a>
 
-  <a id="2133" class="Comment">-- --   max-sup : ∀ x → Ω ⊓ x ≡ x</a>
-  <a id="2169" class="Comment">-- --   max-sup x with Ω &lt;? x</a>
-  <a id="2201" class="Comment">-- --   max-sup x | yes x₁ = ⊥-elim (x₁ (maximal x))</a>
-  <a id="2256" class="Comment">-- --   max-sup x | no  x₁ = refl</a>
+  <a id="1860" class="Comment">-- &lt;⇒≺ : ∀ {x y} → x &lt; y → x ≺ y</a>
+  <a id="1895" class="Comment">-- &lt;⇒≺ x&lt;y = &lt;⇒≤ x&lt;y , diff≢ε x&lt;y</a>
 
-  <a id="2293" class="Comment">-- --   cmb-sup : ∀ x → Ω ∙ x ≡ Ω</a>
-  <a id="2329" class="Comment">-- --   cmb-sup x = antisym (maximal (Ω ∙ x)) (x , refl)</a>
+  <a id="1932" class="Comment">-- ≺⇒&lt; : ∀ {x y} → x ≺ y → x &lt; y</a>
+  <a id="1967" class="Comment">-- ≺⇒&lt; {x} {y} ((k₁ , y≡x∙k₁) , k₁≢ε) (k₂ , x≡y∙k₂) = {!!}</a>
+  <a id="2028" class="Comment">--   where</a>
+  <a id="2041" class="Comment">--   p : x ≡ x ∙ (k₁ ∙ k₂)</a>
+  <a id="2070" class="Comment">--   p = x≡y∙k₂ ; cong (_∙ k₂) y≡x∙k₁ ; assoc x k₁ k₂</a>
 
-  <a id="2389" class="Comment">-- --   viterbi : Semiring ℓ</a>
-  <a id="2420" class="Comment">-- --   NearSemiring.𝑅 (Semiring.nearSemiring viterbi) = 𝑆</a>
-  <a id="2481" class="Comment">-- --   NearSemiring._+_ (Semiring.nearSemiring viterbi) = _⊓_</a>
-  <a id="2546" class="Comment">-- --   NearSemiring._*_ (Semiring.nearSemiring viterbi) = _∙_</a>
-  <a id="2611" class="Comment">-- --   NearSemiring.1# (Semiring.nearSemiring viterbi) = ε</a>
-  <a id="2673" class="Comment">-- --   NearSemiring.0# (Semiring.nearSemiring viterbi) = Ω</a>
-  <a id="2735" class="Comment">-- --   NearSemiring.+-assoc (Semiring.nearSemiring viterbi) = ⊓-assoc</a>
-  <a id="2808" class="Comment">-- --   NearSemiring.*-assoc (Semiring.nearSemiring viterbi) = assoc</a>
-  <a id="2879" class="Comment">-- --   NearSemiring.0+ (Semiring.nearSemiring viterbi) = max-sup</a>
-  <a id="2947" class="Comment">-- --   NearSemiring.+0 (Semiring.nearSemiring viterbi) x = ⊓-comm x Ω ; max-sup x</a>
-  <a id="3032" class="Comment">-- --   NearSemiring.1* (Semiring.nearSemiring viterbi) = ε∙</a>
-  <a id="3095" class="Comment">-- --   NearSemiring.*1 (Semiring.nearSemiring viterbi) = ∙ε</a>
-  <a id="3158" class="Comment">-- --   NearSemiring.0* (Semiring.nearSemiring viterbi) = cmb-sup</a>
-  <a id="3226" class="Comment">-- --   NearSemiring.⟨+⟩* (Semiring.nearSemiring viterbi) = ∙-distrib-⊓</a>
-  <a id="3300" class="Comment">-- --   Semiring.+-comm viterbi = ⊓-comm</a>
-  <a id="3343" class="Comment">-- --   Semiring.*0 viterbi x = comm x Ω ; cmb-sup x</a>
-  <a id="3398" class="Comment">-- --   Semiring.*⟨+⟩ viterbi x y z = comm x (y ⊓ z) ; ∙-distrib-⊓ y z x ; cong₂ _⊓_ (comm y x) (comm z x)</a>
+  <a id="2127" class="Comment">--   q : k₁ ∙ k₂ ≢ ε</a>
+  <a id="2150" class="Comment">--   q = k₁≢ε ∘ zeroSumFree k₁ k₂</a>
+
+  <a id="2187" class="Comment">-- Sup : Type _</a>
+  <a id="2205" class="Comment">-- Sup = Σ[ Ω ⦂ 𝑆 ] (∀ x → x ≤ Ω )</a>
+  <a id="2242" class="Comment">-- -- ∙-distrib-⊓ : _∙_ Distributesˡ _⊓_</a>
+  <a id="2285" class="Comment">-- -- ∙-distrib-⊓ x y z with x &lt;? y | (x ∙ z) &lt;? (y ∙ z)</a>
+  <a id="2344" class="Comment">-- -- ∙-distrib-⊓ x y z | yes x₁  | yes x₂ = refl</a>
+  <a id="2396" class="Comment">-- -- ∙-distrib-⊓ x y z | yes x₁  | no x₂  = antisym (∙-congʳ z (&lt;⇒≤ x₁)) (≮⇒≥ x₂)</a>
+  <a id="2481" class="Comment">-- -- ∙-distrib-⊓ x y z | no  x≥y | yes x∙z≤y∙z = antisym (∙-congʳ z (≮⇒≥ x≥y)) (&lt;⇒≤ x∙z≤y∙z)</a>
+  <a id="2577" class="Comment">-- -- ∙-distrib-⊓ x y z | no  x₁  | no x₂ = refl</a>
+
+  <a id="2629" class="Comment">-- -- module _ (sup : Sup) where</a>
+  <a id="2664" class="Comment">-- --   Ω : 𝑆</a>
+  <a id="2680" class="Comment">-- --   Ω = fst sup</a>
+
+  <a id="2703" class="Comment">-- --   maximal : ∀ x → x ≤ Ω</a>
+  <a id="2735" class="Comment">-- --   maximal = snd sup</a>
+
+  <a id="2764" class="Comment">-- --   max-sup : ∀ x → Ω ⊓ x ≡ x</a>
+  <a id="2800" class="Comment">-- --   max-sup x with Ω &lt;? x</a>
+  <a id="2832" class="Comment">-- --   max-sup x | yes x₁ = ⊥-elim (x₁ (maximal x))</a>
+  <a id="2887" class="Comment">-- --   max-sup x | no  x₁ = refl</a>
+
+  <a id="2924" class="Comment">-- --   cmb-sup : ∀ x → Ω ∙ x ≡ Ω</a>
+  <a id="2960" class="Comment">-- --   cmb-sup x = antisym (maximal (Ω ∙ x)) (x , refl)</a>
+
+  <a id="3020" class="Comment">-- --   viterbi : Semiring ℓ</a>
+  <a id="3051" class="Comment">-- --   NearSemiring.𝑅 (Semiring.nearSemiring viterbi) = 𝑆</a>
+  <a id="3112" class="Comment">-- --   NearSemiring._+_ (Semiring.nearSemiring viterbi) = _⊓_</a>
+  <a id="3177" class="Comment">-- --   NearSemiring._*_ (Semiring.nearSemiring viterbi) = _∙_</a>
+  <a id="3242" class="Comment">-- --   NearSemiring.1# (Semiring.nearSemiring viterbi) = ε</a>
+  <a id="3304" class="Comment">-- --   NearSemiring.0# (Semiring.nearSemiring viterbi) = Ω</a>
+  <a id="3366" class="Comment">-- --   NearSemiring.+-assoc (Semiring.nearSemiring viterbi) = ⊓-assoc</a>
+  <a id="3439" class="Comment">-- --   NearSemiring.*-assoc (Semiring.nearSemiring viterbi) = assoc</a>
+  <a id="3510" class="Comment">-- --   NearSemiring.0+ (Semiring.nearSemiring viterbi) = max-sup</a>
+  <a id="3578" class="Comment">-- --   NearSemiring.+0 (Semiring.nearSemiring viterbi) x = ⊓-comm x Ω ; max-sup x</a>
+  <a id="3663" class="Comment">-- --   NearSemiring.1* (Semiring.nearSemiring viterbi) = ε∙</a>
+  <a id="3726" class="Comment">-- --   NearSemiring.*1 (Semiring.nearSemiring viterbi) = ∙ε</a>
+  <a id="3789" class="Comment">-- --   NearSemiring.0* (Semiring.nearSemiring viterbi) = cmb-sup</a>
+  <a id="3857" class="Comment">-- --   NearSemiring.⟨+⟩* (Semiring.nearSemiring viterbi) = ∙-distrib-⊓</a>
+  <a id="3931" class="Comment">-- --   Semiring.+-comm viterbi = ⊓-comm</a>
+  <a id="3974" class="Comment">-- --   Semiring.*0 viterbi x = comm x Ω ; cmb-sup x</a>
+  <a id="4029" class="Comment">-- --   Semiring.*⟨+⟩ viterbi x y z = comm x (y ⊓ z) ; ∙-distrib-⊓ y z x ; cong₂ _⊓_ (comm y x) (comm z x)</a>
 </pre></body></html>
