@@ -49,7 +49,7 @@ lemma x y k x≡y∙k i z = (cong (_∙ z) x≡y∙k ; assoc y k z) i
 merge : Heap V → Heap V → Heap V
 merge [] ys = ys
 merge (x ∹ xv & xs) [] = x ∹ xv & xs
-merge {V = V} (x ∹ xv & xs) (y ∹ yv & ys) with x ≤? y
+merge {V = V} (x ∹ xv & xs) (y ∹ yv & ys) with x ≤|≥ y
 ... | inl (k , x≤y) = x ∹ xv & (k ∹ subst V x≤y yv & subst (List ∘ Heap ∘ _∘_ V) (lemma y x k x≤y) ys ∷ xs)
 ... | inr (k , x≥y) = y ∹ yv & (k ∹ subst V x≥y xv & subst (List ∘ Heap ∘ _∘_ V) (lemma x y k x≥y) xs ∷ ys)
 
@@ -105,7 +105,7 @@ lemma₂ {V = V} xs = J (λ _ p → sizes (subst (List ∘ Heap ∘ _∘_ V) p x
 merge-size : (xs ys : Heap V) → size (merge xs ys) ≡ size xs ℕ.+ size ys
 merge-size [] ys = refl
 merge-size (x ∹ xv & xs) [] = sym (ℕ.+-idʳ _)
-merge-size {V = V} (x ∹ xv & xs) (y ∹ yv & ys) with x ≤? y
+merge-size {V = V} (x ∹ xv & xs) (y ∹ yv & ys) with x ≤|≥ y
 merge-size {V = V} (x ∹ xv & xs) (y ∹ yv & ys) | inr (k , x≥y) =
   suc (suc (sizes (subst (List ∘ Heap ∘ _∘_ V) (lemma x y k x≥y) xs)) ℕ.+ sizes ys) ≡˘⟨ ℕ.+-suc _ (sizes ys) ⟩
   suc (sizes (subst (List ∘ Heap ∘ _∘_ V) (lemma x y k x≥y) xs)) ℕ.+ suc (sizes ys) ≡⟨ cong (ℕ._+ suc (sizes ys)) (cong suc (lemma₂ {V = V} xs (lemma x y k x≥y))) ⟩
