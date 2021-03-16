@@ -50,18 +50,11 @@ mutual
     .v → x
     .next → stepFrom f s (s ≟ ε)
 
--- mutual
---   seg-rightInv″ : (f : State A) (s₁ : 𝑆) (a : Acc _<_ s₁) (x : A) (s₂ : 𝑆) (p : Dec (s₂ ≡ ε)) → pop′ s₁ a (x ≺ stepFrom f s₂ p) ≡ f s₁
---   seg-rightInv″ f s₁ a x s₂ p = {!!}
+seg-leftInv′ : (x : Heap A) → tabulate (pop x) ≡ x
+seg-leftInv′ x = {!!}
 
---   seg-rightInv′ : (f : State A) (s : 𝑆) (a : Acc _<_ s) → pop′ s a (tabulate f) ≡ f s
---   seg-rightInv′ f s a = let x , s₂ = f ε in seg-rightInv″ f s a x s₂ (s₂ ≟ ε)
-
--- seg-rightInv : (x : State A) → pop (tabulate x) ≡ x
--- seg-rightInv x = funExt (λ s → seg-rightInv′ x s (wf s))
-
--- seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x
--- seg-leftInv = {!!}
+seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x
+seg-leftInv x = {!!}
 
 -- state-iso : Heap A ⇔ State A
 -- state-iso .fun = pop
