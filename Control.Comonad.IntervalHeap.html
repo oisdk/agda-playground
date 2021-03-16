@@ -51,22 +51,15 @@
     <a id="1478" class="Symbol">.</a><a id="1479" href="Control.Comonad.IntervalHeap.html#505" class="Field">v</a> <a id="1481" class="Symbol">→</a> <a id="1483" href="Control.Comonad.IntervalHeap.html#1451" class="Bound">x</a>
     <a id="1489" class="Symbol">.</a><a id="1490" href="Control.Comonad.IntervalHeap.html#515" class="Field">next</a> <a id="1495" class="Symbol">→</a> <a id="1497" href="Control.Comonad.IntervalHeap.html#1226" class="Function">stepFrom</a> <a id="1506" href="Control.Comonad.IntervalHeap.html#1443" class="Bound">f</a> <a id="1508" href="Control.Comonad.IntervalHeap.html#1455" class="Bound">s</a> <a id="1510" class="Symbol">(</a><a id="1511" href="Control.Comonad.IntervalHeap.html#1455" class="Bound">s</a> <a id="1513" href="Control.Comonad.IntervalHeap.html#405" class="Function Operator">≟</a> <a id="1515" href="Algebra.html#1165" class="Function">ε</a><a id="1516" class="Symbol">)</a>
 
-<a id="1519" class="Comment">-- mutual</a>
-<a id="1529" class="Comment">--   seg-rightInv″ : (f : State A) (s₁ : 𝑆) (a : Acc _&lt;_ s₁) (x : A) (s₂ : 𝑆) (p : Dec (s₂ ≡ ε)) → pop′ s₁ a (x ≺ stepFrom f s₂ p) ≡ f s₁</a>
-<a id="1667" class="Comment">--   seg-rightInv″ f s₁ a x s₂ p = {!!}</a>
+<a id="1519" class="Comment">-- seg-leftInv′ : (x : Heap A) → tabulate (pop x) ≡ x</a>
+<a id="1573" class="Comment">-- seg-leftInv′ x = {!!}</a>
 
-<a id="1708" class="Comment">--   seg-rightInv′ : (f : State A) (s : 𝑆) (a : Acc _&lt;_ s) → pop′ s a (tabulate f) ≡ f s</a>
-<a id="1797" class="Comment">--   seg-rightInv′ f s a = let x , s₂ = f ε in seg-rightInv″ f s a x s₂ (s₂ ≟ ε)</a>
+<a id="1599" class="Comment">-- seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x</a>
+<a id="1652" class="Comment">-- seg-leftInv x = {!!}</a>
 
-<a id="1879" class="Comment">-- seg-rightInv : (x : State A) → pop (tabulate x) ≡ x</a>
-<a id="1934" class="Comment">-- seg-rightInv x = funExt (λ s → seg-rightInv′ x s (wf s))</a>
-
-<a id="1995" class="Comment">-- seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x</a>
-<a id="2048" class="Comment">-- seg-leftInv = {!!}</a>
-
-<a id="2071" class="Comment">-- state-iso : Heap A ⇔ State A</a>
-<a id="2103" class="Comment">-- state-iso .fun = pop</a>
-<a id="2127" class="Comment">-- state-iso .inv = tabulate</a>
-<a id="2156" class="Comment">-- state-iso .rightInv = seg-rightInv</a>
-<a id="2194" class="Comment">-- state-iso .leftInv  = seg-leftInv</a>
+<a id="1677" class="Comment">-- state-iso : Heap A ⇔ State A</a>
+<a id="1709" class="Comment">-- state-iso .fun = pop</a>
+<a id="1733" class="Comment">-- state-iso .inv = tabulate</a>
+<a id="1762" class="Comment">-- state-iso .rightInv = seg-rightInv</a>
+<a id="1800" class="Comment">-- state-iso .leftInv  = seg-leftInv</a>
 </pre></body></html>
