@@ -21,13 +21,12 @@ record Heap {a} (A : Type a) : Type (s ℓ⊔ a) where
     next : Maybe (∃[ s ] ((s ≢ ε) × Heap A))
 open Heap public
 
-
 State : Type a → Type _
 State A = 𝑆 → A × 𝑆
 
 pop′ : (s : 𝑆) → Acc _<_ s → Heap A → A × 𝑆
 pop′ s₂ a xs with xs .next
-pop′ s₂ a xs | nothing = xs .v , s₂
+pop′ s₂ a xs | nothing = xs .v , ε
 pop′ s₂ a xs | just (s₁ , s₁≢ε , ys) with s₁ ≤? s₂
 pop′ s₂ a xs | just (s₁ , s₁≢ε , ys) | no s₁≰s₂ = xs .v , fst (<⇒≤ s₁≰s₂)
 pop′ s₂ (acc wf) xs | just (s₁ , s₁≢ε , ys) | yes (k₁ , s₂≡s₁∙k₁) = pop′ k₁ (wf k₁ lemma) ys
@@ -50,3 +49,22 @@ mutual
   tabulate f = let x , s = f ε in λ where
     .v → x
     .next → stepFrom f s (s ≟ ε)
+
+-- mutual
+--   seg-rightInv″ : (f : State A) (s₁ : 𝑆) (a : Acc _<_ s₁) (x : A) (s₂ : 𝑆) (p : Dec (s₂ ≡ ε)) → pop′ s₁ a (x ≺ stepFrom f s₂ p) ≡ f s₁
+--   seg-rightInv″ f s₁ a x s₂ p = {!!}
+
+--   seg-rightInv′ : (f : State A) (s : 𝑆) (a : Acc _<_ s) → pop′ s a (tabulate f) ≡ f s
+--   seg-rightInv′ f s a = let x , s₂ = f ε in seg-rightInv″ f s a x s₂ (s₂ ≟ ε)
+
+-- seg-rightInv : (x : State A) → pop (tabulate x) ≡ x
+-- seg-rightInv x = funExt (λ s → seg-rightInv′ x s (wf s))
+
+-- seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x
+-- seg-leftInv = {!!}
+
+-- state-iso : Heap A ⇔ State A
+-- state-iso .fun = pop
+-- state-iso .inv = tabulate
+-- state-iso .rightInv = seg-rightInv
+-- state-iso .leftInv  = seg-leftInv
