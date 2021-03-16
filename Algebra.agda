@@ -13,24 +13,35 @@ module _ {a} {A : Type a} (_∙_ : A → A → A) where
   Idempotent : Type _
   Idempotent = ∀ x → x ∙ x ≡ x
 
-module _ {a b} {A : Type a} {B : Type b} where
-  Identityˡ : (A → B → B) → A → Type _
-  Identityˡ _∙_ x = ∀ y → x ∙ y ≡ y
+Identityˡ : (A → B → B) → A → Type _
+Identityˡ _∙_ x = ∀ y → x ∙ y ≡ y
 
-  Zeroˡ : (A → B → A) → A → Type _
-  Zeroˡ _∙_ x = ∀ y → x ∙ y ≡ x
+Zeroˡ : (A → B → A) → A → Type _
+Zeroˡ _∙_ x = ∀ y → x ∙ y ≡ x
 
-  Zeroʳ : (A → B → B) → B → Type _
-  Zeroʳ _∙_ x = ∀ y → y ∙ x ≡ x
+Zeroʳ : (A → B → B) → B → Type _
+Zeroʳ _∙_ x = ∀ y → y ∙ x ≡ x
 
-  Identityʳ : (A → B → A) → B → Type _
-  Identityʳ _∙_ x = ∀ y → y ∙ x ≡ y
+Identityʳ : (A → B → A) → B → Type _
+Identityʳ _∙_ x = ∀ y → y ∙ x ≡ y
 
-  _Distributesʳ_ : (A → B → B) → (B → B → B) → Type _
-  _⊗_ Distributesʳ _⊕_ = ∀ x y z → x ⊗ (y ⊕ z) ≡ (x ⊗ y) ⊕ (x ⊗ z)
+_Distributesʳ_ : (A → B → B) → (B → B → B) → Type _
+_⊗_ Distributesʳ _⊕_ = ∀ x y z → x ⊗ (y ⊕ z) ≡ (x ⊗ y) ⊕ (x ⊗ z)
 
-  _Distributesˡ_ : (B → A → B) → (B → B → B) → Type _
-  _⊗_ Distributesˡ _⊕_ = ∀ x y z → (x ⊕ y) ⊗ z ≡ (x ⊗ z) ⊕ (y ⊗ z)
+_Distributesˡ_ : (B → A → B) → (B → B → B) → Type _
+_⊗_ Distributesˡ _⊕_ = ∀ x y z → (x ⊕ y) ⊗ z ≡ (x ⊗ z) ⊕ (y ⊗ z)
+
+Cancellableˡ : (A → B → C) → A → Type _
+Cancellableˡ _⊗_ c = ∀ x y → c ⊗ x ≡ c ⊗ y → x ≡ y
+
+Cancellableʳ : (A → B → C) → B → Type _
+Cancellableʳ _⊗_ c = ∀ x y → x ⊗ c ≡ y ⊗ c → x ≡ y
+
+Cancellativeˡ : (A → B → C) → Type _
+Cancellativeˡ _⊗_ = ∀ c → Cancellableˡ _⊗_ c
+
+Cancellativeʳ : (A → B → C) → Type _
+Cancellativeʳ _⊗_ = ∀ c → Cancellableʳ _⊗_ c
 
 record  Semigroup ℓ : Type (ℓsuc ℓ) where
   infixl 6 _∙_
