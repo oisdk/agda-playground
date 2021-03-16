@@ -50,11 +50,11 @@ mutual
     .v → x
     .next → stepFrom f s (s ≟ ε)
 
-seg-leftInv′ : (x : Heap A) → tabulate (pop x) ≡ x
-seg-leftInv′ x = {!!}
+-- seg-leftInv′ : (x : Heap A) → tabulate (pop x) ≡ x
+-- seg-leftInv′ x = {!!}
 
-seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x
-seg-leftInv x = {!!}
+-- seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x
+-- seg-leftInv x = {!!}
 
 -- state-iso : Heap A ⇔ State A
 -- state-iso .fun = pop
