@@ -2,49 +2,58 @@
 
 open import Algebra
 open import Prelude
-import Algebra.Construct.OrderedMonoid as OrdMon
 open import Relation.Binary
 open import WellFounded
 open import Algebra.Monus
 
-module Control.Comonad.IntervalHeap {s} (mon : Monus s) (wf : WellFounded (Monus._<_ mon)) where
+module Control.Comonad.IntervalHeap {s}
+  (mon : Monus s)
+  (absorbative : Monus.Absorbative mon)
+  (wf : WellFounded (Monus._<_ mon)) where
 
-open Monus mon
+open Monus mon public
 
 record Heap {a} (A : Type a) : Type (s ℓ⊔ a) where
   coinductive
-  constructor node
+  constructor _:[⋯_⟨_⟩],_
   field
-    weight : 𝑆
-    weight≢0 : weight ≢ ε
-    val : A
-    tail : Heap A
+    v : A
+    w : 𝑆
+    w≢ε : w ≢ ε
+    rs : Heap A
 open Heap public
 
--- Func : Type a → Type _
--- Func A = 𝑆 → ∃[ w ] (w ≢ ε) × A
+State : Type a → Type _
+State A = 𝑆 → ∃[ w ] (w ≢ ε) × A
 
--- toFunc′ : Heap A → (w : 𝑆) → Acc _<_ w → ∃[ w ] (w ≢ ε) × A
--- toFunc′ xs w r with compare w (weight xs)
--- toFunc′ xs w r        | lt d = {!!} -- d , d≢0 , (val xs)
--- toFunc′ xs w (acc wf) | eq w≡w = toFunc′ (tail xs) ε (wf ε (either (⊥-elim ∘ weight≢0 xs ∘ sym w≡w ;_) id {!!}))
--- toFunc′ xs w (acc wf) | gt (d , p) = toFunc′ (tail xs) d (wf d (weight xs , weight≢0 xs , p ; comm _ _))
+pop′ : Heap A → (w : 𝑆) → Acc _<_ w → ∃[ w ] (w ≢ ε) × A
+pop′ xs s₂ r with w xs ≤? s₂
+pop′ xs s₂ r | no s₁≰s₂ = let k , p = <⇒≤ s₁≰s₂ in k , diff≢ε s₁≰s₂ , v xs
+pop′ xs s₂ (acc wf) | yes (k₁ , s₂≡s₁∙k₁) = pop′ (rs xs) k₁ (wf k₁ lemma)
+  where
+  s₁ = w xs
 
--- toFunc : Heap A → Func A
--- toFunc xs w = toFunc′ xs w (wf w)
+  lemma : k₁ < s₂
+  lemma (k₂ , k₁≡s₂∙k₂) = w≢ε xs (zeroSumFree s₁ k₂ (absorbative _ _ p))
+    where
+    p : k₁ ≡ k₁ ∙ (s₁ ∙ k₂)
+    p = k₁≡s₂∙k₂ ; cong (_∙ k₂) s₂≡s₁∙k₁ ; cong (_∙ k₂) (comm s₁ k₁) ; assoc k₁ s₁ k₂
 
--- fromFunc′ : 𝑆 → (𝑆 → ∃[ w ] (w ≢ ε) × A) → Heap A
--- fromFunc′ m f = let x , y , z = f m in λ where
---   .weight → x
---   .weight≢0 → y
---   .val → z
---   .tail → fromFunc′ (m ∙ x) f
+pop : Heap A → State A
+pop xs w = pop′ xs w (wf w)
 
--- fromFunc : Func A → Heap A
--- fromFunc = fromFunc′ ε
+tabulate′ : 𝑆 → State A → Heap A
+tabulate′ m f = let x , y , z = f m in λ where
+  .w → x
+  .w≢ε → y
+  .v → z
+  .rs → tabulate′ (m ∙ x) f
 
--- -- from∘to : ∀ (x : Heap A) → fromFunc (toFunc x) ≡ x
--- -- from∘to x i .weight = {!!}
--- -- from∘to x i .weight≢0 = {!!}
--- -- from∘to x i .val = {!!}
--- -- from∘to x i .tail = {!!}
+tabulate : State A → Heap A
+tabulate = tabulate′ ε
+
+-- -- -- from∘to : ∀ (x : Heap A) → fromFunc (toFunc x) ≡ x
+-- -- -- from∘to x i .weight = {!!}
+-- -- -- from∘to x i .weight≢0 = {!!}
+-- -- -- from∘to x i .val = {!!}
+-- -- -- from∘to x i .tail = {!!}

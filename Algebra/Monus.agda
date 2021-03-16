@@ -53,6 +53,28 @@ record Monus ℓ : Type (ℓsuc ℓ) where
 
   open TotalOrder totalOrder hiding (refl; antisym; _≤_; _≤|≥_; partialOrder; ≤-trans) public
 
+  diff≢ε : ∀ {x y} → (x<y : x < y) → fst (<⇒≤ x<y) ≢ ε
+  diff≢ε x<y with <⇒≤ x<y
+  diff≢ε x<y | k , y≡x∙k = λ k≡ε → irrefl x<y (sym (y≡x∙k ; cong (_ ∙_) k≡ε ; ∙ε _))
+
+  Absorbative : Type _
+  Absorbative = ∀ x y → x ≡ x ∙ y → y ≡ ε
+
+  -- _≺_ : 𝑆 → 𝑆 → Type _
+  -- x ≺ y = Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)
+
+  -- <⇒≺ : ∀ {x y} → x < y → x ≺ y
+  -- <⇒≺ x<y = <⇒≤ x<y , diff≢ε x<y
+
+  -- ≺⇒< : ∀ {x y} → x ≺ y → x < y
+  -- ≺⇒< {x} {y} ((k₁ , y≡x∙k₁) , k₁≢ε) (k₂ , x≡y∙k₂) = {!!}
+  --   where
+  --   p : x ≡ x ∙ (k₁ ∙ k₂)
+  --   p = x≡y∙k₂ ; cong (_∙ k₂) y≡x∙k₁ ; assoc x k₁ k₂
+
+  --   q : k₁ ∙ k₂ ≢ ε
+  --   q = k₁≢ε ∘ zeroSumFree k₁ k₂
+
   -- Sup : Type _
   -- Sup = Σ[ Ω ⦂ 𝑆 ] (∀ x → x ≤ Ω )
   -- -- ∙-distrib-⊓ : _∙_ Distributesˡ _⊓_

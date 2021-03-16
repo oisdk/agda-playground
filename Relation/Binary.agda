@@ -93,14 +93,12 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   open PartialOrder partialOrder renaming (trans to ≤-trans) public
   open StrictPartialOrder strictPartialOrder renaming (trans to <-trans) public
 
-
   infix 4 _<?_
   field
     _<?_ : Decidable _<_
 
     ≰⇒> : ∀ {x y} → x ≰ y → x > y
     ≮⇒≥ : ∀ {x y} → x ≮ y → x ≥ y
-
 
   Ordering : 𝑆 → 𝑆 → Type (ℓ₁ ℓ⊔ ℓ₂)
   Ordering = Tri _<_ _≡_ (flip _<_)
