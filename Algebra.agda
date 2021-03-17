@@ -85,9 +85,33 @@ record Group ℓ : Type (ℓsuc ℓ) where
     monoid : Monoid ℓ
   open Monoid monoid public
   field
-    inv : 𝑆 → 𝑆
-    ∙⁻ : ∀ x → x ∙ inv x ≡ ε
-    ⁻∙ : ∀ x → inv x ∙ x ≡ ε
+    -_ : 𝑆 → 𝑆
+    ∙⁻ : ∀ x → x ∙ - x ≡ ε
+    ⁻∙ : ∀ x → - x ∙ x ≡ ε
+
+  open import Path.Reasoning
+
+  cancelˡ : Cancellativeˡ _∙_
+  cancelˡ x y z p =
+    y ≡˘⟨ ε∙ y ⟩
+    ε ∙ y ≡˘⟨ cong (_∙ y) (⁻∙ x) ⟩
+    (- x ∙ x) ∙ y ≡⟨ assoc (- x) x y ⟩
+    - x ∙ (x ∙ y) ≡⟨ cong (- x ∙_) p ⟩
+    - x ∙ (x ∙ z) ≡˘⟨ assoc (- x) x z ⟩
+    (- x ∙ x) ∙ z ≡⟨ cong (_∙ z) (⁻∙ x) ⟩
+    ε ∙ z ≡⟨ ε∙ z ⟩
+    z ∎
+
+  cancelʳ : Cancellativeʳ _∙_
+  cancelʳ x y z p =
+    y ≡˘⟨ ∙ε y ⟩
+    y ∙ ε ≡˘⟨ cong (y ∙_) (∙⁻ x) ⟩
+    y ∙ (x ∙ - x) ≡˘⟨ assoc y x (- x) ⟩
+    (y ∙ x) ∙ - x ≡⟨ cong (_∙ - x) p ⟩
+    (z ∙ x) ∙ - x ≡⟨ assoc z x (- x) ⟩
+    z ∙ (x ∙ - x) ≡⟨ cong (z ∙_) (∙⁻ x) ⟩
+    z ∙ ε ≡⟨ ∙ε z ⟩
+    z ∎
 
 record CommutativeMonoid ℓ : Type (ℓsuc ℓ) where
   field
