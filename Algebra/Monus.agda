@@ -59,35 +59,39 @@ record Monus ℓ : Type (ℓsuc ℓ) where
   diff≢ε x<y with <⇒≤ x<y
   diff≢ε x<y | k , y≡x∙k = λ k≡ε → irrefl x<y (sym (y≡x∙k ; cong (_ ∙_) k≡ε ; ∙ε _))
 
-  NonZero : Type ℓ
-  NonZero = ∃[ x ] (x ≢ ε)
+  -- NonZero : Type ℓ
+  -- NonZero = ∃[ x ] (x ≢ ε)
 
-  data Signed : Type ℓ where
-    pos : 𝑆 → Signed
-    neg : NonZero → Signed
+  -- data Signed : Type ℓ where
+  --   zer : Signed
+  --   pos : NonZero → Signed
+  --   neg : NonZero → Signed
 
-  negate : Signed → Signed
-  negate (pos x) with x ≟ ε
-  negate (pos x) | no x≢ε = neg (x , x≢ε)
-  negate (pos x) | yes _ = pos ε
-  negate (neg x) = pos (fst x)
+  -- negate : Signed → Signed
+  -- negate (pos x) with x ≟ ε
+  -- negate (pos x) | no x≢ε = neg (x , x≢ε)
+  -- negate (pos x) | yes _ = pos ε
+  -- negate (neg x) = pos (fst x)
 
-  _⊝_ : 𝑆 → 𝑆 → Signed
-  x ⊝ y with y ≤? x
-  x ⊝ y | yes x≥y = pos (fst x≥y)
-  x ⊝ y | no  x≱y = neg (fst (<⇒≤ x≱y), diff≢ε x≱y)
+  -- _⊝_ : 𝑆 → 𝑆 → Signed
+  -- x ⊝ y with y ≤? x
+  -- x ⊝ y | yes x≥y = pos (fst x≥y)
+  -- x ⊝ y | no  x≱y = neg (fst (<⇒≤ x≱y), diff≢ε x≱y)
 
-  _*_ : Signed → Signed → Signed
-  pos x * pos y = pos (x ∙ y)
-  neg (x , x≢ε) * neg (y , y≢ε) = neg (x ∙ y , x≢ε ∘ zeroSumFree x y)
-  pos x * neg y = x ⊝ fst y
-  neg x * pos y = y ⊝ fst x
+  -- _*_ : Signed → Signed → Signed
+  -- pos x * pos y = pos (x ∙ y)
+  -- neg (x , x≢ε) * neg (y , y≢ε) = neg (x ∙ y , x≢ε ∘ zeroSumFree x y)
+  -- pos x * neg y = x ⊝ fst y
+  -- neg x * pos y = y ⊝ fst x
 
-  open import Data.Empty.Properties using (isProp¬)
-  open import Data.Sigma.Properties using (ΣProp≡)
+  -- open import Data.Empty.Properties using (isProp¬)
+  -- open import Data.Sigma.Properties using (ΣProp≡)
 
-  -- *-assoc : Associative _*_
-  -- *-assoc x y z = {!!}
+  -- *-comm : Commutative _*_
+  -- *-comm (pos x) (pos y) = cong pos (comm x y)
+  -- *-comm (pos x) (neg y) = refl
+  -- *-comm (neg x) (pos y) = refl
+  -- *-comm (neg x) (neg y) = cong neg (ΣProp≡ (λ _ → isProp¬ _) (comm _ _))
 
   -- *-idˡ : Identityˡ _*_ (pos ε)
   -- *-idˡ (pos x) = cong pos (ε∙ x)
@@ -96,92 +100,98 @@ record Monus ℓ : Type (ℓsuc ℓ) where
   -- *-idˡ (neg (x , x≢ε)) | no  x≰ε = let k , p = <⇒≤ x≰ε in cong neg (ΣProp≡ (λ _ → isProp¬ _ ) (sym (ε∙ _) ; sym p ))
 
   -- *-idʳ : Identityʳ _*_ (pos ε)
-  -- *-idʳ = {!!}
-
-  -- *-invʳ : ∀ x → x * negate x ≡ pos ε
-  -- *-invʳ = {!!}
+  -- *-idʳ x = *-comm x (pos ε) ; *-idˡ x
 
   -- *-invˡ : ∀ x → negate x * x ≡ pos ε
-  -- *-invˡ = {!!}
+  -- *-invˡ (pos x) with x ≟ ε
+  -- *-invˡ (pos x) | yes x≡ε = cong pos (ε∙ x ; x≡ε)
+  -- *-invˡ (pos x) | no  x≢ε with x ≤? x
+  -- *-invˡ (pos x) | no  x≢ε | no  x≰x = ⊥-elim (x≰x ≤-refl)
+  -- *-invˡ (pos x) | no  x≢ε | yes (k , p) = cong pos {!!}
+  -- *-invˡ (neg x) = {!!}
 
-  -- *-group : Group ℓ
-  -- Monoid.𝑆 (Group.monoid *-group) = Signed
-  -- Monoid._∙_ (Group.monoid *-group) = _*_
-  -- Monoid.ε (Group.monoid *-group) = pos ε
-  -- Monoid.assoc (Group.monoid *-group) = *-assoc
-  -- Monoid.ε∙ (Group.monoid *-group) = *-idˡ
-  -- Monoid.∙ε (Group.monoid *-group) = *-idʳ
-  -- Group.- *-group = negate
-  -- Group.∙⁻ *-group = *-invʳ
-  -- Group.⁻∙ *-group = *-invˡ
+  -- -- *-invʳ : ∀ x → x * negate x ≡ pos ε
+  -- -- *-invʳ = {!!}
 
-  -- abs : Signed → 𝑆
-  -- abs (pos x) = x
-  -- abs (neg x) = fst x
 
-  -- sign-abs : ∀ x → abs (pos x) ≡ x
-  -- sign-abs x = refl
+  -- -- *-group : Group ℓ
+  -- -- Monoid.𝑆 (Group.monoid *-group) = Signed
+  -- -- Monoid._∙_ (Group.monoid *-group) = _*_
+  -- -- Monoid.ε (Group.monoid *-group) = pos ε
+  -- -- Monoid.assoc (Group.monoid *-group) = *-assoc
+  -- -- Monoid.ε∙ (Group.monoid *-group) = *-idˡ
+  -- -- Monoid.∙ε (Group.monoid *-group) = *-idʳ
+  -- -- Group.- *-group = negate
+  -- -- Group.∙⁻ *-group = *-invʳ
+  -- -- Group.⁻∙ *-group = *-invˡ
 
-  -- cancelˡ : Cancellativeˡ _∙_
-  -- cancelˡ x y z x∙y≡x∙z = cong abs (Group.cancelˡ *-group (pos x) (pos y) (pos z) (cong pos x∙y≡x∙z))
+  -- -- abs : Signed → 𝑆
+  -- -- abs (pos x) = x
+  -- -- abs (neg x) = fst x
 
-  -- cancelʳ : Cancellativeʳ _∙_
-  -- cancelʳ x y z x∙y≡x∙z = cong abs (Group.cancelʳ *-group (pos x) (pos y) (pos z) (cong pos x∙y≡x∙z))
+  -- -- sign-abs : ∀ x → abs (pos x) ≡ x
+  -- -- sign-abs x = refl
 
-  -- -- _≺_ : 𝑆 → 𝑆 → Type _
+  -- -- cancelˡ : Cancellativeˡ _∙_
+  -- -- cancelˡ x y z x∙y≡x∙z = cong abs (Group.cancelˡ *-group (pos x) (pos y) (pos z) (cong pos x∙y≡x∙z))
 
-  -- -- x ≺ y = Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)
+  -- -- cancelʳ : Cancellativeʳ _∙_
+  -- -- cancelʳ x y z x∙y≡x∙z = cong abs (Group.cancelʳ *-group (pos x) (pos y) (pos z) (cong pos x∙y≡x∙z))
 
-  -- -- <⇒≺ : ∀ {x y} → x < y → x ≺ y
-  -- -- <⇒≺ x<y = <⇒≤ x<y , diff≢ε x<y
+  -- -- -- _≺_ : 𝑆 → 𝑆 → Type _
 
-  -- -- ≺⇒< : ∀ {x y} → x ≺ y → x < y
-  -- -- ≺⇒< {x} {y} ((k₁ , y≡x∙k₁) , k₁≢ε) (k₂ , x≡y∙k₂) = {!!}
-  -- --   where
-  -- --   p : x ≡ x ∙ (k₁ ∙ k₂)
-  -- --   p = x≡y∙k₂ ; cong (_∙ k₂) y≡x∙k₁ ; assoc x k₁ k₂
+  -- -- -- x ≺ y = Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)
 
-  -- --   q : k₁ ∙ k₂ ≢ ε
-  -- --   q = k₁≢ε ∘ zeroSumFree k₁ k₂
+  -- -- -- <⇒≺ : ∀ {x y} → x < y → x ≺ y
+  -- -- -- <⇒≺ x<y = <⇒≤ x<y , diff≢ε x<y
 
-  -- -- Sup : Type _
-  -- -- Sup = Σ[ Ω ⦂ 𝑆 ] (∀ x → x ≤ Ω )
-  -- -- -- ∙-distrib-⊓ : _∙_ Distributesˡ _⊓_
-  -- -- -- ∙-distrib-⊓ x y z with x <? y | (x ∙ z) <? (y ∙ z)
-  -- -- -- ∙-distrib-⊓ x y z | yes x₁  | yes x₂ = refl
-  -- -- -- ∙-distrib-⊓ x y z | yes x₁  | no x₂  = antisym (∙-congʳ z (<⇒≤ x₁)) (≮⇒≥ x₂)
-  -- -- -- ∙-distrib-⊓ x y z | no  x≥y | yes x∙z≤y∙z = antisym (∙-congʳ z (≮⇒≥ x≥y)) (<⇒≤ x∙z≤y∙z)
-  -- -- -- ∙-distrib-⊓ x y z | no  x₁  | no x₂ = refl
+  -- -- -- ≺⇒< : ∀ {x y} → x ≺ y → x < y
+  -- -- -- ≺⇒< {x} {y} ((k₁ , y≡x∙k₁) , k₁≢ε) (k₂ , x≡y∙k₂) = {!!}
+  -- -- --   where
+  -- -- --   p : x ≡ x ∙ (k₁ ∙ k₂)
+  -- -- --   p = x≡y∙k₂ ; cong (_∙ k₂) y≡x∙k₁ ; assoc x k₁ k₂
 
-  -- -- -- module _ (sup : Sup) where
-  -- -- --   Ω : 𝑆
-  -- -- --   Ω = fst sup
+  -- -- --   q : k₁ ∙ k₂ ≢ ε
+  -- -- --   q = k₁≢ε ∘ zeroSumFree k₁ k₂
 
-  -- -- --   maximal : ∀ x → x ≤ Ω
-  -- -- --   maximal = snd sup
+  -- -- -- Sup : Type _
+  -- -- -- Sup = Σ[ Ω ⦂ 𝑆 ] (∀ x → x ≤ Ω )
+  -- -- -- -- ∙-distrib-⊓ : _∙_ Distributesˡ _⊓_
+  -- -- -- -- ∙-distrib-⊓ x y z with x <? y | (x ∙ z) <? (y ∙ z)
+  -- -- -- -- ∙-distrib-⊓ x y z | yes x₁  | yes x₂ = refl
+  -- -- -- -- ∙-distrib-⊓ x y z | yes x₁  | no x₂  = antisym (∙-congʳ z (<⇒≤ x₁)) (≮⇒≥ x₂)
+  -- -- -- -- ∙-distrib-⊓ x y z | no  x≥y | yes x∙z≤y∙z = antisym (∙-congʳ z (≮⇒≥ x≥y)) (<⇒≤ x∙z≤y∙z)
+  -- -- -- -- ∙-distrib-⊓ x y z | no  x₁  | no x₂ = refl
 
-  -- -- --   max-sup : ∀ x → Ω ⊓ x ≡ x
-  -- -- --   max-sup x with Ω <? x
-  -- -- --   max-sup x | yes x₁ = ⊥-elim (x₁ (maximal x))
-  -- -- --   max-sup x | no  x₁ = refl
+  -- -- -- -- module _ (sup : Sup) where
+  -- -- -- --   Ω : 𝑆
+  -- -- -- --   Ω = fst sup
 
-  -- -- --   cmb-sup : ∀ x → Ω ∙ x ≡ Ω
-  -- -- --   cmb-sup x = antisym (maximal (Ω ∙ x)) (x , refl)
+  -- -- -- --   maximal : ∀ x → x ≤ Ω
+  -- -- -- --   maximal = snd sup
 
-  -- -- --   viterbi : Semiring ℓ
-  -- -- --   NearSemiring.𝑅 (Semiring.nearSemiring viterbi) = 𝑆
-  -- -- --   NearSemiring._+_ (Semiring.nearSemiring viterbi) = _⊓_
-  -- -- --   NearSemiring._*_ (Semiring.nearSemiring viterbi) = _∙_
-  -- -- --   NearSemiring.1# (Semiring.nearSemiring viterbi) = ε
-  -- -- --   NearSemiring.0# (Semiring.nearSemiring viterbi) = Ω
-  -- -- --   NearSemiring.+-assoc (Semiring.nearSemiring viterbi) = ⊓-assoc
-  -- -- --   NearSemiring.*-assoc (Semiring.nearSemiring viterbi) = assoc
-  -- -- --   NearSemiring.0+ (Semiring.nearSemiring viterbi) = max-sup
-  -- -- --   NearSemiring.+0 (Semiring.nearSemiring viterbi) x = ⊓-comm x Ω ; max-sup x
-  -- -- --   NearSemiring.1* (Semiring.nearSemiring viterbi) = ε∙
-  -- -- --   NearSemiring.*1 (Semiring.nearSemiring viterbi) = ∙ε
-  -- -- --   NearSemiring.0* (Semiring.nearSemiring viterbi) = cmb-sup
-  -- -- --   NearSemiring.⟨+⟩* (Semiring.nearSemiring viterbi) = ∙-distrib-⊓
-  -- -- --   Semiring.+-comm viterbi = ⊓-comm
-  -- -- --   Semiring.*0 viterbi x = comm x Ω ; cmb-sup x
-  -- -- --   Semiring.*⟨+⟩ viterbi x y z = comm x (y ⊓ z) ; ∙-distrib-⊓ y z x ; cong₂ _⊓_ (comm y x) (comm z x)
+  -- -- -- --   max-sup : ∀ x → Ω ⊓ x ≡ x
+  -- -- -- --   max-sup x with Ω <? x
+  -- -- -- --   max-sup x | yes x₁ = ⊥-elim (x₁ (maximal x))
+  -- -- -- --   max-sup x | no  x₁ = refl
+
+  -- -- -- --   cmb-sup : ∀ x → Ω ∙ x ≡ Ω
+  -- -- -- --   cmb-sup x = antisym (maximal (Ω ∙ x)) (x , refl)
+
+  -- -- -- --   viterbi : Semiring ℓ
+  -- -- -- --   NearSemiring.𝑅 (Semiring.nearSemiring viterbi) = 𝑆
+  -- -- -- --   NearSemiring._+_ (Semiring.nearSemiring viterbi) = _⊓_
+  -- -- -- --   NearSemiring._*_ (Semiring.nearSemiring viterbi) = _∙_
+  -- -- -- --   NearSemiring.1# (Semiring.nearSemiring viterbi) = ε
+  -- -- -- --   NearSemiring.0# (Semiring.nearSemiring viterbi) = Ω
+  -- -- -- --   NearSemiring.+-assoc (Semiring.nearSemiring viterbi) = ⊓-assoc
+  -- -- -- --   NearSemiring.*-assoc (Semiring.nearSemiring viterbi) = assoc
+  -- -- -- --   NearSemiring.0+ (Semiring.nearSemiring viterbi) = max-sup
+  -- -- -- --   NearSemiring.+0 (Semiring.nearSemiring viterbi) x = ⊓-comm x Ω ; max-sup x
+  -- -- -- --   NearSemiring.1* (Semiring.nearSemiring viterbi) = ε∙
+  -- -- -- --   NearSemiring.*1 (Semiring.nearSemiring viterbi) = ∙ε
+  -- -- -- --   NearSemiring.0* (Semiring.nearSemiring viterbi) = cmb-sup
+  -- -- -- --   NearSemiring.⟨+⟩* (Semiring.nearSemiring viterbi) = ∙-distrib-⊓
+  -- -- -- --   Semiring.+-comm viterbi = ⊓-comm
+  -- -- -- --   Semiring.*0 viterbi x = comm x Ω ; cmb-sup x
+  -- -- -- --   Semiring.*⟨+⟩ viterbi x y z = comm x (y ⊓ z) ; ∙-distrib-⊓ y z x ; cong₂ _⊓_ (comm y x) (comm z x)
