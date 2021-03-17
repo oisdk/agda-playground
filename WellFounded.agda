@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --cubical --safe #-}
 
 module WellFounded where
 
@@ -16,3 +16,9 @@ data Acc {a r} {A : Type a} (R : A → A → Type r) (x : A) : Type (a ℓ⊔ r)
 
 WellFounded : ∀ {r} → (A → A → Type r) → Type _
 WellFounded R = ∀ x → Acc R x
+
+open import HLevels
+open import Path
+
+isPropAcc : ∀ {r} {R : A → A → Type r} {x : A} → isProp (Acc R x)
+isPropAcc (acc x) (acc y) = cong acc (funExt λ n → funExt λ p → isPropAcc (x n p) (y n p))
