@@ -48,40 +48,56 @@ x ∉ xs = ¬ (x ∈ xs)
 
 
 
--- module _ (_≟_ : Discrete A) where
---   member : A → ψ[ xs ⦂ A ] Bool
---   [ member x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = does (x ≟ y) or P⟨xs⟩
---   [ member x ][] = false
---   [ member x ]-swap y z xs pxs with does (x ≟ y) | does (x ≟ z)
---   [ member x ]-swap y z xs pxs | false | xz    = refl
---   [ member x ]-swap y z xs pxs | true  | false = refl
---   [ member x ]-swap y z xs pxs | true  | true  = refl
+module _ (_≟_ : Discrete A) where
+  member : A → ψ[ xs ⦂ A ] Bool
+  [ member x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = does (x ≟ y) or P⟨xs⟩
+  [ member x ][] = false
+  [ member x ]-swap y z xs pxs with does (x ≟ y) | does (x ≟ z)
+  [ member x ]-swap y z xs pxs | false | xz    = refl
+  [ member x ]-swap y z xs pxs | true  | false = refl
+  [ member x ]-swap y z xs pxs | true  | true  = refl
 
---   member-conv : (x : A) → ψ[ xs ⦂ A ] (T ([ member x ] xs) → x ∈ xs)
---   [ member-conv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m with x ≟ y
---   [ member-conv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m | yes p = xs , cong (_∷ xs) p
---   [ member-conv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m | no ¬p = let ys , x∈ys = P⟨xs⟩ m in y ∷ ys , (swap x y ys ; cong (y ∷_) x∈ys)
---   [ member-conv x ][] ()
---   [ member-conv x ]-swap = {!!}
+  member-conv : (x : A) → ψ[ xs ⦂ A ] (T ([ member x ] xs) → x ∈ xs)
+  [ member-conv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m with x ≟ y
+  [ member-conv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m | yes p = xs , cong (_∷ xs) p
+  [ member-conv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m | no ¬p = let ys , x∈ys = P⟨xs⟩ m in y ∷ ys , (swap x y ys ; cong (y ∷_) x∈ys)
+  [ member-conv x ][] ()
+  [ member-conv x ]-swap = {!!}
 
---   member-inv : (x : A) → ψ[ xs ⦂ A ] (x ∈ xs → T ([ member x ] xs))
---   [ member-inv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ x∈xs with x ≟ y
---   [ member-inv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ x∈xs | yes p = tt
---   [ member-inv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ (ys , x∈xs) | no ¬p = P⟨xs⟩ {!!}
---   [ member-inv x ][] x∈xs = snotz (cong length (snd x∈xs))
---   [ member-inv x ]-swap = {!!}
+  remove : A → ψ[ xs ⦂ A ] Row A
+  [ remove x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = if does (x ≟ y) then xs else y ∷ P⟨xs⟩
+  [ remove x ][] = []
+  [ remove x ]-swap y z xs pxs with x ≟ y | x ≟ z
+  [ remove x ]-swap y z xs pxs | no _    | no _  = swap y z pxs
+  [ remove x ]-swap y z xs pxs | no _    | yes _ = refl
+  [ remove x ]-swap y z xs pxs | yes _   | no _  = refl
+  [ remove x ]-swap y z xs pxs | yes x≡y | yes x≡z = cong (_∷ xs) (sym x≡z ; x≡y)
 
---   -- ∈?-alg : (x : A) → ψ[ xs ⦂ A ] Dec (x ∈ xs)
---   -- [ ∈?-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ =
---   --   ∣ x ≟ y
---   --     ∣yes x≡y ⇒ yes (xs , cong (_∷ xs) x≡y)
---   --     ∣no  x≢y ⇒ ∣ P⟨xs⟩
---   --       ∣yes (ys , x≡y) ⇒ yes (y ∷ ys , swap x y ys ; cong (y ∷_) x≡y)
---   --       ∣no  x∉xs ⇒ no (∉-cons x y xs x≢y x∉xs)
---   -- [ ∈?-alg x ][] = no (snotz ∘ cong length ∘ snd)
---   -- [ ∈?-alg x ]-swap = {!!}
+  push : (y : A) → ψ[ ys ⦂ A ] (∀ x xs → x ≢ y → x ∷ ys ≡ y ∷ xs → x ∷ [ remove y ] ys ≡ xs)
+  [ push y ] z ∷ ys ⟨ P⟨ys⟩ ⟩ x xs x≢y p with y ≟ z
+  [ push y ] z ∷ ys ⟨ P⟨ys⟩ ⟩ x xs x≢y p | yes y≡z = {!!}
+  [ push y ] z ∷ ys ⟨ P⟨ys⟩ ⟩ x xs x≢y p | no  y≢z = {!!}
+  [ push y ][] p = {!!}
+  [ push y ]-swap = {!!}
 
---   -- _∈?_ : (x : A) → (xs : Row A) → Dec (x ∈ xs)
---   -- x ∈? [] = 
---   -- x ∈? (y ∷ xs) = {!!}
---   -- x ∈? swap y z xs i = {!!}
+  member-inv : (x : A) → ψ[ xs ⦂ A ] (x ∈ xs → T ([ member x ] xs))
+  [ member-inv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ x∈xs with x ≟ y
+  [ member-inv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ x∈xs | yes p = tt
+  [ member-inv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ (ys , x∈xs) | no ¬p = P⟨xs⟩ ([ remove y ] ys , [ push y ] ys x xs ¬p x∈xs)
+  [ member-inv x ][] x∈xs = snotz (cong length (snd x∈xs))
+  [ member-inv x ]-swap = {!!}
+
+  -- ∈?-alg : (x : A) → ψ[ xs ⦂ A ] Dec (x ∈ xs)
+  -- [ ∈?-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ =
+  --   ∣ x ≟ y
+  --     ∣yes x≡y ⇒ yes (xs , cong (_∷ xs) x≡y)
+  --     ∣no  x≢y ⇒ ∣ P⟨xs⟩
+  --       ∣yes (ys , x≡y) ⇒ yes (y ∷ ys , swap x y ys ; cong (y ∷_) x≡y)
+  --       ∣no  x∉xs ⇒ no (∉-cons x y xs x≢y x∉xs)
+  -- [ ∈?-alg x ][] = no (snotz ∘ cong length ∘ snd)
+  -- [ ∈?-alg x ]-swap = {!!}
+
+  -- _∈?_ : (x : A) → (xs : Row A) → Dec (x ∈ xs)
+  -- x ∈? [] = 
+  -- x ∈? (y ∷ xs) = {!!}
+  -- x ∈? swap y z xs i = {!!}
