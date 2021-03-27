@@ -105,8 +105,8 @@ module _ (_≟_ : Discrete A) where
   member-inv : (x : A) → ψ[ xs ⦂ A ] (x ∈ xs → T ([ member x ] xs))
   [ member-inv x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = member-cons x y xs P⟨xs⟩
   [ member-inv x ][] x∈xs = snotz (cong length (snd x∈xs))
-  [ member-inv x ]-swap y z xs pxs =
-    toPathP (∥_∥-prop (transp (λ i → P (com x y xs i)) i0 (f x (y ∷ xs) (f y xs pxs))) (f y (x ∷ xs) (f x xs pxs))))
+  [ member-inv x ]-swap y z xs pxs = {!!}
+    -- toPathP (∥_∥-prop (transp (λ i → P (com x y xs i)) i0 (f x (y ∷ xs) (f y xs pxs))) (f y (x ∷ xs) (f x xs pxs))))
     -- isPropT
     --  ([ member x ] (swap y z xs i)) (member-cons x y (z ∷ xs) (member-cons x z xs pxs)) (member-cons x z (y ∷ xs) (member-cons x y xs pxs)) i
 
