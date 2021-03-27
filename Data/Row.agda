@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --allow-unsolved-metas #-}
+{-# OPTIONS --cubical --allow-unsolved-metas --postfix-projections #-}
 
 module Data.Row where
 
@@ -57,8 +57,6 @@ record ψ-prop {a p} (A : Type a) (P : Row A → Type p) : Type (a ℓ⊔ p) whe
   ∥_∥⇓ : ∀ xs → P xs
   ∥_∥⇓ = [ to-elim ]
 
-
-
 syntax ψ-prop ty (λ v → e) = ψ[ v ⦂ ty ]∥ e ∥
 open ψ-prop
 
@@ -89,6 +87,8 @@ union-alg ys .swap-coh x y xs pxs = swap x y pxs
 _∪_ : Row A → Row A → Row A
 xs ∪ ys = [ union-alg ys ] xs
 
+open import Relation.Nullary.Decidable.Logic
+
 module _ (_≟_ : Discrete A) where
   _⁻ : A → ψ[ xs ⦂ A ] Row A
   [ (x ⁻) .alg ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = if does (x ≟ y) then xs else y ∷ P⟨xs⟩
@@ -114,46 +114,67 @@ module _ (_≟_ : Discrete A) where
   ∷-inj x xs ys p | yes _ | q = q
   ∷-inj x xs ys p | no ¬p | q = ⊥-elim (¬p refl)
 
+  elem-push : ∀ x y (xs : Row A) → ¬ ((x ≡ y) ⊎ (x ∈ xs)) → ¬ (x ∈ y ∷ xs)
+  elem-push x y xs x∉xs′ x∈y∷xs with x ≟ y
+  elem-push x y xs x∉xs′ x∈y∷xs | yes p = x∉xs′ (inl p)
+  elem-push x y xs x∉xs′ (ys , x∷ys≡y∷xs) | no x≢y =
+    let q = rem-swap x y ys x≢y ; cong [ y ⁻ ] x∷ys≡y∷xs ; rem-cons y xs
+    in x∉xs′ (inr ([ y ⁻ ] ys , q))
 
-  member : A → ψ[ xs ⦂ A ] Bool
-  [ member x .alg ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = does (x ≟ y) or P⟨xs⟩
-  [ member x .alg ][] = false
-  member x .swap-coh y z xs pxs with does (x ≟ y) | does (x ≟ z)
-  member x .swap-coh y z xs pxs | false | xz    = refl
-  member x .swap-coh y z xs pxs | true  | false = refl
-  member x .swap-coh y z xs pxs | true  | true  = refl
-
-  member-conv-alg : (x : A) → Alg A (λ xs → T ([ member x ] xs) → x ∈ xs)
-  [ member-conv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m with x ≟ y
-  [ member-conv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m | yes p = xs , cong (_∷ xs) p
-  [ member-conv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m | no ¬p = let ys , x∈ys = P⟨xs⟩ m in y ∷ ys , (swap x y ys ; cong (y ∷_) x∈ys)
-  [ member-conv-alg x ][] ()
-
-  member-conv-coh : (x : A) → Swap-Coh (member-conv-alg x)
-  member-conv-coh x y z xs P⟨xs⟩ = {!!}
-
-  member-inv-alg : (x : A) → Alg A (λ xs → x ∈ xs → T ([ member x ] xs))
-  [ member-inv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ x∈xs with x ≟ y
-  [ member-inv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ x∈xs | yes x≡y = tt
-  [ member-inv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ (ys , x∷ys≡y∷xs) | no x≢y = P⟨xs⟩ ([ y ⁻ ] ys , rem-swap x y ys x≢y ; cong [ y ⁻ ] x∷ys≡y∷xs ; rem-cons y xs)
-  [ member-inv-alg x ][] x∈xs = snotz (cong length (snd x∈xs))
-
-  member-inv : (x : A) → ψ[ xs ⦂ A ]∥ (x ∈ xs → T ([ member x ] xs)) ∥
-  member-inv x .p-alg = member-inv-alg x
-  member-inv x .is-prop xs f g = funExt λ x∈xs → isPropT ([ member x ] xs) (f x∈xs) (g x∈xs)
+  elem : ∀ x → ψ[ xs ⦂ A ] Dec (x ∈ xs)
+  [ elem x .alg ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = map-dec (either (λ x≡y → (xs , cong (_∷ xs) x≡y)) λ { (ys , x∷ys≡xs) → y ∷ ys , swap x y ys ; cong (y ∷_) x∷ys≡xs }) (elem-push x y xs) ((x ≟ y) || P⟨xs⟩)
+  [ elem x .alg ][] = no (snotz ∘ cong length ∘ snd)
+  elem x .swap-coh x₁ y xs P⟨xs⟩ = ?
 
 
--- --   -- ∈?-alg : (x : A) → ψ[ xs ⦂ A ] Dec (x ∈ xs)
--- --   -- [ ∈?-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ =
--- --   --   ∣ x ≟ y
--- --   --     ∣yes x≡y ⇒ yes (xs , cong (_∷ xs) x≡y)
--- --   --     ∣no  x≢y ⇒ ∣ P⟨xs⟩
--- --   --       ∣yes (ys , x≡y) ⇒ yes (y ∷ ys , swap x y ys ; cong (y ∷_) x≡y)
--- --   --       ∣no  x∉xs ⇒ no (∉-cons x y xs x≢y x∉xs)
--- --   -- [ ∈?-alg x ][] = no (snotz ∘ cong length ∘ snd)
--- --   -- [ ∈?-alg x ]-swap = {!!}
+  -- ∈?-alg : ∀ x → ψ[ xs ⦂ A ] Dec (x ∈ xs)
+  -- [ ∈?-alg x .alg ] y ∷ xs ⟨ P⟨xs⟩ ⟩ with x ≟ y
+  -- [ ∈?-alg x .alg ] y ∷ xs ⟨ P⟨xs⟩ ⟩ | yes x≡y = yes (xs , ∣ cong (_∷ xs) x≡y ∣)
+  -- [ ∈?-alg x .alg ] y ∷ xs ⟨ yes (ys , x∷ys≡xs ) ⟩ | no x≢y = yes (y ∷ ys , {!!})
+  -- [ ∈?-alg x .alg ] y ∷ xs ⟨ no  x∉xs ⟩ | no x≢y = no (uncurry {!!})
+  -- [ ∈?-alg x .alg ][] = no {!!}
+  -- ∈?-alg x .swap-coh = {!!}
 
--- --   -- _∈?_ : (x : A) → (xs : Row A) → Dec (x ∈ xs)
--- --   -- x ∈? [] = 
--- --   -- x ∈? (y ∷ xs) = {!!}
--- --   -- x ∈? swap y z xs i = {!!}
+
+--   member : A → ψ[ xs ⦂ A ] Bool
+--   [ member x .alg ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = does (x ≟ y) or P⟨xs⟩
+--   [ member x .alg ][] = false
+--   member x .swap-coh y z xs pxs with does (x ≟ y) | does (x ≟ z)
+--   member x .swap-coh y z xs pxs | false | xz    = refl
+--   member x .swap-coh y z xs pxs | true  | false = refl
+--   member x .swap-coh y z xs pxs | true  | true  = refl
+
+--   member-conv-alg : (x : A) → Alg A (λ xs → T ([ member x ] xs) → x ∈ xs)
+--   [ member-conv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m with x ≟ y
+--   [ member-conv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m | yes p = xs , cong (_∷ xs) p
+--   [ member-conv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ m | no ¬p = let ys , x∈ys = P⟨xs⟩ m in y ∷ ys , (swap x y ys ; cong (y ∷_) x∈ys)
+--   [ member-conv-alg x ][] ()
+
+--   member-conv-coh : (x : A) → Swap-Coh (member-conv-alg x)
+--   member-conv-coh x y z xs P⟨xs⟩ = {!!}
+
+--   member-inv-alg : (x : A) → Alg A (λ xs → x ∈ xs → T ([ member x ] xs))
+--   [ member-inv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ x∈xs with x ≟ y
+--   [ member-inv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ x∈xs | yes x≡y = tt
+--   [ member-inv-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ (ys , x∷ys≡y∷xs) | no x≢y = P⟨xs⟩ ([ y ⁻ ] ys , rem-swap x y ys x≢y ; cong [ y ⁻ ] x∷ys≡y∷xs ; rem-cons y xs)
+--   [ member-inv-alg x ][] x∈xs = snotz (cong length (snd x∈xs))
+
+--   member-inv : (x : A) → ψ[ xs ⦂ A ]∥ (x ∈ xs → T ([ member x ] xs)) ∥
+--   member-inv x .p-alg = member-inv-alg x
+--   member-inv x .is-prop xs f g = funExt λ x∈xs → isPropT ([ member x ] xs) (f x∈xs) (g x∈xs)
+
+
+-- -- --   -- ∈?-alg : (x : A) → ψ[ xs ⦂ A ] Dec (x ∈ xs)
+-- -- --   -- [ ∈?-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ =
+-- -- --   --   ∣ x ≟ y
+-- -- --   --     ∣yes x≡y ⇒ yes (xs , cong (_∷ xs) x≡y)
+-- -- --   --     ∣no  x≢y ⇒ ∣ P⟨xs⟩
+-- -- --   --       ∣yes (ys , x≡y) ⇒ yes (y ∷ ys , swap x y ys ; cong (y ∷_) x≡y)
+-- -- --   --       ∣no  x∉xs ⇒ no (∉-cons x y xs x≢y x∉xs)
+-- -- --   -- [ ∈?-alg x ][] = no (snotz ∘ cong length ∘ snd)
+-- -- --   -- [ ∈?-alg x ]-swap = {!!}
+
+-- -- --   -- _∈?_ : (x : A) → (xs : Row A) → Dec (x ∈ xs)
+-- -- --   -- x ∈? [] = 
+-- -- --   -- x ∈? (y ∷ xs) = {!!}
+-- -- --   -- x ∈? swap y z xs i = {!!}
