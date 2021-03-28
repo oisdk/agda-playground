@@ -114,17 +114,17 @@ module _ (_≟_ : Discrete A) where
   ∷-inj x xs ys p | yes _ | q = q
   ∷-inj x xs ys p | no ¬p | q = ⊥-elim (¬p refl)
 
-  elem-push : ∀ x y (xs : Row A) → ¬ ((x ≡ y) ⊎ (x ∈ xs)) → ¬ (x ∈ y ∷ xs)
-  elem-push x y xs x∉xs′ x∈y∷xs with x ≟ y
-  elem-push x y xs x∉xs′ x∈y∷xs | yes p = x∉xs′ (inl p)
-  elem-push x y xs x∉xs′ (ys , x∷ys≡y∷xs) | no x≢y =
+  elem-push : ∀ x y (xs : Row A) → x ≢ y → x ∉ xs → x ∉ y ∷ xs
+  elem-push x y xs x≢y x∉xs (ys , x∷ys≡y∷xs) =
     let q = rem-swap x y ys x≢y ; cong [ y ⁻ ] x∷ys≡y∷xs ; rem-cons y xs
-    in x∉xs′ (inr ([ y ⁻ ] ys , q))
+    in x∉xs ([ y ⁻ ] ys , q)
 
-  elem : ∀ x → ψ[ xs ⦂ A ] Dec (x ∈ xs)
-  [ elem x .alg ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = map-dec (either (λ x≡y → (xs , cong (_∷ xs) x≡y)) λ { (ys , x∷ys≡xs) → y ∷ ys , swap x y ys ; cong (y ∷_) x∷ys≡xs }) (elem-push x y xs) ((x ≟ y) || P⟨xs⟩)
-  [ elem x .alg ][] = no (snotz ∘ cong length ∘ snd)
-  elem x .swap-coh x₁ y xs P⟨xs⟩ = ?
+  elem-alg : ∀ x → Alg A (λ xs → Dec (x ∈ xs))
+  [ elem-alg x ] y ∷ xs ⟨ P⟨xs⟩ ⟩ = disj (λ x≡y → (xs , cong (_∷ xs) x≡y)) (λ { (ys , x∷ys≡xs) → y ∷ ys , swap x y ys ; cong (y ∷_) x∷ys≡xs }) (elem-push x y xs) (x ≟ y) P⟨xs⟩
+  [ elem-alg x ][] = no (snotz ∘ cong length ∘ snd)
+
+  elem-coh : (x : A) → Swap-Coh (elem-alg x)
+  elem-coh x y z xs P⟨xs⟩ = {!!}
 
 
   -- ∈?-alg : ∀ x → ψ[ xs ⦂ A ] Dec (x ∈ xs)
