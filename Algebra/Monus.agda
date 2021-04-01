@@ -51,7 +51,7 @@ record Monus ℓ : Type (ℓsuc ℓ) where
   totalOrder = fromPartialOrder partialOrder _≤|≥_
 
   open TotalOrder totalOrder
-    hiding (refl; antisym; _≤_; _≤|≥_; partialOrder; ≤-trans; _≟_)
+    hiding (refl; antisym; _≤_; _≤|≥_; partialOrder; ≤-trans)
     public
 
   diff≢ε : ∀ {x y} → (x<y : x < y) → fst (<⇒≤ x<y) ≢ ε
