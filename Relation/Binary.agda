@@ -173,47 +173,44 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
 
   open import Data.Unit
 
-  module FromDec (_≤?_ : Decidable _≤_) (asym : ∀ {x y} → x ≰ y → y ≰ x → ⊥) where
+  module _ (_≤|≥_ : Total _≤_) where
+    ≤-side : 𝑆 → 𝑆 → Bool
+    ≤-side x y = is-l (x ≤|≥ y)
+
+    ≤-dec : Decidable _≤_
+    ≤-dec x y with x ≤|≥ y | inspect (≤-side x) y
+    ≤-dec x y | inl x≤y | _ = yes x≤y
+    ≤-dec x y | inr x≥y | _ with y ≤|≥ x | inspect (≤-side y) x
+    ≤-dec x y | inr x≥y | _ | inr y≥x | _ = yes y≥x
+    ≤-dec x y | inr x≥y | 〖 pxy 〗 | inl y≤x | 〖 pyx 〗 = no (y≢x ∘ antisym x≥y)
+      where
+      y≢x : y ≢ x
+      y≢x p = subst (bool ⊤ ⊥) (≡.sym pxy ; cong₂ ≤-side (≡.sym p) p ; pyx) tt
+
     ≤-stable : ∀ {x y} → Stable (x ≤ y)
-    ≤-stable {x} {y} ¬¬x≤y with x ≤? y
+    ≤-stable {x} {y} ¬¬x≤y with ≤-dec x y
     ... | yes x≤y = x≤y
     ... | no  x≰y = ⊥-elim (¬¬x≤y x≰y)
+
+    asym-≰ : Asymmetric _≰_
+    asym-≰ {x} {y} x≰y y≰x = either x≰y y≰x (x ≤|≥ y)
 
     toStrict : StrictPartialOrder 𝑆 ℓ₂
     toStrict .StrictPartialOrder._<_ x y = ¬ (y ≤ x)
     toStrict .StrictPartialOrder.conn x<y y<x = antisym (≤-stable y<x) (≤-stable x<y)
-    toStrict .StrictPartialOrder.asym = asym
-    toStrict .StrictPartialOrder.trans {x} {y} {z} y≰x z≰y z≤x with y ≤? z
+    toStrict .StrictPartialOrder.asym = asym-≰
+    toStrict .StrictPartialOrder.trans {x} {y} {z} y≰x z≰y z≤x with ≤-dec y z
     ... | yes y≤z = y≰x (trans y≤z z≤x)
-    ... | no  y≰z = asym z≰y y≰z
+    ... | no  y≰z = asym-≰ z≰y y≰z
 
     fromPartialOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
     fromPartialOrder .TotalOrder.strictPartialOrder = toStrict
     fromPartialOrder .TotalOrder.partialOrder = partialOrder
     fromPartialOrder .TotalOrder.≰⇒> x≤y = x≤y
     fromPartialOrder .TotalOrder.≮⇒≥ = ≤-stable
-    fromPartialOrder .TotalOrder._<?_ x y with y ≤? x
+    fromPartialOrder .TotalOrder._<?_ x y with ≤-dec y x
     ... | yes y≤x = no λ y≰x → y≰x y≤x
     ... | no  y≰x = yes y≰x
-
-  module _ (_≤?_ : Total _≤_) where
-    ≤-dec : Decidable _≤_
-    ≤-dec x y with x ≤? y | inspect (x ≤?_) y
-    ≤-dec x y | inl x≤y | _ = yes x≤y
-    ≤-dec x y | inr x≥y | _ with y ≤? x | inspect (y ≤?_) x
-    ≤-dec x y | inr x≥y | _ | inr y≥x | _ = yes y≥x
-    ≤-dec x y | inr x≥y | 〖 pxy 〗 | inl y≤x | 〖 pyx 〗 = no λ x≤y → x≢y (antisym x≤y x≥y)
-      where
-      ≤-b : 𝑆 → 𝑆 → Bool
-      ≤-b x y = is-l (x ≤? y)
-
-      x≢y : x ≢ y
-      x≢y p = subst (bool ⊤ ⊥) (cong is-l (≡.sym pxy) ; cong₂ ≤-b p (≡.sym p) ; cong is-l pyx) tt
-
-    asym-≰ : Asymmetric _≰_
-    asym-≰ {x} {y} x≰y y≰x = either x≰y y≰x (x ≤? y)
-
-    open FromDec ≤-dec asym-≰ public using (fromPartialOrder)
 
 module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (strictPartialOrder : StrictPartialOrder 𝑆 ℓ₂) where
   open StrictPartialOrder strictPartialOrder
