@@ -58,7 +58,6 @@ record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ �
   x > y = y < x
   x ≯ y = ¬ (y < x)
 
-
 record PartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _≤_
   field
@@ -103,23 +102,23 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
 
   _≤?_ : Decidable _≤_
   x ≤? y with y <? x
-  x ≤? y | yes y<x = no (<⇒≱ y<x)
-  x ≤? y | no  y≮x = yes (≮⇒≥ y≮x)
+  ... | yes y<x = no (<⇒≱ y<x)
+  ... | no  y≮x = yes (≮⇒≥ y≮x)
 
   _≤ᵇ_ : 𝑆 → 𝑆 → Bool
   x ≤ᵇ y = does (x ≤? y)
 
   _≤|≥_ : Total _≤_
   x ≤|≥ y with x <? y
-  x ≤|≥ y | yes x<y = inl (<⇒≤ x<y)
-  x ≤|≥ y | no  x≮y = inr (≮⇒≥ x≮y)
+  ... | yes x<y = inl (<⇒≤ x<y)
+  ... | no  x≮y = inr (≮⇒≥ x≮y)
 
   open import Data.Unit
   open import Data.Empty
   open import Data.Sigma
 
-  total⇒discrete : Discrete 𝑆
-  total⇒discrete x y with x <? y | y <? x
+  _≟_ : Discrete 𝑆
+  x ≟ y with x <? y | y <? x
   ... | yes x<y | _ = no (irrefl x<y)
   ... | _ | yes y<x = no (irrefl y<x ∘ ≡.sym)
   ... | no x≮y | no y≮x = yes (conn x≮y y≮x)
@@ -139,7 +138,7 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   open import Relation.Nullary.Discrete.Properties using (Discrete→isSet)
 
   total⇒isSet : isSet 𝑆
-  total⇒isSet = Discrete→isSet total⇒discrete
+  total⇒isSet = Discrete→isSet _≟_
 
   open import Data.Bool using (bool′)
 
