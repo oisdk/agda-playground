@@ -36,5 +36,5 @@ _≥_ = flip _≤_
 ∙-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
 ∙-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
 
-Trichotomous : Type _
-Trichotomous = (x y : 𝑆) → Tri _<_ _≡_ _>_ x y
+-- Trichotomous : Type _
+-- Trichotomous = (x y : 𝑆) → Tri _<_ _≡_ _>_ x y

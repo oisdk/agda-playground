@@ -7,7 +7,7 @@ module Data.AVLTree.Internal {k} {K : Type k} {r₁ r₂} (totalOrder : TotalOrd
 
 open import Relation.Binary.Construct.Bounded totalOrder
 open import Data.Nat using (_+_)
-open TotalOrder totalOrder using (_<?_; compare)
+open TotalOrder totalOrder using (_<?_; compare; Ordering; lt; eq; gt)
 open TotalOrder b-ord using (<-trans) renaming (refl to <-refl)
 import Data.Empty.UniversePolymorphic as Poly
 

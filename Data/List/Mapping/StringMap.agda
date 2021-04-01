@@ -7,8 +7,8 @@ open import Data.List.Mapping stringOrd public
 open import Prelude
 open import Data.Maybe
 
-example : Record (∅ [ "name" ]︓ String [ "age" ]︓ ℕ [ "occ" ]︓ Bool)
-example =
-  ∅ [ "age"  ]≔ 30
-    [ "occ"  ]≔ true
-    [ "name" ]≔ "Jo"
+-- example : Record (∅ [ "name" ]︓ String [ "age" ]︓ ℕ [ "occ" ]︓ Bool)
+-- example =
+--   ∅ [ "age"  ]≔ 30
+--     [ "occ"  ]≔ true
+--     [ "name" ]≔ "Jo"

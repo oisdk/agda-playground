@@ -41,19 +41,6 @@ module _ (_~_ : A → A → Type b) where
   Total : Type _
   Total = ∀ x y → (x ~ y) ⊎ (y ~ x)
 
-data Ord : Type₀ where LT EQ GT : Ord
-
-module _ {a r₁ r₂ r₃} {A : Type a} (R₁ : A → A → Type r₁) (R₂ : A → A → Type r₂) (R₃ : A → A → Type r₃) (x y : A) where
-  data Tri : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
-    lt : R₁ x y → Tri
-    eq : R₂ x y → Tri
-    gt : R₃ x y → Tri
-
-  data InstTri : Type (a ℓ⊔ r₁ ℓ⊔ r₂ ℓ⊔ r₃) where
-    lt′ : ⦃ _ : R₁ x y ⦄ → InstTri
-    eq′ : ⦃ _ : R₂ x y ⦄ → InstTri
-    gt′ : ⦃ _ : R₃ x y ⦄ → InstTri
-
 record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _<_
   field
@@ -100,36 +87,6 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
     ≰⇒> : ∀ {x y} → x ≰ y → x > y
     ≮⇒≥ : ∀ {x y} → x ≮ y → x ≥ y
 
-  Ordering : 𝑆 → 𝑆 → Type (ℓ₁ ℓ⊔ ℓ₂)
-  Ordering = Tri _<_ _≡_ (flip _<_)
-
-  compare : ∀ x y → Ordering x y
-  compare x y = dec lt (λ x≮y → dec gt (λ y≮x → eq (conn x≮y y≮x)) (y <? x)) (x <? y)
-
-  compared : {x y : 𝑆} →
-             (⦃ lt : x < y ⦄ → A) →
-             (⦃ eq : x ≡ y ⦄ → A) →
-             (⦃ gt : x > y ⦄ → A) →
-             Ordering x y →
-             A
-  compared lt-c eq-c gt-c (lt p) = lt-c ⦃ p ⦄
-  compared lt-c eq-c gt-c (eq p) = eq-c ⦃ p ⦄
-  compared lt-c eq-c gt-c (gt p) = gt-c ⦃ p ⦄
-
-  compare′ : (x y : 𝑆) → InstTri _<_ _≡_ _>_ x y
-  compare′ x y = compared lt′ eq′ gt′ (compare x y)
-
-  infixr 1 comparing_∙_|<_|≡_|>_
-  comparing_∙_|<_|≡_|>_ : (x y : 𝑆) →
-              (⦃ lt : x < y ⦄ → A) →
-              (⦃ eq : x ≡ y ⦄ → A) →
-              (⦃ gt : x > y ⦄ → A) →
-              A
-  comparing x ∙ y |< lt-c |≡ eq-c |> gt-c with compare′ x y
-  ... | lt′ = lt-c
-  ... | eq′ = eq-c
-  ... | gt′ = gt-c
-
   <⇒≤ : ∀ {x y} → x < y → x ≤ y
   <⇒≤ = ≮⇒≥ ∘ asym
 
@@ -162,10 +119,21 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   open import Data.Sigma
 
   total⇒discrete : Discrete 𝑆
-  total⇒discrete x y with compare x y
-  ... | lt x<y = no (irrefl x<y)
-  ... | eq x≡y = yes x≡y
-  ... | gt x>y = no (irrefl x>y ∘ ≡.sym)
+  total⇒discrete x y with x <? y | y <? x
+  ... | yes x<y | _ = no (irrefl x<y)
+  ... | _ | yes y<x = no (irrefl y<x ∘ ≡.sym)
+  ... | no x≮y | no y≮x = yes (conn x≮y y≮x)
+
+  data Ordering (x y : 𝑆) : Type (ℓ₁ ℓ⊔ ℓ₂) where
+    lt : x < y → Ordering x y
+    eq : x ≡ y → Ordering x y
+    gt : x > y → Ordering x y
+
+  compare : ∀ x y → Ordering x y
+  compare x y with x <? y | y <? x
+  ... | yes x<y | _ = lt x<y
+  ... | no  x≮y | yes y<x = gt y<x
+  ... | no  x≮y | no  y≮x = eq (conn x≮y y≮x)
 
   open import HLevels using (isSet)
   open import Relation.Nullary.Discrete.Properties using (Discrete→isSet)
