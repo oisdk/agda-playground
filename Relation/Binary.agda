@@ -171,6 +171,7 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
   open import Data.Sigma
   open import Relation.Nullary.Stable.Base
 
+  open import Relation.Nullary.Decidable.Properties using (Dec→DoubleNegElim)
   open import Data.Unit
 
   module _ (_≤|≥_ : Total _≤_) where
@@ -178,19 +179,16 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
     ≤-side x y = is-l (x ≤|≥ y)
 
     ≤-dec : Decidable _≤_
-    ≤-dec x y with x ≤|≥ y | inspect (≤-side x) y
-    ≤-dec x y | inl x≤y | _ = yes x≤y
-    ≤-dec x y | inr x≥y | _ with y ≤|≥ x | inspect (≤-side y) x
-    ≤-dec x y | inr x≥y | _ | inr y≥x | _ = yes y≥x
-    ≤-dec x y | inr x≥y | 〖 pxy 〗 | inl y≤x | 〖 pyx 〗 = no (y≢x ∘ antisym x≥y)
+    ≤-dec x y with x ≤|≥ y | y ≤|≥ x | inspect (≤-side x) y | inspect (≤-side y) x
+    ≤-dec x y | inl x≤y | _       | _ | _ = yes x≤y
+    ≤-dec x y | inr x≥y | inr y≥x | _ | _ = yes y≥x
+    ≤-dec x y | inr x≥y | inl y≤x | 〖 x≥yᵇ 〗 | 〖 y≤xᵇ 〗 = no (x≢y ∘ flip antisym x≥y)
       where
-      y≢x : y ≢ x
-      y≢x p = subst (bool ⊤ ⊥) (≡.sym pxy ; cong₂ ≤-side (≡.sym p) p ; pyx) tt
+      x≢y : x ≢ y
+      x≢y x≡y = subst (bool ⊤ ⊥) (≡.sym x≥yᵇ ; cong₂ ≤-side x≡y (≡.sym x≡y) ; y≤xᵇ) tt
 
     ≤-stable : ∀ {x y} → Stable (x ≤ y)
-    ≤-stable {x} {y} ¬¬x≤y with ≤-dec x y
-    ... | yes x≤y = x≤y
-    ... | no  x≰y = ⊥-elim (¬¬x≤y x≰y)
+    ≤-stable {x} {y} = Dec→DoubleNegElim _ (≤-dec x y)
 
     asym-≰ : Asymmetric _≰_
     asym-≰ {x} {y} x≰y y≰x = either x≰y y≰x (x ≤|≥ y)
