@@ -293,3 +293,27 @@ record Foldable ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
     foldMap : {A : Type ℓ₁} ⦃ _ : Monoid ℓ₁ ⦄ → (A → 𝑆) → 𝐹 A → 𝑆
   foldr : {A B : Type ℓ₁} → (A → B → B) → B → 𝐹 A → B
   foldr f b xs = foldMap ⦃ endoMonoid _ ⦄ f xs b
+
+record GradedMonad ℓ₁ ℓ₂ ℓ₃ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃)) where
+  field
+    monoid : Monoid ℓ₁
+  open Monoid monoid public
+  field
+    𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₃
+    pure  : A → 𝐹 ε A
+    _>>=_ : ∀ {x y} → 𝐹 x A → (A → 𝐹 y B) → 𝐹 (x ∙ y) B
+
+    >>=-idˡ : ∀ {s} (f : A → 𝐹 s B) → (x : A) → (pure x >>= f) ≡[ i ≔ 𝐹 (ε∙ s i) B ]≡ (f x)
+    >>=-idʳ : ∀ {s} (x : 𝐹 s A) → (x >>= pure) ≡[ i ≔ 𝐹 (∙ε s i) A ]≡ x
+    >>=-assoc : ∀ {x y z} (xs : 𝐹 x A) (f : A → 𝐹 y B) (g : B → 𝐹 z C) → ((xs >>= f) >>= g) ≡[ i ≔ 𝐹 (assoc x y z i) C ]≡ (xs >>= (λ x → f x >>= g))
+
+  infixr 0 proven-bind
+
+  proven-bind : ∀ {x y z} → 𝐹 x A → (A → 𝐹 y B) → (x ∙ y) ≡ z → 𝐹 z B
+  proven-bind xs f proof = subst (flip 𝐹 _) proof (xs >>= f)
+
+  syntax proven-bind xs f proof = xs >>=[ proof ] f
+
+  map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
+  map f xs = xs >>=[ ∙ε _ ] (pure ∘ f)
+
