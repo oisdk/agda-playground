@@ -22,63 +22,61 @@ CommutativeMonoid.comm (Monus.commutativeMonoid monus) = comm
 Monus._≤|≥_ monus = tot
 Monus.antisym monus = atsm
 
-open Monus monus hiding (monoid; 𝑆; _∙_; assoc; comm; ε)
+open Monus monus hiding (monoid; 𝑆; _∙_; assoc; comm; ε; ε∙; ∙ε)
 
 private
   variable
-    x y z : 𝑆
+    w : 𝑆
 
 mutual
-  Heaped : 𝑆 → Type ℓ → Type ℓ
-  Heaped x A = 𝐹 x (Root x A)
+  Heaped :  Type ℓ → 𝑆 → Type ℓ
+  Heaped A w = 𝐹 w (Root A)
 
-  data Root (x : 𝑆) (A : Type ℓ) : Type ℓ where
-    [] : Root x A
-    _∷_ : Branch x A → Heaped x A → Root x A
+  data Root (A : Type ℓ) : Type ℓ where
+    [] : Root A
+    _∷_ : (x : Branch A) → (xs : 𝐹 ε (Root A)) → Root A
 
-  data Branch (x : 𝑆) (A : Type ℓ) : Type ℓ where
-    leaf : A → Branch x A
-    node : (y : 𝑆) (ys : Heaped (x ∙ y) A) → Branch x A
+  data Branch (A : Type ℓ) : Type ℓ where
+    leaf : A → Branch A
+    node : (w : 𝑆) (xs : Heaped A w) → Branch A
 
 Heap : Type ℓ → Type ℓ
-Heap = Heaped ε
+Heap A = Heaped A ε
 
-hmap : (A → B) → Heaped x A → Heaped x B
-bmap : (A → B) → Branch x A → Branch x B
+_++_ : 𝐹 w (Root A) → 𝐹 ε (Root A) → 𝐹 w (Root A)
+xs ++ ys = xs >>=[ ∙ε _ ] ( λ { [] → ys ; (x ∷ xs) → pure (x ∷ (xs ++ ys))})
 
-hmap f = map λ { [] → [] ; (x ∷ xs) → bmap f x ∷ hmap f xs}
-bmap f (leaf x) = leaf (f x)
-bmap f (node y ys) = node y (hmap f ys)
+hbind : (A → Heap B) → Heaped A w → Heaped B w
+rbind : (A → Heap B) → Root A → Heap B
+bbind : (A → Heap B) → Branch A → Heap B
 
--- -- _++_ : Heaped ε A → Heaped ε A → Heaped ε A
--- -- xs ++ ys = xs >>=[ {!!} ] (λ { [] → ys ; (x ∷ xs) → pure (x ∷ (xs ++ ys)) })
+hbind f xs = xs >>=[ ∙ε _ ] rbind f
 
+bbind f (leaf x) = f x
+bbind f (node y ys) = pure (node y (hbind f ys) ∷ pure [])
 
--- hbind : (A → Heap B) → Heaped x A → Heaped x B
--- bbind : (A → Heap B) → Branch x A → Heap B
+rbind f [] = pure []
+rbind f (x ∷ xs) = bbind f x ++ hbind f xs
 
--- hbind f xs′ = xs′ >>=[ ∙ε _ ]
---   (λ { [] → pure []
---      ; (x ∷ xs) →
---        let y = bbind f x
---            ys = hbind f xs
---        in {! !}})
+liftT : 𝐹 w A → Heaped A w
+liftT = map λ x → leaf x ∷ pure []
 
--- bbind f (leaf x) = f x
--- bbind f (node y ys) = pure (node y {!!} ∷ pure [])
+pushT : Heaped A w → Heap A
+pushT {w = w} x = pure (node w x ∷ pure [])
 
--- -- mutual
--- --   bind : ∀ {x} → Heaped x A → (A → Heaped ε B) → Heaped x B
--- --   bind xs f = subst (flip 𝐹 _) (∙ε _) (xs >>= go f)
+open import Data.List hiding (map)
 
--- --   go : (A → Heaped ε B) → Root x A → 𝐹 ε (Root x B)
--- --   go f [] = pure []
--- --   go f (leaf x    ∷ xs) =
--- --     let p = f x
--- --         q = bind xs f
--- --     in {!!}
--- --   go f (node y ys ∷ xs) = {!!}
+partition : List (Branch A) → List A × List (Σ 𝑆 (Heaped A))
+partition = foldr f ([] , [])
+  where
+  f : Branch A → List A × List (Σ 𝑆 (Heaped A)) → List A × List (Σ 𝑆 (Heaped A))
+  f (leaf x) = map₁ (x ∷_)
+  f (node w xs) = map₂ ((w , xs) ∷_)
 
--- --   -- go′ : (A → Heaped ε B) → Branch x A → Heaped x B → Root x B
--- --   -- go′ f (leaf x) xs = {!!}
--- --   -- go′ f (node y ys) zs = {!!}
+flattenTop : Heaped A w → 𝐹 w (List (Branch A))
+flattenTop xs = xs >>=[ ∙ε _ ] λ { [] → pure [] ; (x ∷ xs) → map (x ∷_) (flattenTop xs)}
+
+-- merge : ∃ (Heaped A) → ∃ (Heaped A) → ∃ (Heaped A)
+-- merge (wˣ , xs) (wʸ , ys) with wˣ ≤|≥ wʸ
+-- merge (wˣ , xs) (wʸ , ys) | inl x≤y = wˣ , {!!}
+-- merge (wˣ , xs) (wʸ , ys) | inr y≤x = wʸ , {!!}
