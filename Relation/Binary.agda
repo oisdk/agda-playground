@@ -36,7 +36,7 @@ module _ (_~_ : A → A → Type b) where
   Asymmetric = ∀ {x y} → x ~ y → ¬ (y ~ x)
 
   Irreflexive : Type _
-  Irreflexive = ∀ {x y} → x ~ y → x ≢ y
+  Irreflexive = ∀ {x} → ¬ (x ~ x)
 
   Total : Type _
   Total = ∀ x y → (x ~ y) ⊎ (y ~ x)
@@ -54,22 +54,26 @@ record Preorder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsu
   x ≥ y = y ≤ x
   x ≱ y = ¬ (y ≤ x)
 
-record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
+record StrictPreorder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _<_
   field
     _<_ : 𝑆 → 𝑆 → Type ℓ₂
     trans : Transitive _<_
-    asym : Asymmetric _<_
-    conn : Connected _<_
+    irrefl : Irreflexive _<_
 
-  irrefl : Irreflexive _<_
-  irrefl {x} {y} x<y x≡y = asym x<y (subst  (y <_) (≡.sym x≡y) (subst (_< y) x≡y x<y))
+  asym : Asymmetric _<_
+  asym x<y y<x = irrefl (trans x<y y<x)
 
   infix 4 _≮_ _>_ _≯_
   _≮_ _>_ _≯_ : 𝑆 → 𝑆 → Type ℓ₂
   x ≮ y = ¬ (x < y)
   x > y = y < x
   x ≯ y = ¬ (y < x)
+
+record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
+  field strictPreorder : StrictPreorder 𝑆 ℓ₂
+  open StrictPreorder strictPreorder public
+  field conn : Connected _<_
 
 record PartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   field preorder : Preorder 𝑆 ℓ₂
@@ -98,10 +102,10 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   x <ᵇ y = does (x <? y)
 
   <⇒≱ : ∀ {x y} → x < y → x ≱ y
-  <⇒≱ {x} {y} x<y = irrefl x<y ∘ antisym (<⇒≤ x<y)
+  <⇒≱ {x} {y} x<y x≥y = irrefl (subst (_< _) (antisym (<⇒≤ x<y) x≥y) x<y)
 
   ≤⇒≯ : ∀ {x y} → x ≤ y → x ≯ y
-  ≤⇒≯ {x} {y} x≤y x>y = irrefl x>y (antisym (≮⇒≥ (asym x>y)) x≤y)
+  ≤⇒≯ {x} {y} x≤y x>y = irrefl (subst (_< _) (antisym (≮⇒≥ (asym x>y)) x≤y) x>y)
 
   infix 4 _≤ᵇ_ _≤?_
 
@@ -124,8 +128,8 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
 
   _≟_ : Discrete 𝑆
   x ≟ y with x <? y | y <? x
-  ... | yes x<y | _ = no (irrefl x<y)
-  ... | _ | yes y<x = no (irrefl y<x ∘ ≡.sym)
+  ... | yes x<y | _ = no (λ x≡y → irrefl (subst (_< _) x≡y x<y))
+  ... | _ | yes y<x = no (λ x≡y → irrefl (subst (_ <_) x≡y y<x))
   ... | no x≮y | no y≮x = yes (conn x≮y y≮x)
 
   data Ordering (x y : 𝑆) : Type (ℓ₁ ℓ⊔ ℓ₂) where
@@ -199,10 +203,10 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
     asym-≰ {x} {y} x≰y y≰x = either x≰y y≰x (x ≤|≥ y)
 
     toStrict : StrictPartialOrder 𝑆 ℓ₂
-    toStrict .StrictPartialOrder._<_ x y = ¬ (y ≤ x)
+    toStrict .StrictPartialOrder.strictPreorder .StrictPreorder._<_ x y = ¬ (y ≤ x)
     toStrict .StrictPartialOrder.conn x<y y<x = antisym (≤-stable y<x) (≤-stable x<y)
-    toStrict .StrictPartialOrder.asym = asym-≰
-    toStrict .StrictPartialOrder.trans {x} {y} {z} y≰x z≰y z≤x with ≤-dec y z
+    toStrict .StrictPartialOrder.strictPreorder .StrictPreorder.irrefl y≰x = y≰x refl
+    toStrict .StrictPartialOrder.strictPreorder .StrictPreorder.trans {x} {y} {z} y≰x z≰y z≤x with ≤-dec y z
     ... | yes y≤z = y≰x (trans y≤z z≤x)
     ... | no  y≰z = asym-≰ z≰y y≰z
 

@@ -13,6 +13,9 @@ open import Relation.Binary
 <-asym : Asymmetric _<_
 <-asym {suc x} {suc y} x<y y<x = <-asym {x} {y} x<y y<x
 
+<-irrefl : Irreflexive _<_
+<-irrefl {suc x} = <-irrefl {x = x}
+
 <-conn : Connected _<_
 <-conn {zero} {zero} x≮y y≮x = refl
 <-conn {zero} {suc y} x≮y y≮x = ⊥-elim (x≮y tt)
@@ -34,9 +37,9 @@ open import Relation.Binary
 ... | true = x≮y tt
 
 totalOrder : TotalOrder ℕ ℓzero ℓzero
-totalOrder .TotalOrder.strictPartialOrder .StrictPartialOrder._<_ = _<_
-totalOrder .TotalOrder.strictPartialOrder .StrictPartialOrder.trans {x} {y} {z} = <-trans {x} {y} {z}
-totalOrder .TotalOrder.strictPartialOrder .StrictPartialOrder.asym {x} {y} = <-asym {x} {y}
+totalOrder .TotalOrder.strictPartialOrder .StrictPartialOrder.strictPreorder .StrictPreorder._<_ = _<_
+totalOrder .TotalOrder.strictPartialOrder .StrictPartialOrder.strictPreorder .StrictPreorder.trans {x} {y} {z} = <-trans {x} {y} {z}
+totalOrder .TotalOrder.strictPartialOrder .StrictPartialOrder.strictPreorder .StrictPreorder.irrefl {x} = <-irrefl {x = x}
 totalOrder .TotalOrder.strictPartialOrder .StrictPartialOrder.conn = <-conn
 totalOrder .TotalOrder.partialOrder .PartialOrder.preorder .Preorder._≤_ = _≤_
 totalOrder .TotalOrder.partialOrder .PartialOrder.preorder .Preorder.refl {x} = ≤-refl x

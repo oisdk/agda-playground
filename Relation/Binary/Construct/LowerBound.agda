@@ -42,16 +42,16 @@ PartialOrder.antisym lb-pord {⌊ x ⌋} {⌊ x₁ ⌋} p q = cong ⌊_⌋ (anti
 
 
 lb-sord : StrictPartialOrder ⌊∙⌋ _
-StrictPartialOrder._<_ lb-sord = _⌊<⌋_
-StrictPartialOrder.trans lb-sord {⌊⊥⌋} {⌊⊥⌋} {⌊⊥⌋} p q = q
-StrictPartialOrder.trans lb-sord {⌊⊥⌋} {⌊⊥⌋} {⌊ x ⌋} p q = q
-StrictPartialOrder.trans lb-sord {⌊⊥⌋} {⌊ x ⌋} {⌊ x₁ ⌋} p q = p
-StrictPartialOrder.trans lb-sord {⌊ x ⌋} {⌊ x₁ ⌋} {⌊ x₂ ⌋} p q = <-trans p q
-StrictPartialOrder.asym lb-sord {⌊ x ⌋} {⌊ y ⌋} p q = asym p q
-StrictPartialOrder.conn lb-sord {⌊⊥⌋} {⌊⊥⌋} p q = refl
-StrictPartialOrder.conn lb-sord {⌊⊥⌋} {⌊ x ⌋} p q = ⊥-elim (p _)
-StrictPartialOrder.conn lb-sord {⌊ x ⌋} {⌊⊥⌋} p q = ⊥-elim (q _)
-StrictPartialOrder.conn lb-sord {⌊ x ⌋} {⌊ x₁ ⌋} p q = cong ⌊_⌋ (conn p q)
+StrictPreorder._<_   (StrictPartialOrder.strictPreorder lb-sord) = _⌊<⌋_
+StrictPreorder.trans (StrictPartialOrder.strictPreorder lb-sord) {⌊⊥⌋} {⌊⊥⌋} {⌊⊥⌋} p q = q
+StrictPreorder.trans (StrictPartialOrder.strictPreorder lb-sord) {⌊⊥⌋} {⌊⊥⌋} {⌊ x ⌋} p q = q
+StrictPreorder.trans (StrictPartialOrder.strictPreorder lb-sord) {⌊⊥⌋} {⌊ x ⌋} {⌊ x₁ ⌋} p q = p
+StrictPreorder.trans (StrictPartialOrder.strictPreorder lb-sord) {⌊ x ⌋} {⌊ x₁ ⌋} {⌊ x₂ ⌋} p q = <-trans p q
+StrictPreorder.irrefl  (StrictPartialOrder.strictPreorder lb-sord) {⌊ x ⌋} = irrefl {x = x}
+StrictPartialOrder.conn  lb-sord {⌊⊥⌋} {⌊⊥⌋} p q = refl
+StrictPartialOrder.conn  lb-sord {⌊⊥⌋} {⌊ x ⌋} p q = ⊥-elim (p _)
+StrictPartialOrder.conn  lb-sord {⌊ x ⌋} {⌊⊥⌋} p q = ⊥-elim (q _)
+StrictPartialOrder.conn  lb-sord {⌊ x ⌋} {⌊ x₁ ⌋} p q = cong ⌊_⌋ (conn p q)
 
 lb-lt : ∀ x y → Dec (x ⌊<⌋ y)
 lb-lt x ⌊⊥⌋ = no (λ ())

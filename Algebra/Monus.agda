@@ -61,7 +61,7 @@ record Monus ℓ : Type (ℓsuc ℓ) where
 
   diff≢ε : ∀ {x y} → (x<y : x < y) → fst (<⇒≤ x<y) ≢ ε
   diff≢ε x<y with <⇒≤ x<y
-  diff≢ε x<y | k , y≡x∙k = λ k≡ε → irrefl x<y (sym (y≡x∙k ; cong (_ ∙_) k≡ε ; ∙ε _))
+  diff≢ε x<y | k , y≡x∙k = λ k≡ε → irrefl (subst (_< _) (sym (y≡x∙k ; cong (_ ∙_) k≡ε ; ∙ε _)) x<y)
 
   -- NonZero : Type ℓ
   -- NonZero = ∃[ x ] (x ≢ ε)

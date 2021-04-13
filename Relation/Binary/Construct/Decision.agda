@@ -47,9 +47,9 @@ compute-≤ {x} {y} ¬p | no  _ = tt
 ≮⇒≥′ {x} {y} p | yes _ = p tt
 
 dec-ord : TotalOrder A ℓzero ℓzero
-StrictPartialOrder._<_ (TotalOrder.strictPartialOrder dec-ord) = _<′_
-StrictPartialOrder.trans (TotalOrder.strictPartialOrder dec-ord) p q = compute-< (<-trans (witness-< p) (witness-< q))
-StrictPartialOrder.asym (TotalOrder.strictPartialOrder dec-ord) p q = asym (witness-< p) (witness-< q)
+StrictPreorder._<_    (StrictPartialOrder.strictPreorder (TotalOrder.strictPartialOrder dec-ord)) = _<′_
+StrictPreorder.trans  (StrictPartialOrder.strictPreorder (TotalOrder.strictPartialOrder dec-ord)) p q = compute-< (<-trans (witness-< p) (witness-< q))
+StrictPreorder.irrefl (StrictPartialOrder.strictPreorder (TotalOrder.strictPartialOrder dec-ord)) p = irrefl (witness-< p)
 StrictPartialOrder.conn (TotalOrder.strictPartialOrder dec-ord) p q = conn (p ∘ compute-<) (q ∘ compute-<)
 Preorder._≤_  (PartialOrder.preorder (TotalOrder.partialOrder dec-ord)) = _≤′_
 Preorder.refl (PartialOrder.preorder (TotalOrder.partialOrder dec-ord)) = compute-≤ ≤-refl

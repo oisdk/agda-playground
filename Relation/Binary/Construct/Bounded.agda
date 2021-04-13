@@ -42,15 +42,12 @@ b-pord .PartialOrder.antisym {[⊤]} {[⊤]} x≤y y≤x i = [⊤]
 b-pord .PartialOrder.antisym {[ x ]} {[ y ]} x≤y y≤x i = [ antisym x≤y y≤x i ]
 
 b-sord : StrictPartialOrder [∙] _
-b-sord .StrictPartialOrder._<_ = _[<]_
-b-sord .StrictPartialOrder.trans {[⊥]} {[ x ]} {[⊤]} x<y y<z = Poly.tt
-b-sord .StrictPartialOrder.trans {[⊥]} {[ x ]} {[ x₁ ]} x<y y<z = Poly.tt
-b-sord .StrictPartialOrder.trans {[ x ]} {[ x₁ ]} {[⊤]} x<y y<z = Poly.tt
-b-sord .StrictPartialOrder.trans {[ x ]} {[ x₁ ]} {[ x₂ ]} x<y y<z = <-trans x<y y<z
-b-sord .StrictPartialOrder.asym {[⊥]} {[⊤]} x<y ()
-b-sord .StrictPartialOrder.asym {[⊥]} {[ x ]} x<y ()
-b-sord .StrictPartialOrder.asym {[ x ]} {[⊤]} x<y ()
-b-sord .StrictPartialOrder.asym {[ x ]} {[ x₁ ]} x<y = asym x<y
+b-sord .StrictPartialOrder.strictPreorder .StrictPreorder._<_ = _[<]_
+b-sord .StrictPartialOrder.strictPreorder .StrictPreorder.trans {[⊥]} {[ x ]} {[⊤]} x<y y<z = Poly.tt
+b-sord .StrictPartialOrder.strictPreorder .StrictPreorder.trans {[⊥]} {[ x ]} {[ x₁ ]} x<y y<z = Poly.tt
+b-sord .StrictPartialOrder.strictPreorder .StrictPreorder.trans {[ x ]} {[ x₁ ]} {[⊤]} x<y y<z = Poly.tt
+b-sord .StrictPartialOrder.strictPreorder .StrictPreorder.trans {[ x ]} {[ x₁ ]} {[ x₂ ]} x<y y<z = <-trans x<y y<z
+b-sord .StrictPartialOrder.strictPreorder .StrictPreorder.irrefl {[ x ]} x<x = irrefl x<x
 b-sord .StrictPartialOrder.conn {[⊥]} {[⊥]} x≮y y≮x = refl
 b-sord .StrictPartialOrder.conn {[⊥]} {[⊤]} x≮y y≮x = ⊥-elim (x≮y Poly.tt)
 b-sord .StrictPartialOrder.conn {[⊥]} {[ x ]} x≮y y≮x = ⊥-elim (x≮y Poly.tt)

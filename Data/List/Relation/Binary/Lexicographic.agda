@@ -43,8 +43,8 @@ x ∷ xs ≤′ y ∷ ys = (x < y) ⊎ ((x ≡ y) × (xs ≤′ ys))
 ≤′-antisym : Antisymmetric _≤′_
 ≤′-antisym {[]} {[]} p q = refl
 ≤′-antisym {x ∷ xs} {y ∷ ys} (inl p) (inl q) = ⊥-elim (asym p q)
-≤′-antisym {x ∷ xs} {y ∷ ys} (inl p) (inr q) = ⊥-elim (irrefl p (sym (fst q)))
-≤′-antisym {x ∷ xs} {y ∷ ys} (inr p) (inl q) = ⊥-elim (irrefl q (sym (fst p)))
+≤′-antisym {x ∷ xs} {y ∷ ys} (inl p) (inr q) = ⊥-elim (irrefl (subst (_< _) (sym (fst q)) p))
+≤′-antisym {x ∷ xs} {y ∷ ys} (inr p) (inl q) = ⊥-elim (irrefl (subst (_< _) (sym (fst p)) q))
 ≤′-antisym {x ∷ xs} {y ∷ ys} (inr (p , ps)) (inr (_ , qs)) = cong₂ _∷_ p (≤′-antisym ps qs)
 
 ≤′-refl : Reflexive _≤′_
@@ -53,9 +53,10 @@ x ∷ xs ≤′ y ∷ ys = (x < y) ⊎ ((x ≡ y) × (xs ≤′ ys))
 
 <′-asym : Asymmetric _<′_
 <′-asym {x ∷ xs} {y ∷ ys} (inl p) (inl q) = asym p q
-<′-asym {x ∷ xs} {y ∷ ys} (inl p) (inr q) = irrefl p (sym (fst q))
-<′-asym {x ∷ xs} {y ∷ ys} (inr p) (inl q) = irrefl q (sym (fst p))
+<′-asym {x ∷ xs} {y ∷ ys} (inl p) (inr q) = irrefl (subst (_< _) (sym (fst q)) p)
+<′-asym {x ∷ xs} {y ∷ ys} (inr p) (inl q) = irrefl (subst (_< _) (sym (fst p)) q)
 <′-asym {x ∷ xs} {y ∷ ys} (inr p) (inr q) = <′-asym (snd p) (snd q)
+
 
 ≮′⇒≥′ : ∀ {xs ys} → ¬ (xs <′ ys) → ys ≤′ xs
 ≮′⇒≥′ {xs} {[]} p = Poly.tt
@@ -68,6 +69,10 @@ x ∷ xs ≤′ y ∷ ys = (x < y) ⊎ ((x ≡ y) × (xs ≤′ ys))
 <′-conn : Connected _<′_
 <′-conn xs≮ys ys≮xs = ≤′-antisym (≮′⇒≥′ ys≮xs) (≮′⇒≥′ xs≮ys)
 
+<′-irrefl : Irreflexive _<′_
+<′-irrefl {x ∷ xs} (inl x<x) = irrefl x<x
+<′-irrefl {x ∷ xs} (inr xs<xs) = <′-irrefl (snd xs<xs)
+
 ≰′⇒>′ : ∀ {xs ys} → ¬ (xs ≤′ ys) → ys <′ xs
 ≰′⇒>′ {[]} xs≰ys = ⊥-elim (xs≰ys _)
 ≰′⇒>′ {x ∷ xs} {[]} xs≰ys = Poly.tt
@@ -77,7 +82,7 @@ x ∷ xs ≤′ y ∷ ys = (x < y) ⊎ ((x ≡ y) × (xs ≤′ ys))
 ≰′⇒>′ {x ∷ xs} {y ∷ ys} xs≰ys | gt x>y = inl x>y
 
 ≮′-cons : ∀ {x y xs ys} → x ≡ y → ¬ (xs <′ ys) → ¬ (x ∷ xs <′ y ∷ ys)
-≮′-cons x≡y xs≮ys (inl x<y) = irrefl x<y x≡y
+≮′-cons x≡y xs≮ys (inl x<y) = irrefl (subst (_< _) x≡y x<y)
 ≮′-cons x≡y xs≮ys (inr (x≡y₁ , x∷xs<y∷ys)) = xs≮ys x∷xs<y∷ys
 
 _<′?_ : Decidable _<′_
@@ -89,9 +94,9 @@ xs <′? [] = no (λ ())
 ((x ∷ xs) <′? (y ∷ ys)) | gt x>y = no (<′-asym (inl x>y))
 
 listOrd : TotalOrder (List E) _ _
-StrictPartialOrder._<_ (TotalOrder.strictPartialOrder listOrd) = _<′_
-StrictPartialOrder.trans (TotalOrder.strictPartialOrder listOrd) = <′-trans
-StrictPartialOrder.asym (TotalOrder.strictPartialOrder listOrd) = <′-asym
+StrictPreorder._<_   (StrictPartialOrder.strictPreorder (TotalOrder.strictPartialOrder listOrd)) = _<′_
+StrictPreorder.trans (StrictPartialOrder.strictPreorder (TotalOrder.strictPartialOrder listOrd)) = <′-trans
+StrictPreorder.irrefl  (StrictPartialOrder.strictPreorder (TotalOrder.strictPartialOrder listOrd)) = <′-irrefl
 StrictPartialOrder.conn (TotalOrder.strictPartialOrder listOrd) = <′-conn
 Preorder._≤_   (PartialOrder.preorder (TotalOrder.partialOrder listOrd)) = _≤′_
 Preorder.refl  (PartialOrder.preorder (TotalOrder.partialOrder listOrd)) = ≤′-refl
