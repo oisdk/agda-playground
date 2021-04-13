@@ -78,8 +78,7 @@ record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ �
 record PartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   field preorder : Preorder 𝑆 ℓ₂
   open Preorder preorder public
-  field
-    antisym : Antisymmetric _≤_
+  field antisym : Antisymmetric _≤_
 
 record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂ ℓ⊔ ℓsuc ℓ₃) where
   field

@@ -8,9 +8,53 @@ open import Relation.Binary
 open import Path.Reasoning
 
 record POM ℓ : Type (ℓsuc ℓ) where
+  field commutativeMonoid : CommutativeMonoid ℓ
+  open CommutativeMonoid commutativeMonoid public
+  field preorder : Preorder 𝑆 ℓ
+  open Preorder preorder public
   field
-    commutativeMonoid : CommutativeMonoid ℓ
+    positive : ∀ {x} → ε ≤ x
+    ≤-cong : ∀ {x y} z → x ≤ y → x ∙ z ≤ y ∙ z
 
+  algebraic : ∀ {x y} → x ≤ y ∙ x
+  algebraic {x} {y} = subst (_≤ y ∙ x) (ε∙ x) (≤-cong x (positive {x = y}))
+
+record CMM ℓ : Type (ℓsuc ℓ) where
+  field commutativeMonoid : CommutativeMonoid ℓ
+  open CommutativeMonoid commutativeMonoid public
+
+  infix 4 _≤_
+  _≤_ : 𝑆 → 𝑆 → Type ℓ
+  x ≤ y = ∃[ z ] (y ≡ x ∙ z)
+
+
+  field _∸_ : 𝑆 → 𝑆 → 𝑆
+  infixl 6 _∸_
+  field
+    lcomm  : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
+    sassoc : ∀ x y z → (x ∸ y) ∸ z ≡ x ∸ (y ∙ z)
+    minv   : ∀ x → x ∸ x ≡ ε
+    zsub   : ∀ x → ε ∸ x ≡ ε
+
+  open import Path.Reasoning
+
+  rsub : ∀ x → x ∸ ε ≡ x
+  rsub x =
+    x ∸ ε ≡˘⟨ ε∙ (x ∸ ε) ⟩
+    ε ∙ (x ∸ ε) ≡⟨ lcomm ε x ⟩
+    x ∙ (ε ∸ x) ≡⟨ cong (x ∙_) (zsub x) ⟩
+    x ∙ ε ≡⟨ ∙ε x ⟩
+    x ∎
+
+  -- remov : ∀ x y → (x ∙ y) ∸ y ≡ x
+  -- remov x y =
+  --   (x ∙ y) ∸ y ≡⟨ {!!} ⟩
+  --   ((x ∙ y) ∸ y) ∙ ε ≡⟨ {!!} ⟩
+  --   ((x ∙ y) ∸ y) ∙ (y ∸ y) ≡⟨ {!!} ⟩
+  --   (y ∸ y) ∙ ((x ∙ y) ∸ y) ≡⟨ {!!} ⟩
+  --   x ∙ (y ∸ y) ≡⟨ cong (x ∙_) (minv y) ⟩
+  --   x ∙ ε ≡⟨ ∙ε x ⟩
+  --   x ∎
 
 record Monus ℓ : Type (ℓsuc ℓ) where
   field
