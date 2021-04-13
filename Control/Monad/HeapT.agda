@@ -76,7 +76,20 @@ partition = foldr f ([] , [])
 flattenTop : Heaped A w → 𝐹 w (List (Branch A))
 flattenTop xs = xs >>=[ ∙ε _ ] λ { [] → pure [] ; (x ∷ xs) → map (x ∷_) (flattenTop xs)}
 
--- merge : ∃ (Heaped A) → ∃ (Heaped A) → ∃ (Heaped A)
--- merge (wˣ , xs) (wʸ , ys) with wˣ ≤|≥ wʸ
--- merge (wˣ , xs) (wʸ , ys) | inl x≤y = wˣ , {!!}
--- merge (wˣ , xs) (wʸ , ys) | inr y≤x = wʸ , {!!}
+module _ (decomp : ∀ {A B} {w₁ w₂ w₃} → 𝐹 (w₁ ∙ w₂) A → 𝐹 (w₁ ∙ w₃) B → 𝐹 w₁ (𝐹 w₂ A × 𝐹 w₃ B)) where
+  merge : ∃ (Heaped A) → ∃ (Heaped A) → ∃ (Heaped A)
+  merge (wˣ , xs) (wʸ , ys) with wˣ ≤|≥ wʸ
+  ... | inl (k , x≤y) = wˣ , map (λ { (xs , ys) → node k ys ∷ xs }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) xs) (subst (flip 𝐹 _) x≤y ys))
+  ... | inr (k , y≤x) = wʸ , map (λ { (ys , xs) → node k xs ∷ ys }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) ys) (subst (flip 𝐹 _) y≤x xs))
+
+  mergeLists⁺ : ∃ (Heaped A) → List (∃ (Heaped A)) → ∃ (Heaped A)
+  mergeLists⁺ x₁ [] = x₁
+  mergeLists⁺ x₁ (x₂ ∷ []) = merge x₁ x₂
+  mergeLists⁺ x₁ (x₂ ∷ x₃ ∷ xs) = merge (merge x₁ x₂) (mergeLists⁺ x₃ xs)
+
+  mergeLists : List (∃ (Heaped A)) → Maybe (∃ (Heaped A))
+  mergeLists [] = nothing
+  mergeLists (x ∷ xs) = just (mergeLists⁺ x xs)
+
+  popMin : Heaped A w → 𝐹 w (List A × Maybe (∃ (Heaped A)))
+  popMin = map (map₂ mergeLists ∘ partition) ∘ flattenTop
