@@ -41,6 +41,19 @@ module _ (_~_ : A → A → Type b) where
   Total : Type _
   Total = ∀ x y → (x ~ y) ⊎ (y ~ x)
 
+record Preorder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
+  infix 4 _≤_
+  field
+    _≤_ : 𝑆 → 𝑆 → Type ℓ₂
+    refl : Reflexive _≤_
+    trans : Transitive _≤_
+
+  infix 4 _≰_ _≥_ _≱_
+  _≰_ _≥_ _≱_ : 𝑆 → 𝑆 → Type ℓ₂
+  x ≰ y = ¬ (x ≤ y)
+  x ≥ y = y ≤ x
+  x ≱ y = ¬ (y ≤ x)
+
 record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _<_
   field
@@ -59,18 +72,10 @@ record StrictPartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ �
   x ≯ y = ¬ (y < x)
 
 record PartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
-  infix 4 _≤_
+  field preorder : Preorder 𝑆 ℓ₂
+  open Preorder preorder public
   field
-    _≤_ : 𝑆 → 𝑆 → Type ℓ₂
-    refl : Reflexive _≤_
     antisym : Antisymmetric _≤_
-    trans : Transitive _≤_
-
-  infix 4 _≰_ _≥_ _≱_
-  _≰_ _≥_ _≱_ : 𝑆 → 𝑆 → Type ℓ₂
-  x ≰ y = ¬ (x ≤ y)
-  x ≥ y = y ≤ x
-  x ≱ y = ¬ (y ≤ x)
 
 record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂ ℓ⊔ ℓsuc ℓ₃) where
   field
@@ -218,12 +223,12 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (strictPartialOrder : StrictPart
 
   module _ (_<?_ : Decidable _<_) where
     unStrict : PartialOrder 𝑆 _
-    unStrict .PartialOrder._≤_ x y = ¬ (y < x)
-    unStrict .PartialOrder.refl x<x = asym x<x x<x
-    unStrict .PartialOrder.antisym = flip conn
-    unStrict .PartialOrder.trans {x} {y} {z} y≮x z≮y z<x with x <? y
+    unStrict .PartialOrder.preorder .Preorder._≤_ x y = ¬ (y < x)
+    unStrict .PartialOrder.preorder .Preorder.refl x<x = asym x<x x<x
+    unStrict .PartialOrder.preorder .Preorder.trans {x} {y} {z} y≮x z≮y z<x with x <? y
     ... | yes x<y = z≮y (trans z<x x<y)
     ... | no  x≮y = z≮y (subst (z <_) (conn x≮y y≮x) z<x)
+    unStrict .PartialOrder.antisym = flip conn
 
     fromStrictPartialOrder : TotalOrder 𝑆 _ _
     fromStrictPartialOrder .TotalOrder.strictPartialOrder = strictPartialOrder

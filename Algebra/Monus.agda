@@ -7,6 +7,11 @@ open import Algebra
 open import Relation.Binary
 open import Path.Reasoning
 
+record POM ℓ : Type (ℓsuc ℓ) where
+  field
+    commutativeMonoid : CommutativeMonoid ℓ
+
+
 record Monus ℓ : Type (ℓsuc ℓ) where
   field
     commutativeMonoid : CommutativeMonoid ℓ
@@ -42,10 +47,10 @@ record Monus ℓ : Type (ℓsuc ℓ) where
   zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
 
   partialOrder : PartialOrder 𝑆 ℓ
-  PartialOrder._≤_ partialOrder = _≤_
-  PartialOrder.refl partialOrder = ≤-refl
+  Preorder._≤_   (PartialOrder.preorder partialOrder) = _≤_
+  Preorder.refl  (PartialOrder.preorder partialOrder) = ≤-refl
+  Preorder.trans (PartialOrder.preorder partialOrder) = ≤-trans
   PartialOrder.antisym partialOrder = antisym
-  PartialOrder.trans partialOrder = ≤-trans
 
   totalOrder : TotalOrder 𝑆 ℓ ℓ
   totalOrder = fromPartialOrder partialOrder _≤|≥_

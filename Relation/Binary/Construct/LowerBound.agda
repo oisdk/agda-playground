@@ -31,13 +31,13 @@ _     ⌊<⌋ ⌊⊥⌋   = Poly.⊥
 x     ⌊<⌋ ⌊ y ⌋ = x <⌊ y ⌋
 
 lb-pord : PartialOrder ⌊∙⌋ _
-PartialOrder._≤_ lb-pord = _⌊≤⌋_
-PartialOrder.refl lb-pord {⌊⊥⌋} = _
-PartialOrder.refl lb-pord {⌊ x ⌋} = <-refl
+Preorder._≤_   (PartialOrder.preorder lb-pord) = _⌊≤⌋_
+Preorder.refl  (PartialOrder.preorder lb-pord) {⌊⊥⌋} = _
+Preorder.refl  (PartialOrder.preorder lb-pord) {⌊ x ⌋} = <-refl
+Preorder.trans (PartialOrder.preorder lb-pord) {⌊⊥⌋} {_} {_} p q = _
+Preorder.trans (PartialOrder.preorder lb-pord) {⌊ x ⌋} {⌊ y ⌋} {⌊ z ⌋} p q = ≤-trans p q
 PartialOrder.antisym lb-pord {⌊⊥⌋} {⌊⊥⌋} p q = refl
 PartialOrder.antisym lb-pord {⌊ x ⌋} {⌊ x₁ ⌋} p q = cong ⌊_⌋ (antisym p q)
-PartialOrder.trans lb-pord {⌊⊥⌋} {_} {_} p q = _
-PartialOrder.trans lb-pord {⌊ x ⌋} {⌊ y ⌋} {⌊ z ⌋} p q = ≤-trans p q
 
 
 

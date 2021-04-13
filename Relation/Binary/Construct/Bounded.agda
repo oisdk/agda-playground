@@ -28,18 +28,18 @@ _     [<] [⊤]   = Poly.⊤
 [ x ] [<] [ y ] = x < y
 
 b-pord : PartialOrder [∙] _
-b-pord .PartialOrder._≤_ = _[≤]_
-b-pord .PartialOrder.refl {[⊥]} = Poly.tt
-b-pord .PartialOrder.refl {[⊤]} = Poly.tt
-b-pord .PartialOrder.refl {[ x ]} = ≤-refl
+b-pord .PartialOrder.preorder .Preorder._≤_ = _[≤]_
+b-pord .PartialOrder.preorder .Preorder.refl {[⊥]} = Poly.tt
+b-pord .PartialOrder.preorder .Preorder.refl {[⊤]} = Poly.tt
+b-pord .PartialOrder.preorder .Preorder.refl {[ x ]} = ≤-refl
+b-pord .PartialOrder.preorder .Preorder.trans {[⊥]} {y} {z} x≤y y≤z = Poly.tt
+b-pord .PartialOrder.preorder .Preorder.trans {[⊤]} {[⊤]} {[⊤]} x≤y y≤z = Poly.tt
+b-pord .PartialOrder.preorder .Preorder.trans {[ x ]} {[⊤]} {[⊤]} x≤y y≤z = Poly.tt
+b-pord .PartialOrder.preorder .Preorder.trans {[ x ]} {[ y ]} {[⊤]} x≤y y≤z = Poly.tt
+b-pord .PartialOrder.preorder .Preorder.trans {[ x ]} {[ y ]} {[ z ]} x≤y y≤z = ≤-trans x≤y y≤z
 b-pord .PartialOrder.antisym {[⊥]} {[⊥]} x≤y y≤x i = [⊥]
 b-pord .PartialOrder.antisym {[⊤]} {[⊤]} x≤y y≤x i = [⊤]
 b-pord .PartialOrder.antisym {[ x ]} {[ y ]} x≤y y≤x i = [ antisym x≤y y≤x i ]
-b-pord .PartialOrder.trans {[⊥]} {y} {z} x≤y y≤z = Poly.tt
-b-pord .PartialOrder.trans {[⊤]} {[⊤]} {[⊤]} x≤y y≤z = Poly.tt
-b-pord .PartialOrder.trans {[ x ]} {[⊤]} {[⊤]} x≤y y≤z = Poly.tt
-b-pord .PartialOrder.trans {[ x ]} {[ y ]} {[⊤]} x≤y y≤z = Poly.tt
-b-pord .PartialOrder.trans {[ x ]} {[ y ]} {[ z ]} x≤y y≤z = ≤-trans x≤y y≤z
 
 b-sord : StrictPartialOrder [∙] _
 b-sord .StrictPartialOrder._<_ = _[<]_
