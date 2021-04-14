@@ -17,8 +17,8 @@ record POM ℓ : Type (ℓsuc ℓ) where
     positive : ∀ x → ε ≤ x
     ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
 
-  algebraic : ∀ {x y} → x ≤ x ∙ y
-  algebraic {x} {y} = subst (_≤ x ∙ y) (∙ε x) (≤-cong x (positive y))
+  x≤x∙y : ∀ {x y} → x ≤ x ∙ y
+  x≤x∙y {x} {y} = subst (_≤ x ∙ y) (∙ε x) (≤-cong x (positive y))
 
   ≤-congʳ : ∀ x {y z} → y ≤ z → y ∙ x ≤ z ∙ x
   ≤-congʳ x {y} {z} p = subst (y ∙ x ≤_) (comm x z) (subst (_≤ x ∙ z) (comm x y) (≤-cong x p))
@@ -120,8 +120,8 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   PartialOrder.antisym partialOrder = antisym
 
 record Monus ℓ : Type (ℓsuc ℓ) where
-  field
-    commutativeMonoid : CommutativeMonoid ℓ
+  field commutativeMonoid : CommutativeMonoid ℓ
+
   pom : POM _
   pom = algebraic-pom commutativeMonoid
 
