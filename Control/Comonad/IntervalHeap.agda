@@ -66,7 +66,7 @@ pop-ε xs _ with xs .tl .next
 pop-ε xs _ | [] = refl
 pop-ε xs _ | until s s≢ε ys with s ≤? ε
 pop-ε xs _ | until s s≢ε ys | no  s≰ε = refl
-pop-ε xs _ | until s s≢ε ys | yes s≤ε = ⊥-elim (s≢ε (antisym s≤ε (positive s)))
+pop-ε xs _ | until s s≢ε ys | yes s≤ε = ⊥-elim (s≢ε (antisym s≤ε (positive {s})))
 
 -- slide : Heap A → Heap A
 -- slide xs with xs .tl .next

@@ -109,7 +109,7 @@ record Monus ℓ : Type (ℓsuc ℓ) where
   pom : POM _
   pom = algebraic-pom commutativeMonoid
 
-  open POM pom public
+  open POM pom public hiding (refl)
 
   field
     _≤|≥_ : Total _≤_
