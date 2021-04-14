@@ -130,18 +130,11 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
   infix 4 _≤|≥_
   field _≤|≥_ : Total _≤_
 
--- Total Minimal POM
+-- Total Minimal Antisymmetric POM
 record TMAPOM ℓ : Type (ℓsuc ℓ) where
-  field commutativeMonoid : CommutativeMonoid ℓ
-
-  pom : POM _
-  pom = algebraic-pom commutativeMonoid
-
-  open POM pom public hiding (refl)
-
-  field
-    _≤|≥_ : Total _≤_
-    antisym : Antisymmetric _≤_
+  field tmpom : TMPOM ℓ
+  open TMPOM tmpom public
+  field antisym : Antisymmetric _≤_
 
   zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
   zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)

@@ -17,9 +17,9 @@ open GradedMonad gmon
 
 
 monus : TMAPOM ℓ
-CommutativeMonoid.monoid (TMAPOM.commutativeMonoid monus) = monoid
-CommutativeMonoid.comm (TMAPOM.commutativeMonoid monus) = comm
-TMAPOM._≤|≥_ monus = tot
+CommutativeMonoid.monoid (TMPOM.commutativeMonoid (TMAPOM.tmpom monus)) = monoid
+CommutativeMonoid.comm (TMPOM.commutativeMonoid (TMAPOM.tmpom monus)) = comm
+TMPOM._≤|≥_ (TMAPOM.tmpom monus) = tot
 TMAPOM.antisym monus = atsm
 
 open TMAPOM monus hiding (monoid; 𝑆; _∙_; assoc; comm; ε; ε∙; ∙ε)
