@@ -203,12 +203,12 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ⊔-idem : ∀ x → x ⊔ x ≡ x
   ⊔-idem x = cong snd (min-max-idem x)
 
-module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder 𝑆 ℓ₂) where
+module FromPartial {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder 𝑆 ℓ₂) where
   open PartialOrder partialOrder
   open import Data.Sigma
   open import Relation.Nullary.Stable.Base
 
-  open import Relation.Nullary.Decidable.Properties using (Dec→DoubleNegElim)
+  open import Relation.Nullary.Decidable.Properties using (Dec→Stable)
   open import Data.Unit
 
   module _ (_≤|≥_ : Total _≤_) where
@@ -225,10 +225,7 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
       x≢y x≡y = subst (bool ⊤ ⊥) (≡.sym x≥yᵇ ; cong₂ ≤-side x≡y (≡.sym x≡y) ; y≤xᵇ) tt
 
     ≤-stable : ∀ {x y} → Stable (x ≤ y)
-    ≤-stable {x} {y} = Dec→DoubleNegElim _ (≤-dec x y)
-
-    asym-≰ : Asymmetric _≰_
-    asym-≰ {x} {y} x≰y y≰x = either x≰y y≰x (x ≤|≥ y)
+    ≤-stable {x} {y} = Dec→Stable _ (≤-dec x y)
 
     toStrict : StrictPartialOrder 𝑆 ℓ₂
     toStrict .StrictPartialOrder.strictPreorder .StrictPreorder._<_ x y = ¬ (y ≤ x)
@@ -236,7 +233,7 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
     toStrict .StrictPartialOrder.strictPreorder .StrictPreorder.irrefl y≰x = y≰x refl
     toStrict .StrictPartialOrder.strictPreorder .StrictPreorder.trans {x} {y} {z} y≰x z≰y z≤x with ≤-dec y z
     ... | yes y≤z = y≰x (trans y≤z z≤x)
-    ... | no  y≰z = asym-≰ z≰y y≰z
+    ... | no  y≰z = either z≰y y≰z (z ≤|≥ y)
 
     fromPartialOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
     fromPartialOrder .TotalOrder.strictPartialOrder = toStrict
@@ -247,25 +244,22 @@ module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder �
     ... | yes y≤x = no λ y≰x → y≰x y≤x
     ... | no  y≰x = yes y≰x
 
+open FromPartial using (fromPartialOrder) public
+
 module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (strictPartialOrder : StrictPartialOrder 𝑆 ℓ₂) where
   open StrictPartialOrder strictPartialOrder
-  open import Data.Sigma
-  open import Data.Sum
-  open import Relation.Nullary.Decidable.Properties using (Dec→DoubleNegElim)
+  open import Relation.Nullary.Decidable.Properties using (Dec→Stable)
 
   module _ (_<?_ : Decidable _<_) where
-    unStrict : PartialOrder 𝑆 _
-    unStrict .PartialOrder.preorder .Preorder._≤_ x y = ¬ (y < x)
-    unStrict .PartialOrder.preorder .Preorder.refl x<x = asym x<x x<x
-    unStrict .PartialOrder.preorder .Preorder.trans {x} {y} {z} y≮x z≮y z<x with x <? y
-    ... | yes x<y = z≮y (trans z<x x<y)
-    ... | no  x≮y = z≮y (subst (z <_) (conn x≮y y≮x) z<x)
-    unStrict .PartialOrder.antisym = flip conn
-
     fromStrictPartialOrder : TotalOrder 𝑆 _ _
     fromStrictPartialOrder .TotalOrder.strictPartialOrder = strictPartialOrder
-    fromStrictPartialOrder .TotalOrder.partialOrder = unStrict
-    fromStrictPartialOrder .TotalOrder.≰⇒> = Dec→DoubleNegElim _ (_ <? _)
+    fromStrictPartialOrder .TotalOrder.partialOrder .PartialOrder.preorder .Preorder._≤_ x y = ¬ (y < x)
+    fromStrictPartialOrder .TotalOrder.partialOrder .PartialOrder.preorder .Preorder.refl x<x = asym x<x x<x
+    fromStrictPartialOrder .TotalOrder.partialOrder .PartialOrder.preorder .Preorder.trans {x} {y} {z} y≮x z≮y z<x with x <? y
+    ... | yes x<y = z≮y (trans z<x x<y)
+    ... | no  x≮y = z≮y (subst (z <_) (conn x≮y y≮x) z<x)
+    fromStrictPartialOrder .TotalOrder.partialOrder .PartialOrder.antisym = flip conn
+    fromStrictPartialOrder .TotalOrder.≰⇒> = Dec→Stable _ (_ <? _)
     fromStrictPartialOrder .TotalOrder.≮⇒≥ = id
     fromStrictPartialOrder .TotalOrder._<?_ = _<?_
 

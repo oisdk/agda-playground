@@ -11,10 +11,6 @@ open import Data.Empty.Properties using (isProp¬)
 open import Data.Unit
 open import Data.Empty
 
-Dec→DoubleNegElim : (A : Type a) → Dec A → Stable A
-Dec→DoubleNegElim A (yes p)  _       = p
-Dec→DoubleNegElim A (no ¬p)  contra  = ⊥-elim (contra ¬p)
-
 Dec→Stable : ∀ {ℓ} (A : Type ℓ) → Dec A → Stable A
 Dec→Stable A (yes x) = λ _ → x
 Dec→Stable A (no x) = λ f → ⊥-elim (f x)

@@ -24,7 +24,7 @@ Exhaustible p A = ∀ {P : A → Type p} → (∀ x → Dec (P x)) → Dec (∀ 
 Omniscient→Exhaustible : Omniscient p A → Exhaustible p A
 Omniscient→Exhaustible omn P? =
   map-dec
-    (λ ¬∃P x → Dec→DoubleNegElim _ (P? x) (¬∃P ∘ (x ,_)))
+    (λ ¬∃P x → Dec→Stable _ (P? x) (¬∃P ∘ (x ,_)))
     (λ ¬∃P ∀P → ¬∃P λ p → p .snd (∀P (p .fst)))
     (! (omn (! ∘ P?)))
 Prop-Omniscient p A = ∀ {P : A → Type p} → (∀ x → Dec (P x)) → Dec ∥ ∃[ x ] P x ∥
