@@ -324,7 +324,4 @@ record GradedMonad ℓ₁ ℓ₂ ℓ₃ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂ ℓ
   map f xs = xs >>=[ ∙ε _ ] (pure ∘ f)
 
   _<*>_ : ∀ {x y} → 𝐹 x (A → B) → 𝐹 y A → 𝐹 (x ∙ y) B
-  fs <*> xs =
-    f ← fs [ refl ]
-    x ← xs [ ∙ε _ ]
-    pure (f x)
+  fs <*> xs = fs >>= flip map xs
