@@ -205,59 +205,65 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ⊓≤ x y | yes x<y = refl
   ⊓≤ x y | no  x≮y = ≮⇒≥ x≮y
 
-module FromPartial {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder 𝑆 ℓ₂) where
-  open PartialOrder partialOrder
+module FromPartialOrder {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (po : PartialOrder 𝑆 ℓ₂) (_≤|≥_ : Total (PartialOrder._≤_ po)) where
+  open PartialOrder po
 
-  module _ (_≤|≥_ : Total _≤_) where
-    ≤-side : 𝑆 → 𝑆 → Bool
-    ≤-side x y = is-l (x ≤|≥ y)
+  partialOrder = po
 
-    ≤-dec : Decidable _≤_
-    ≤-dec x y with x ≤|≥ y | y ≤|≥ x | inspect (≤-side x) y | inspect (≤-side y) x
-    ≤-dec x y | inl x≤y | _       | _ | _ = yes x≤y
-    ≤-dec x y | inr x≥y | inr y≥x | _ | _ = yes y≥x
-    ≤-dec x y | inr x≥y | inl y≤x | 〖 x≥yᵇ 〗 | 〖 y≤xᵇ 〗 = no (x≢y ∘ flip antisym x≥y)
-      where
-      x≢y : x ≢ y
-      x≢y x≡y = subst (bool ⊤ ⊥) (≡.sym x≥yᵇ ; cong₂ ≤-side x≡y (≡.sym x≡y) ; y≤xᵇ) tt
+  ≤-side : 𝑆 → 𝑆 → Bool
+  ≤-side x y = is-l (x ≤|≥ y)
 
-    ≤-stable : ∀ {x y} → Stable (x ≤ y)
-    ≤-stable {x} {y} = Dec→Stable _ (≤-dec x y)
+  ≤-dec : Decidable _≤_
+  ≤-dec x y with x ≤|≥ y | y ≤|≥ x | inspect (≤-side x) y | inspect (≤-side y) x
+  ≤-dec x y | inl x≤y | _       | _ | _ = yes x≤y
+  ≤-dec x y | inr x≥y | inr y≥x | _ | _ = yes y≥x
+  ≤-dec x y | inr x≥y | inl y≤x | 〖 x≥yᵇ 〗 | 〖 y≤xᵇ 〗 = no (x≢y ∘ flip antisym x≥y)
+    where
+    x≢y : x ≢ y
+    x≢y x≡y = subst (bool ⊤ ⊥) (≡.sym x≥yᵇ ; cong₂ ≤-side x≡y (≡.sym x≡y) ; y≤xᵇ) tt
 
-    toStrict : StrictPartialOrder 𝑆 ℓ₂
-    toStrict .StrictPartialOrder.strictPreorder .StrictPreorder._<_ x y = ¬ (y ≤ x)
-    toStrict .StrictPartialOrder.conn x<y y<x = antisym (≤-stable y<x) (≤-stable x<y)
-    toStrict .StrictPartialOrder.strictPreorder .StrictPreorder.irrefl y≰x = y≰x refl
-    toStrict .StrictPartialOrder.strictPreorder .StrictPreorder.trans {x} {y} {z} y≰x z≰y z≤x with ≤-dec y z
-    ... | yes y≤z = y≰x (trans y≤z z≤x)
-    ... | no  y≰z = either z≰y y≰z (z ≤|≥ y)
+  ≮⇒≥ : ∀ {x y} → Stable (x ≤ y)
+  ≮⇒≥ {x} {y} = Dec→Stable _ (≤-dec x y)
 
-    fromPartialOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
-    fromPartialOrder .TotalOrder.strictPartialOrder = toStrict
-    fromPartialOrder .TotalOrder.partialOrder = partialOrder
-    fromPartialOrder .TotalOrder.≰⇒> x≤y = x≤y
-    fromPartialOrder .TotalOrder.≮⇒≥ = ≤-stable
-    fromPartialOrder .TotalOrder._<?_ x y with ≤-dec y x
-    ... | yes y≤x = no λ y≰x → y≰x y≤x
-    ... | no  y≰x = yes y≰x
+  strictPartialOrder : StrictPartialOrder 𝑆 ℓ₂
+  strictPartialOrder .StrictPartialOrder.strictPreorder .StrictPreorder._<_ x y = ¬ (y ≤ x)
+  strictPartialOrder .StrictPartialOrder.conn x<y y<x = antisym (≮⇒≥ y<x) (≮⇒≥ x<y)
+  strictPartialOrder .StrictPartialOrder.strictPreorder .StrictPreorder.irrefl y≰x = y≰x refl
+  strictPartialOrder .StrictPartialOrder.strictPreorder .StrictPreorder.trans {x} {y} {z} y≰x z≰y z≤x with ≤-dec y z
+  ... | yes y≤z = y≰x (trans y≤z z≤x)
+  ... | no  y≰z = either z≰y y≰z (z ≤|≥ y)
 
-open FromPartial using (fromPartialOrder) public
+  ≰⇒> = id
 
-module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (strictPartialOrder : StrictPartialOrder 𝑆 ℓ₂) where
-  open StrictPartialOrder strictPartialOrder
+  _<?_ : Decidable (λ x y → ¬ (y ≤ x))
+  _<?_ x y with ≤-dec y x
+  ... | yes y≤x = no λ y≰x → y≰x y≤x
+  ... | no  y≰x = yes y≰x
 
-  module _ (_<?_ : Decidable _<_) where
-    fromStrictPartialOrder : TotalOrder 𝑆 _ _
-    fromStrictPartialOrder .TotalOrder.strictPartialOrder = strictPartialOrder
-    fromStrictPartialOrder .TotalOrder.partialOrder .PartialOrder.preorder .Preorder._≤_ x y = ¬ (y < x)
-    fromStrictPartialOrder .TotalOrder.partialOrder .PartialOrder.preorder .Preorder.refl x<x = asym x<x x<x
-    fromStrictPartialOrder .TotalOrder.partialOrder .PartialOrder.preorder .Preorder.trans {x} {y} {z} y≮x z≮y z<x with x <? y
-    ... | yes x<y = z≮y (trans z<x x<y)
-    ... | no  x≮y = z≮y (subst (z <_) (conn x≮y y≮x) z<x)
-    fromStrictPartialOrder .TotalOrder.partialOrder .PartialOrder.antisym = flip conn
-    fromStrictPartialOrder .TotalOrder.≰⇒> = Dec→Stable _ (_ <? _)
-    fromStrictPartialOrder .TotalOrder.≮⇒≥ = id
-    fromStrictPartialOrder .TotalOrder._<?_ = _<?_
+
+fromPartialOrder : (po : PartialOrder A b) (_≤|≥_ : Total (PartialOrder._≤_ po)) → TotalOrder _ _ _
+fromPartialOrder po tot = record { FromPartialOrder po tot }
+
+module FromStrictPartialOrder {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (spo : StrictPartialOrder 𝑆 ℓ₂) (<-dec : Decidable (StrictPartialOrder._<_ spo)) where
+  open StrictPartialOrder spo
+  strictPartialOrder = spo
+  _<?_ = <-dec
+
+  partialOrder : PartialOrder _ _
+  partialOrder .PartialOrder.preorder .Preorder._≤_ x y = ¬ (y < x)
+  partialOrder .PartialOrder.preorder .Preorder.refl x<x = asym x<x x<x
+  partialOrder .PartialOrder.preorder .Preorder.trans {x} {y} {z} y≮x z≮y z<x with x <? y
+  ... | yes x<y = z≮y (trans z<x x<y)
+  ... | no  x≮y = z≮y (subst (z <_) (conn x≮y y≮x) z<x)
+  partialOrder .PartialOrder.antisym = flip conn
+
+  ≰⇒> : ∀ {x y} → ¬ ¬ (x < y) → x < y
+  ≰⇒> {x} {y} = Dec→Stable (x < y) (x <? y)
+
+  ≮⇒≥ = id
+
+fromStrictPartialOrder : (spo : StrictPartialOrder A b) (_<?_ : Decidable (StrictPartialOrder._<_ spo)) → TotalOrder _ _ _
+fromStrictPartialOrder spo _<?_ = record { FromStrictPartialOrder spo _<?_ }
 
 record Equivalence {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   infix 4 _≋_

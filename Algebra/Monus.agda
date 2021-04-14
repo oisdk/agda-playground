@@ -15,10 +15,42 @@ record POM ℓ : Type (ℓsuc ℓ) where
   open Preorder preorder public
   field
     positive : ∀ {x} → ε ≤ x
-    ≤-cong : ∀ {x y} z → x ≤ y → x ∙ z ≤ y ∙ z
+    ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
 
-  algebraic : ∀ {x y} → x ≤ y ∙ x
-  algebraic {x} {y} = subst (_≤ y ∙ x) (ε∙ x) (≤-cong x (positive {x = y}))
+  -- algebraic : ∀ {x y} → x ≤ y ∙ x
+  -- algebraic {x} {y} = subst (_≤ y ∙ x) (ε∙ x) {!!}
+
+-- Every commutative monoid generates a positively ordered monoid
+-- called the "algebraic" pom
+module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
+  commutativeMonoid = mon
+  open CommutativeMonoid mon
+
+  infix 4 _≤_
+  _≤_ : 𝑆 → 𝑆 → Type _
+  x ≤ y = ∃[ k ] (y ≡ x ∙ k)
+
+  ≤-trans : Transitive _≤_
+  ≤-trans (k₁ , _) (k₂ , _) .fst = k₁ ∙ k₂
+  ≤-trans {x} {y} {z} (k₁ , y≡x∙k₁) (k₂ , z≡y∙k₂) .snd =
+    z ≡⟨ z≡y∙k₂ ⟩
+    y ∙ k₂ ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
+    (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
+    x ∙ (k₁ ∙ k₂) ∎
+
+  preorder : Preorder 𝑆 ℓ
+  Preorder._≤_ preorder = _≤_
+  Preorder.refl preorder = ε , sym (∙ε _)
+  Preorder.trans preorder = ≤-trans
+
+  positive : ∀ {x} → ε ≤ x
+  positive {x} = x , sym (ε∙ x)
+
+  ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
+  ≤-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
+
+algebraic-pom : ∀ {ℓ} → CommutativeMonoid ℓ → POM ℓ
+algebraic-pom mon = record { AlgebraicPOM mon }
 
 -- Commutative Monoids with Monus
 record CMM ℓ : Type (ℓsuc ℓ) where
