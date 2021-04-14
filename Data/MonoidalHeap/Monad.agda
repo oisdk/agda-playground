@@ -4,9 +4,9 @@ open import Algebra
 open import Relation.Binary
 open import Algebra.Monus
 
-module Data.MonoidalHeap.Monad {s} (monus : Monus s) where
+module Data.MonoidalHeap.Monad {s} (monus : TMPOM s) where
 
-open Monus monus
+open TMPOM monus
 
 open import Prelude
 open import Data.List using (List; _∷_; []; foldr; _++_)

@@ -16,13 +16,13 @@ module Control.Monad.HeapT
 open GradedMonad gmon
 
 
-monus : Monus ℓ
-CommutativeMonoid.monoid (Monus.commutativeMonoid monus) = monoid
-CommutativeMonoid.comm (Monus.commutativeMonoid monus) = comm
-Monus._≤|≥_ monus = tot
-Monus.antisym monus = atsm
+monus : TMPOM ℓ
+CommutativeMonoid.monoid (TMPOM.commutativeMonoid monus) = monoid
+CommutativeMonoid.comm (TMPOM.commutativeMonoid monus) = comm
+TMPOM._≤|≥_ monus = tot
+TMPOM.antisym monus = atsm
 
-open Monus monus hiding (monoid; 𝑆; _∙_; assoc; comm; ε; ε∙; ∙ε)
+open TMPOM monus hiding (monoid; 𝑆; _∙_; assoc; comm; ε; ε∙; ∙ε)
 
 private
   variable

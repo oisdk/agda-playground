@@ -119,7 +119,7 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   PartialOrder.preorder partialOrder = preorder
   PartialOrder.antisym partialOrder = antisym
 
-record Monus ℓ : Type (ℓsuc ℓ) where
+record TMPOM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
 
   pom : POM _
@@ -137,7 +137,6 @@ record Monus ℓ : Type (ℓsuc ℓ) where
   totalOrder : TotalOrder 𝑆 ℓ ℓ
   totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
 
-
   open TotalOrder totalOrder
     hiding (refl; antisym; _≤_; _≤|≥_; partialOrder; ≤-trans; _≥_; _≰_; _≱_)
     public
@@ -145,3 +144,51 @@ record Monus ℓ : Type (ℓsuc ℓ) where
   diff≢ε : ∀ {x y} → (x<y : x < y) → fst (<⇒≤ x<y) ≢ ε
   diff≢ε x<y with <⇒≤ x<y
   diff≢ε x<y | k , y≡x∙k = λ k≡ε → irrefl (subst (_< _) (sym (y≡x∙k ; cong (_ ∙_) k≡ε ; ∙ε _)) x<y)
+
+  -- module ToCMM where
+  --   _∸_ : 𝑆 → 𝑆 → 𝑆
+  --   x ∸ y with compare x y
+  --   (x ∸ y) | lt x<y = ε
+  --   (x ∸ y) | eq x≡y = ε
+  --   (x ∸ y) | gt x>y = fst (<⇒≤ x>y)
+
+  --   ∸‿≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
+  --   ∸‿≤ x y x≤y with compare x y
+  --   ∸‿≤ x y x≤y | lt _ = refl
+  --   ∸‿≤ x y x≤y | eq _ = refl
+  --   ∸‿≤ x y x≤y | gt x>y = ⊥-elim (x>y x≤y)
+
+  --   ∸‿inv : ∀ x → x ∸ x ≡ ε
+  --   ∸‿inv x with compare x x
+  --   ∸‿inv x | lt x<x = ⊥-elim (irrefl x<x)
+  --   ∸‿inv x | eq x≡x = refl
+  --   ∸‿inv x | gt x>x = ⊥-elim (irrefl x>x)
+
+  --   ε∸ : ∀ x → ε ∸ x ≡ ε
+  --   ε∸ x with compare ε x
+  --   ε∸ x | lt ε<x = refl
+  --   ε∸ x | eq ε≡x = refl
+  --   ε∸ x | gt ε>x = ⊥-elim (<⇒≱ ε>x (positive x))
+
+  --   ∸‿comm : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
+  --   ∸‿comm x y with compare y x | compare x y
+  --   ∸‿comm x y | lt y<x | lt x<y = ⊥-elim (asym x<y y<x)
+  --   ∸‿comm x y | gt y>x | gt x>y = ⊥-elim (asym x>y y>x)
+  --   ∸‿comm x y | gt y>x | eq x≡y = ⊥-elim (irrefl (subst (_< y) x≡y y>x))
+  --   ∸‿comm x y | eq y≡x | gt x>y = ⊥-elim (irrefl (subst (_< x) y≡x x>y))
+  --   ∸‿comm x y | eq y≡x | lt x<y = ⊥-elim (irrefl (subst (x <_) y≡x x<y))
+  --   ∸‿comm x y | lt y<x | eq x≡y = ⊥-elim (irrefl (subst (y <_) x≡y y<x))
+  --   ∸‿comm x y | eq y≡x | eq x≡y = cong (_∙ ε) x≡y
+  --   ∸‿comm x y | gt y>x | lt x<y = sym (snd (<⇒≤ y>x)) ; sym (∙ε y)
+  --   ∸‿comm x y | lt y<x | gt x>y = ∙ε x ; snd (<⇒≤ x>y)
+
+  --   ∸‿assoc : ∀ x y z → (x ∸ y) ∸ z ≡ x ∸ (y ∙ z)
+  --   ∸‿assoc x y z with compare x y
+  --   ∸‿assoc x y z | lt x<y = ε∸ z ; sym (∸‿≤ x (y ∙ z) (trans (<⇒≤ x<y) x≤x∙y))
+  --   ∸‿assoc x y z | eq x≡y = ε∸ z ; sym (∸‿≤ x (y ∙ z) (subst (_≤ y ∙ z) (sym x≡y) x≤x∙y))
+  --   ∸‿assoc x y z | gt x>y with <⇒≤ x>y | compare x (y ∙ z)
+  --   ∸‿assoc x y z | gt x>y | k , x≡y∙k | lt x<y∙z = k ∸ z ≡⟨ {!!} ⟩ ε ∎
+  --   ∸‿assoc x y z | gt x>y | k , x≡y∙k | eq x≡y∙z = k ∸ z ≡⟨ {!!} ⟩ ε ∎
+  --   ∸‿assoc x y z | gt x>y | k , x≡y∙k | gt x>y∙z with <⇒≤ x>y∙z
+  --   ∸‿assoc x y z | gt x>y | k₁ , x≡y∙k₁ | gt x>y∙z | k₂ , x≡y∙z∙k₁∙k₂ = k₁ ∸ z ≡⟨ {!!} ⟩ k₂ ∎
+

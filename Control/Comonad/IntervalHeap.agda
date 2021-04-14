@@ -8,12 +8,12 @@ open import Algebra.Monus
 open import Data.Maybe
 
 module Control.Comonad.IntervalHeap {s}
-  (mon : Monus s)
-  (wf : WellFounded (Monus._<_ mon))
-  (cancel : Cancellativeˡ (Monus._∙_ mon))
+  (mon : TMPOM s)
+  (wf : WellFounded (TMPOM._<_ mon))
+  (cancel : Cancellativeˡ (TMPOM._∙_ mon))
   where
 
-open Monus mon
+open TMPOM mon
 
 mutual
   record Heap (A : Type a) : Type (s ℓ⊔ a) where
