@@ -86,6 +86,11 @@ record PartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ �
   open Preorder preorder public
   field antisym : Antisymmetric _≤_
 
+data Tri (A : Type a) (B : Type b) (C : Type c) : Type (a ℓ⊔ b ℓ⊔ c) where
+  lt : A → Tri A B C
+  eq : B → Tri A B C
+  gt : C → Tri A B C
+
 record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂ ℓ⊔ ℓsuc ℓ₃) where
   field
     strictPartialOrder : StrictPartialOrder 𝑆 ℓ₂
@@ -112,11 +117,11 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ≤⇒≯ : ∀ {x y} → x ≤ y → x ≯ y
   ≤⇒≯ {x} {y} x≤y x>y = irrefl (subst (_< _) (antisym (≮⇒≥ (asym x>y)) x≤y) x>y)
 
-  infix 4 _≤ᵇ_ _≤?_
+  infix 4 _≤ᵇ_ _≤?_ _≤|≥_ _≟_
 
   _≤?_ : Decidable _≤_
   x ≤? y with y <? x
-  ... | yes y<x = no (<⇒≱ y<x)
+  ... | yes y<x = no  (<⇒≱ y<x)
   ... | no  y≮x = yes (≮⇒≥ y≮x)
 
   _≤ᵇ_ : 𝑆 → 𝑆 → Bool
@@ -133,10 +138,8 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ... | _ | yes y<x = no (λ x≡y → irrefl (subst (_ <_) x≡y y<x))
   ... | no x≮y | no y≮x = yes (conn x≮y y≮x)
 
-  data Ordering (x y : 𝑆) : Type (ℓ₁ ℓ⊔ ℓ₂) where
-    lt : x < y → Ordering x y
-    eq : x ≡ y → Ordering x y
-    gt : x > y → Ordering x y
+  Ordering : (x y : 𝑆) → Type (ℓ₁ ℓ⊔  ℓ₂)
+  Ordering x y = Tri (x < y) (x ≡ y) (x > y)
 
   compare : ∀ x y → Ordering x y
   compare x y with x <? y | y <? x
@@ -165,7 +168,7 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   min-max-assoc x y z | yes x≤y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 = cong ((x ⊓ z) ,_) (cong (snd ∘ bool _ _) yzp ; cong (snd ∘ bool _ _) (≡.sym xyp))
   min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 with x <? z
   min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = let z≡x = antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z) in cong₂ _,_ (cong (fst ∘ bool _ _) yzp ; z≡x) (z≡x ; cong (snd ∘ bool _ _) (≡.sym xyp))
-  min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no x≥z = cong₂ _,_ (cong (fst ∘ bool _ _) yzp) (cong (snd ∘ bool _ _) (≡.sym xyp))
+  min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no  x≥z = cong₂ _,_ (cong (fst ∘ bool _ _) yzp) (cong (snd ∘ bool _ _) (≡.sym xyp))
 
   ⊓-assoc : ∀ x y z → (x ⊓ y) ⊓ z ≡ x ⊓ (y ⊓ z)
   ⊓-assoc x y z = cong fst (min-max-assoc x y z)
@@ -174,11 +177,11 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ⊔-assoc x y z = cong snd (min-max-assoc x y z)
 
   min-max-comm : ∀ x y → min-max x y ≡ min-max y x
-  min-max-comm x y with x <? y | inspect (x <ᵇ_) y | y <? x | inspect (y <ᵇ_) x
-  min-max-comm x y | yes x<y | 〖 xy 〗 | yes y<x | 〖 yx 〗 = ⊥-elim (asym x<y y<x)
-  min-max-comm x y | no  x≮y | 〖 xy 〗 | yes y<x | 〖 yx 〗 = ≡.refl
-  min-max-comm x y | yes x<y | 〖 xy 〗 | no  y≮x | 〖 yx 〗 = ≡.refl
-  min-max-comm x y | no  x≮y | 〖 xy 〗 | no  y≮x | 〖 yx 〗 = cong₂ _,_ (conn y≮x x≮y) (conn x≮y y≮x)
+  min-max-comm x y with x <? y | y <? x
+  min-max-comm x y | yes x<y | yes y<x = ⊥-elim (asym x<y y<x)
+  min-max-comm x y | no  x≮y | yes y<x = ≡.refl
+  min-max-comm x y | yes x<y | no  y≮x = ≡.refl
+  min-max-comm x y | no  x≮y | no  y≮x = cong₂ _,_ (conn y≮x x≮y) (conn x≮y y≮x)
 
   ⊓-comm : ∀ x y → x ⊓ y ≡ y ⊓ x
   ⊓-comm x y = cong fst (min-max-comm x y)
@@ -235,11 +238,10 @@ module FromPartialOrder {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (po : PartialOrde
 
   ≰⇒> = id
 
-  _<?_ : Decidable (λ x y → ¬ (y ≤ x))
+  _<?_ : Decidable _≱_
   _<?_ x y with ≤-dec y x
   ... | yes y≤x = no λ y≰x → y≰x y≤x
   ... | no  y≰x = yes y≰x
-
 
 fromPartialOrder : (po : PartialOrder A b) (_≤|≥_ : Total (PartialOrder._≤_ po)) → TotalOrder _ _ _
 fromPartialOrder po tot = record { FromPartialOrder po tot }
@@ -257,7 +259,7 @@ module FromStrictPartialOrder {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (spo : Stri
   ... | no  x≮y = z≮y (subst (z <_) (conn x≮y y≮x) z<x)
   partialOrder .PartialOrder.antisym = flip conn
 
-  ≰⇒> : ∀ {x y} → ¬ ¬ (x < y) → x < y
+  ≰⇒> : ∀ {x y} → Stable (x < y)
   ≰⇒> {x} {y} = Dec→Stable (x < y) (x <? y)
 
   ≮⇒≥ = id
