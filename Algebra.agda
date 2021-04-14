@@ -314,6 +314,17 @@ record GradedMonad ℓ₁ ℓ₂ ℓ₃ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂ ℓ
 
   syntax proven-bind xs f proof = xs >>=[ proof ] f
 
+  infixr 0 proven-do
+  proven-do : ∀ {x y z} → 𝐹 x A → (A → 𝐹 y B) → (x ∙ y) ≡ z → 𝐹 z B
+  proven-do = proven-bind
+
+  syntax proven-do xs (λ x → e) proof = x ← xs [ proof ] e
+
   map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
   map f xs = xs >>=[ ∙ε _ ] (pure ∘ f)
 
+  _<*>_ : ∀ {x y} → 𝐹 x (A → B) → 𝐹 y A → 𝐹 (x ∙ y) B
+  fs <*> xs =
+    f ← fs [ refl ]
+    x ← xs [ ∙ε _ ]
+    pure (f x)
