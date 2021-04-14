@@ -150,29 +150,58 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
 
   open import Data.Bool using (bool′)
 
+  min-max : 𝑆 → 𝑆 → 𝑆 × 𝑆
+  min-max x y = bool′ (y , x) (x , y) (x <ᵇ y)
+
   _⊔_ : 𝑆 → 𝑆 → 𝑆
-  x ⊔ y = bool′ x y (x <ᵇ y)
+  x ⊔ y = snd (min-max x y)
 
   _⊓_ : 𝑆 → 𝑆 → 𝑆
-  x ⊓ y = bool′ y x (x <ᵇ y)
+  x ⊓ y = fst (min-max x y)
 
   ⊓-assoc : ∀ x y z → (x ⊓ y) ⊓ z ≡ x ⊓ (y ⊓ z)
   ⊓-assoc x y z with x <? y | inspect (x <ᵇ_) y | y <? z | inspect (y <ᵇ_) z
   ⊓-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 with x <? z
-  ⊓-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | yes x≤z = cong (bool y x) (≡.sym xyp)
+  ⊓-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | yes x≤z = cong (fst ∘ bool _ _) (≡.sym xyp)
   ⊓-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | no  x≥z = ⊥-elim (x≥z (<-trans x≤y y≤z))
-  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 = cong (bool z y) yzp ; cong (bool y x) (≡.sym xyp)
+  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 = cong (fst ∘ bool _ _) yzp ; cong (fst ∘ bool _ _) (≡.sym xyp)
   ⊓-assoc x y z | yes x≤y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 = ≡.refl
   ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 with x <? z
-  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = cong (bool z y) yzp ; antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z)
-  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no x≥z = cong (bool z y) yzp
+  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = cong (fst ∘ bool _ _) yzp ; antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z)
+  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no x≥z = cong (fst ∘ bool _ _) yzp
+
+  ⊔-assoc : ∀ x y z → (x ⊔ y) ⊔ z ≡ x ⊔ (y ⊔ z)
+  ⊔-assoc x y z with x <? y | inspect (x <ᵇ_) y | y <? z | inspect (y <ᵇ_) z
+  ⊔-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 with x <? z
+  ⊔-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | yes x≤z = cong (snd ∘ bool _ _) yzp
+  ⊔-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | no  x≥z = ⊥-elim (x≥z (<-trans x≤y y≤z))
+  ⊔-assoc x y z | no  x≥y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 = ≡.refl
+  ⊔-assoc x y z | yes x≤y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 = cong (snd ∘ bool _ _) yzp ; cong (snd ∘ bool _ _) (≡.sym xyp)
+  ⊔-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 with x <? z
+  ⊔-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z) ; cong (snd ∘ bool _ _) (≡.sym xyp)
+  ⊔-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no x≥z = cong (snd ∘ bool _ _) (≡.sym xyp)
+
+  min-max-comm : ∀ x y → min-max x y ≡ min-max y x
+  min-max-comm x y with x <? y | inspect (x <ᵇ_) y | y <? x | inspect (y <ᵇ_) x
+  min-max-comm x y | yes x<y | 〖 xy 〗 | yes y<x | 〖 yx 〗 = ⊥-elim (asym x<y y<x)
+  min-max-comm x y | no  x≮y | 〖 xy 〗 | yes y<x | 〖 yx 〗 = ≡.refl
+  min-max-comm x y | yes x<y | 〖 xy 〗 | no  y≮x | 〖 yx 〗 = ≡.refl
+  min-max-comm x y | no  x≮y | 〖 xy 〗 | no  y≮x | 〖 yx 〗 = cong₂ _,_ (conn y≮x x≮y) (conn x≮y y≮x)
 
   ⊓-comm : ∀ x y → x ⊓ y ≡ y ⊓ x
-  ⊓-comm x y with x <? y | inspect (x <ᵇ_) y | y <? x | inspect (y <ᵇ_) x
-  ⊓-comm x y | yes x₁ | 〖 xyp 〗 | yes x₂ | 〖 yxp 〗 = ⊥-elim (asym x₁ x₂)
-  ⊓-comm x y | no  x₁ | 〖 xyp 〗 | yes x₂ | 〖 yxp 〗 = ≡.refl
-  ⊓-comm x y | yes x₁ | 〖 xyp 〗 | no  x₂ | 〖 yxp 〗 = ≡.refl
-  ⊓-comm x y | no  x₁ | 〖 xyp 〗 | no  x₂ | 〖 yxp 〗 = conn x₂ x₁
+  ⊓-comm x y = cong fst (min-max-comm x y)
+
+  ⊔-comm : ∀ x y → x ⊔ y ≡ y ⊔ x
+  ⊔-comm x y = cong snd (min-max-comm x y)
+
+  min-max-idem : ∀ x → min-max x x ≡ (x , x)
+  min-max-idem x = bool {P = λ r → bool′ (x , x) (x , x) r ≡ (x , x)} ≡.refl ≡.refl (x <ᵇ x)
+
+  ⊓-idem : ∀ x → x ⊓ x ≡ x
+  ⊓-idem x = cong fst (min-max-idem x)
+
+  ⊔-idem : ∀ x → x ⊔ x ≡ x
+  ⊔-idem x = cong snd (min-max-idem x)
 
 module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder 𝑆 ℓ₂) where
   open PartialOrder partialOrder
