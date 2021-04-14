@@ -11,7 +11,7 @@ open import Data.Nat using (_+_)
 open TotalOrder lb-ord using (<-trans) renaming (refl to <-refl)
 import Data.Unit.UniversePolymorphic as Poly
 open import Data.Maybe.Properties using (IsJust)
-open TotalOrder dec-ord using (_<?_; _<_; total⇒isSet; irrefl; compare; Ordering; lt; eq; gt)
+open TotalOrder dec-ord using (_<?_; _<_; total⇒isSet; irrefl; compare)
 
 instance
   top-inst : Poly.⊤ {ℓzero}

@@ -130,6 +130,7 @@ record TPOM ℓ : Type (ℓsuc ℓ) where
   infix 4 _≤|≥_
   field _≤|≥_ : Total _≤_
 
+-- Total Minimal POM
 record TMPOM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
 
