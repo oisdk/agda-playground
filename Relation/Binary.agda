@@ -7,11 +7,17 @@ open import Relation.Nullary
 open import Path as ≡ hiding (sym; refl)
 open import Data.Sum
 open import Function
-open import Data.Bool as Bool using (Bool; true; false; T; bool)
+open import Data.Bool as Bool using (Bool; true; false; bool; bool′)
 open import Relation.Nullary.Decidable
 open import Relation.Nullary.Discrete
 open import Data.Empty
 open import Inspect
+open import Data.Sigma
+open import Relation.Nullary.Stable.Base
+open import Data.Unit
+open import Relation.Nullary.Decidable.Properties using (Dec→Stable)
+open import HLevels using (isSet)
+open import Relation.Nullary.Discrete.Properties using (Discrete→isSet)
 
 module _ (_~_ : A → A → Type b) where
   Reflexive : Type _
@@ -121,10 +127,6 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ... | yes x<y = inl (<⇒≤ x<y)
   ... | no  x≮y = inr (≮⇒≥ x≮y)
 
-  open import Data.Unit
-  open import Data.Empty
-  open import Data.Sigma
-
   _≟_ : Discrete 𝑆
   x ≟ y with x <? y | y <? x
   ... | yes x<y | _ = no (λ x≡y → irrefl (subst (_< _) x≡y x<y))
@@ -142,13 +144,8 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ... | no  x≮y | yes y<x = gt y<x
   ... | no  x≮y | no  y≮x = eq (conn x≮y y≮x)
 
-  open import HLevels using (isSet)
-  open import Relation.Nullary.Discrete.Properties using (Discrete→isSet)
-
   total⇒isSet : isSet 𝑆
   total⇒isSet = Discrete→isSet _≟_
-
-  open import Data.Bool using (bool′)
 
   min-max : 𝑆 → 𝑆 → 𝑆 × 𝑆
   min-max x y = bool′ (y , x) (x , y) (x <ᵇ y)
@@ -159,27 +156,22 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   _⊓_ : 𝑆 → 𝑆 → 𝑆
   x ⊓ y = fst (min-max x y)
 
+  min-max-assoc : ∀ x y z → map-Σ (_⊓ z) (_⊔ z) (min-max x y) ≡ map-Σ (x ⊓_) (x ⊔_) (min-max y z)
+  min-max-assoc x y z with x <? y | inspect (x <ᵇ_) y | y <? z | inspect (y <ᵇ_) z
+  min-max-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 with x <? z
+  min-max-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | yes x≤z = cong₂ _,_ (cong (fst ∘ bool _ _) (≡.sym xyp)) (cong (snd ∘ bool _ _) yzp)
+  min-max-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | no  x≥z = ⊥-elim (x≥z (<-trans x≤y y≤z))
+  min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 = cong (_, (x ⊔ z)) (cong (fst ∘ bool _ _) yzp ; cong (fst ∘ bool _ _) (≡.sym xyp))
+  min-max-assoc x y z | yes x≤y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 = cong ((x ⊓ z) ,_) (cong (snd ∘ bool _ _) yzp ; cong (snd ∘ bool _ _) (≡.sym xyp))
+  min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 with x <? z
+  min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = let z≡x = antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z) in cong₂ _,_ (cong (fst ∘ bool _ _) yzp ; z≡x) (z≡x ; cong (snd ∘ bool _ _) (≡.sym xyp))
+  min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no x≥z = cong₂ _,_ (cong (fst ∘ bool _ _) yzp) (cong (snd ∘ bool _ _) (≡.sym xyp))
+
   ⊓-assoc : ∀ x y z → (x ⊓ y) ⊓ z ≡ x ⊓ (y ⊓ z)
-  ⊓-assoc x y z with x <? y | inspect (x <ᵇ_) y | y <? z | inspect (y <ᵇ_) z
-  ⊓-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 with x <? z
-  ⊓-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | yes x≤z = cong (fst ∘ bool _ _) (≡.sym xyp)
-  ⊓-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | no  x≥z = ⊥-elim (x≥z (<-trans x≤y y≤z))
-  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 = cong (fst ∘ bool _ _) yzp ; cong (fst ∘ bool _ _) (≡.sym xyp)
-  ⊓-assoc x y z | yes x≤y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 = ≡.refl
-  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 with x <? z
-  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = cong (fst ∘ bool _ _) yzp ; antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z)
-  ⊓-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no x≥z = cong (fst ∘ bool _ _) yzp
+  ⊓-assoc x y z = cong fst (min-max-assoc x y z)
 
   ⊔-assoc : ∀ x y z → (x ⊔ y) ⊔ z ≡ x ⊔ (y ⊔ z)
-  ⊔-assoc x y z with x <? y | inspect (x <ᵇ_) y | y <? z | inspect (y <ᵇ_) z
-  ⊔-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 with x <? z
-  ⊔-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | yes x≤z = cong (snd ∘ bool _ _) yzp
-  ⊔-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | no  x≥z = ⊥-elim (x≥z (<-trans x≤y y≤z))
-  ⊔-assoc x y z | no  x≥y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 = ≡.refl
-  ⊔-assoc x y z | yes x≤y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 = cong (snd ∘ bool _ _) yzp ; cong (snd ∘ bool _ _) (≡.sym xyp)
-  ⊔-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 with x <? z
-  ⊔-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z) ; cong (snd ∘ bool _ _) (≡.sym xyp)
-  ⊔-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no x≥z = cong (snd ∘ bool _ _) (≡.sym xyp)
+  ⊔-assoc x y z = cong snd (min-max-assoc x y z)
 
   min-max-comm : ∀ x y → min-max x y ≡ min-max y x
   min-max-comm x y with x <? y | inspect (x <ᵇ_) y | y <? x | inspect (y <ᵇ_) x
@@ -203,13 +195,18 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   ⊔-idem : ∀ x → x ⊔ x ≡ x
   ⊔-idem x = cong snd (min-max-idem x)
 
+  ≤⊔ : ∀ x y → x ≤ x ⊔ y
+  ≤⊔ x y with x <? y
+  ≤⊔ x y | yes x<y = <⇒≤ x<y
+  ≤⊔ x y | no  x≮y = refl
+
+  ⊓≤ : ∀ x y → x ⊓ y ≤ x
+  ⊓≤ x y with x <? y
+  ⊓≤ x y | yes x<y = refl
+  ⊓≤ x y | no  x≮y = ≮⇒≥ x≮y
+
 module FromPartial {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (partialOrder : PartialOrder 𝑆 ℓ₂) where
   open PartialOrder partialOrder
-  open import Data.Sigma
-  open import Relation.Nullary.Stable.Base
-
-  open import Relation.Nullary.Decidable.Properties using (Dec→Stable)
-  open import Data.Unit
 
   module _ (_≤|≥_ : Total _≤_) where
     ≤-side : 𝑆 → 𝑆 → Bool
@@ -248,7 +245,6 @@ open FromPartial using (fromPartialOrder) public
 
 module _ {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (strictPartialOrder : StrictPartialOrder 𝑆 ℓ₂) where
   open StrictPartialOrder strictPartialOrder
-  open import Relation.Nullary.Decidable.Properties using (Dec→Stable)
 
   module _ (_<?_ : Decidable _<_) where
     fromStrictPartialOrder : TotalOrder 𝑆 _ _
