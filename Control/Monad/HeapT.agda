@@ -15,7 +15,6 @@ module Control.Monad.HeapT
 
 open GradedMonad gmon
 
-
 monus : TMAPOM ℓ
 CommutativeMonoid.monoid (TMPOM.commutativeMonoid (TMAPOM.tmpom monus)) = monoid
 CommutativeMonoid.comm (TMPOM.commutativeMonoid (TMAPOM.tmpom monus)) = comm
@@ -44,19 +43,17 @@ Heap : Type ℓ → Type ℓ
 Heap A = Heaped A ε
 
 _++_ : 𝐹 w (Root A) → 𝐹 ε (Root A) → 𝐹 w (Root A)
-xs ++ ys = xs >>=[ ∙ε _ ] ( λ { [] → ys ; (x ∷ xs) → pure (x ∷ (xs ++ ys))})
+xs ++ ys = xs >>=ε λ { [] → ys ; (x ∷ xs) → pure (x ∷ (xs ++ ys))}
 
 hbind : (A → Heap B) → Heaped A w → Heaped B w
-rbind : (A → Heap B) → Root A → Heap B
-bbind : (A → Heap B) → Branch A → Heap B
+hbind′ : (A → Heap B) → Root A → Heap B
 
-hbind f xs = xs >>=[ ∙ε _ ] rbind f
+hbind f xs = xs >>=ε hbind′ f
 
-bbind f (leaf x) = f x
-bbind f (node y ys) = pure (node y (hbind f ys) ∷ pure [])
+hbind′ f []               = pure []
+hbind′ f (leaf x    ∷ xs) = f x ++ hbind f xs
+hbind′ f (node y ys ∷ xs) = pure (node y (hbind f ys) ∷ hbind f xs)
 
-rbind f [] = pure []
-rbind f (x ∷ xs) = bbind f x ++ hbind f xs
 
 liftT : 𝐹 w A → Heaped A w
 liftT = map λ x → leaf x ∷ pure []
@@ -74,7 +71,7 @@ partition = foldr f ([] , [])
   f (node w xs) = map₂ ((w , xs) ∷_)
 
 flattenTop : Heaped A w → 𝐹 w (List (Branch A))
-flattenTop xs = xs >>=[ ∙ε _ ] λ { [] → pure [] ; (x ∷ xs) → map (x ∷_) (flattenTop xs)}
+flattenTop xs = xs >>=ε λ { [] → pure [] ; (x ∷ xs) → map (x ∷_) (flattenTop xs)}
 
 module _ (decomp : ∀ {A B} {w₁ w₂ w₃} → 𝐹 (w₁ ∙ w₂) A → 𝐹 (w₁ ∙ w₃) B → 𝐹 w₁ (𝐹 w₂ A × 𝐹 w₃ B)) where
   merge : ∃ (Heaped A) → ∃ (Heaped A) → ∃ (Heaped A)
