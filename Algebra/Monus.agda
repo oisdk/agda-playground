@@ -119,7 +119,7 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   PartialOrder.preorder partialOrder = preorder
   PartialOrder.antisym partialOrder = antisym
 
-record TPOM ℓ : Type (ℓsuc ℓ) where
+record TMPOM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
 
   pom : POM _
@@ -131,7 +131,7 @@ record TPOM ℓ : Type (ℓsuc ℓ) where
   field _≤|≥_ : Total _≤_
 
 -- Total Minimal POM
-record TMPOM ℓ : Type (ℓsuc ℓ) where
+record TMAPOM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
 
   pom : POM _
