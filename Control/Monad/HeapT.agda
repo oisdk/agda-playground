@@ -10,18 +10,16 @@ module Control.Monad.HeapT
   (gmon : GradedMonad ℓ ℓ ℓ)
   (comm : Commutative (GradedMonad._∙_ gmon))
   (tot : Total (λ x y → ∃[ z ] (y ≡ (GradedMonad._∙_ gmon x z))))
-  (atsm : Antisymmetric (λ x y → ∃[ z ] (y ≡ (GradedMonad._∙_ gmon x z))))
   where
 
 open GradedMonad gmon
 
-monus : TMAPOM ℓ
-CommutativeMonoid.monoid (TMPOM.commutativeMonoid (TMAPOM.tmpom monus)) = monoid
-CommutativeMonoid.comm (TMPOM.commutativeMonoid (TMAPOM.tmpom monus)) = comm
-TMPOM._≤|≥_ (TMAPOM.tmpom monus) = tot
-TMAPOM.antisym monus = atsm
+monus : TMPOM ℓ
+CommutativeMonoid.monoid (TMPOM.commutativeMonoid monus) = monoid
+CommutativeMonoid.comm (TMPOM.commutativeMonoid monus) = comm
+TMPOM._≤|≥_ monus = tot
 
-open TMAPOM monus hiding (monoid; 𝑆; _∙_; assoc; comm; ε; ε∙; ∙ε)
+open TMPOM monus hiding (monoid; 𝑆; _∙_; assoc; comm; ε; ε∙; ∙ε)
 
 private
   variable
