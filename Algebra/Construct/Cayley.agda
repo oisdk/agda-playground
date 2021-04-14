@@ -25,6 +25,7 @@ open Monoid mon
 ⓔ .snd x = ∣ ε∙ x ∣
 
 open import Relation.Binary
+open import HITs.PropositionalTruncation.Equivalence
 open import Relation.Binary.Equivalence.Reasoning (trunc-equivalence (≡-equivalence {A = 𝑆}))
 
 _⊙_ : 𝒞 → 𝒞 → 𝒞
