@@ -14,11 +14,11 @@ record POM ℓ : Type (ℓsuc ℓ) where
   field preorder : Preorder 𝑆 ℓ
   open Preorder preorder public
   field
-    positive : ∀ {x} → ε ≤ x
+    positive : ∀ x → ε ≤ x
     ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
 
   algebraic : ∀ {x y} → x ≤ x ∙ y
-  algebraic {x} {y} = subst (_≤ x ∙ y) (∙ε x) (≤-cong x (positive {y}))
+  algebraic {x} {y} = subst (_≤ x ∙ y) (∙ε x) (≤-cong x (positive y))
 
   ≤-congʳ : ∀ x {y z} → y ≤ z → y ∙ x ≤ z ∙ x
   ≤-congʳ x {y} {z} p = subst (y ∙ x ≤_) (comm x z) (subst (_≤ x ∙ z) (comm x y) (≤-cong x p))
@@ -31,7 +31,7 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
 
   infix 4 _≤_
   _≤_ : 𝑆 → 𝑆 → Type _
-  x ≤ y = ∃[ k ] (y ≡ x ∙ k)
+  x ≤ y = ∃[ z ] (y ≡ x ∙ z)
 
   ≤-trans : Transitive _≤_
   ≤-trans (k₁ , _) (k₂ , _) .fst = k₁ ∙ k₂
@@ -46,8 +46,8 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
   Preorder.refl preorder = ε , sym (∙ε _)
   Preorder.trans preorder = ≤-trans
 
-  positive : ∀ {x} → ε ≤ x
-  positive {x} = x , sym (ε∙ x)
+  positive : ∀ x → ε ≤ x
+  positive x = x , sym (ε∙ x)
 
   ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
   ≤-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
@@ -103,6 +103,22 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
     (x ∙ z) ∸ x ≡⟨ ∸‿cancel x z ⟩
     z ∎
 
+  pom : POM _
+  pom = algebraic-pom commutativeMonoid
+
+  open POM pom public hiding (semigroup; commutativeMonoid; monoid; _∙_; ε; assoc; comm; ε∙; ∙ε)
+
+  zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
+  zeroSumFree x y x∙y≡ε = sym (∸‿cancel y x) ; cong (_∸ y) (comm y x ; x∙y≡ε) ; ε∸ y
+
+  antisym : Antisymmetric _≤_
+  antisym {x} {y} (k₁ , y≡x∙k₁) (k₂ , x≡y∙k₂) =
+    sym (y≡x∙k₁ ; cong (x ∙_) (zeroSumFree k₁ k₂ (sym (sym (∸‿inv x) ; cong (_∸ x) (x≡y∙k₂ ; cong (_∙ k₂) y≡x∙k₁ ; assoc x k₁ k₂) ; ∸‿cancel x (k₁ ∙ k₂)))) ; ∙ε x)
+
+  partialOrder : PartialOrder _ _
+  PartialOrder.preorder partialOrder = preorder
+  PartialOrder.antisym partialOrder = antisym
+
 record Monus ℓ : Type (ℓsuc ℓ) where
   field
     commutativeMonoid : CommutativeMonoid ℓ
@@ -116,10 +132,11 @@ record Monus ℓ : Type (ℓsuc ℓ) where
     antisym : Antisymmetric _≤_
 
   zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
-  zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive {x})
+  zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
 
   totalOrder : TotalOrder 𝑆 ℓ ℓ
   totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
+
 
   open TotalOrder totalOrder
     hiding (refl; antisym; _≤_; _≤|≥_; partialOrder; ≤-trans; _≥_; _≰_; _≱_)
