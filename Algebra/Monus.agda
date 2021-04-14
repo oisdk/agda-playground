@@ -119,6 +119,17 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   PartialOrder.preorder partialOrder = preorder
   PartialOrder.antisym partialOrder = antisym
 
+record TPOM ℓ : Type (ℓsuc ℓ) where
+  field commutativeMonoid : CommutativeMonoid ℓ
+
+  pom : POM _
+  pom = algebraic-pom commutativeMonoid
+
+  open POM pom public hiding (refl)
+
+  infix 4 _≤|≥_
+  field _≤|≥_ : Total _≤_
+
 record TMPOM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
 
@@ -140,7 +151,3 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
   open TotalOrder totalOrder
     hiding (refl; antisym; _≤_; _≤|≥_; partialOrder; ≤-trans; _≥_; _≰_; _≱_)
     public
-
-  diff≢ε : ∀ {x y} → (x<y : x < y) → fst (<⇒≤ x<y) ≢ ε
-  diff≢ε x<y with <⇒≤ x<y
-  diff≢ε x<y | k , y≡x∙k = λ k≡ε → irrefl (subst (_< _) (sym (y≡x∙k ; cong (_ ∙_) k≡ε ; ∙ε _)) x<y)
