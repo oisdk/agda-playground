@@ -30,37 +30,37 @@ _⌈<⌉_ : ⌈∙⌉ → ⌈∙⌉ → Type _
 ⌈⊤⌉   ⌈<⌉ _ = Poly.⊥
 ⌈ x ⌉ ⌈<⌉ y = ⌈ x ⌉< y
 
-lb-pord : PartialOrder ⌈∙⌉ _
-lb-pord .PartialOrder.preorder .Preorder._≤_ = _⌈≤⌉_
-lb-pord .PartialOrder.preorder .Preorder.refl {⌈⊤⌉} = Poly.tt
-lb-pord .PartialOrder.preorder .Preorder.refl {⌈ x ⌉} = <-refl
-lb-pord .PartialOrder.preorder .Preorder.trans {x} {y} {⌈⊤⌉} x≤y y≤z = Poly.tt
-lb-pord .PartialOrder.preorder .Preorder.trans {⌈ x ⌉} {⌈ y ⌉} {⌈ z ⌉} x≤y y≤z = ≤-trans x≤y y≤z
-lb-pord .PartialOrder.antisym {⌈⊤⌉} {⌈⊤⌉} p q = refl
-lb-pord .PartialOrder.antisym {⌈ x ⌉} {⌈ y ⌉} p q = cong ⌈_⌉ (antisym p q)
+ub-pord : PartialOrder ⌈∙⌉ _
+ub-pord .PartialOrder.preorder .Preorder._≤_ = _⌈≤⌉_
+ub-pord .PartialOrder.preorder .Preorder.refl {⌈⊤⌉} = Poly.tt
+ub-pord .PartialOrder.preorder .Preorder.refl {⌈ x ⌉} = <-refl
+ub-pord .PartialOrder.preorder .Preorder.trans {x} {y} {⌈⊤⌉} x≤y y≤z = Poly.tt
+ub-pord .PartialOrder.preorder .Preorder.trans {⌈ x ⌉} {⌈ y ⌉} {⌈ z ⌉} x≤y y≤z = ≤-trans x≤y y≤z
+ub-pord .PartialOrder.antisym {⌈⊤⌉} {⌈⊤⌉} p q = refl
+ub-pord .PartialOrder.antisym {⌈ x ⌉} {⌈ y ⌉} p q = cong ⌈_⌉ (antisym p q)
 
-lb-sord : StrictPartialOrder ⌈∙⌉ _
-StrictPreorder._<_   (StrictPartialOrder.strictPreorder lb-sord) = _⌈<⌉_
-StrictPreorder.trans (StrictPartialOrder.strictPreorder lb-sord) {⌈ x ⌉} {⌈ y ⌉} {⌈⊤⌉} p q = Poly.tt
-StrictPreorder.trans (StrictPartialOrder.strictPreorder lb-sord) {⌈ x ⌉} {⌈ y ⌉} {⌈ z ⌉} p q = <-trans p q
-StrictPreorder.irrefl  (StrictPartialOrder.strictPreorder lb-sord) {⌈ x ⌉} = irrefl {x = x}
-StrictPartialOrder.conn lb-sord {⌈⊤⌉} {⌈⊤⌉} p q = refl
-StrictPartialOrder.conn lb-sord {⌈⊤⌉} {⌈ x ⌉} p q = ⊥-elim (q Poly.tt)
-StrictPartialOrder.conn lb-sord {⌈ x ⌉} {⌈⊤⌉} p q = ⊥-elim (p Poly.tt)
-StrictPartialOrder.conn lb-sord {⌈ x ⌉} {⌈ y ⌉} p q = cong ⌈_⌉ (conn p q)
+ub-sord : StrictPartialOrder ⌈∙⌉ _
+StrictPreorder._<_   (StrictPartialOrder.strictPreorder ub-sord) = _⌈<⌉_
+StrictPreorder.trans (StrictPartialOrder.strictPreorder ub-sord) {⌈ x ⌉} {⌈ y ⌉} {⌈⊤⌉} p q = Poly.tt
+StrictPreorder.trans (StrictPartialOrder.strictPreorder ub-sord) {⌈ x ⌉} {⌈ y ⌉} {⌈ z ⌉} p q = <-trans p q
+StrictPreorder.irrefl  (StrictPartialOrder.strictPreorder ub-sord) {⌈ x ⌉} = irrefl {x = x}
+StrictPartialOrder.conn ub-sord {⌈⊤⌉} {⌈⊤⌉} p q = refl
+StrictPartialOrder.conn ub-sord {⌈⊤⌉} {⌈ x ⌉} p q = ⊥-elim (q Poly.tt)
+StrictPartialOrder.conn ub-sord {⌈ x ⌉} {⌈⊤⌉} p q = ⊥-elim (p Poly.tt)
+StrictPartialOrder.conn ub-sord {⌈ x ⌉} {⌈ y ⌉} p q = cong ⌈_⌉ (conn p q)
 
-lb-lt : ∀ x y → Dec (x ⌈<⌉ y)
-lb-lt ⌈⊤⌉ y = no λ ()
-lb-lt ⌈ x ⌉ ⌈⊤⌉ = yes Poly.tt
-lb-lt ⌈ x ⌉ ⌈ y ⌉ = x <? y
+ub-lt : ∀ x y → Dec (x ⌈<⌉ y)
+ub-lt ⌈⊤⌉ y = no λ ()
+ub-lt ⌈ x ⌉ ⌈⊤⌉ = yes Poly.tt
+ub-lt ⌈ x ⌉ ⌈ y ⌉ = x <? y
 
-lb-ord : TotalOrder ⌈∙⌉ _ _
-TotalOrder.strictPartialOrder lb-ord = lb-sord
-TotalOrder.partialOrder lb-ord = lb-pord
-TotalOrder._<?_ lb-ord = lb-lt
-TotalOrder.≰⇒> lb-ord {x} {⌈⊤⌉} p = ⊥-elim (p Poly.tt)
-TotalOrder.≰⇒> lb-ord {⌈⊤⌉} {⌈ y ⌉} p = Poly.tt
-TotalOrder.≰⇒> lb-ord {⌈ x ⌉} {⌈ y ⌉} p = ≰⇒> p
-TotalOrder.≮⇒≥ lb-ord {⌈⊤⌉} {y} p = Poly.tt
-TotalOrder.≮⇒≥ lb-ord {⌈ x ⌉} {⌈⊤⌉} p = ⊥-elim (p Poly.tt)
-TotalOrder.≮⇒≥ lb-ord {⌈ x ⌉} {⌈ y ⌉} p = ≮⇒≥ p
+ub-ord : TotalOrder ⌈∙⌉ _ _
+TotalOrder.strictPartialOrder ub-ord = ub-sord
+TotalOrder.partialOrder ub-ord = ub-pord
+TotalOrder._<?_ ub-ord = ub-lt
+TotalOrder.≰⇒> ub-ord {x} {⌈⊤⌉} p = ⊥-elim (p Poly.tt)
+TotalOrder.≰⇒> ub-ord {⌈⊤⌉} {⌈ y ⌉} p = Poly.tt
+TotalOrder.≰⇒> ub-ord {⌈ x ⌉} {⌈ y ⌉} p = ≰⇒> p
+TotalOrder.≮⇒≥ ub-ord {⌈⊤⌉} {y} p = Poly.tt
+TotalOrder.≮⇒≥ ub-ord {⌈ x ⌉} {⌈⊤⌉} p = ⊥-elim (p Poly.tt)
+TotalOrder.≮⇒≥ ub-ord {⌈ x ⌉} {⌈ y ⌉} p = ≮⇒≥ p

@@ -87,9 +87,9 @@ record PartialOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ �
   field antisym : Antisymmetric _≤_
 
 data Tri (A : Type a) (B : Type b) (C : Type c) : Type (a ℓ⊔ b ℓ⊔ c) where
-  lt : A → Tri A B C
-  eq : B → Tri A B C
-  gt : C → Tri A B C
+  lt : (x<y : A) → Tri A B C
+  eq : (x≡y : B) → Tri A B C
+  gt : (x>y : C) → Tri A B C
 
 record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂ ℓ⊔ ℓsuc ℓ₃) where
   field
