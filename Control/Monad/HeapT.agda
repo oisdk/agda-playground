@@ -46,11 +46,17 @@ xs >>=ᴴ f =
             ; (⌊ x ⌋  ∷ xs) → f x ++ (xs >>=ᴴ f)
             ; (w ⋊ ys ∷ xs) → pure (w ⋊ (ys >>=ᴴ f) ∷ (xs >>=ᴴ f)) }
 
+pureᴴ : A → Heap A
+pureᴴ x = pure (⌊ x ⌋ ∷ pure [])
+
 liftT : 𝐹 w A → Heaped A w
 liftT = map λ x → ⌊ x ⌋ ∷ pure []
 
 pushT : Heaped A w → Heap A
 pushT {w = w} x = pure (w ⋊ x ∷ pure [])
+
+liftᴴ : 𝐹 w A → Heap A
+liftᴴ = pushT ∘ liftT
 
 open import Data.List hiding (map)
 
