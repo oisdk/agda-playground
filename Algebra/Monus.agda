@@ -24,6 +24,13 @@ record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   ≤-congʳ : ∀ x {y z} → y ≤ z → y ∙ x ≤ z ∙ x
   ≤-congʳ x {y} {z} p = subst (y ∙ x ≤_) (comm x z) (subst (_≤ x ∙ z) (comm x y) (≤-cong x p))
 
+  sum-difference : ∀ {x y z} → ∀ k₁ → y ≡ x ∙ k₁ → ∀ k₂ → z ≡ y ∙ k₂ → z ≡ x ∙ (k₁ ∙ k₂)
+  sum-difference {x} {y} {z} k₁ y≡x∙k₁ k₂ z≡y∙k₂ =
+    z             ≡⟨ z≡y∙k₂ ⟩
+    y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
+    (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
+    x ∙ (k₁ ∙ k₂) ∎
+
 -- Total Antisymmetric POM
 record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field pom : POM ℓ₁ ℓ₂
@@ -48,12 +55,6 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
   _≤_ : 𝑆 → 𝑆 → Type _
   x ≤ y = ∃[ z ] (y ≡ x ∙ z)
 
-  sum-difference : ∀ {x y z} → ∀ k₁ → y ≡ x ∙ k₁ → ∀ k₂ → z ≡ y ∙ k₂ → z ≡ x ∙ (k₁ ∙ k₂)
-  sum-difference {x} {y} {z} k₁ y≡x∙k₁ k₂ z≡y∙k₂ =
-    z             ≡⟨ z≡y∙k₂ ⟩
-    y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
-    (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
-    x ∙ (k₁ ∙ k₂) ∎
 
   -- The snd here is the same proof as sum-difference, so could be refactored out.
   ≤-trans : Transitive _≤_
@@ -83,11 +84,8 @@ algebraic-pom mon = record { AlgebraicPOM mon }
 record TMPOM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
 
-  module apom = AlgebraicPOM commutativeMonoid
-  open apom using (sum-difference) public
-
   pom : POM _ _
-  pom = record { apom }
+  pom = algebraic-pom commutativeMonoid
 
   open POM pom public
 
@@ -178,7 +176,7 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
       y ∙ ε  ≡⟨ ∙ε y ⟩
       y ∎
     where
-    lemma = ∙ε y ; snd (trans  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁))
+    lemma = ∙ε y ; sum-difference k₂ x≡y∙k₂ k₁ y≡x∙k₁
 
   partialOrder : PartialOrder _ _
   PartialOrder.preorder partialOrder = preorder
