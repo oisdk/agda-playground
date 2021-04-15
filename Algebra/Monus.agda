@@ -12,7 +12,7 @@ record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field commutativeMonoid : CommutativeMonoid ℓ₁
   open CommutativeMonoid commutativeMonoid public
   field preorder : Preorder 𝑆 ℓ₂
-  open Preorder preorder public
+  open Preorder preorder public renaming (refl to ≤-refl)
   field
     positive : ∀ x → ε ≤ x
     ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
@@ -26,7 +26,7 @@ record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
 -- Total Antisymmetric POM
 record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field pom : POM ℓ₁ ℓ₂
-  open POM pom public using (preorder; _≤_; ≤-cong; ≤-congʳ; x≤x∙y; commutativeMonoid)
+  open POM pom public using (preorder; _≤_; ≤-cong; ≤-congʳ; x≤x∙y; commutativeMonoid; positive)
   open CommutativeMonoid commutativeMonoid public
   field
     _≤|≥_   : Total _≤_
@@ -34,7 +34,7 @@ record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
 
   totalOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
   totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
-  open TotalOrder totalOrder public hiding (_≤|≥_; antisym; refl)
+  open TotalOrder totalOrder public hiding (_≤|≥_; antisym) renaming (refl to ≤-refl)
 
 
 -- Every commutative monoid generates a positively ordered monoid
@@ -76,7 +76,7 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
   pom : POM _ _
   pom = algebraic-pom commutativeMonoid
 
-  open POM pom public hiding (refl)
+  open POM pom public
 
   infix 4 _≤|≥_
   field _≤|≥_ : Total _≤_
@@ -92,7 +92,7 @@ record TMAPOM ℓ : Type (ℓsuc ℓ) where
   TAPOM._≤|≥_ tapom = _≤|≥_
   TAPOM.antisym tapom = antisym
 
-  open TAPOM tapom public hiding (antisym; _≤|≥_)
+  open TAPOM tapom public hiding (antisym; _≤|≥_; _≤_; positive)
 
   zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
   zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
@@ -110,8 +110,6 @@ record CMM ℓ : Type (ℓsuc ℓ) where
     ∸‿inv   : ∀ x → x ∸ x ≡ ε
     ε∸      : ∀ x → ε ∸ x ≡ ε
 
-  open import Path.Reasoning
-
   ∸ε : ∀ x → x ∸ ε ≡ x
   ∸ε x =
     x ∸ ε       ≡˘⟨ ε∙ (x ∸ ε) ⟩
@@ -126,8 +124,6 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   open CMM cmm public
 
   field ∸‿cancel : ∀ x y → (x ∙ y) ∸ x ≡ y
-
-  open import Path.Reasoning
 
   cancelˡ : Cancellativeˡ _∙_
   cancelˡ x y z x∙y≡x∙z =
@@ -175,6 +171,64 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   partialOrder : PartialOrder _ _
   PartialOrder.preorder partialOrder = preorder
   PartialOrder.antisym partialOrder = antisym
+
+module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._∙_ tmapom)) where
+  open TMAPOM tmapom
+
+  module NonCancel where
+    _∸_ : 𝑆 → 𝑆 → 𝑆
+    x ∸ y = either (const ε) fst (x ≤|≥ y)
+
+    ∸≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
+    ∸≤ x y x≤y with x ≤|≥ y
+    ∸≤ x y x≤y | inl _ = refl
+    ∸≤ x y (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) = zeroSumFree k₂ k₁ (cancel y (k₂ ∙ k₁) ε (sym y∙ε≡y∙⟨k₂∙k₁⟩))
+      where
+      y∙ε≡y∙⟨k₂∙k₁⟩ =
+        y ∙ ε       ≡⟨ ∙ε y ⟩
+        y           ≡⟨ y≡x∙k₁ ⟩
+        x ∙ k₁      ≡⟨ cong (_∙ k₁) x≡y∙k₂ ⟩
+        y ∙ k₂ ∙ k₁ ≡⟨ assoc y k₂ k₁ ⟩
+        y ∙ (k₂ ∙ k₁) ∎
+
+    ∸‿inv : ∀ x → x ∸ x ≡ ε
+    ∸‿inv x = ∸≤ x x ≤-refl
+
+    ε∸ : ∀ x → ε ∸ x ≡ ε
+    ε∸ x = ∸≤ ε x (positive x)
+
+    ∸‿comm : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
+    ∸‿comm x y with y ≤|≥ x | x ≤|≥ y
+    ∸‿comm x y | inl y≤x | inl x≤y = cong (_∙ ε) (antisym x≤y y≤x)
+    ∸‿comm x y | inr (k , y≥x) | inl x≤y = sym y≥x ; sym (∙ε y)
+    ∸‿comm x y | inl y≤x | inr (k , x≥y) = ∙ε x ; x≥y
+    ∸‿comm x y | inr (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) = sym y≡x∙k₁ ; antisym  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁) ; x≡y∙k₂
+
+    ∸‿assoc : ∀ x y z → (x ∸ y) ∸ z ≡ x ∸ (y ∙ z)
+    ∸‿assoc x y z with x ≤|≥ y
+    ∸‿assoc x y z | inl x≤y  = ε∸ z ; sym (∸≤ x (y ∙ z) (≤-trans x≤y x≤x∙y))
+    ∸‿assoc x y z | inr x≥y with x ≤|≥ y ∙ z
+    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inl (k₂ , y∙z≡x∙k₂) = ∸≤ k₁ z (k₂ , cancel y z (k₁ ∙ k₂) (y∙z≡x∙k₂ ; cong (_∙ k₂) x≡y∙k₁ ; assoc y k₁ k₂))
+    ∸‿assoc x y z | inr (k , x≡y∙k) | inr x≥y∙z with k ≤|≥ z
+    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inl (k₃ , z≡k₁∙k₃) = sym (zeroSumFree k₂ k₃ (sym (cancel k₁ ε (k₃ ∙ k₂) (∙ε k₁ ; k₁≡z∙k₂ ; cong (_∙ k₂) z≡k₁∙k₃ ; assoc k₁ k₃ k₂) ; comm k₃ k₂)))
+      where
+      k₁≡z∙k₂ : k₁ ≡ z ∙ k₂
+      k₁≡z∙k₂ = cancel y k₁ (z ∙ k₂) (sym x≡y∙k₁ ; x≡y∙z∙k₂ ; assoc y z k₂)
+    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inr (k₃ , k₁≡z∙k₃) =
+      cancel z k₃ k₂ (sym k₁≡z∙k₃ ; cancel y k₁ (z ∙ k₂) (sym x≡y∙k₁ ; x≡y∙z∙k₂ ; assoc y z k₂))
+
+  cmm : CMM _
+  cmm = record { NonCancel ; commutativeMonoid = commutativeMonoid }
+
+  open NonCancel
+
+  ∸‿cancel : ∀ x y → (x ∙ y) ∸ x ≡ y
+  ∸‿cancel x y with (x ∙ y) ≤|≥ x
+  ∸‿cancel x y | inl x∙y≤x = sym (cancel x y ε (antisym x∙y≤x x≤x∙y ; sym (∙ε x)))
+  ∸‿cancel x y | inr (k , x∙y≡x∙k) = sym (cancel x y k x∙y≡x∙k)
+
+pomToMonus : (tmapom : TMAPOM a) → (cancel : Cancellativeˡ (TMAPOM._∙_ tmapom)) → CCMM a
+pomToMonus t c = record { POMToMonus t c }
 
 module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
   open TAPOM tapom
