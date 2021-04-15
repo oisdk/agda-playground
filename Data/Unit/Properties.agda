@@ -3,7 +3,8 @@
 module Data.Unit.Properties where
 
 open import Data.Unit
-open import Prelude
+open import Level
+open import HLevels
 
 isProp⊤ : isProp ⊤
-isProp⊤ _ _ = refl
+isProp⊤ _ _ i = tt

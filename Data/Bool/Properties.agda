@@ -2,10 +2,16 @@
 
 module Data.Bool.Properties where
 
-open import Prelude
+open import HLevels
+open import Path
 open import Data.Bool.Base
+open import Data.Bool.Truth
 open import Data.Unit.Properties
+open import Data.Unit
+open import Data.Empty
 open import Data.Empty.Properties using (isProp⊥)
+open import Relation.Nullary.Discrete
+open import Relation.Nullary.Decidable using (Dec; does; why)
 
 isPropT : ∀ x → isProp (T x)
 isPropT false = isProp⊥

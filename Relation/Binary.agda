@@ -3,21 +3,23 @@
 module Relation.Binary where
 
 open import Level
-open import Relation.Nullary
+
+open import Function using (_∘_; flip; id)
+open import Inspect  using (inspect;〖_〗)
+
+open import HLevels   using (isSet)
 open import Path as ≡ hiding (sym; refl)
-open import Data.Sum
-open import Function
-open import Data.Bool as Bool using (Bool; true; false; bool; bool′)
-open import Relation.Nullary.Decidable
-open import Relation.Nullary.Discrete
-open import Data.Empty
-open import Inspect
-open import Data.Sigma
-open import Relation.Nullary.Stable.Base
-open import Data.Unit
+
+open import Data.Bool            using (Bool; true; false; bool)
+open import Data.Bool.Properties using (false≢true)
+open import Data.Empty           using (⊥; ⊥-elim; ¬_)
+open import Data.Sum             using (either; inl; inr; _⊎_; is-l)
+
+open import Relation.Nullary.Decidable            using (Dec; yes; no; does)
 open import Relation.Nullary.Decidable.Properties using (Dec→Stable)
-open import HLevels using (isSet)
-open import Relation.Nullary.Discrete.Properties using (Discrete→isSet)
+open import Relation.Nullary.Discrete             using (Discrete)
+open import Relation.Nullary.Discrete.Properties  using (Discrete→isSet)
+open import Relation.Nullary.Stable               using (Stable)
 
 module _ (_~_ : A → A → Type b) where
   Reflexive : Type _
@@ -166,7 +168,7 @@ module FromPartialOrder {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (po : PartialOrde
   ≤-dec x y | inr x≥y | inl y≤x | 〖 x≥yᵇ 〗 | 〖 y≤xᵇ 〗 = no (x≢y ∘ flip antisym x≥y)
     where
     x≢y : x ≢ y
-    x≢y x≡y = subst (bool ⊤ ⊥) (≡.sym x≥yᵇ ; cong₂ ≤-side x≡y (≡.sym x≡y) ; y≤xᵇ) tt
+    x≢y x≡y = false≢true (≡.sym x≥yᵇ ; cong₂ ≤-side x≡y (≡.sym x≡y) ; y≤xᵇ)
 
   ≮⇒≥ : ∀ {x y} → Stable (x ≤ y)
   ≮⇒≥ {x} {y} = Dec→Stable _ (≤-dec x y)
