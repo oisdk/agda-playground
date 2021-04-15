@@ -9,10 +9,10 @@ module Relation.Binary.Construct.UpperBound {e} {E : Type e} {r₁ r₂} (totalO
 open TotalOrder totalOrder renaming (refl to <-refl)
 import Data.Unit.UniversePolymorphic as Poly
 import Data.Empty.UniversePolymorphic as Poly
+open import Data.Maybe.Base using () renaming (nothing to ⌈⊤⌉; just to ⌈_⌉) public
 
-data ⌈∙⌉ : Type e where
-  ⌈⊤⌉ : ⌈∙⌉
-  ⌈_⌉ : E → ⌈∙⌉
+⌈∙⌉ : Type e
+⌈∙⌉ = Maybe E
 
 _≤⌈_⌉ : ⌈∙⌉ → E → Type _
 ⌈⊤⌉   ≤⌈ y ⌉ = Poly.⊥
@@ -64,3 +64,6 @@ TotalOrder.≰⇒> ub-ord {⌈ x ⌉} {⌈ y ⌉} p = ≰⇒> p
 TotalOrder.≮⇒≥ ub-ord {⌈⊤⌉} {y} p = Poly.tt
 TotalOrder.≮⇒≥ ub-ord {⌈ x ⌉} {⌈⊤⌉} p = ⊥-elim (p Poly.tt)
 TotalOrder.≮⇒≥ ub-ord {⌈ x ⌉} {⌈ y ⌉} p = ≮⇒≥ p
+
+import Data.Maybe.Sugar
+module UBSugar = Data.Maybe.Sugar

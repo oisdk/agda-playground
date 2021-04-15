@@ -39,22 +39,21 @@ record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   module Viterbi where
     open import Relation.Binary.Construct.UpperBound totalOrder
     open import Relation.Binary.Lattice ub-ord
+    open UBSugar
 
     module NS where
       _*_ : ⌈∙⌉ → ⌈∙⌉ → ⌈∙⌉
-      ⌈⊤⌉   *  y = ⌈⊤⌉
-      ⌈ x ⌉ * ⌈⊤⌉ = ⌈⊤⌉
-      ⌈ x ⌉ * ⌈ y ⌉ = ⌈ x ∙ y ⌉
+      x * y = ⦇ x ∙ y ⦈
 
       *-assoc : Associative _*_
       *-assoc ⌈⊤⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
       *-assoc ⌈⊤⌉ ⌈⊤⌉ ⌈ x ⌉ = refl
       *-assoc ⌈⊤⌉ ⌈ x ⌉ ⌈⊤⌉ = refl
-      *-assoc ⌈⊤⌉ ⌈ x ⌉ ⌈ x₁ ⌉ = refl
-      *-assoc ⌈ x ⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
-      *-assoc ⌈ x ⌉ ⌈⊤⌉ ⌈ x₁ ⌉ = refl
-      *-assoc ⌈ x ⌉ ⌈ x₁ ⌉ ⌈⊤⌉ = refl
-      *-assoc ⌈ x ⌉ ⌈ x₁ ⌉ ⌈ x₂ ⌉ = cong ⌈_⌉ (assoc x x₁ x₂)
+      *-assoc ⌈⊤⌉ ⌈ _ ⌉ ⌈ _ ⌉ = refl
+      *-assoc ⌈ _ ⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
+      *-assoc ⌈ _ ⌉ ⌈⊤⌉ ⌈ _ ⌉ = refl
+      *-assoc ⌈ _ ⌉ ⌈ _ ⌉ ⌈⊤⌉ = refl
+      *-assoc ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (assoc x y z)
 
       *-com : Commutative _*_
       *-com ⌈⊤⌉   ⌈⊤⌉ = refl
@@ -75,16 +74,14 @@ record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
 
       𝑅 = ⌈∙⌉
 
-      _+_ = _⊓_
-
       1# = ⌈ ε ⌉
       0# = ⌈⊤⌉
 
       +-assoc = ⊓-assoc
 
       0+ : ∀ x → ⌈⊤⌉ ⊓ x ≡ x
-      0+ ⌈ x ⌉ = refl
       0+ ⌈⊤⌉ = refl
+      0+ ⌈ x ⌉ = refl
 
       +0 : ∀ x → x ⊓ ⌈⊤⌉ ≡ x
       +0 ⌈ x ⌉ = refl
@@ -102,12 +99,12 @@ record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
       0* x = refl
 
     nearSemiring : NearSemiring _
-    nearSemiring = record { NS }
+    nearSemiring = record { NS ; _+_ = _⊓_ }
 
     +-comm = ⊓-comm
     open NS
 
-    *0 : ∀ x → _*_ x ⌈⊤⌉ ≡ ⌈⊤⌉
+    *0 : ∀ x → x * ⌈⊤⌉ ≡ ⌈⊤⌉
     *0 ⌈ x ⌉ = refl
     *0 ⌈⊤⌉ = refl
 
