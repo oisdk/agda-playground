@@ -142,10 +142,11 @@ record TMAPOM ℓ : Type (ℓsuc ℓ) where
   totalOrder : TotalOrder 𝑆 ℓ ℓ
   totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
 
-  open import Relation.Binary.Construct.UpperBound totalOrder
 
   module Viterbi where
+    open import Relation.Binary.Construct.UpperBound totalOrder
     open TotalOrder ub-ord hiding (refl)
+    open import Relation.Binary.Lattice ub-ord
 
     module NS where
 
