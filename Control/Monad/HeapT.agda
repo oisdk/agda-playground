@@ -58,8 +58,8 @@ partition : List (Branch A) → List A × List (Σ 𝑆 (Heaped A))
 partition = foldr f ([] , [])
   where
   f : Branch A → List A × List (Σ 𝑆 (Heaped A)) → List A × List (Σ 𝑆 (Heaped A))
-  f (⌊ x ⌋) = map₁ (x ∷_)
-  f (_⋊_ w xs) = map₂ ((w , xs) ∷_)
+  f ⌊ x ⌋    = map₁ (x ∷_)
+  f (w ⋊ xs) = map₂ ((w , xs) ∷_)
 
 flattenTop : Heaped A w → 𝐹 w (List (Branch A))
 flattenTop xs =
