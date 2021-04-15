@@ -174,6 +174,7 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
 
 module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._∙_ tmapom)) where
   open TMAPOM tmapom
+  open import Function.Reasoning
 
   module NonCancel where
     _∸_ : 𝑆 → 𝑆 → 𝑆
@@ -182,7 +183,11 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
     ∸≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
     ∸≤ x y x≤y with x ≤|≥ y
     ∸≤ x y x≤y | inl _ = refl
-    ∸≤ x y (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) = zeroSumFree k₂ k₁ (cancel y (k₂ ∙ k₁) ε (sym y∙ε≡y∙⟨k₂∙k₁⟩))
+    ∸≤ x y (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
+      [ y∙ε≡y∙⟨k₂∙k₁⟩ ]⇒ y ∙ ε ≡ y ∙ (k₂ ∙ k₁) ⇒⟨ sym ⟩
+                         y ∙ (k₂ ∙ k₁) ≡ y ∙ ε ⇒⟨ cancel y (k₂ ∙ k₁) ε ⟩
+                         k₂ ∙ k₁ ≡ ε           ⇒⟨ zeroSumFree k₂ k₁ ⟩
+                         k₂ ≡ ε ⇒∎
       where
       y∙ε≡y∙⟨k₂∙k₁⟩ =
         y ∙ ε       ≡⟨ ∙ε y ⟩
