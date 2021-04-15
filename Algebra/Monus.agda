@@ -109,7 +109,11 @@ record TMAPOM ℓ : Type (ℓsuc ℓ) where
 -- Commutative Monoids with Monus
 record CMM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
-  open CommutativeMonoid commutativeMonoid public
+
+  pom : POM _ _
+  pom = algebraic-pom commutativeMonoid
+
+  open POM pom public
 
   field _∸_ : 𝑆 → 𝑆 → 𝑆
   infixl 6 _∸_
@@ -126,6 +130,15 @@ record CMM ℓ : Type (ℓsuc ℓ) where
     x ∙ (ε ∸ x) ≡⟨ cong (x ∙_) (ε∸ x) ⟩
     x ∙ ε       ≡⟨ ∙ε x ⟩
     x ∎
+
+
+  ∸≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
+  ∸≤ x y (k , y≡x∙k) =
+    x ∸ y       ≡⟨ cong (x ∸_) y≡x∙k ⟩
+    x ∸ (x ∙ k) ≡˘⟨ ∸‿assoc x x k ⟩
+    (x ∸ x) ∸ k ≡⟨ cong (_∸ k) (∸‿inv x) ⟩
+    ε ∸ k       ≡⟨ ε∸ k ⟩
+    ε ∎
 
 -- Cancellative Commutative Monoids with Monus
 record CCMM ℓ : Type (ℓsuc ℓ) where
@@ -149,11 +162,6 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
     (z ∙ x) ∸ x ≡⟨ cong (_∸ x) (comm z x) ⟩
     (x ∙ z) ∸ x ≡⟨ ∸‿cancel x z ⟩
     z ∎
-
-  pom : POM _ _
-  pom = algebraic-pom commutativeMonoid
-
-  open POM pom public hiding (semigroup; commutativeMonoid; monoid; _∙_; ε; assoc; comm; ε∙; ∙ε)
 
   zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
   zeroSumFree x y x∙y≡ε =
