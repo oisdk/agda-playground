@@ -223,10 +223,30 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
     ∸‿assoc x y z | inr x≥y with x ≤|≥ y ∙ z
     ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inl (k₂ , y∙z≡x∙k₂) = ∸≤ k₁ z (k₂ , cancel y z (k₁ ∙ k₂) (y∙z≡x∙k₂ ; cong (_∙ k₂) x≡y∙k₁ ; assoc y k₁ k₂))
     ∸‿assoc x y z | inr (k , x≡y∙k) | inr x≥y∙z with k ≤|≥ z
-    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inl (k₃ , z≡k₁∙k₃) = sym (zeroSumFree k₂ k₃ (sym (cancel k₁ ε (k₃ ∙ k₂) (∙ε k₁ ; k₁≡z∙k₂ ; cong (_∙ k₂) z≡k₁∙k₃ ; assoc k₁ k₃ k₂) ; comm k₃ k₂)))
+    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inl (k₃ , z≡k₁∙k₃) =
+        [ lemma₁            ]⇒ ε       ≡ k₂ ∙ k₃
+        ⟨ sym               ⟩⇒ k₂ ∙ k₃ ≡ ε
+        ⟨ zeroSumFree k₂ k₃ ⟩⇒ k₂      ≡ ε
+        ⟨ sym               ⟩⇒ ε       ≡ k₂ ⇒∎
       where
-      k₁≡z∙k₂ : k₁ ≡ z ∙ k₂
-      k₁≡z∙k₂ = cancel y k₁ (z ∙ k₂) (sym x≡y∙k₁ ; x≡y∙z∙k₂ ; assoc y z k₂)
+      lemma₃ =
+        y ∙ k₁     ≡˘⟨ x≡y∙k₁ ⟩
+        x          ≡⟨ x≡y∙z∙k₂ ⟩
+        y ∙ z ∙ k₂ ≡⟨ assoc y z k₂ ⟩
+        y ∙ (z ∙ k₂) ∎
+
+      lemma₂ =
+        k₁ ∙ ε         ≡⟨ ∙ε k₁ ⟩
+        k₁             ≡⟨ cancel y k₁ (z ∙ k₂) lemma₃ ⟩
+        z ∙ k₂         ≡⟨ cong (_∙ k₂) z≡k₁∙k₃ ⟩
+        (k₁ ∙ k₃) ∙ k₂ ≡⟨ assoc k₁ k₃ k₂ ⟩
+        k₁ ∙ (k₃ ∙ k₂) ∎
+
+      lemma₁ =
+        ε       ≡⟨ cancel k₁ ε (k₃ ∙ k₂) lemma₂ ⟩
+        k₃ ∙ k₂ ≡⟨ comm k₃ k₂ ⟩
+        k₂ ∙ k₃ ∎
+
     ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inr (k₃ , k₁≡z∙k₃) =
       cancel z k₃ k₂ (sym k₁≡z∙k₃ ; cancel y k₁ (z ∙ k₂) (sym x≡y∙k₁ ; x≡y∙z∙k₂ ; assoc y z k₂))
 
