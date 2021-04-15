@@ -191,10 +191,10 @@ record CMM ℓ : Type (ℓsuc ℓ) where
 
   ∸ε : ∀ x → x ∸ ε ≡ x
   ∸ε x =
-    x ∸ ε ≡˘⟨ ε∙ (x ∸ ε) ⟩
+    x ∸ ε       ≡˘⟨ ε∙ (x ∸ ε) ⟩
     ε ∙ (x ∸ ε) ≡⟨ ∸‿comm ε x ⟩
     x ∙ (ε ∸ x) ≡⟨ cong (x ∙_) (ε∸ x) ⟩
-    x ∙ ε ≡⟨ ∙ε x ⟩
+    x ∙ ε       ≡⟨ ∙ε x ⟩
     x ∎
 
 -- Cancellative Commutative Monoids with Monus
@@ -207,17 +207,17 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   open import Path.Reasoning
 
   cancelˡ : Cancellativeˡ _∙_
-  cancelˡ x y z p =
-    y ≡˘⟨ ∸‿cancel x y ⟩
-    (x ∙ y) ∸ x ≡⟨ cong (_∸ x) p ⟩
+  cancelˡ x y z x∙y≡x∙z =
+    y           ≡˘⟨ ∸‿cancel x y ⟩
+    (x ∙ y) ∸ x ≡⟨ cong (_∸ x) x∙y≡x∙z ⟩
     (x ∙ z) ∸ x ≡⟨ ∸‿cancel x z ⟩
     z ∎
 
   cancelʳ : Cancellativeʳ _∙_
-  cancelʳ x y z p =
-    y ≡˘⟨ ∸‿cancel x y ⟩
+  cancelʳ x y z y∙x≡z∙x =
+    y           ≡˘⟨ ∸‿cancel x y ⟩
     (x ∙ y) ∸ x ≡⟨ cong (_∸ x) (comm x y) ⟩
-    (y ∙ x) ∸ x ≡⟨ cong (_∸ x) p ⟩
+    (y ∙ x) ∸ x ≡⟨ cong (_∸ x) y∙x≡z∙x ⟩
     (z ∙ x) ∸ x ≡⟨ cong (_∸ x) (comm z x) ⟩
     (x ∙ z) ∸ x ≡⟨ ∸‿cancel x z ⟩
     z ∎
@@ -228,11 +228,26 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   open POM pom public hiding (semigroup; commutativeMonoid; monoid; _∙_; ε; assoc; comm; ε∙; ∙ε)
 
   zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
-  zeroSumFree x y x∙y≡ε = sym (∸‿cancel y x) ; cong (_∸ y) (comm y x ; x∙y≡ε) ; ε∸ y
+  zeroSumFree x y x∙y≡ε =
+    x           ≡˘⟨ ∸‿cancel y x ⟩
+    (y ∙ x) ∸ y ≡⟨ cong (_∸ y) (comm y x) ⟩
+    (x ∙ y) ∸ y ≡⟨ cong (_∸ y) x∙y≡ε ⟩
+    ε ∸ y       ≡⟨ ε∸ y ⟩
+    ε ∎
 
   antisym : Antisymmetric _≤_
   antisym {x} {y} (k₁ , y≡x∙k₁) (k₂ , x≡y∙k₂) =
-    sym (y≡x∙k₁ ; cong (x ∙_) (zeroSumFree k₁ k₂ (sym (sym (∸‿inv x) ; cong (_∸ x) (x≡y∙k₂ ; cong (_∙ k₂) y≡x∙k₁ ; assoc x k₁ k₂) ; ∸‿cancel x (k₁ ∙ k₂)))) ; ∙ε x)
+      x      ≡⟨ x≡y∙k₂ ⟩
+      y ∙ k₂ ≡⟨ cong (y ∙_) (zeroSumFree k₂ k₁ (sym (cancelˡ y ε (k₂ ∙ k₁) y∙ε≡y∙⟨k₂∙k₁⟩))) ⟩
+      y ∙ ε  ≡⟨ ∙ε y ⟩
+      y ∎
+    where
+    y∙ε≡y∙⟨k₂∙k₁⟩ =
+      y ∙ ε       ≡⟨ ∙ε y ⟩
+      y           ≡⟨ y≡x∙k₁ ⟩
+      x ∙ k₁      ≡⟨ cong (_∙ k₁) x≡y∙k₂ ⟩
+      y ∙ k₂ ∙ k₁ ≡⟨ assoc y k₂ k₁ ⟩
+      y ∙ (k₂ ∙ k₁) ∎
 
   partialOrder : PartialOrder _ _
   PartialOrder.preorder partialOrder = preorder
