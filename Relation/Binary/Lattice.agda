@@ -26,8 +26,11 @@ min-max-assoc x y z | yes x≤y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 | no  x�
 min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | yes y≤z | 〖 yzp 〗 = cong (_, (x ⊔ z)) (cong (fst ∘ bool _ _) yzp ; cong (fst ∘ bool _ _) (≡.sym xyp))
 min-max-assoc x y z | yes x≤y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 = cong ((x ⊓ z) ,_) (cong (snd ∘ bool _ _) yzp ; cong (snd ∘ bool _ _) (≡.sym xyp))
 min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 with x <? z
-min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = let z≡x = antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z) in cong₂ _,_ (cong (fst ∘ bool _ _) yzp ; z≡x) (z≡x ; cong (snd ∘ bool _ _) (≡.sym xyp))
 min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | no  x≥z = cong₂ _,_ (cong (fst ∘ bool _ _) yzp) (cong (snd ∘ bool _ _) (≡.sym xyp))
+min-max-assoc x y z | no  x≥y | 〖 xyp 〗 | no  y≥z | 〖 yzp 〗 | yes x≤z = cong₂ _,_ (cong (fst ∘ bool _ _) yzp ; lemma) (lemma ; cong (snd ∘ bool _ _) (≡.sym xyp))
+  where
+  lemma : z ≡ x
+  lemma = antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z)
 
 ⊓-assoc : ∀ x y z → (x ⊓ y) ⊓ z ≡ x ⊓ (y ⊓ z)
 ⊓-assoc x y z = cong fst (min-max-assoc x y z)
