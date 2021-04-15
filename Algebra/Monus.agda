@@ -48,6 +48,14 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
   _≤_ : 𝑆 → 𝑆 → Type _
   x ≤ y = ∃[ z ] (y ≡ x ∙ z)
 
+  sum-difference : ∀ {x y z} → ∀ k₁ → y ≡ x ∙ k₁ → ∀ k₂ → z ≡ y ∙ k₂ → z ≡ x ∙ (k₁ ∙ k₂)
+  sum-difference {x} {y} {z} k₁ y≡x∙k₁ k₂ z≡y∙k₂ =
+    z             ≡⟨ z≡y∙k₂ ⟩
+    y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
+    (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
+    x ∙ (k₁ ∙ k₂) ∎
+
+  -- The snd here is the same proof as sum-difference, so could be refactored out.
   ≤-trans : Transitive _≤_
   ≤-trans (k₁ , _) (k₂ , _) .fst = k₁ ∙ k₂
   ≤-trans {x} {y} {z} (k₁ , y≡x∙k₁) (k₂ , z≡y∙k₂) .snd =
@@ -67,6 +75,7 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
   ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
   ≤-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
 
+
 algebraic-pom : ∀ {ℓ} → CommutativeMonoid ℓ → POM ℓ ℓ
 algebraic-pom mon = record { AlgebraicPOM mon }
 
@@ -74,8 +83,11 @@ algebraic-pom mon = record { AlgebraicPOM mon }
 record TMPOM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
 
+  module apom = AlgebraicPOM commutativeMonoid
+  open apom using (sum-difference) public
+
   pom : POM _ _
-  pom = algebraic-pom commutativeMonoid
+  pom = record { apom }
 
   open POM pom public
 
@@ -85,7 +97,7 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
 -- Total Minimal Antisymmetric POM
 record TMAPOM ℓ : Type (ℓsuc ℓ) where
   field tmpom : TMPOM ℓ
-  open TMPOM tmpom public using (_≤_; _≤|≥_; positive)
+  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; sum-difference)
   field antisym : Antisymmetric _≤_
 
   tapom : TAPOM _ _
@@ -166,12 +178,7 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
       y ∙ ε  ≡⟨ ∙ε y ⟩
       y ∎
     where
-    lemma =
-      y ∙ ε       ≡⟨ ∙ε y ⟩
-      y           ≡⟨ y≡x∙k₁ ⟩
-      x ∙ k₁      ≡⟨ cong (_∙ k₁) x≡y∙k₂ ⟩
-      y ∙ k₂ ∙ k₁ ≡⟨ assoc y k₂ k₁ ⟩
-      y ∙ (k₂ ∙ k₁) ∎
+    lemma = ∙ε y ; snd (trans  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁))
 
   partialOrder : PartialOrder _ _
   PartialOrder.preorder partialOrder = preorder
@@ -194,10 +201,8 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
       ⟨ zeroSumFree k₂ k₁    ⟩⇒ k₂            ≡ ε ⇒∎
       where
         lemma =
-          y ∙ ε       ≡⟨ ∙ε y ⟩
-          y           ≡⟨ y≡x∙k₁ ⟩
-          x ∙ k₁      ≡⟨ cong (_∙ k₁) x≡y∙k₂ ⟩
-          y ∙ k₂ ∙ k₁ ≡⟨ assoc y k₂ k₁ ⟩
+          y ∙ ε ≡⟨ ∙ε y ⟩
+          y     ≡⟨ sum-difference k₂ x≡y∙k₂ k₁ y≡x∙k₁ ⟩
           y ∙ (k₂ ∙ k₁) ∎
 
     ∸‿inv : ∀ x → x ∸ x ≡ ε
@@ -221,7 +226,11 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
     ∸‿assoc x y z with x ≤|≥ y
     ∸‿assoc x y z | inl x≤y  = ε∸ z ; sym (∸≤ x (y ∙ z) (≤-trans x≤y x≤x∙y))
     ∸‿assoc x y z | inr x≥y with x ≤|≥ y ∙ z
-    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inl (k₂ , y∙z≡x∙k₂) = ∸≤ k₁ z (k₂ , cancel y z (k₁ ∙ k₂) (y∙z≡x∙k₂ ; cong (_∙ k₂) x≡y∙k₁ ; assoc y k₁ k₂))
+    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inl (k₂ , y∙z≡x∙k₂) = ∸≤ k₁ z (k₂ , lemma)
+      where
+      lemma : z ≡ k₁ ∙ k₂
+      lemma = cancel y z (k₁ ∙ k₂) (sum-difference k₁ x≡y∙k₁ k₂ y∙z≡x∙k₂)
+
     ∸‿assoc x y z | inr (k , x≡y∙k) | inr x≥y∙z with k ≤|≥ z
     ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inl (k₃ , z≡k₁∙k₃) =
         [ lemma₁            ]⇒ ε       ≡ k₂ ∙ k₃
@@ -230,16 +239,14 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
         ⟨ sym               ⟩⇒ ε       ≡ k₂ ⇒∎
       where
       lemma₃ =
-        y ∙ k₁     ≡˘⟨ x≡y∙k₁ ⟩
-        x          ≡⟨ x≡y∙z∙k₂ ⟩
+        y ∙ k₁       ≡˘⟨ x≡y∙k₁ ⟩
+        x            ≡⟨ x≡y∙z∙k₂ ⟩
         (y ∙ z) ∙ k₂ ≡⟨ assoc y z k₂ ⟩
         y ∙ (z ∙ k₂) ∎
 
       lemma₂ =
         k₁ ∙ ε         ≡⟨ ∙ε k₁ ⟩
-        k₁             ≡⟨ cancel y k₁ (z ∙ k₂) lemma₃ ⟩
-        z ∙ k₂         ≡⟨ cong (_∙ k₂) z≡k₁∙k₃ ⟩
-        (k₁ ∙ k₃) ∙ k₂ ≡⟨ assoc k₁ k₃ k₂ ⟩
+        k₁             ≡⟨ sum-difference k₃ z≡k₁∙k₃ k₂ (cancel y k₁ (z ∙ k₂) lemma₃) ⟩
         k₁ ∙ (k₃ ∙ k₂) ∎
 
       lemma₁ =
