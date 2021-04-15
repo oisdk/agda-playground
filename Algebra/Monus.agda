@@ -41,9 +41,8 @@ record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
     open import Relation.Binary.Lattice ub-ord
 
     module NS where
-
       _*_ : ⌈∙⌉ → ⌈∙⌉ → ⌈∙⌉
-      ⌈⊤⌉  *  y = ⌈⊤⌉
+      ⌈⊤⌉   *  y = ⌈⊤⌉
       ⌈ x ⌉ * ⌈⊤⌉ = ⌈⊤⌉
       ⌈ x ⌉ * ⌈ y ⌉ = ⌈ x ∙ y ⌉
 
@@ -173,7 +172,7 @@ record TMAPOM ℓ : Type (ℓsuc ℓ) where
   TAPOM._≤|≥_ tapom = _≤|≥_
   TAPOM.antisym tapom = antisym
 
-  open TAPOM tapom public hiding (antisym)
+  open TAPOM tapom public hiding (antisym; _≤|≥_)
 
   zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
   zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
