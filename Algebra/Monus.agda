@@ -6,6 +6,7 @@ open import Prelude
 open import Algebra
 open import Relation.Binary
 open import Path.Reasoning
+open import Function.Reasoning
 
 -- Positively ordered monoids
 record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
@@ -50,8 +51,8 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
   ≤-trans : Transitive _≤_
   ≤-trans (k₁ , _) (k₂ , _) .fst = k₁ ∙ k₂
   ≤-trans {x} {y} {z} (k₁ , y≡x∙k₁) (k₂ , z≡y∙k₂) .snd =
-    z ≡⟨ z≡y∙k₂ ⟩
-    y ∙ k₂ ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
+    z             ≡⟨ z≡y∙k₂ ⟩
+    y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
     (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
     x ∙ (k₁ ∙ k₂) ∎
 
@@ -157,11 +158,15 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   antisym : Antisymmetric _≤_
   antisym {x} {y} (k₁ , y≡x∙k₁) (k₂ , x≡y∙k₂) =
       x      ≡⟨ x≡y∙k₂ ⟩
-      y ∙ k₂ ≡⟨ cong (y ∙_) (zeroSumFree k₂ k₁ (sym (cancelˡ y ε (k₂ ∙ k₁) y∙ε≡y∙⟨k₂∙k₁⟩))) ⟩
+      y ∙ k₂ ≡⟨ [ lemma                 ]⇒ y ∙ ε   ≡ y ∙ (k₂ ∙ k₁)
+                ⟨ cancelˡ y ε (k₂ ∙ k₁) ⟩⇒ ε       ≡ k₂ ∙ k₁
+                ⟨ sym                   ⟩⇒ k₂ ∙ k₁ ≡ ε
+                ⟨ zeroSumFree k₂ k₁     ⟩⇒ k₂      ≡ ε
+                ⟨ cong (y ∙_)           ⟩⇒ y ∙ k₂  ≡ y ∙ ε ⇒∎ ⟩
       y ∙ ε  ≡⟨ ∙ε y ⟩
       y ∎
     where
-    y∙ε≡y∙⟨k₂∙k₁⟩ =
+    lemma =
       y ∙ ε       ≡⟨ ∙ε y ⟩
       y           ≡⟨ y≡x∙k₁ ⟩
       x ∙ k₁      ≡⟨ cong (_∙ k₁) x≡y∙k₂ ⟩
@@ -174,7 +179,6 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
 
 module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._∙_ tmapom)) where
   open TMAPOM tmapom
-  open import Function.Reasoning
 
   module NonCancel where
     _∸_ : 𝑆 → 𝑆 → 𝑆
@@ -184,17 +188,17 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
     ∸≤ x y x≤y with x ≤|≥ y
     ∸≤ x y x≤y | inl _ = refl
     ∸≤ x y (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
-      [ y∙ε≡y∙⟨k₂∙k₁⟩ ]⇒ y ∙ ε ≡ y ∙ (k₂ ∙ k₁) ⇒⟨ sym ⟩
-                         y ∙ (k₂ ∙ k₁) ≡ y ∙ ε ⇒⟨ cancel y (k₂ ∙ k₁) ε ⟩
-                         k₂ ∙ k₁ ≡ ε           ⇒⟨ zeroSumFree k₂ k₁ ⟩
-                         k₂ ≡ ε ⇒∎
+      [ lemma                ]⇒ y ∙ ε         ≡ y ∙ (k₂ ∙ k₁)
+      ⟨ sym                  ⟩⇒ y ∙ (k₂ ∙ k₁) ≡ y ∙ ε
+      ⟨ cancel y (k₂ ∙ k₁) ε ⟩⇒ k₂ ∙ k₁       ≡ ε
+      ⟨ zeroSumFree k₂ k₁    ⟩⇒ k₂            ≡ ε ⇒∎
       where
-      y∙ε≡y∙⟨k₂∙k₁⟩ =
-        y ∙ ε       ≡⟨ ∙ε y ⟩
-        y           ≡⟨ y≡x∙k₁ ⟩
-        x ∙ k₁      ≡⟨ cong (_∙ k₁) x≡y∙k₂ ⟩
-        y ∙ k₂ ∙ k₁ ≡⟨ assoc y k₂ k₁ ⟩
-        y ∙ (k₂ ∙ k₁) ∎
+        lemma =
+          y ∙ ε       ≡⟨ ∙ε y ⟩
+          y           ≡⟨ y≡x∙k₁ ⟩
+          x ∙ k₁      ≡⟨ cong (_∙ k₁) x≡y∙k₂ ⟩
+          y ∙ k₂ ∙ k₁ ≡⟨ assoc y k₂ k₁ ⟩
+          y ∙ (k₂ ∙ k₁) ∎
 
     ∸‿inv : ∀ x → x ∸ x ≡ ε
     ∸‿inv x = ∸≤ x x ≤-refl
@@ -205,9 +209,13 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
     ∸‿comm : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
     ∸‿comm x y with y ≤|≥ x | x ≤|≥ y
     ∸‿comm x y | inl y≤x | inl x≤y = cong (_∙ ε) (antisym x≤y y≤x)
-    ∸‿comm x y | inr (k , y≥x) | inl x≤y = sym y≥x ; sym (∙ε y)
+    ∸‿comm x y | inr (k , y≡x∙k) | inl x≤y = sym y≡x∙k ; sym (∙ε y)
     ∸‿comm x y | inl y≤x | inr (k , x≥y) = ∙ε x ; x≥y
-    ∸‿comm x y | inr (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) = sym y≡x∙k₁ ; antisym  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁) ; x≡y∙k₂
+    ∸‿comm x y | inr (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
+      x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
+      y      ≡⟨ antisym  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁) ⟩
+      x      ≡⟨ x≡y∙k₂ ⟩
+      y ∙ k₂ ∎
 
     ∸‿assoc : ∀ x y z → (x ∸ y) ∸ z ≡ x ∸ (y ∙ z)
     ∸‿assoc x y z with x ≤|≥ y
