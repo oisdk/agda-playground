@@ -232,7 +232,7 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
       lemma₃ =
         y ∙ k₁     ≡˘⟨ x≡y∙k₁ ⟩
         x          ≡⟨ x≡y∙z∙k₂ ⟩
-        y ∙ z ∙ k₂ ≡⟨ assoc y z k₂ ⟩
+        (y ∙ z) ∙ k₂ ≡⟨ assoc y z k₂ ⟩
         y ∙ (z ∙ k₂) ∎
 
       lemma₂ =
@@ -248,7 +248,18 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
         k₂ ∙ k₃ ∎
 
     ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inr (k₃ , k₁≡z∙k₃) =
-      cancel z k₃ k₂ (sym k₁≡z∙k₃ ; cancel y k₁ (z ∙ k₂) (sym x≡y∙k₁ ; x≡y∙z∙k₂ ; assoc y z k₂))
+        cancel z k₃ k₂ lemma₂
+      where
+      lemma₁ =
+        y ∙ k₁       ≡˘⟨ x≡y∙k₁ ⟩
+        x            ≡⟨ x≡y∙z∙k₂ ⟩
+        (y ∙ z) ∙ k₂ ≡⟨ assoc y z k₂ ⟩
+        y ∙ (z ∙ k₂) ∎
+
+      lemma₂ =
+        z ∙ k₃ ≡˘⟨ k₁≡z∙k₃ ⟩
+        k₁     ≡⟨ cancel y k₁ (z ∙ k₂) lemma₁ ⟩
+        z ∙ k₂ ∎
 
   cmm : CMM _
   cmm = record { NonCancel ; commutativeMonoid = commutativeMonoid }
