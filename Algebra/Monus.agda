@@ -289,8 +289,18 @@ module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
   open UBSugar
 
   module NS where
-    _*_ : ⌈∙⌉ → ⌈∙⌉ → ⌈∙⌉
+    𝑅 = ⌈∙⌉
+
+    0# 1# : 𝑅
+    _*_ _+_ : 𝑅 → 𝑅 → 𝑅
+
+    1# = ⌈ ε ⌉
+
     x * y = ⦇ x ∙ y ⦈
+
+    0# = ⌈⊤⌉
+
+    _+_ = _⊓_
 
     *-assoc : Associative _*_
     *-assoc ⌈⊤⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
@@ -314,17 +324,10 @@ module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
     ⟨+⟩* ⌈ x ⌉ ⌈⊤⌉ ⌈ z ⌉ = refl
     ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈⊤⌉ = *-com _ _
     ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ with x <? y | (x ∙ z) <? (y ∙ z)
-    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | yes x<y | yes xz<yz = refl
-    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | no  x≮y | no  xz≮yz = refl
-    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
-    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | yes x<y | no  xz≮yz = TotalOrder.antisym ub-ord (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
-
-    𝑅 = ⌈∙⌉
-
-    1# = ⌈ ε ⌉
-
-    0# : 𝑅
-    0# = ⌈⊤⌉
+    ... | yes x<y | yes xz<yz = refl
+    ... | no  x≮y | no  xz≮yz = refl
+    ... | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
+    ... | yes x<y | no  xz≮yz = TotalOrder.antisym ub-ord (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
 
     +-assoc = ⊓-assoc
 
@@ -348,7 +351,7 @@ module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
     0* x = refl
 
   nearSemiring : NearSemiring _
-  nearSemiring = record { NS ; _+_ = _⊓_ }
+  nearSemiring = record { NS }
 
   +-comm = ⊓-comm
   open NS
