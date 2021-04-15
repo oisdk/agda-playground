@@ -8,10 +8,10 @@ open import Relation.Binary
 open import Path.Reasoning
 
 -- Positively ordered monoids
-record POM ℓ : Type (ℓsuc ℓ) where
-  field commutativeMonoid : CommutativeMonoid ℓ
+record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
+  field commutativeMonoid : CommutativeMonoid ℓ₁
   open CommutativeMonoid commutativeMonoid public
-  field preorder : Preorder 𝑆 ℓ
+  field preorder : Preorder 𝑆 ℓ₂
   open Preorder preorder public
   field
     positive : ∀ x → ε ≤ x
@@ -23,8 +23,103 @@ record POM ℓ : Type (ℓsuc ℓ) where
   ≤-congʳ : ∀ x {y z} → y ≤ z → y ∙ x ≤ z ∙ x
   ≤-congʳ x {y} {z} p = subst (y ∙ x ≤_) (comm x z) (subst (_≤ x ∙ z) (comm x y) (≤-cong x p))
 
+-- Total Antisymmetric POM
+record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
+  field pom : POM ℓ₁ ℓ₂
+  open POM pom public using (preorder; _≤_; ≤-cong; ≤-congʳ; x≤x∙y; commutativeMonoid)
+  open CommutativeMonoid commutativeMonoid public
+  field
+    _≤|≥_   : Total _≤_
+    antisym : Antisymmetric _≤_
+
+  totalOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
+  totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
+  open TotalOrder totalOrder public hiding (_≤|≥_; antisym; refl)
+
+  module Viterbi where
+    open import Relation.Binary.Construct.UpperBound totalOrder
+    open import Relation.Binary.Lattice ub-ord
+
+    module NS where
+
+      _*_ : ⌈∙⌉ → ⌈∙⌉ → ⌈∙⌉
+      ⌈⊤⌉  *  y = ⌈⊤⌉
+      ⌈ x ⌉ * ⌈⊤⌉ = ⌈⊤⌉
+      ⌈ x ⌉ * ⌈ y ⌉ = ⌈ x ∙ y ⌉
+
+      *-assoc : Associative _*_
+      *-assoc ⌈⊤⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
+      *-assoc ⌈⊤⌉ ⌈⊤⌉ ⌈ x ⌉ = refl
+      *-assoc ⌈⊤⌉ ⌈ x ⌉ ⌈⊤⌉ = refl
+      *-assoc ⌈⊤⌉ ⌈ x ⌉ ⌈ x₁ ⌉ = refl
+      *-assoc ⌈ x ⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
+      *-assoc ⌈ x ⌉ ⌈⊤⌉ ⌈ x₁ ⌉ = refl
+      *-assoc ⌈ x ⌉ ⌈ x₁ ⌉ ⌈⊤⌉ = refl
+      *-assoc ⌈ x ⌉ ⌈ x₁ ⌉ ⌈ x₂ ⌉ = cong ⌈_⌉ (assoc x x₁ x₂)
+
+      *-com : Commutative _*_
+      *-com ⌈⊤⌉   ⌈⊤⌉ = refl
+      *-com ⌈⊤⌉   ⌈ x ⌉ = refl
+      *-com ⌈ x ⌉ ⌈⊤⌉ = refl
+      *-com ⌈ x ⌉ ⌈ y ⌉ = cong ⌈_⌉ (comm x y)
+
+      ⟨+⟩* : _*_ Distributesˡ _⊓_
+      ⟨+⟩* ⌈⊤⌉ _ _ = refl
+      ⟨+⟩* ⌈ x ⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
+      ⟨+⟩* ⌈ x ⌉ ⌈⊤⌉ ⌈ z ⌉ = refl
+      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈⊤⌉ = *-com _ _
+      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ with x <? y | (x ∙ z) <? (y ∙ z)
+      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | yes x<y | yes xz<yz = refl
+      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | no  x≮y | no  xz≮yz = refl
+      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
+      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | yes x<y | no  xz≮yz = TotalOrder.antisym ub-ord (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
+
+      𝑅 = ⌈∙⌉
+
+      _+_ = _⊓_
+
+      1# = ⌈ ε ⌉
+      0# = ⌈⊤⌉
+
+      +-assoc = ⊓-assoc
+
+      0+ : ∀ x → ⌈⊤⌉ ⊓ x ≡ x
+      0+ ⌈ x ⌉ = refl
+      0+ ⌈⊤⌉ = refl
+
+      +0 : ∀ x → x ⊓ ⌈⊤⌉ ≡ x
+      +0 ⌈ x ⌉ = refl
+      +0 ⌈⊤⌉ = refl
+
+      1* : ∀ x → ⌈ ε ⌉ * x ≡ x
+      1* ⌈⊤⌉ = refl
+      1* ⌈ x ⌉ = cong ⌈_⌉ (ε∙ x)
+
+      *1 : ∀ x → x * ⌈ ε ⌉ ≡ x
+      *1 ⌈⊤⌉ = refl
+      *1 ⌈ x ⌉ = cong ⌈_⌉ (∙ε x)
+
+      0* : ∀ x → 0# * x ≡ 0#
+      0* x = refl
+
+    nearSemiring : NearSemiring _
+    nearSemiring = record { NS }
+
+    +-comm = ⊓-comm
+    open NS
+
+    *0 : ∀ x → _*_ x ⌈⊤⌉ ≡ ⌈⊤⌉
+    *0 ⌈ x ⌉ = refl
+    *0 ⌈⊤⌉ = refl
+
+    *⟨+⟩ : _*_ Distributesʳ _⊓_
+    *⟨+⟩ x y z = *-com x (y ⊓ z) ; ⟨+⟩* y z x ; cong₂ _⊓_ (*-com y x) (*-com z x)
+
+  viterbi : Semiring ℓ₁
+  viterbi = record { Viterbi }
+
 -- Every commutative monoid generates a positively ordered monoid
--- called the "algebraic" pom
+-- called the "algebraic" or "minimal" pom
 module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
   commutativeMonoid = mon
   open CommutativeMonoid mon
@@ -52,8 +147,36 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
   ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
   ≤-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
 
-algebraic-pom : ∀ {ℓ} → CommutativeMonoid ℓ → POM ℓ
+algebraic-pom : ∀ {ℓ} → CommutativeMonoid ℓ → POM ℓ ℓ
 algebraic-pom mon = record { AlgebraicPOM mon }
+
+-- Total Minimal POM
+record TMPOM ℓ : Type (ℓsuc ℓ) where
+  field commutativeMonoid : CommutativeMonoid ℓ
+
+  pom : POM _ _
+  pom = algebraic-pom commutativeMonoid
+
+  open POM pom public hiding (refl)
+
+  infix 4 _≤|≥_
+  field _≤|≥_ : Total _≤_
+
+-- Total Minimal Antisymmetric POM
+record TMAPOM ℓ : Type (ℓsuc ℓ) where
+  field tmpom : TMPOM ℓ
+  open TMPOM tmpom public using (_≤_; _≤|≥_; positive)
+  field antisym : Antisymmetric _≤_
+
+  tapom : TAPOM _ _
+  TAPOM.pom tapom = TMPOM.pom tmpom
+  TAPOM._≤|≥_ tapom = _≤|≥_
+  TAPOM.antisym tapom = antisym
+
+  open TAPOM tapom public hiding (antisym)
+
+  zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
+  zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
 
 -- Commutative Monoids with Monus
 record CMM ℓ : Type (ℓsuc ℓ) where
@@ -103,7 +226,7 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
     (x ∙ z) ∸ x ≡⟨ ∸‿cancel x z ⟩
     z ∎
 
-  pom : POM _
+  pom : POM _ _
   pom = algebraic-pom commutativeMonoid
 
   open POM pom public hiding (semigroup; commutativeMonoid; monoid; _∙_; ε; assoc; comm; ε∙; ∙ε)
@@ -118,114 +241,3 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   partialOrder : PartialOrder _ _
   PartialOrder.preorder partialOrder = preorder
   PartialOrder.antisym partialOrder = antisym
-
-record TMPOM ℓ : Type (ℓsuc ℓ) where
-  field commutativeMonoid : CommutativeMonoid ℓ
-
-  pom : POM _
-  pom = algebraic-pom commutativeMonoid
-
-  open POM pom public hiding (refl)
-
-  infix 4 _≤|≥_
-  field _≤|≥_ : Total _≤_
-
--- Total Minimal Antisymmetric POM
-record TMAPOM ℓ : Type (ℓsuc ℓ) where
-  field tmpom : TMPOM ℓ
-  open TMPOM tmpom public
-  field antisym : Antisymmetric _≤_
-
-  zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
-  zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
-
-  totalOrder : TotalOrder 𝑆 ℓ ℓ
-  totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
-
-
-  module Viterbi where
-    open import Relation.Binary.Construct.UpperBound totalOrder
-    open TotalOrder ub-ord hiding (refl)
-    open import Relation.Binary.Lattice ub-ord
-
-    module NS where
-
-      _*_ : ⌈∙⌉ → ⌈∙⌉ → ⌈∙⌉
-      ⌈⊤⌉  *  y = ⌈⊤⌉
-      ⌈ x ⌉ * ⌈⊤⌉ = ⌈⊤⌉
-      ⌈ x ⌉ * ⌈ y ⌉ = ⌈ x ∙ y ⌉
-
-      *-assoc : Associative _*_
-      *-assoc ⌈⊤⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
-      *-assoc ⌈⊤⌉ ⌈⊤⌉ ⌈ x ⌉ = refl
-      *-assoc ⌈⊤⌉ ⌈ x ⌉ ⌈⊤⌉ = refl
-      *-assoc ⌈⊤⌉ ⌈ x ⌉ ⌈ x₁ ⌉ = refl
-      *-assoc ⌈ x ⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
-      *-assoc ⌈ x ⌉ ⌈⊤⌉ ⌈ x₁ ⌉ = refl
-      *-assoc ⌈ x ⌉ ⌈ x₁ ⌉ ⌈⊤⌉ = refl
-      *-assoc ⌈ x ⌉ ⌈ x₁ ⌉ ⌈ x₂ ⌉ = cong ⌈_⌉ (assoc x x₁ x₂)
-
-      *-com : Commutative _*_
-      *-com ⌈⊤⌉   ⌈⊤⌉ = refl
-      *-com ⌈⊤⌉   ⌈ x ⌉ = refl
-      *-com ⌈ x ⌉ ⌈⊤⌉ = refl
-      *-com ⌈ x ⌉ ⌈ y ⌉ = cong ⌈_⌉ (comm x y)
-
-      ⟨+⟩* : _*_ Distributesˡ _⊓_
-      ⟨+⟩* ⌈⊤⌉ _ _ = refl
-      ⟨+⟩* ⌈ x ⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
-      ⟨+⟩* ⌈ x ⌉ ⌈⊤⌉ ⌈ z ⌉ = refl
-      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈⊤⌉ = *-com _ _
-      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ with ⌈ x ⌉ <? ⌈ y ⌉ | ⌈ x ∙ z ⌉ <? ⌈ y ∙ z ⌉
-      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | yes x<y | yes xz<yz = refl
-      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | no  x≮y | no  xz≮yz = refl
-      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | no  x≮y | yes xz<yz = ⊥-elim (xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
-      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ | yes x<y | no  xz≮yz = TotalOrder.antisym ub-ord (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
-
-      𝑅 = ⌈∙⌉
-
-      _+_ = _⊓_
-
-      1# = ⌈ ε ⌉
-      0# = ⌈⊤⌉
-
-      +-assoc = ⊓-assoc
-
-      0+ : ∀ x → ⌈⊤⌉ ⊓ x ≡ x
-      0+ ⌈ x ⌉ = refl
-      0+ ⌈⊤⌉ = refl
-
-      +0 : ∀ x → x ⊓ ⌈⊤⌉ ≡ x
-      +0 ⌈ x ⌉ = refl
-      +0 ⌈⊤⌉ = refl
-
-      1* : ∀ x → ⌈ ε ⌉ * x ≡ x
-      1* ⌈⊤⌉ = refl
-      1* ⌈ x ⌉ = cong ⌈_⌉ (ε∙ x)
-
-      *1 : ∀ x → x * ⌈ ε ⌉ ≡ x
-      *1 ⌈⊤⌉ = refl
-      *1 ⌈ x ⌉ = cong ⌈_⌉ (∙ε x)
-
-      0* : ∀ x → 0# * x ≡ 0#
-      0* x = refl
-
-    nearSemiring : NearSemiring ℓ
-    nearSemiring = record { NS }
-
-    +-comm = ⊓-comm
-    open NS
-
-    *0 : ∀ x → _*_ x ⌈⊤⌉ ≡ ⌈⊤⌉
-    *0 ⌈ x ⌉ = refl
-    *0 ⌈⊤⌉ = refl
-
-    *⟨+⟩ : _*_ Distributesʳ _⊓_
-    *⟨+⟩ x y z = *-com x (y ⊓ z) ; ⟨+⟩* y z x ; cong₂ _⊓_ (*-com y x) (*-com z x)
-
-  viterbi : Semiring ℓ
-  viterbi = record { Viterbi }
-
-  open TotalOrder totalOrder
-    hiding (refl; antisym; _≤_; _≤|≥_; partialOrder; ≤-trans; _≥_; _≰_; _≱_)
-    public
