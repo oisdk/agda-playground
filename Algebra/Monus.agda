@@ -130,7 +130,6 @@ record CMM ℓ : Type (ℓsuc ℓ) where
     x ∙ ε       ≡⟨ ∙ε x ⟩
     x ∎
 
-
   ∸≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
   ∸≤ x y (k , y≡x∙k) =
     x ∸ y       ≡⟨ cong (x ∸_) y≡x∙k ⟩
@@ -187,6 +186,7 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   PartialOrder.preorder partialOrder = preorder
   PartialOrder.antisym partialOrder = antisym
 
+-- We can from a CCMM from a POM with the relevant properties
 module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._∙_ tmapom)) where
   open TMAPOM tmapom
 
@@ -281,6 +281,8 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
 pomToMonus : (tmapom : TMAPOM a) → (cancel : Cancellativeˡ (TMAPOM._∙_ tmapom)) → CCMM a
 pomToMonus t c = record { POMToMonus t c }
 
+-- We can construct the viterbi semiring by adjoining a top element to
+-- a tapom
 module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
   open TAPOM tapom
   open import Relation.Binary.Construct.UpperBound totalOrder
