@@ -44,7 +44,6 @@ record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
   open TotalOrder totalOrder public hiding (_≤|≥_; antisym) renaming (refl to ≤-refl)
 
-
 -- Every commutative monoid generates a positively ordered monoid
 -- called the "algebraic" or "minimal" pom
 module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
@@ -285,7 +284,7 @@ pomToMonus t c = record { POMToMonus t c }
 module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
   open TAPOM tapom
   open import Relation.Binary.Construct.UpperBound totalOrder
-  open import Relation.Binary.Lattice ub-ord
+  open import Relation.Binary.Lattice totalOrder
   open UBSugar
 
   module NS where
@@ -296,72 +295,81 @@ module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
 
     1# = ⌈ ε ⌉
 
-    x * y = ⦇ x ∙ y ⦈
+    ⌈⊤⌉   * y     = ⌈⊤⌉
+    ⌈ x ⌉ * ⌈⊤⌉   = ⌈⊤⌉
+    ⌈ x ⌉ * ⌈ y ⌉ = ⌈ x ∙ y ⌉
 
     0# = ⌈⊤⌉
 
-    _+_ = _⊓_
+    ⌈⊤⌉   + y     = y
+    ⌈ x ⌉ + ⌈⊤⌉   = ⌈ x ⌉
+    ⌈ x ⌉ + ⌈ y ⌉ = ⌈ x ⊓ y ⌉
 
     *-assoc : Associative _*_
-    *-assoc ⌈⊤⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
-    *-assoc ⌈⊤⌉ ⌈⊤⌉ ⌈ x ⌉ = refl
-    *-assoc ⌈⊤⌉ ⌈ x ⌉ ⌈⊤⌉ = refl
-    *-assoc ⌈⊤⌉ ⌈ _ ⌉ ⌈ _ ⌉ = refl
-    *-assoc ⌈ _ ⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
-    *-assoc ⌈ _ ⌉ ⌈⊤⌉ ⌈ _ ⌉ = refl
-    *-assoc ⌈ _ ⌉ ⌈ _ ⌉ ⌈⊤⌉ = refl
+    *-assoc ⌈⊤⌉   _     _     = refl
+    *-assoc ⌈ _ ⌉ ⌈⊤⌉   _     = refl
+    *-assoc ⌈ _ ⌉ ⌈ _ ⌉ ⌈⊤⌉   = refl
     *-assoc ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (assoc x y z)
 
     *-com : Commutative _*_
-    *-com ⌈⊤⌉   ⌈⊤⌉ = refl
-    *-com ⌈⊤⌉   ⌈ x ⌉ = refl
-    *-com ⌈ x ⌉ ⌈⊤⌉ = refl
+    *-com ⌈⊤⌉   ⌈⊤⌉   = refl
+    *-com ⌈⊤⌉   ⌈ _ ⌉ = refl
+    *-com ⌈ _ ⌉ ⌈⊤⌉   = refl
     *-com ⌈ x ⌉ ⌈ y ⌉ = cong ⌈_⌉ (comm x y)
 
-    ⟨+⟩* : _*_ Distributesˡ _⊓_
-    ⟨+⟩* ⌈⊤⌉ _ _ = refl
-    ⟨+⟩* ⌈ x ⌉ ⌈⊤⌉ ⌈⊤⌉ = refl
-    ⟨+⟩* ⌈ x ⌉ ⌈⊤⌉ ⌈ z ⌉ = refl
-    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈⊤⌉ = *-com _ _
+    ⟨+⟩* : _*_ Distributesˡ _+_
+    ⟨+⟩* ⌈⊤⌉   _     _     = refl
+    ⟨+⟩* ⌈ _ ⌉ ⌈⊤⌉   ⌈⊤⌉   = refl
+    ⟨+⟩* ⌈ _ ⌉ ⌈⊤⌉   ⌈ _ ⌉ = refl
+    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈⊤⌉   = refl
     ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ with x <? y | (x ∙ z) <? (y ∙ z)
     ... | yes x<y | yes xz<yz = refl
     ... | no  x≮y | no  xz≮yz = refl
     ... | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
     ... | yes x<y | no  xz≮yz = TotalOrder.antisym ub-ord (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
 
-    +-assoc = ⊓-assoc
+    +-assoc : Associative _+_
+    +-assoc ⌈⊤⌉   _     _     = refl
+    +-assoc ⌈ x ⌉ ⌈⊤⌉   _     = refl
+    +-assoc ⌈ x ⌉ ⌈ _ ⌉ ⌈⊤⌉   = refl
+    +-assoc ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (⊓-assoc x y z)
 
-    0+ : ∀ x → ⌈⊤⌉ ⊓ x ≡ x
-    0+ ⌈⊤⌉ = refl
-    0+ ⌈ x ⌉ = refl
+    0+ : ∀ x → 0# + x ≡ x
+    0+ ⌈⊤⌉   = refl
+    0+ ⌈ _ ⌉ = refl
 
-    +0 : ∀ x → x ⊓ ⌈⊤⌉ ≡ x
-    +0 ⌈ x ⌉ = refl
-    +0 ⌈⊤⌉ = refl
+    +0 : ∀ x → x + 0# ≡ x
+    +0 ⌈ _ ⌉ = refl
+    +0 ⌈⊤⌉   = refl
 
-    1* : ∀ x → ⌈ ε ⌉ * x ≡ x
-    1* ⌈⊤⌉ = refl
+    1* : ∀ x → 1# * x ≡ x
+    1* ⌈⊤⌉   = refl
     1* ⌈ x ⌉ = cong ⌈_⌉ (ε∙ x)
 
-    *1 : ∀ x → x * ⌈ ε ⌉ ≡ x
-    *1 ⌈⊤⌉ = refl
+    *1 : ∀ x → x * 1# ≡ x
+    *1 ⌈⊤⌉   = refl
     *1 ⌈ x ⌉ = cong ⌈_⌉ (∙ε x)
 
     0* : ∀ x → 0# * x ≡ 0#
-    0* x = refl
+    0* _ = refl
+
+  open NS
 
   nearSemiring : NearSemiring _
   nearSemiring = record { NS }
 
-  +-comm = ⊓-comm
-  open NS
+  +-comm : Commutative _+_
+  +-comm ⌈⊤⌉   ⌈⊤⌉   = refl
+  +-comm ⌈⊤⌉   ⌈ _ ⌉ = refl
+  +-comm ⌈ _ ⌉ ⌈⊤⌉   = refl
+  +-comm ⌈ x ⌉ ⌈ y ⌉ = cong ⌈_⌉ (⊓-comm x y)
 
   *0 : ∀ x → x * ⌈⊤⌉ ≡ ⌈⊤⌉
-  *0 ⌈ x ⌉ = refl
-  *0 ⌈⊤⌉ = refl
+  *0 ⌈ _ ⌉ = refl
+  *0 ⌈⊤⌉   = refl
 
-  *⟨+⟩ : _*_ Distributesʳ _⊓_
-  *⟨+⟩ x y z = *-com x (y ⊓ z) ; ⟨+⟩* y z x ; cong₂ _⊓_ (*-com y x) (*-com z x)
+  *⟨+⟩ : _*_ Distributesʳ _+_
+  *⟨+⟩ x y z = *-com x (y + z) ; ⟨+⟩* y z x ; cong₂ _+_ (*-com y x) (*-com z x)
 
 viterbi : ∀ {ℓ₁ ℓ₂} → TAPOM ℓ₁ ℓ₂ → Semiring ℓ₁
 viterbi tapom = record { Viterbi tapom }
