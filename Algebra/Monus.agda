@@ -287,6 +287,17 @@ module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
   open TAPOM tapom
   open import Relation.Binary.Construct.UpperBound totalOrder
   open import Relation.Binary.Lattice totalOrder
+
+  ⟨⊓⟩∙ : _∙_ Distributesˡ _⊓_
+  ⟨⊓⟩∙ x y z with x <? y | (x ∙ z) <? (y ∙ z)
+  ... | yes x<y | yes xz<yz = refl
+  ... | no  x≮y | no  xz≮yz = refl
+  ... | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
+  ... | yes x<y | no  xz≮yz = antisym (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
+
+  ∙⟨⊓⟩ : _∙_ Distributesʳ _⊓_
+  ∙⟨⊓⟩ x y z = comm x (y ⊓ z) ; ⟨⊓⟩∙ y z x ; cong₂ _⊓_ (comm y x) (comm z x)
+
   open UBSugar
 
   module NS where
@@ -324,11 +335,7 @@ module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
     ⟨+⟩* ⌈ _ ⌉ ⌈⊤⌉   ⌈⊤⌉   = refl
     ⟨+⟩* ⌈ _ ⌉ ⌈⊤⌉   ⌈ _ ⌉ = refl
     ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈⊤⌉   = refl
-    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ with x <? y | (x ∙ z) <? (y ∙ z)
-    ... | yes x<y | yes xz<yz = refl
-    ... | no  x≮y | no  xz≮yz = refl
-    ... | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
-    ... | yes x<y | no  xz≮yz = TotalOrder.antisym ub-ord (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
+    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (⟨⊓⟩∙ x y z)
 
     +-assoc : Associative _+_
     +-assoc ⌈⊤⌉   _     _     = refl
