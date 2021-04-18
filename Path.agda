@@ -36,6 +36,7 @@ x ≢ y = ¬ (x ≡ y)
 
 infix 4 PathP-syntax
 PathP-syntax = PathP
+{-# DISPLAY PathP-syntax = PathP #-}
 
 syntax PathP-syntax (λ i → Ty) lhs rhs = lhs ≡[ i ≔ Ty ]≡ rhs
 
