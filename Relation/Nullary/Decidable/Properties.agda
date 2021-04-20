@@ -2,9 +2,9 @@
 
 module Relation.Nullary.Decidable.Properties where
 
-open import Relation.Nullary.Decidable.Base
+open import Relation.Nullary.Decidable
 open import Level
-open import Relation.Nullary.Stable.Base
+open import Relation.Nullary.Stable
 open import Data.Empty
 open import HLevels
 open import Data.Empty.Properties using (isProp¬)

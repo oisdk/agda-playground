@@ -2,7 +2,7 @@
 
 module Relation.Nullary.Discrete.Properties where
 
-open import Relation.Nullary.Discrete.Base
+open import Relation.Nullary.Discrete
 open import Relation.Nullary.Stable.Properties using (Stable≡→isSet)
 open import Relation.Nullary.Decidable.Properties using (Dec→Stable; isPropDec)
 

@@ -4,7 +4,7 @@ module Relation.Nullary.Stable.Properties where
 
 open import Data.Empty
 open import Level
-open import Relation.Nullary.Stable.Base
+open import Relation.Nullary.Stable
 open import Path
 open import HLevels
 open import Data.Empty.Properties
