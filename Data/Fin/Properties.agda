@@ -58,7 +58,7 @@ discreteFin {k = suc _} f0 f0 = yes refl
 discreteFin {k = suc _} f0 (fs fk) = no (ℕ.znots ∘ cong FinToℕ)
 discreteFin {k = suc _} (fs fj) f0 = no (ℕ.snotz ∘ cong FinToℕ)
 discreteFin {k = suc _} (fs fj) (fs fk) =
-  ⟦yes cong fs ,no cong (λ { f0 → fk ; (fs x) → x}) ⟧ (discreteFin fj fk)
+  iff-dec (cong fs iff cong (λ { f0 → fk ; (fs x) → x})) (discreteFin fj fk)
 
 isSetFin : isSet (Fin n)
 isSetFin = Discrete→isSet discreteFin

@@ -13,6 +13,4 @@ module _ {a} {A : Type a}
 
   from-bool-eq : Discrete A
   from-bool-eq x y =
-    ⟦yes sound x y
-    ,no (λ p → subst (λ z → T (x ≡ᴮ z)) p (complete x))
-    ⟧ (T? (x ≡ᴮ y))
+    iff-dec (sound x y iff flip (subst (λ z → T (x ≡ᴮ z))) (complete x)) (T? (x ≡ᴮ y))

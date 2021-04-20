@@ -21,7 +21,7 @@ discreteMaybe : Discrete A → Discrete (Maybe A)
 discreteMaybe _≟_ nothing nothing = yes refl
 discreteMaybe _≟_ nothing (just x) = no nothing≢just
 discreteMaybe _≟_ (just x) nothing = no just≢nothing
-discreteMaybe _≟_ (just x) (just y) = ⟦yes cong just ,no just-inj ⟧ (x ≟ y)
+discreteMaybe _≟_ (just x) (just y) = iff-dec (cong just iff just-inj) (x ≟ y)
 
 is-just : Maybe A → Bool
 is-just = maybe false (const true)

@@ -66,7 +66,7 @@ module Exists {a} {A : Type a} {p} (P : A → Type p) where
 
     ◇? : ∀ xs → Dec (◇ P xs)
     ◇? [] = no λ ()
-    ◇? (x ∷ xs) =  ⟦yes ⟦l f0 ,_ ,r push ⟧ ,no uncons ⟧ (P? x || ◇? xs)
+    ◇? (x ∷ xs) =  iff-dec (⟦l f0 ,_ ,r push ⟧ iff uncons) (P? x || ◇? xs)
 
 ◻ : (P : A → Type p) → List A → Type _
 ◻ P xs = ∀ i → P (xs ! i)
@@ -103,9 +103,7 @@ module Forall {a} {A : Type a} {p} (P : A → Type p) where
     open import Relation.Nullary.Decidable.Logic
     ◻? : (∀ x → Dec (P x)) → ∀ xs → Dec (◻ P xs)
     ◻? P? [] = yes λ ()
-    ◻? P? (x ∷ xs) =  ⟦yes uncurry push
-                      ,no uncons
-                      ⟧ (P? x && ◻? P? xs)
+    ◻? P? (x ∷ xs) =  iff-dec (uncurry push iff uncons) (P? x && ◻? P? xs)
 
 module Forall-NotExists {a} {A : Type a} {p} (P : A → Type p) where
   open import Relation.Nullary.Stable

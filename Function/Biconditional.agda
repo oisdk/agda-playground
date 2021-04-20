@@ -3,7 +3,6 @@
 module Function.Biconditional where
 
 open import Level
-open import Relation.Binary
 open import Path as ≡ using (_;_; cong)
 open import Function
 
