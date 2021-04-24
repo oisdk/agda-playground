@@ -4,20 +4,7 @@ module Relation.Nullary.Decidable.Logic where
 
 open import Prelude
 open import Data.Sum
-
-infixl 7 _&&_
-_&&_ : Dec A → Dec B → Dec (A × B)
-(x && y) .does = x .does and y .does
-(yes x && yes y) .why  = (x , y)
-(yes x && no  y) .why  = (y ∘ snd)
-(no  x && y) .why  = (x ∘ fst)
-
-infixl 6 _||_
-_||_ : Dec A → Dec B → Dec (A ⊎ B)
-(x || y) .does = x .does or y .does
-(yes x || y) .why = (inl x)
-(no  x || yes y) .why = (inr y)
-(no  x || no  y) .why = (either x y)
+open import Relation.Nullary.Decidable
 
 disj : (A → C) → (B → C) → (¬ A → ¬ B → ¬ C) → Dec A → Dec B → Dec C
 disj l r n x y .does = x .does or y .does
@@ -31,7 +18,18 @@ conj c l r (no ¬x) y .why = l ¬x
 conj c l r (yes x) (no ¬y) .why = r ¬y
 conj c l r (yes x) (yes y) .why = c x y
 
+negate : (A → ¬ B) → (¬ A → B) → Dec A → Dec B
+negate t f d .does = not (d .does)
+negate t f (yes d) .why = t d
+negate t f (no ¬d) .why = f ¬d
+
 ! : Dec A → Dec (¬ A)
-! x .does = not (x .does)
-! (yes x) .why = (λ z → z x)
-! (no  x) .why = x
+! = negate (λ x ¬x → ¬x x) id
+
+infixl 7 _&&_
+_&&_ : Dec A → Dec B → Dec (A × B)
+_&&_ = conj _,_ (_∘ fst) (_∘ snd)
+
+infixl 6 _||_
+_||_ : Dec A → Dec B → Dec (A ⊎ B)
+_||_ = disj inl inr either
