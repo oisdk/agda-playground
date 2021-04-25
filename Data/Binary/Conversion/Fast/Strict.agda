@@ -1,28 +1,21 @@
 {-# OPTIONS --without-K --safe #-}
 
-module Data.Binary.Conversion.Fast where
-
--- This module provides a conversion function from
--- nats which uses built-in functions.
--- It is dramatically faster than the normal conversion
--- even at smaller numbers.
+module Data.Binary.Conversion.Fast.Strict where
 
 open import Data.Binary.Definition
 open import Data.Nat.DivMod
-open import Data.Nat.Base
+open import Data.Nat.Base using (ℕ; suc; zero)
+open import Strict
 open import Data.Bool
 
 ⟦_⇑⟧⟨_⟩ : ℕ → ℕ → 𝔹
 ⟦ suc n ⇑⟧⟨ suc w ⟩ =
-  if even n
-    then 1ᵇ ⟦ n ÷ 2 ⇑⟧⟨ w ⟩
-    else 2ᵇ ⟦ n ÷ 2 ⇑⟧⟨ w ⟩
+  let! m =! even n in!
+  let! ms =! ⟦ n ÷ 2 ⇑⟧⟨ w ⟩ in!
+  if m then 1ᵇ ms else 2ᵇ ms
 ⟦ zero  ⇑⟧⟨ _    ⟩ = 0ᵇ
 ⟦ suc _ ⇑⟧⟨ zero ⟩ = 0ᵇ -- will not happen
 
--- We build the output by repeatedly halving the input,
--- but we also pass in the number to reduce as we go so that
--- we satisfy the termination checker.
 ⟦_⇑⟧ : ℕ → 𝔹
 ⟦ n ⇑⟧ = ⟦ n ⇑⟧⟨ n ⟩
 {-# INLINE ⟦_⇑⟧ #-}

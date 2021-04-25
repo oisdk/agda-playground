@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Data.Nat.DivMod where
 
@@ -16,3 +16,6 @@ _÷_ n (suc m) = Nat.div-helper 0 m n m
 
 rem : (n m : ℕ) → { m≢0 : T (nonZero m) } → ℕ
 rem n (suc m) = Nat.mod-helper 0 m n m
+
+even : ℕ → Bool
+even n = rem n 2 Nat.== 0

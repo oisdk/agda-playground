@@ -30,25 +30,30 @@ fromZ 0ᵇ = 0ᵇ
 fromZ (1ᵇ xs) = fromZ₁ zero xs
 fromZ (2ᵇ xs) = 1ᵇ fromZ xs
 
-compl : 𝔹 → 𝔹
-compl 0ᵇ = 1ᵇ 0ᵇ
-compl (1ᵇ xs) = 2ᵇ compl xs
-compl (2ᵇ xs) = 1ᵇ compl xs
+twos : 𝔹 → 𝔹
+twos 0ᵇ = 0ᵇ
+twos (1ᵇ xs) = 2ᵇ twos xs
+twos (2ᵇ xs) = 2ᵇ twos xs
 
-extend : 𝔹 → 𝔹 → 𝔹
-extend 0ᵇ      ys = ys
-extend (1ᵇ xs) 0ᵇ = 2ᵇ extend xs 0ᵇ
-extend (2ᵇ xs) 0ᵇ = 2ᵇ extend xs 0ᵇ
-extend (1ᵇ xs) (1ᵇ ys) = 1ᵇ extend xs ys
-extend (1ᵇ xs) (2ᵇ ys) = 2ᵇ extend xs ys
-extend (2ᵇ xs) (1ᵇ ys) = 1ᵇ extend xs ys
-extend (2ᵇ xs) (2ᵇ ys) = 2ᵇ extend xs ys
+compl : 𝔹 → 𝔹 → 𝔹
+compl 0ᵇ      _  = 1ᵇ 0ᵇ
+compl (1ᵇ xs) 0ᵇ = 1ᵇ twos xs
+compl (1ᵇ xs) (1ᵇ ys) = 2ᵇ compl xs ys
+compl (1ᵇ xs) (2ᵇ ys) = 1ᵇ compl xs ys
+compl (2ᵇ xs) 0ᵇ = 1ᵇ twos xs
+compl (2ᵇ xs) (1ᵇ ys) = 2ᵇ compl xs ys
+compl (2ᵇ xs) (2ᵇ ys) = 1ᵇ compl xs ys
 
 open import Data.Binary.Order
 open import Data.Bool
 open import Data.Binary.Addition
 
-
 infixl 6 _-_
 _-_ : 𝔹 → 𝔹 → 𝔹
-n - m = if n ≤ᴮ m then 0ᵇ else fromZ (add₂ n (extend n (compl m)))
+n - m = if n ≤ᴮ m then 0ᵇ else fromZ (add₂ n (compl n m))
+
+open import Data.Binary.Testers
+open import Path using (refl)
+
+_ : test _-_ _∸_ 20
+_ = refl

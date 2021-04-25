@@ -6,6 +6,7 @@ open import Data.Nat.Base
 open import Agda.Builtin.Nat using () renaming (_<_ to _<ᴮ_; _==_ to _≡ᴮ_) public
 open import Prelude
 open import Cubical.Data.Nat using (caseNat; injSuc) public
+open import Data.Nat.DivMod
 
 mutual
   _-1⊔_ : ℕ → ℕ → ℕ
@@ -106,9 +107,6 @@ div-helper-lemma : ∀ k m n j → div-helper k m n j ≡ k + div-helper′ m n 
 div-helper-lemma k m zero j = sym (+-idʳ k)
 div-helper-lemma k m (suc n) zero = div-helper-lemma (suc k) m n m ; sym (+-suc k (div-helper′ m n m))
 div-helper-lemma k m (suc n) (suc j) = div-helper-lemma k m n j
-
-even : ℕ → Bool
-even n = rem n 2 ≡ᴮ 0
 
 Even : ℕ → Type₀
 Even n = T (even n)
