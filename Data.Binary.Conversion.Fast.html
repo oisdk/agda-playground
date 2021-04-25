@@ -1,56 +1,56 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="utf-8"><title>Data.Binary.Conversion.Fast</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+<html><head><meta charset="utf-8"><title>Data.Binary.Conversion.Fast</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--without-K</a> <a id="25" class="Pragma">--safe</a> <a id="32" class="Symbol">#-}</a>
 
-<a id="35" class="Keyword">module</a> <a id="42" href="Data.Binary.Conversion.Fast.html" class="Module">Data.Binary.Conversion.Fast</a> <a id="70" class="Keyword">where</a>
+<a id="37" class="Keyword">module</a> <a id="44" href="Data.Binary.Conversion.Fast.html" class="Module">Data.Binary.Conversion.Fast</a> <a id="72" class="Keyword">where</a>
 
-<a id="77" class="Comment">-- This module provides a conversion function from</a>
-<a id="128" class="Comment">-- nats which uses built-in functions.</a>
-<a id="167" class="Comment">-- It is dramatically faster than the normal conversion</a>
-<a id="223" class="Comment">-- even at smaller numbers.</a>
+<a id="79" class="Comment">-- This module provides a conversion function from</a>
+<a id="130" class="Comment">-- nats which uses built-in functions.</a>
+<a id="169" class="Comment">-- It is dramatically faster than the normal conversion</a>
+<a id="225" class="Comment">-- even at smaller numbers.</a>
 
-<a id="252" class="Keyword">open</a> <a id="257" class="Keyword">import</a> <a id="264" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a>
-<a id="287" class="Keyword">open</a> <a id="292" class="Keyword">import</a> <a id="299" href="Data.Nat.DivMod.html" class="Module">Data.Nat.DivMod</a>
-<a id="315" class="Keyword">open</a> <a id="320" class="Keyword">import</a> <a id="327" href="Prelude.html" class="Module">Prelude</a>
-<a id="335" class="Keyword">open</a> <a id="340" class="Keyword">import</a> <a id="347" href="Data.Nat.Properties.html" class="Module">Data.Nat.Properties</a>
+<a id="254" class="Keyword">open</a> <a id="259" class="Keyword">import</a> <a id="266" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a>
+<a id="289" class="Keyword">open</a> <a id="294" class="Keyword">import</a> <a id="301" href="Data.Nat.DivMod.html" class="Module">Data.Nat.DivMod</a>
+<a id="317" class="Keyword">open</a> <a id="322" class="Keyword">import</a> <a id="329" href="Data.Nat.Base.html" class="Module">Data.Nat.Base</a>
+<a id="343" class="Keyword">open</a> <a id="348" class="Keyword">import</a> <a id="355" href="Data.Bool.html" class="Module">Data.Bool</a>
 
-<a id="⟦_⇑⟧⟨_⟩"></a><a id="368" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟦_⇑⟧⟨_⟩</a> <a id="376" class="Symbol">:</a> <a id="378" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="380" class="Symbol">→</a> <a id="382" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="384" class="Symbol">→</a> <a id="386" href="Data.Bits.html#102" class="Datatype">𝔹</a>
-<a id="388" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟦</a> <a id="390" href="Agda.Builtin.Nat.html#223" class="InductiveConstructor">suc</a> <a id="394" href="Data.Binary.Conversion.Fast.html#394" class="Bound">n</a> <a id="396" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⇑⟧⟨</a> <a id="400" href="Agda.Builtin.Nat.html#223" class="InductiveConstructor">suc</a> <a id="404" href="Data.Binary.Conversion.Fast.html#404" class="Bound">w</a> <a id="406" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟩</a> <a id="408" class="Symbol">=</a>
-  <a id="412" href="Data.Bool.Base.html#596" class="Function Operator">if</a> <a id="415" href="Data.Nat.Properties.html#2859" class="Function">even</a> <a id="420" href="Data.Binary.Conversion.Fast.html#394" class="Bound">n</a>
-    <a id="426" href="Data.Bool.Base.html#596" class="Function Operator">then</a> <a id="431" href="Data.Bits.html#135" class="InductiveConstructor Operator">1ᵇ</a> <a id="434" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟦</a> <a id="436" href="Data.Binary.Conversion.Fast.html#394" class="Bound">n</a> <a id="438" href="Data.Nat.DivMod.html#230" class="Function Operator">÷</a> <a id="440" class="Number">2</a> <a id="442" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⇑⟧⟨</a> <a id="446" href="Data.Binary.Conversion.Fast.html#404" class="Bound">w</a> <a id="448" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟩</a>
-    <a id="454" href="Data.Bool.Base.html#596" class="Function Operator">else</a> <a id="459" href="Data.Bits.html#155" class="InductiveConstructor Operator">2ᵇ</a> <a id="462" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟦</a> <a id="464" href="Data.Binary.Conversion.Fast.html#394" class="Bound">n</a> <a id="466" href="Data.Nat.DivMod.html#230" class="Function Operator">÷</a> <a id="468" class="Number">2</a> <a id="470" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⇑⟧⟨</a> <a id="474" href="Data.Binary.Conversion.Fast.html#404" class="Bound">w</a> <a id="476" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟩</a>
-<a id="478" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟦</a> <a id="480" href="Agda.Builtin.Nat.html#210" class="InductiveConstructor">zero</a>  <a id="486" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⇑⟧⟨</a> <a id="490" class="Symbol">_</a>    <a id="495" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟩</a> <a id="497" class="Symbol">=</a> <a id="499" href="Data.Bits.html#123" class="InductiveConstructor">0ᵇ</a>
-<a id="502" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟦</a> <a id="504" href="Agda.Builtin.Nat.html#223" class="InductiveConstructor">suc</a> <a id="508" class="Symbol">_</a> <a id="510" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⇑⟧⟨</a> <a id="514" href="Agda.Builtin.Nat.html#210" class="InductiveConstructor">zero</a> <a id="519" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟩</a> <a id="521" class="Symbol">=</a> <a id="523" href="Data.Bits.html#123" class="InductiveConstructor">0ᵇ</a> <a id="526" class="Comment">-- will not happen</a>
+<a id="⟦_⇑⟧⟨_⟩"></a><a id="366" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟦_⇑⟧⟨_⟩</a> <a id="374" class="Symbol">:</a> <a id="376" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="378" class="Symbol">→</a> <a id="380" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="382" class="Symbol">→</a> <a id="384" href="Data.Bits.html#102" class="Datatype">𝔹</a>
+<a id="386" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟦</a> <a id="388" href="Agda.Builtin.Nat.html#223" class="InductiveConstructor">suc</a> <a id="392" href="Data.Binary.Conversion.Fast.html#392" class="Bound">n</a> <a id="394" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⇑⟧⟨</a> <a id="398" href="Agda.Builtin.Nat.html#223" class="InductiveConstructor">suc</a> <a id="402" href="Data.Binary.Conversion.Fast.html#402" class="Bound">w</a> <a id="404" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟩</a> <a id="406" class="Symbol">=</a>
+  <a id="410" href="Data.Bool.Base.html#596" class="Function Operator">if</a> <a id="413" href="Data.Nat.DivMod.html#404" class="Function">even</a> <a id="418" href="Data.Binary.Conversion.Fast.html#392" class="Bound">n</a>
+    <a id="424" href="Data.Bool.Base.html#596" class="Function Operator">then</a> <a id="429" href="Data.Bits.html#135" class="InductiveConstructor Operator">1ᵇ</a> <a id="432" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟦</a> <a id="434" href="Data.Binary.Conversion.Fast.html#392" class="Bound">n</a> <a id="436" href="Data.Nat.DivMod.html#232" class="Function Operator">÷</a> <a id="438" class="Number">2</a> <a id="440" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⇑⟧⟨</a> <a id="444" href="Data.Binary.Conversion.Fast.html#402" class="Bound">w</a> <a id="446" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟩</a>
+    <a id="452" href="Data.Bool.Base.html#596" class="Function Operator">else</a> <a id="457" href="Data.Bits.html#155" class="InductiveConstructor Operator">2ᵇ</a> <a id="460" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟦</a> <a id="462" href="Data.Binary.Conversion.Fast.html#392" class="Bound">n</a> <a id="464" href="Data.Nat.DivMod.html#232" class="Function Operator">÷</a> <a id="466" class="Number">2</a> <a id="468" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⇑⟧⟨</a> <a id="472" href="Data.Binary.Conversion.Fast.html#402" class="Bound">w</a> <a id="474" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟩</a>
+<a id="476" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟦</a> <a id="478" href="Agda.Builtin.Nat.html#210" class="InductiveConstructor">zero</a>  <a id="484" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⇑⟧⟨</a> <a id="488" class="Symbol">_</a>    <a id="493" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟩</a> <a id="495" class="Symbol">=</a> <a id="497" href="Data.Bits.html#123" class="InductiveConstructor">0ᵇ</a>
+<a id="500" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟦</a> <a id="502" href="Agda.Builtin.Nat.html#223" class="InductiveConstructor">suc</a> <a id="506" class="Symbol">_</a> <a id="508" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⇑⟧⟨</a> <a id="512" href="Agda.Builtin.Nat.html#210" class="InductiveConstructor">zero</a> <a id="517" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟩</a> <a id="519" class="Symbol">=</a> <a id="521" href="Data.Bits.html#123" class="InductiveConstructor">0ᵇ</a> <a id="524" class="Comment">-- will not happen</a>
 
-<a id="546" class="Comment">-- We build the output by repeatedly halving the input,</a>
-<a id="602" class="Comment">-- but we also pass in the number to reduce as we go so that</a>
-<a id="663" class="Comment">-- we satisfy the termination checker.</a>
-<a id="⟦_⇑⟧"></a><a id="702" href="Data.Binary.Conversion.Fast.html#702" class="Function Operator">⟦_⇑⟧</a> <a id="707" class="Symbol">:</a> <a id="709" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="711" class="Symbol">→</a> <a id="713" href="Data.Bits.html#102" class="Datatype">𝔹</a>
-<a id="715" href="Data.Binary.Conversion.Fast.html#702" class="Function Operator">⟦</a> <a id="717" href="Data.Binary.Conversion.Fast.html#717" class="Bound">n</a> <a id="719" href="Data.Binary.Conversion.Fast.html#702" class="Function Operator">⇑⟧</a> <a id="722" class="Symbol">=</a> <a id="724" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟦</a> <a id="726" href="Data.Binary.Conversion.Fast.html#717" class="Bound">n</a> <a id="728" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⇑⟧⟨</a> <a id="732" href="Data.Binary.Conversion.Fast.html#717" class="Bound">n</a> <a id="734" href="Data.Binary.Conversion.Fast.html#368" class="Function Operator">⟩</a>
-<a id="736" class="Symbol">{-#</a> <a id="740" class="Keyword">INLINE</a> <a id="747" href="Data.Binary.Conversion.Fast.html#702" class="Function Operator">⟦_⇑⟧</a> <a id="752" class="Symbol">#-}</a>
+<a id="544" class="Comment">-- We build the output by repeatedly halving the input,</a>
+<a id="600" class="Comment">-- but we also pass in the number to reduce as we go so that</a>
+<a id="661" class="Comment">-- we satisfy the termination checker.</a>
+<a id="⟦_⇑⟧"></a><a id="700" href="Data.Binary.Conversion.Fast.html#700" class="Function Operator">⟦_⇑⟧</a> <a id="705" class="Symbol">:</a> <a id="707" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="709" class="Symbol">→</a> <a id="711" href="Data.Bits.html#102" class="Datatype">𝔹</a>
+<a id="713" href="Data.Binary.Conversion.Fast.html#700" class="Function Operator">⟦</a> <a id="715" href="Data.Binary.Conversion.Fast.html#715" class="Bound">n</a> <a id="717" href="Data.Binary.Conversion.Fast.html#700" class="Function Operator">⇑⟧</a> <a id="720" class="Symbol">=</a> <a id="722" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟦</a> <a id="724" href="Data.Binary.Conversion.Fast.html#715" class="Bound">n</a> <a id="726" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⇑⟧⟨</a> <a id="730" href="Data.Binary.Conversion.Fast.html#715" class="Bound">n</a> <a id="732" href="Data.Binary.Conversion.Fast.html#366" class="Function Operator">⟩</a>
+<a id="734" class="Symbol">{-#</a> <a id="738" class="Keyword">INLINE</a> <a id="745" href="Data.Binary.Conversion.Fast.html#700" class="Function Operator">⟦_⇑⟧</a> <a id="750" class="Symbol">#-}</a>
 
-<a id="757" class="Comment">-- Without the added argument to the recursor, the function does not</a>
-<a id="826" class="Comment">-- pass the termination checker:</a>
-<a id="859" class="Comment">-- {-# TERMINATING #-}</a>
-<a id="882" class="Comment">-- ⟦_⇑⟧″ : ℕ → 𝔹</a>
-<a id="899" class="Comment">-- ⟦ zero  ⇑⟧″ = 0ᵇ</a>
-<a id="919" class="Comment">-- ⟦ suc n ⇑⟧″ =</a>
-<a id="936" class="Comment">--   if rem n 2 ℕ.≡ᴮ 0</a>
-<a id="959" class="Comment">--   then 1ᵇ ⟦ n ÷ 2 ⇑⟧″</a>
-<a id="984" class="Comment">--   else 2ᵇ ⟦ n ÷ 2 ⇑⟧″</a>
+<a id="755" class="Comment">-- Without the added argument to the recursor, the function does not</a>
+<a id="824" class="Comment">-- pass the termination checker:</a>
+<a id="857" class="Comment">-- {-# TERMINATING #-}</a>
+<a id="880" class="Comment">-- ⟦_⇑⟧″ : ℕ → 𝔹</a>
+<a id="897" class="Comment">-- ⟦ zero  ⇑⟧″ = 0ᵇ</a>
+<a id="917" class="Comment">-- ⟦ suc n ⇑⟧″ =</a>
+<a id="934" class="Comment">--   if rem n 2 ℕ.≡ᴮ 0</a>
+<a id="957" class="Comment">--   then 1ᵇ ⟦ n ÷ 2 ⇑⟧″</a>
+<a id="982" class="Comment">--   else 2ᵇ ⟦ n ÷ 2 ⇑⟧″</a>
 
-<a id="1010" class="Comment">-- The &quot;principled&quot; version (which uses well-founded recursion) is</a>
-<a id="1077" class="Comment">-- incredibly slow. (and the following doesn&#39;t even compute, because of</a>
-<a id="1149" class="Comment">-- cubical)</a>
+<a id="1008" class="Comment">-- The &quot;principled&quot; version (which uses well-founded recursion) is</a>
+<a id="1075" class="Comment">-- incredibly slow. (and the following doesn&#39;t even compute, because of</a>
+<a id="1147" class="Comment">-- cubical)</a>
 
-<a id="1162" class="Comment">-- open import Data.Nat.WellFounded</a>
+<a id="1160" class="Comment">-- open import Data.Nat.WellFounded</a>
 
-<a id="1199" class="Comment">-- ⟦_⇑⟧‴ : ℕ → 𝔹</a>
-<a id="1216" class="Comment">-- ⟦ n ⇑⟧‴ = go n (≤-wellFounded n)</a>
-<a id="1252" class="Comment">--   where</a>
-<a id="1263" class="Comment">--   go : ∀ n → Acc _&lt;_ n → 𝔹</a>
-<a id="1293" class="Comment">--   go zero    wf = 0ᵇ</a>
-<a id="1317" class="Comment">--   go (suc n) (acc wf) =</a>
-<a id="1344" class="Comment">--     if rem n 2 ℕ.≡ᴮ 0</a>
-<a id="1369" class="Comment">--     then 1ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))</a>
-<a id="1424" class="Comment">--     else 2ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))</a>
+<a id="1197" class="Comment">-- ⟦_⇑⟧‴ : ℕ → 𝔹</a>
+<a id="1214" class="Comment">-- ⟦ n ⇑⟧‴ = go n (≤-wellFounded n)</a>
+<a id="1250" class="Comment">--   where</a>
+<a id="1261" class="Comment">--   go : ∀ n → Acc _&lt;_ n → 𝔹</a>
+<a id="1291" class="Comment">--   go zero    wf = 0ᵇ</a>
+<a id="1315" class="Comment">--   go (suc n) (acc wf) =</a>
+<a id="1342" class="Comment">--     if rem n 2 ℕ.≡ᴮ 0</a>
+<a id="1367" class="Comment">--     then 1ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))</a>
+<a id="1422" class="Comment">--     else 2ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))</a>
 </pre></body></html>
