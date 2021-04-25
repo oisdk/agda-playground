@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --cubical --safe #-}
 
 module Data.Binary.Subtraction where
 
@@ -20,52 +20,35 @@ ones : ℕ → 𝔹 → 𝔹
 ones zero    xs = xs
 ones (suc n) xs = ones n (1ᵇ xs)
 
-push : 𝔹 → 𝔹 → 𝔹
-push 0ᵇ     xs      = xs
-push (2ᵇ t) xs      = push t (2ᵇ xs)
-push (1ᵇ t) 0ᵇ      = push t 0ᵇ
-push (1ᵇ t) (1ᵇ xs) = push t (1ᵇ xs)
-push (1ᵇ t) (2ᵇ xs) = push t (2ᵇ 1ᵇ xs)
+fromZ₁ : ℕ → 𝔹 → 𝔹
+fromZ₁ n 0ᵇ      = 0ᵇ
+fromZ₁ n (1ᵇ xs) = fromZ₁ (suc n) xs
+fromZ₁ n (2ᵇ xs) = 2ᵇ ones n (fromZ₁ 0 xs)
 
-sub₄ : ℕ → 𝔹 → 𝔹 → 𝔹 → 𝔹
-sub₃ : ℕ → 𝔹 → 𝔹 → 𝔹 → 𝔹
+fromZ : 𝔹 → 𝔹
+fromZ 0ᵇ = 0ᵇ
+fromZ (1ᵇ xs) = fromZ₁ zero xs
+fromZ (2ᵇ xs) = 1ᵇ fromZ xs
 
-sub₄ n t 0ᵇ         ys      = 0ᵇ
-sub₄ n t (1ᵇ xs)    (1ᵇ ys) = sub₄ n (2ᵇ t) xs ys
-sub₄ n t (1ᵇ xs)    (2ᵇ ys) = sub₄ n (1ᵇ t) xs ys
-sub₄ n t (1ᵇ xs)    0ᵇ      = ones n (push (1ᵇ t) (dec′ xs))
-sub₄ n t (2ᵇ xs)    (2ᵇ ys) = sub₄ n (2ᵇ t) xs ys
-sub₄ n t (2ᵇ xs)    (1ᵇ ys) = sub₃ n (1ᵇ t) xs ys
-sub₄ n t (2ᵇ xs)    0ᵇ      = ones n (push (2ᵇ t) (dec′ xs))
+compl : 𝔹 → 𝔹
+compl 0ᵇ = 1ᵇ 0ᵇ
+compl (1ᵇ xs) = 2ᵇ compl xs
+compl (2ᵇ xs) = 1ᵇ compl xs
 
-sub₃ n t 0ᵇ      0ᵇ      = ones n (push t 0ᵇ)
-sub₃ n t 0ᵇ      (1ᵇ ys) = 0ᵇ
-sub₃ n t 0ᵇ      (2ᵇ ys) = 0ᵇ
-sub₃ n t (1ᵇ xs) 0ᵇ      = ones n (push t (2ᵇ dec′ xs))
-sub₃ n t (2ᵇ xs) 0ᵇ      = ones n (push t (2ᵇ 1ᵇ xs))
-sub₃ n t (1ᵇ xs) (1ᵇ ys) = sub₃ n (1ᵇ t) xs ys
-sub₃ n t (2ᵇ xs) (2ᵇ ys) = sub₃ n (1ᵇ t) xs ys
-sub₃ n t (1ᵇ xs) (2ᵇ ys) = sub₄ n (2ᵇ t) xs ys
-sub₃ n t (2ᵇ xs) (1ᵇ ys) = sub₃ n (2ᵇ t) xs ys
+extend : 𝔹 → 𝔹 → 𝔹
+extend 0ᵇ      ys = ys
+extend (1ᵇ xs) 0ᵇ = 2ᵇ extend xs 0ᵇ
+extend (2ᵇ xs) 0ᵇ = 2ᵇ extend xs 0ᵇ
+extend (1ᵇ xs) (1ᵇ ys) = 1ᵇ extend xs ys
+extend (1ᵇ xs) (2ᵇ ys) = 2ᵇ extend xs ys
+extend (2ᵇ xs) (1ᵇ ys) = 1ᵇ extend xs ys
+extend (2ᵇ xs) (2ᵇ ys) = 2ᵇ extend xs ys
 
-sub₂ : ℕ → 𝔹 → 𝔹 → 𝔹
-sub₂ t 0ᵇ      ys      = 0ᵇ
-sub₂ t (1ᵇ xs) 0ᵇ      = ones t (dec′ xs)
-sub₂ t (2ᵇ xs) 0ᵇ      = ones t (1ᵇ xs)
-sub₂ t (1ᵇ xs) (1ᵇ ys) = sub₂ (suc t) xs ys
-sub₂ t (2ᵇ xs) (2ᵇ ys) = sub₂ (suc t) xs ys
-sub₂ t (1ᵇ xs) (2ᵇ ys) = sub₄ t 0ᵇ xs ys
-sub₂ t (2ᵇ xs) (1ᵇ ys) = sub₃ t 0ᵇ xs ys
+open import Data.Binary.Order
+open import Data.Bool
+open import Data.Binary.Addition
 
-sub₁ : ℕ → 𝔹 → 𝔹 → 𝔹
-sub₁ t xs      0ᵇ      = ones t xs
-sub₁ t 0ᵇ      (1ᵇ ys) = 0ᵇ
-sub₁ t 0ᵇ      (2ᵇ ys) = 0ᵇ
-sub₁ t (1ᵇ xs) (1ᵇ ys) = sub₃ t 0ᵇ xs ys
-sub₁ t (2ᵇ xs) (2ᵇ ys) = sub₃ t 0ᵇ xs ys
-sub₁ t (2ᵇ xs) (1ᵇ ys) = sub₁ (suc t) xs ys
-sub₁ t (1ᵇ xs) (2ᵇ ys) = sub₂ (suc t) xs ys
 
 infixl 6 _-_
 _-_ : 𝔹 → 𝔹 → 𝔹
-_-_ = sub₁ zero
+n - m = if n ≤ᴮ m then 0ᵇ else fromZ (add₂ n (extend n (compl m)))
