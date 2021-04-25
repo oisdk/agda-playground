@@ -30,30 +30,47 @@ fromZ 0ᵇ = 0ᵇ
 fromZ (1ᵇ xs) = fromZ₁ zero xs
 fromZ (2ᵇ xs) = 1ᵇ fromZ xs
 
-twos : 𝔹 → 𝔹
-twos 0ᵇ = 0ᵇ
-twos (1ᵇ xs) = 2ᵇ twos xs
-twos (2ᵇ xs) = 2ᵇ twos xs
+open import Data.Binary.Addition
 
-compl : 𝔹 → 𝔹 → 𝔹
-compl 0ᵇ      _  = 1ᵇ 0ᵇ
-compl (1ᵇ xs) 0ᵇ = 1ᵇ twos xs
-compl (1ᵇ xs) (1ᵇ ys) = 2ᵇ compl xs ys
-compl (1ᵇ xs) (2ᵇ ys) = 1ᵇ compl xs ys
-compl (2ᵇ xs) 0ᵇ = 1ᵇ twos xs
-compl (2ᵇ xs) (1ᵇ ys) = 2ᵇ compl xs ys
-compl (2ᵇ xs) (2ᵇ ys) = 1ᵇ compl xs ys
+mutual
+  twos₁ : 𝔹 → 𝔹
+  twos₁ 0ᵇ      = 1ᵇ 0ᵇ
+  twos₁ (1ᵇ xs) = 2ᵇ twos₁ xs
+  twos₁ (2ᵇ xs) = 1ᵇ twos₂ xs
+
+  twos₂ : 𝔹 → 𝔹
+  twos₂ 0ᵇ      = 2ᵇ 0ᵇ
+  twos₂ (1ᵇ xs) = 1ᵇ twos₂ xs
+  twos₂ (2ᵇ xs) = 2ᵇ twos₂ xs
+
+mutual
+  compl₁ : 𝔹 → 𝔹 → 𝔹
+  compl₁ 0ᵇ      _       = 2ᵇ 0ᵇ
+  compl₁ (1ᵇ xs) 0ᵇ      = 1ᵇ twos₁ xs
+  compl₁ (2ᵇ xs) 0ᵇ      = 2ᵇ twos₁ xs
+  compl₁ (1ᵇ xs) (1ᵇ ys) = 2ᵇ compl₁ xs ys
+  compl₁ (1ᵇ xs) (2ᵇ ys) = 1ᵇ compl₁ xs ys
+  compl₁ (2ᵇ xs) (1ᵇ ys) = 1ᵇ compl₂ xs ys
+  compl₁ (2ᵇ xs) (2ᵇ ys) = 2ᵇ compl₁ xs ys
+
+  compl₂ : 𝔹 → 𝔹 → 𝔹
+  compl₂ 0ᵇ      _       = 1ᵇ 1ᵇ 0ᵇ
+  compl₂ (1ᵇ xs) 0ᵇ      = 2ᵇ twos₁ xs
+  compl₂ (2ᵇ xs) 0ᵇ      = 1ᵇ twos₂ xs
+  compl₂ (1ᵇ xs) (1ᵇ ys) = 1ᵇ compl₂ xs ys
+  compl₂ (1ᵇ xs) (2ᵇ ys) = 2ᵇ compl₁ xs ys
+  compl₂ (2ᵇ xs) (1ᵇ ys) = 2ᵇ compl₂ xs ys
+  compl₂ (2ᵇ xs) (2ᵇ ys) = 1ᵇ compl₂ xs ys
 
 open import Data.Binary.Order
 open import Data.Bool
-open import Data.Binary.Addition
 
 infixl 6 _-_
 _-_ : 𝔹 → 𝔹 → 𝔹
-n - m = if n ≤ᴮ m then 0ᵇ else fromZ (add₂ n (compl n m))
+n - m = if n ≤ᴮ m then 0ᵇ else fromZ (compl₂ n m)
 
 open import Data.Binary.Testers
 open import Path using (refl)
 
-_ : test _-_ _∸_ 20
+_ : test _-_ _∸_ 30
 _ = refl
