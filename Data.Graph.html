@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.Graph</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--guardedness</a> <a id="37" class="Pragma">--postfix-projections</a> <a id="59" class="Symbol">#-}</a>
+
+<a id="64" class="Keyword">module</a> <a id="71" href="Data.Graph.html" class="Module">Data.Graph</a> <a id="82" class="Keyword">where</a>
+
+<a id="89" class="Keyword">open</a> <a id="94" class="Keyword">import</a> <a id="101" href="Prelude.html" class="Module">Prelude</a>
+<a id="109" class="Keyword">open</a> <a id="114" class="Keyword">import</a> <a id="121" href="Data.List.html" class="Module">Data.List</a>
+<a id="131" class="Keyword">open</a> <a id="136" class="Keyword">import</a> <a id="143" href="Data.Nat.html" class="Module">Data.Nat</a>
+
+<a id="153" class="Comment">-- record Thunk (A : Type a) : Type a where</a>
+<a id="197" class="Comment">--   coinductive</a>
+<a id="214" class="Comment">--   constructor ⟪_⟫</a>
+<a id="235" class="Comment">--   field force : A</a>
+<a id="256" class="Comment">-- open Thunk</a>
+
+<a id="271" class="Comment">-- infixr 5 _◃_</a>
+<a id="287" class="Comment">-- record Stream (A : Type a) : Type a where</a>
+<a id="332" class="Comment">--   constructor _◃_</a>
+<a id="353" class="Comment">--   coinductive</a>
+<a id="370" class="Comment">--   field</a>
+<a id="381" class="Comment">--     head : A</a>
+<a id="397" class="Comment">--     tail : (Stream A)</a>
+
+<a id="423" class="Comment">-- open Stream</a>
+
+<a id="Graph"></a><a id="439" href="Data.Graph.html#439" class="Function">Graph</a> <a id="445" class="Symbol">:</a> <a id="447" href="Level.html#192" class="Function">Type</a> <a id="452" href="Level.html#372" class="Generalizable">a</a> <a id="454" class="Symbol">→</a> <a id="456" href="Level.html#192" class="Function">Type</a> <a id="461" href="Level.html#372" class="Generalizable">a</a>
+<a id="463" href="Data.Graph.html#439" class="Function">Graph</a> <a id="469" href="Data.Graph.html#469" class="Bound">A</a> <a id="471" class="Symbol">=</a> <a id="473" href="Data.Graph.html#469" class="Bound">A</a> <a id="475" class="Symbol">→</a> <a id="477" href="Agda.Builtin.List.html#148" class="Datatype">List</a> <a id="482" href="Data.Graph.html#469" class="Bound">A</a>
+
+
+<a id="Stream"></a><a id="486" href="Data.Graph.html#486" class="Function">Stream</a> <a id="493" class="Symbol">:</a> <a id="495" href="Level.html#192" class="Function">Type</a> <a id="500" href="Level.html#372" class="Generalizable">a</a> <a id="502" class="Symbol">→</a> <a id="504" href="Level.html#192" class="Function">Type</a> <a id="509" href="Level.html#372" class="Generalizable">a</a>
+<a id="511" href="Data.Graph.html#486" class="Function">Stream</a> <a id="518" href="Data.Graph.html#518" class="Bound">A</a> <a id="520" class="Symbol">=</a> <a id="522" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a> <a id="524" class="Symbol">→</a> <a id="526" href="Data.Graph.html#518" class="Bound">A</a>
+
+<a id="pure"></a><a id="529" href="Data.Graph.html#529" class="Function">pure</a> <a id="534" class="Symbol">:</a> <a id="536" href="Level.html#388" class="Generalizable">A</a> <a id="538" class="Symbol">→</a> <a id="540" href="Data.Graph.html#486" class="Function">Stream</a> <a id="547" href="Level.html#388" class="Generalizable">A</a>
+<a id="549" href="Data.Graph.html#529" class="Function">pure</a> <a id="554" href="Data.Graph.html#554" class="Bound">x</a> <a id="556" class="Symbol">_</a> <a id="558" class="Symbol">=</a> <a id="560" href="Data.Graph.html#554" class="Bound">x</a>
+
+<a id="smap"></a><a id="563" href="Data.Graph.html#563" class="Function">smap</a> <a id="568" class="Symbol">:</a> <a id="570" class="Symbol">(</a><a id="571" href="Level.html#388" class="Generalizable">A</a> <a id="573" class="Symbol">→</a> <a id="575" href="Level.html#402" class="Generalizable">B</a><a id="576" class="Symbol">)</a> <a id="578" class="Symbol">→</a> <a id="580" href="Data.Graph.html#486" class="Function">Stream</a> <a id="587" href="Level.html#388" class="Generalizable">A</a> <a id="589" class="Symbol">→</a> <a id="591" href="Data.Graph.html#486" class="Function">Stream</a> <a id="598" href="Level.html#402" class="Generalizable">B</a>
+<a id="600" href="Data.Graph.html#563" class="Function">smap</a> <a id="605" href="Data.Graph.html#605" class="Bound">f</a> <a id="607" href="Data.Graph.html#607" class="Bound">xs</a> <a id="610" href="Data.Graph.html#610" class="Bound">n</a> <a id="612" class="Symbol">=</a> <a id="614" href="Data.Graph.html#605" class="Bound">f</a> <a id="616" class="Symbol">(</a><a id="617" href="Data.Graph.html#607" class="Bound">xs</a> <a id="620" href="Data.Graph.html#610" class="Bound">n</a><a id="621" class="Symbol">)</a>
+
+<a id="bfs"></a><a id="624" href="Data.Graph.html#624" class="Function">bfs</a> <a id="628" class="Symbol">:</a> <a id="630" href="Data.Graph.html#439" class="Function">Graph</a> <a id="636" href="Level.html#388" class="Generalizable">A</a> <a id="638" class="Symbol">→</a> <a id="640" href="Level.html#388" class="Generalizable">A</a> <a id="642" class="Symbol">→</a> <a id="644" href="Data.Graph.html#486" class="Function">Stream</a> <a id="651" class="Symbol">(</a><a id="652" href="Agda.Builtin.List.html#148" class="Datatype">List</a> <a id="657" href="Level.html#388" class="Generalizable">A</a><a id="658" class="Symbol">)</a>
+<a id="660" href="Data.Graph.html#624" class="Function">bfs</a> <a id="664" href="Data.Graph.html#664" class="Bound">g</a> <a id="666" href="Data.Graph.html#666" class="Bound">r</a> <a id="668" href="Agda.Builtin.Nat.html#210" class="InductiveConstructor">zero</a>    <a id="676" class="Symbol">=</a> <a id="678" href="Data.Graph.html#666" class="Bound">r</a> <a id="680" href="Agda.Builtin.List.html#200" class="InductiveConstructor Operator">∷</a> <a id="682" href="Agda.Builtin.List.html#185" class="InductiveConstructor">[]</a>
+<a id="685" href="Data.Graph.html#624" class="Function">bfs</a> <a id="689" href="Data.Graph.html#689" class="Bound">g</a> <a id="691" href="Data.Graph.html#691" class="Bound">r</a> <a id="693" class="Symbol">(</a><a id="694" href="Agda.Builtin.Nat.html#223" class="InductiveConstructor">suc</a> <a id="698" href="Data.Graph.html#698" class="Bound">n</a><a id="699" class="Symbol">)</a> <a id="701" class="Symbol">=</a> <a id="703" href="Data.List.Base.html#564" class="Function">concatMap</a> <a id="713" href="Data.Graph.html#689" class="Bound">g</a> <a id="715" class="Symbol">(</a><a id="716" href="Data.Graph.html#624" class="Function">bfs</a> <a id="720" href="Data.Graph.html#689" class="Bound">g</a> <a id="722" href="Data.Graph.html#691" class="Bound">r</a> <a id="724" href="Data.Graph.html#698" class="Bound">n</a><a id="725" class="Symbol">)</a>
+
+<a id="728" class="Comment">-- module _ {A : Type a} (g : Graph A) where</a>
+<a id="773" class="Comment">--   mutual</a>
+<a id="785" class="Comment">--     bfs-foldr : List A → Stream (List A) → Stream (List A)</a>
+<a id="847" class="Comment">--     bfs-foldr []       qs = qs</a>
+<a id="881" class="Comment">--     bfs-foldr (x ∷ xs) qs .head = x ∷ bfs-foldr xs qs .head</a>
+<a id="944" class="Comment">--     bfs-foldr (x ∷ xs) qs .tail .force = bfs-foldr (g x) (bfs-foldr xs qs .tail .force)</a>
+
+<a id="1036" class="Comment">--     -- bfs-cons : A → Stream (List A) → Stream (List A)</a>
+<a id="1095" class="Comment">--     -- bfs-cons x (q ◃ qs) = (x ∷ q) ◃ bfs-foldr (g x) qs</a>
+
+<a id="1157" class="Comment">--   -- bfs : A → Stream (List A)</a>
+<a id="1191" class="Comment">--   -- bfs r = bfs-cons r (pure [])</a>
+</pre></body></html>
