@@ -117,9 +117,9 @@ module MapComp
   mapComp ①      Fs xs = refl
 
 map-comp : ∀ (F : Functor (suc n)) → (f : B → C) → (g : A → B) → (x : ⟦ F ⟧ (A ∷ As)) →
-           map F 0 f (map F 0 g x) ≡ map F 0 (f ∘ g) x
+           map F f0 f (map F f0 g x) ≡ map F f0 (f ∘ g) x
 map-comp F f g x =
-  MapComp.mapComp (mapParamAt 0 f) (mapParamAt 0 g) F [] [! x !] ;
+  MapComp.mapComp (mapParamAt f0 f) (mapParamAt f0 g) F [] [! x !] ;
   cong (λ c → Mapping.mapRec c F [] [! x !])
     (funExt λ { f0 → refl ; (fs x) → refl } )
 
@@ -138,7 +138,7 @@ module MapId {m} {As : Params m}
   mapId (! (fs i)) (F ∷ Fs) [! xs    !] = mapId (! i) Fs [! xs !]
   mapId ①      Fs xs = refl
 
-map-id : (F : Functor (suc n)) → (x : ⟦ F ⟧ (A ∷ As)) → map F 0 id x ≡ x
+map-id : (F : Functor (suc n)) → (x : ⟦ F ⟧ (A ∷ As)) → map F f0 id x ≡ x
 map-id F x =
   cong
     (λ c → Mapping.mapRec c F [] [! x !])
@@ -161,7 +161,7 @@ module Categorical (F : Functor (suc n)) (As : Params n) where
 
   -- Hom
   _⟶_ : Alg → Alg → Type
-  (A , a) ⟶ (B , b) = Σ[ h ⦂ (A → B) ] (h ∘ a ≗ b ∘ map F 0 h)
+  (A , a) ⟶ (B , b) = Σ[ h ⦂ (A → B) ] (h ∘ a ≗ b ∘ map F f0 h)
 
   variable
     X Y Z : Alg
@@ -170,7 +170,7 @@ module Categorical (F : Functor (suc n)) (As : Params n) where
   (f ∙ g) .fst = f .fst ∘ g .fst
   _∙_ {Y = Y}  {Z = Z} {X = X} f g .snd x =
     cong (f .fst) (g .snd x) ;
-    f .snd (map F 0 (g .fst) x) ;
+    f .snd (map F f0 (g .fst) x) ;
     cong (Z .snd) (map-comp F (f .fst) (g .fst) x)
 
 
@@ -200,7 +200,7 @@ module Cata {k} {F : Functor (suc k)} {As : Params k} (alg : ⟦ F ⟧ (A ∷ As
 
 module _ {F : Functor (suc n)} {As : Params n} where
   cata : (⟦ F ⟧ (A ∷ As) → A) → μ F As → A
-  cata alg xs = Cata.cataRec alg {Bs = As} (! 0) [] [! xs !]
+  cata alg xs = Cata.cataRec alg {Bs = As} (! f0) [] [! xs !]
 
 
 module CataId {k} {F : Functor (suc k)} {As : Params k} where
@@ -218,7 +218,7 @@ module CataId {k} {F : Functor (suc k)} {As : Params k} where
 
 module _ {F : Functor (suc n)} {As : Params n} where
   cataId : (x : μ F As) → cata ⟨_⟩ x ≡ x
-  cataId x = CataId.cataRecId (! 0) [] [! x !]
+  cataId x = CataId.cataRecId (! f0) [] [! x !]
 ---------------------------------------------------------------------------------
 --
 -- Eliminators
@@ -228,19 +228,19 @@ module _ {F : Functor (suc n)} {As : Params n} where
 module Eliminator {As : Params k}
          {F : Functor (suc k)}
          (P : μ F As → Type)
-         (f : (x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ map F 0 fst x ⟩)
+         (f : (x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ map F f0 fst x ⟩)
          where
   open import Path
   open Mapping
   open Cata
 
   alg : ⟦ F ⟧ (∃ P ∷ As) → ∃ P
-  alg x = ⟨ map F 0 fst x ⟩ , f x
+  alg x = ⟨ map F f0 fst x ⟩ , f x
 
   mutual
     elimRec : (G : Functor n) (Gs : Layers (suc m) n) →
               (x : <! ⟦ G ⟧ (Gs ++∙ μ F As ∷ Bs) !>) →
-              mapRec (mapParamAt 0 fst) G Gs [! cataRec alg G Gs x !] ≡ !! x
+              mapRec (mapParamAt f0 fst) G Gs [! cataRec alg G Gs x !] ≡ !! x
     elimRec (G₁ ⊕ G₂)   Gs       [! inl x !] = cong inl (elimRec G₁ Gs [! x !])
     elimRec (G₁ ⊕ G₂)   Gs       [! inr x !] = cong inr (elimRec G₂ Gs [! x !])
     elimRec (G₁ ⊗ G₂)   Gs       [! x , y !] = cong₂ _,_ (elimRec G₁ Gs [! x !]) (elimRec G₂ Gs [! y !])
@@ -252,11 +252,11 @@ module Eliminator {As : Params k}
     elimRec ①          Gs        [! _     !] = refl
 
   elim : ∀ x → P x
-  elim x = subst P (elimRec {Bs = As} (! 0) [] [! x !]) (snd (cata alg x))
+  elim x = subst P (elimRec {Bs = As} (! f0) [] [! x !]) (snd (cata alg x))
 
 module _ {F : Functor (suc n)} where
   elim : (P : μ F As → Type) →
-         ((x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ map F 0 fst x ⟩) →
+         ((x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ map F f0 fst x ⟩) →
          (x : μ F As) → P x
   elim = Eliminator.elim
 
@@ -336,7 +336,7 @@ module AnaTerm {B : Type} {_<_ : B → B → Type} (<-wellFounded : WellFounded 
          (coalg : (x : B) → ⟦ F ⟧ (∃ (_< x)  ∷ As)) where
 
   pr-anaAcc : (x : B) → Acc _<_ x → μ F As
-  pr-anaAcc x (acc wf) = ⟨ map F 0 (λ { (x , p) → pr-anaAcc x (wf x p) }) (coalg x)  ⟩
+  pr-anaAcc x (acc wf) = ⟨ map F f0 (λ { (x , p) → pr-anaAcc x (wf x p) }) (coalg x)  ⟩
 
   pr-ana : B → μ F As
   pr-ana x = pr-anaAcc x (<-wellFounded x)
@@ -356,7 +356,7 @@ module Truncate {B : Type} {_<_ : B → B → Type} (<-wellFounded : WellFounded
                 {As : Params k} (step : (x : B) -> ⟦ F ⟧ (ν F As ∷ As) → ⟦ F ⟧ ((ν F As × ∃ (_< x)) ∷ As)) where
 
   truncAcc : (x : B) → Acc _<_ x → ν F As → μ F As
-  truncAcc x (acc wf) xs = ⟨ map F 0 (λ { (ys , z , z<x) → truncAcc z (wf z z<x) ys}) (step x (xs .unfold)) ⟩
+  truncAcc x (acc wf) xs = ⟨ map F f0 (λ { (ys , z , z<x) → truncAcc z (wf z z<x) ys}) (step x (xs .unfold)) ⟩
 
   trunc : B → ν F As → μ F As
   trunc x = truncAcc x (<-wellFounded x)

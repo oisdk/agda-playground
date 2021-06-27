@@ -72,7 +72,7 @@ open import Data.Fin.Indexed
 infixl 4 lookup
 lookup : Fin n → Vec A n → A
 lookup f0     = head
-lookup (fs i) = lookup i ∘ tail
+lookup (fs i) xs = lookup i (tail xs)
 
 syntax lookup i xs = xs [ i ]
 

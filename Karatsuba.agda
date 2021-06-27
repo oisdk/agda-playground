@@ -60,7 +60,7 @@ mutual
   (⟨ n ⟩ xs ◆ ys) .lo = xs .lo ⊗ ys .lo
   (⟨ n ⟩ xs ◆ ys) .hi = xs .hi ⊗ ys .hi
   (⟨ zero  ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = []
-  (⟨ suc t ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = (replicate 0 (2 ℕ.* m) ++ z2) ⊕ (replicate 0 m ++ z1) ⊕ z0
+  (⟨ suc t ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = (replicate (⁺ 0) (2 ℕ.* m) ++ z2) ⊕ (replicate (⁺ 0) m ++ z1) ⊕ z0
     where
     z1 : List ℤ
     z1 = ⟨ t ⟩ (⌊ x1 ⌋ ⊕ ⌊ x0 ⌋) ⊛ (⌊ y1 ⌋ ⊕ ⌊ y0 ⌋) ⊕ map negate z2 ⊕ map negate z0
@@ -70,7 +70,7 @@ xs ⊛ ys = ⟨ length xs ℕ.+ length ys ⟩ xs ⊛ ys
 
 
 e : List ℤ
-e = (2 ∷ 5 ∷ []) ⊛ (1 ∷ 1 ∷ [])
+e = (⁺ 2 ∷ ⁺ 5 ∷ []) ⊛ (⁺ 1 ∷ ⁺ 1 ∷ [])
 
-_ : e ≡ 2 ∷ 7 ∷ 5 ∷ 0 ∷ []
+_ : e ≡ ⁺ 2 ∷ ⁺ 7 ∷ ⁺ 5 ∷ ⁺ 0 ∷ []
 _ = refl

@@ -31,9 +31,12 @@ xs ⟨×⟩ ys = isOfHLevelΣ 2 xs (const ys)
 module _ {X Y : Ob} where
   iso-iso : (X ≅ Y) ⇔ (fst X ⇔ fst Y)
   iso-iso .fun (f , g , f∘g , g∘f) = iso f g (λ x i → g∘f i x) (λ x i → f∘g i x)
-  iso-iso .inv (iso f g g∘f f∘g) = f , g  , (λ i x → f∘g x i) , (λ i x → g∘f x i)
-  iso-iso .rightInv _ = refl
-  iso-iso .leftInv  _ = refl
+  iso-iso .inv fg = fg .fun , fg .inv  , (λ i x → fg .leftInv x i) , (λ i x → fg .rightInv x i)
+  iso-iso .rightInv x i .fun = x .fun
+  iso-iso .rightInv x i .inv = x .inv
+  iso-iso .rightInv x i .rightInv = x .rightInv
+  iso-iso .rightInv x i .leftInv = x .leftInv
+  iso-iso .leftInv x = refl
 
   univ⇔ : (X ≡ Y) ⇔ (X ≅ Y)
   univ⇔ = equivToIso (≃ΣProp≡ (λ _ → isPropIsSet)) ⟨ trans-⇔ ⟩
@@ -71,7 +74,7 @@ hSetHasPullbacks f g .Pullback.commute = funExt snd
 hSetHasPullbacks f g .Pullback.ump {A = A} h₁ h₂ p .fst x = (h₁ x , h₂ x) , λ i → p i x
 hSetHasPullbacks f g .Pullback.ump {A = A} h₁ h₂ p .snd .fst .fst = refl
 hSetHasPullbacks f g .Pullback.ump {A = A} h₁ h₂ p .snd .fst .snd = refl
-hSetHasPullbacks {Z = Z} f g .Pullback.ump {A = A} h₁ h₂ p .snd .snd {i} (p₁e , p₂e) = funExt (λ x → ΣProp≡ (λ _ → Z .snd _ _) λ j → p₁e (~ j) x , p₂e (~ j) x)
+hSetHasPullbacks {Z = Z} f g .Pullback.ump {A = A} h₁ h₂ p .snd .snd {i} (p₁e , p₂e) = funExt (λ x → Σ≡Prop (λ _ → Z .snd _ _) λ j → p₁e (~ j) x , p₂e (~ j) x)
 
 hSetTerminal : Terminal
 hSetTerminal .fst = Lift _ ⊤ , isProp→isSet λ _ _ → refl
@@ -90,7 +93,7 @@ open import Categories.Coequalizer
 ∃!′ A P = ∥ Σ A P ∥ Prelude.× AtMostOne P
 
 lemma23 : ∀ {p} {P : A → hProp p} → ∃!′ A (fst ∘ P) → Σ A (fst ∘ P)
-lemma23 {P = P} (x , y) = rec (λ xs ys → ΣProp≡ (snd ∘ P) (y (xs .fst) (ys .fst) (xs .snd) (ys .snd))) id x
+lemma23 {P = P} (x , y) = rec (λ xs ys → Σ≡Prop (snd ∘ P) (y (xs .fst) (ys .fst) (xs .snd) (ys .snd))) id x
 
 module _ {A : Type a} {P : A → Type b} (R : ∀ x → P x → hProp c) where
   uniqueChoice : (Π[ x ⦂ A ] (∃!′ (P x) (λ u → R x u .fst))) →
@@ -123,15 +126,15 @@ module CoeqProofs {X Y : Ob} (f : X ⟶ Y) where
 
     prf : Π[ x ⦂ Im .fst ] ∃!′ (H .fst) (λ u → ∀ y → im y ≡ x → h y ≡ u)
     prf (xy , p) .fst = (λ { (z , r) → h z , λ y imy≡xyp → cong (_$ ((y , z) , cong fst imy≡xyp ; sym r)) eq }) ∥$∥ p
-    prf (xy , p) .snd x₁ x₂ Px₁ Px₂ = rec (H .snd x₁ x₂) (λ { (z , zs) → sym (Px₁ z (ΣProp≡ (λ _ → squash) zs)) ; Px₂ z (ΣProp≡ (λ _ → squash) zs) } ) p
+    prf (xy , p) .snd x₁ x₂ Px₁ Px₂ = rec (H .snd x₁ x₂) (λ { (z , zs) → sym (Px₁ z (Σ≡Prop (λ _ → squash) zs)) ; Px₂ z (Σ≡Prop (λ _ → squash) zs) } ) p
 
   lem₂ : ∀ (H : Ob) (h : X ⟶ H) (i : Im ⟶ H) (x : Im .fst) (hi : h ≡ i ∘ im) (eq : h ∘ p₁ ≡ h ∘ p₂) → i x ≡ lem {H = H} h eq .fst x
-  lem₂ H h i x hi eq = rec (H .snd _ _) (λ { (y , ys) → (cong i (ΣProp≡ (λ _ → squash) (sym ys)) ; sym (cong (_$ y) hi)) ; lem {H = H} h eq .snd x y (ΣProp≡ (λ _ → squash) ys) }) (x .snd)
+  lem₂ H h i x hi eq = rec (H .snd _ _) (λ { (y , ys) → (cong i (Σ≡Prop (λ _ → squash) (sym ys)) ; sym (cong (_$ y) hi)) ; lem {H = H} h eq .snd x y (Σ≡Prop (λ _ → squash) ys) }) (x .snd)
 
   hSetCoeq : Coequalizer hSetCategory {X = P} {Y = X} p₁ p₂
   hSetCoeq .Coequalizer.obj = Im
   hSetCoeq .Coequalizer.arr = im
-  hSetCoeq .Coequalizer.equality = funExt λ x → ΣProp≡ (λ _ → squash) λ i → commute i x
+  hSetCoeq .Coequalizer.equality = funExt λ x → Σ≡Prop (λ _ → squash) λ i → commute i x
   hSetCoeq .Coequalizer.coequalize {H = H} {h = h} eq = lem {H = H} h eq .fst
   hSetCoeq .Coequalizer.universal {H = H} {h = h} {eq = eq} = funExt λ x → lem {H = H} h eq .snd (im x) x refl
   hSetCoeq .Coequalizer.unique {H = H} {h = h} {i = i} {eq = eq} prf = funExt λ x → lem₂ H h i x prf eq

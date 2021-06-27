@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --cubical --safe --guardedness #-}
 
 module Container.Fixpoint where
 

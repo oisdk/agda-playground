@@ -23,25 +23,25 @@ open import Data.PolyP.Currying
 open import Data.PolyP.RecursionSchemes
 
 LIST : ∀ {n} → Functor (suc n)
-LIST = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩
+LIST = μ⟨ ① ⊕ ! (fs f0) ⊗ ! f0 ⟩
 
 -- The free near-semiring
 FOREST : Functor 1
-FOREST = μ⟨ LIST ⊚ (① ⊕ ! 1 ⊗ ! 0) ⟩
+FOREST = μ⟨ LIST ⊚ (① ⊕ ! (fs f0) ⊗ ! f0) ⟩
 
 -- Lists of lists
 LEVELS : Functor 1
-LEVELS = μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩ ⊚ μ⟨ ① ⊕ ! 1 ⊗ ! 0 ⟩
+LEVELS = μ⟨ ① ⊕ ! (fs f0) ⊗ ! f0 ⟩ ⊚ μ⟨ ① ⊕ ! (fs f0) ⊗ ! f0 ⟩
 
 -- The free monad
 FREE : Functor 1 → Functor 1
-FREE f = μ⟨ ! 1 ⊕ 0 ⇑ f ⟩
+FREE f = μ⟨ ! (fs f0) ⊕ f0 ⇑ f ⟩
 
 COFREE : Functor 1 → Functor 1
-COFREE f = μ⟨ ! 1 ⊗ 0 ⇑ f ⟩
+COFREE f = μ⟨ ! (fs f0) ⊗ f0 ⇑ f ⟩
 
 ROSE : Functor 1
-ROSE = μ⟨ ! 1 ⊗ f0 ⇑ LIST ⟩
+ROSE = μ⟨ ! (fs f0) ⊗ f0 ⇑ LIST ⟩
 
 module _ {A B : Type} where
   FOLDR : (A → B → B) → B → ⟦ LIST ⟧ ~ A → B
@@ -64,7 +64,7 @@ generic-list .rightInv  = elim       _ λ {  (inr (  x ,   xs ,   p))  i → x �
 open import Data.Vec
 
 STREAM : Type → Type
-STREAM A = ν (! 1 ⊗ ! 0) ~ A
+STREAM A = ν (! (fs f0) ⊗ ! f0) ~ A
 
 nats : ℕ → STREAM ℕ
 nats n .unfold = n , nats (suc n)

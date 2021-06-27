@@ -15,7 +15,7 @@ if [ -f "$1.agda" ]; then
 fi
 everything_file=$(mktemp)
 trap "rm -f $everything_file" 0 2 3 15
-echo "{-# OPTIONS --cubical --prop --allow-unsolved-metas #-}" > "$everything_file"
+echo "{-# OPTIONS --cubical --guardedness --prop --allow-unsolved-metas #-}" > "$everything_file"
 echo "module $1 where" >> "$everything_file"
 find . -type f \( -name "*.agda" -o -name "*.lagda" \) \
         | cut -c 3- \

@@ -37,8 +37,8 @@ com-◇ P y z xs .rightInv p = squash _ p
     isSetHProp
     (λ { x (xs , _) → ∥ P x ⊎ xs ∥ , squash })
     (⊥ , λ ())
-    (λ x xs → ΣProp≡ (λ _ → isPropIsProp) (isoToPath (dup-◇ P x (xs .fst))))
-    (λ x y xs → ΣProp≡ (λ _ → isPropIsProp) (isoToPath (com-◇ P x y (xs .fst))))
+    (λ x xs → Σ≡Prop (λ _ → isPropIsProp) (isoToPath (dup-◇ P x (xs .fst))))
+    (λ x y xs → Σ≡Prop (λ _ → isPropIsProp) (isoToPath (com-◇ P x y (xs .fst))))
 {-# INLINE ◇′ #-}
 
 ◇ : (P : A → Type p) → 𝒦 A → Type p

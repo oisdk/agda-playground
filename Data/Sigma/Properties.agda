@@ -4,7 +4,7 @@ module Data.Sigma.Properties where
 
 open import Prelude hiding (B; C)
 open import Cubical.Foundations.HLevels using (isOfHLevelΣ) public
-open import Cubical.Data.Sigma.Properties using (ΣProp≡) public
+open import Cubical.Data.Sigma.Properties using (Σ≡Prop) public
 
 private
   variable
@@ -24,7 +24,7 @@ reassoc .rightInv  (x , (y , z)) i  = (x , (y , z))
   to = cong fst
 
   fro : ∀ {p q} → fst p ≡ fst q → p ≡ q
-  fro = ΣProp≡ pA
+  fro = Σ≡Prop pA
 
   Jt : (q : Σ A U) → p ≡ q → Type _
   Jt q q≡ = fro (to q≡) ≡ q≡

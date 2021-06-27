@@ -24,7 +24,7 @@ module _ {p} {P : A → Type p} where
                      (x ∈ xs) →
                      ((x , v) ∈ filter P? xs)
   filter-preserves isPropP P? (x ∷ xs) y v (n , y∈xs) with P? x
-  filter-preserves isPropP P? (x ∷ xs) y v (f0   , y∈xs) | yes t = f0 , ΣProp≡ isPropP y∈xs
+  filter-preserves isPropP P? (x ∷ xs) y v (f0   , y∈xs) | yes t = f0 , Σ≡Prop isPropP y∈xs
   filter-preserves isPropP P? (x ∷ xs) y v (fs n , y∈xs) | yes t = let m , q = filter-preserves isPropP P? xs y v (n , y∈xs) in fs m , q
   filter-preserves isPropP P? (x ∷ xs) y v (f0   , y∈xs) | no ¬t = ⊥-elim (¬t (subst P (sym y∈xs) v))
   filter-preserves isPropP P? (x ∷ xs) y v (fs n , y∈xs) | no ¬t = filter-preserves isPropP P? xs y v (n , y∈xs)

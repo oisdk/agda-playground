@@ -32,10 +32,10 @@ com-◻ P _ _ _ .rightInv (x , y , xs) = refl
 ◻′ : (P : A → Type p) → A ↘ hProp p
 [ ◻′ P ]-set = isSetHProp
 ([ ◻′ P ] x ∷ (xs , hxs)) .fst = ∥ P x ∥ × xs
-([ ◻′ P ] x ∷ (xs , hxs)) .snd y z = ΣProp≡ (λ _  → hxs) (squash (fst y) (fst z))
+([ ◻′ P ] x ∷ (xs , hxs)) .snd y z = Σ≡Prop (λ _  → hxs) (squash (fst y) (fst z))
 [ ◻′ P ][] = ⊤ , λ x y _ → x
-[ ◻′ P ]-dup x xs = ΣProp≡ (λ _ → isPropIsProp) (isoToPath (dup-◻ P x (xs .fst)))
-[ ◻′ P ]-com x y xs = ΣProp≡ (λ _ → isPropIsProp) (isoToPath (com-◻ P x y (xs .fst)))
+[ ◻′ P ]-dup x xs = Σ≡Prop (λ _ → isPropIsProp) (isoToPath (dup-◻ P x (xs .fst)))
+[ ◻′ P ]-com x y xs = Σ≡Prop (λ _ → isPropIsProp) (isoToPath (com-◻ P x y (xs .fst)))
 
 ◻ : (P : A → Type p) → 𝒦 A → Type p
 ◻ P xs = [ ◻′ P ]↓ xs .fst

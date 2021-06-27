@@ -64,7 +64,7 @@ module _ (sIsSet : isSet 𝑆) where
   𝒞-leftInv-fst x y = rec (sIsSet (x .fst ε ∙ y) (x .fst y)) id (x .snd y)
 
   𝒞-leftInv : ∀ x → ⟦ ⟦ x ⇓⟧ ⇑⟧ ≡ x
-  𝒞-leftInv x = ΣProp≡ (λ f xs ys → funExt λ x → squash (xs x) (ys x)) (funExt (𝒞-leftInv-fst x))
+  𝒞-leftInv x = Σ≡Prop (λ f xs ys → funExt λ x → squash (xs x) (ys x)) (funExt (𝒞-leftInv-fst x))
 
   𝒞-iso : 𝒞 ⇔ 𝑆
   fun 𝒞-iso = ⟦_⇓⟧

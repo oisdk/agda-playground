@@ -54,6 +54,7 @@ instance
 
 mutual
   record Deep {a} (A : Type a) ⦃ _ : Measured A ⦄ : Type (a ℓ⊔ ℓ) where
+    pattern
     constructor more
     inductive
     field

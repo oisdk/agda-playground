@@ -44,7 +44,8 @@ mutual
   ⟦ μ⟨ F ⟩  ⟧ xs = μ F xs
   ⟦ ⓪       ⟧ xs = ⊥
   ⟦ ①       ⟧ xs = ⊤
+
   record μ (F : Functor (suc n)) (As : Params n) : Type₀ where
-    inductive; constructor ⟨_⟩
+    pattern; inductive; constructor ⟨_⟩
     field unwrap : ⟦ F ⟧ (μ F As ∷ As)
 open μ public
