@@ -51,12 +51,12 @@ jobs:
       if: steps.cache-cabal.outputs.cache-hit != 'true'
       run: |
         cabal update
-        cabal install --overwrite-policy=always --ghc-options='-O2 +RTS -M6G -RTS' alex-3.2.5
+        cabal install --overwrite-policy=always --ghc-options='-O2 +RTS -M6G -RTS' alex-3.2.6
         cabal install --overwrite-policy=always --ghc-options='-O2 +RTS -M6G -RTS' happy-1.19.12
         cd agda
         mkdir -p doc
         touch doc/user-manual.pdf
-        cabal install --overwrite-policy=always --ghc-options='-O1 +RTS -M6G -RTS'
+        cabal install --overwrite-policy=always --ghc-options='-O2 +RTS -M6G -RTS'
 
 # Download and compile cubical library
     - name: Checkout cubical library
