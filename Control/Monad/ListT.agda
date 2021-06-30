@@ -21,22 +21,51 @@ mutual
     []  : Cons A
     _∷_ : (x : A) → (xs : List A) → Cons A
 
-data ℭ𝔬𝔫𝔰 (A : Type ℓ) (B : Type ℓ) : Type ℓ where
-  [] : ℭ𝔬𝔫𝔰 A B
-  _∷_ : (x : A) → (xs : B) → ℭ𝔬𝔫𝔰 A B
+data ℭ𝔬𝔫𝔰 (A : Type ℓ) (P : List A → Type ℓ) : Type ℓ where
+  [] : ℭ𝔬𝔫𝔰 A P
+  _∷_⟨_⟩ : (x : A) → (xs : List A) → (P⟨xs⟩ : P xs) → ℭ𝔬𝔫𝔰 A P
 
-cata : (⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A B) → B) → List A → B
-cata ϕ (s , p) = ϕ (s , λ i → case p i of λ { [] → [] ; (x ∷ xs) → x ∷ cata ϕ xs })
+module _ (P : List A → Type ℓ) where
+  wrapc : ℭ𝔬𝔫𝔰 A P → Cons A
+  wrapc [] = []
+  wrapc (x ∷ xs ⟨ P⟨xs⟩ ⟩) = x ∷ xs
+
+  wrap : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A P) → List A
+  wrap = cmap wrapc
+
+  module _ (ψ : (x : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A P)) → P (wrap x)) where
+    elim : (x : List A) → P x
+    elimc : Cons A → ℭ𝔬𝔫𝔰 A P
+
+    elimc [] = []
+    elimc (x ∷ xs) = x ∷ xs ⟨ elim xs ⟩
+
+    elim xs = subst P (cong (fst xs ,_) (funExt (λ i → lemma (xs .snd i)))) (ψ (cmap elimc xs))
+      where
+      lemma : (c : Cons A) → wrapc (elimc c) ≡ c
+      lemma [] = refl
+      lemma (x ∷ xs) = refl
+
+para : (⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (const B)) → B) → List A → B
+para = elim (const _)
 
 infixr 5 _++_
 _++_ : List A → List A → List A
-_++_ {A = A} xs ys = cata ϕ xs
+_++_ {A = A} xs ys = para ϕ xs
   where
-  ϕ : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (List A)) → List A
-  ϕ xs = xs >>= λ { [] → ys ; (x ∷ xs) → return (x ∷ xs) }
+  ϕ : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (const (List A))) → List A
+  ϕ xs = xs >>= λ { [] → ys ; (x ∷ _ ⟨ xs ⟩ ) → return (x ∷ xs) }
 
-_>>=′_ : List A → (A → List B) → List B
-_>>=′_ {A = A} {B = B} xs k = cata ϕ xs
-  where
-  ϕ : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (List B)) → List B
-  ϕ xs = xs >>= λ { [] → return [] ; (x ∷ xs) → k x ++ xs }
+-- ++-assoc : (xs ys zs : List A) → (xs ++ ys) ++ zs ≡ xs ++ (ys ++ zs)
+-- ++-assoc {A = A} xs ys zs = elim P ψ xs
+--   where
+--   P : List A → Type ℓ
+--   P xs′ = (xs′ ++ ys) ++ zs ≡ xs′ ++ (ys ++ zs)
+
+--   ψ : (x : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A P)) → P (wrap P x)
+--   ψ xs = {!!}
+-- _>>=′_ : List A → (A → List B) → List B
+-- _>>=′_ {A = A} {B = B} xs k = cata ϕ xs
+--   where
+--   ϕ : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (List B)) → List B
+--   ϕ xs = xs >>= λ { [] → return [] ; (x ∷ xs) → k x ++ xs }
