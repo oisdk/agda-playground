@@ -5,7 +5,7 @@ module Data.PolyP.Types where
 open import Function hiding (_⟨_⟩_)
 open import Data.Sum
 open import Data.Sigma
-open import Level hiding (Type) renaming (Type to Type)
+open import Level
 open import Data.Unit
 open import Data.Nat
 open import Data.Empty
