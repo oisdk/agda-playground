@@ -4,18 +4,18 @@
 <a id="37" class="Keyword">module</a> <a id="44" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a> <a id="67" class="Keyword">where</a>
 
 <a id="74" class="Keyword">open</a> <a id="79" class="Keyword">import</a> <a id="86" href="Level.html" class="Module">Level</a>
-<a id="92" class="Keyword">open</a> <a id="97" class="Keyword">import</a> <a id="104" href="Data.Bits.html" class="Module">Data.Bits</a> <a id="114" class="Keyword">public</a> <a id="121" class="Keyword">renaming</a> <a id="130" class="Symbol">(</a><a id="131" href="Data.Bits.html#102" class="Datatype">Bits</a> <a id="136" class="Symbol">to</a> <a id="139" class="Datatype">𝔹</a><a id="140" class="Symbol">;</a> <a id="142" href="Data.Bits.html#123" class="InductiveConstructor">[]</a> <a id="145" class="Symbol">to</a> <a id="148" class="InductiveConstructor">0ᵇ</a><a id="150" class="Symbol">;</a> <a id="152" href="Data.Bits.html#135" class="InductiveConstructor Operator">0∷_</a> <a id="156" class="Symbol">to</a> <a id="159" class="InductiveConstructor Operator">1ᵇ_</a><a id="162" class="Symbol">;</a> <a id="164" href="Data.Bits.html#155" class="InductiveConstructor Operator">1∷_</a> <a id="168" class="Symbol">to</a> <a id="171" class="InductiveConstructor Operator">2ᵇ_</a><a id="174" class="Symbol">)</a>
+<a id="92" class="Keyword">open</a> <a id="97" class="Keyword">import</a> <a id="104" href="Data.Bits.html" class="Module">Data.Bits</a> <a id="114" class="Keyword">public</a> <a id="121" class="Keyword">renaming</a> <a id="130" class="Symbol">(</a><a id="131" href="Data.Bits.html#102" class="Datatype">Bits</a> <a id="136" class="Symbol">to</a> <a id="139" class="Datatype">𝔹</a><a id="140" class="Symbol">;</a> <a id="142" href="Data.Bits.html#122" class="InductiveConstructor">[]</a> <a id="145" class="Symbol">to</a> <a id="148" class="InductiveConstructor">0ᵇ</a><a id="150" class="Symbol">;</a> <a id="152" href="Data.Bits.html#134" class="InductiveConstructor Operator">0∷_</a> <a id="156" class="Symbol">to</a> <a id="159" class="InductiveConstructor Operator">1ᵇ_</a><a id="162" class="Symbol">;</a> <a id="164" href="Data.Bits.html#154" class="InductiveConstructor Operator">1∷_</a> <a id="168" class="Symbol">to</a> <a id="171" class="InductiveConstructor Operator">2ᵇ_</a><a id="174" class="Symbol">)</a>
 
 <a id="177" class="Comment">-- The following causes a performance hit:</a>
 
 <a id="221" class="Comment">-- open import Agda.Builtin.List using ([]; _∷_; List)</a>
 <a id="276" class="Comment">-- open import Agda.Builtin.Bool using (Bool; true; false)</a>
 
-<a id="336" class="Comment">-- 𝔹 : Type₀</a>
-<a id="349" class="Comment">-- 𝔹 = List Bool</a>
+<a id="336" class="Comment">-- 𝔹 : Type</a>
+<a id="348" class="Comment">-- 𝔹 = List Bool</a>
 
-<a id="367" class="Comment">-- infixr 8 1ᵇ_ 2ᵇ_</a>
-<a id="387" class="Comment">-- pattern 0ᵇ = []</a>
-<a id="406" class="Comment">-- pattern 1ᵇ_ xs = false ∷ xs</a>
-<a id="437" class="Comment">-- pattern 2ᵇ_ xs = true  ∷ xs</a>
+<a id="366" class="Comment">-- infixr 8 1ᵇ_ 2ᵇ_</a>
+<a id="386" class="Comment">-- pattern 0ᵇ = []</a>
+<a id="405" class="Comment">-- pattern 1ᵇ_ xs = false ∷ xs</a>
+<a id="436" class="Comment">-- pattern 2ᵇ_ xs = true  ∷ xs</a>
 </pre></body></html>
