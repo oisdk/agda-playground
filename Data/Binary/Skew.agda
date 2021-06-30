@@ -6,7 +6,7 @@ open import Prelude
 open import Data.Nat
 open import Data.List
 
-𝔹 : Type₀
+𝔹 : Type
 𝔹 = List ℕ
 
 inc : 𝔹 → 𝔹

@@ -7,7 +7,7 @@ open import Testers
 open import Prelude
 
 infixl 5 _1𝕓 _2𝕓
-data 𝔹 : Type₀ where
+data 𝔹 : Type where
   0𝕓  : 𝔹
   _1𝕓 : 𝔹 → 𝔹
   _2𝕓 : 𝔹 → 𝔹

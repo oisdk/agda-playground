@@ -7,7 +7,7 @@ open import Data.String
 open import Prelude
 open import Data.Nat.Show
 
-data Fstr : Type₀ where
+data Fstr : Type where
   [] : Fstr
   %s_ : Fstr → Fstr
   %i_ : Fstr → Fstr
@@ -22,7 +22,7 @@ parse = go ∘ unpack
   go [] = []
   go (x ∷ xs) = x ∷ go xs
 
-Format : Fstr → Type₀
+Format : Fstr → Type
 Format [] = String
 Format (%s xs) = String → Format xs
 Format (%i xs) = ℕ → Format xs

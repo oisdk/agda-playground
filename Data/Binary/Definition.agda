@@ -10,7 +10,7 @@ open import Data.Bits public renaming (Bits to 𝔹; [] to 0ᵇ; 0∷_ to 1ᵇ_;
 -- open import Agda.Builtin.List using ([]; _∷_; List)
 -- open import Agda.Builtin.Bool using (Bool; true; false)
 
--- 𝔹 : Type₀
+-- 𝔹 : Type
 -- 𝔹 = List Bool
 
 -- infixr 8 1ᵇ_ 2ᵇ_

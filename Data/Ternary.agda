@@ -6,7 +6,7 @@ open import Prelude
 open import Relation.Nullary.Discrete.FromBoolean
 
 infixl 5 _,0 _,1 _,2
-data Tri : Type₀ where
+data Tri : Type where
   0t : Tri
   _,0 _,1 _,2 : Tri → Tri
 

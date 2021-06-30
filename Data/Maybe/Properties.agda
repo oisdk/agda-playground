@@ -26,6 +26,6 @@ discreteMaybe _≟_ (just x) (just y) = iff-dec (cong just iff just-inj) (x ≟ 
 is-just : Maybe A → Bool
 is-just = maybe false (const true)
 
-IsJust : Maybe A → Type₀
+IsJust : Maybe A → Type
 IsJust nothing = ⊥
 IsJust (just _) = ⊤

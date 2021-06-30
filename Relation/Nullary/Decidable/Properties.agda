@@ -21,7 +21,7 @@ isPropDec Aprop (yes a) (no ¬a) = ⊥-elim (¬a a)
 isPropDec Aprop (no ¬a) (yes a) = ⊥-elim (¬a a)
 isPropDec {A = A} Aprop (no ¬a) (no ¬a') i = no (isProp¬ A ¬a ¬a' i)
 
-True : Dec A → Type₀
+True : Dec A → Type
 True (yes _) = ⊤
 True (no  _) = ⊥
 

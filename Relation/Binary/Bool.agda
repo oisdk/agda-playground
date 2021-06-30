@@ -8,4 +8,4 @@ open import Prelude
 --   field
 --     _≤?_ : E → E → Bool
 
---   _≤_ : E → E → Type₀
+--   _≤_ : E → E → Type

@@ -7,6 +7,6 @@ open import Data.Unit
 open import Level
 open import Data.Bool.Base
 
-T : Bool → Type₀
+T : Bool → Type
 T true  = ⊤
 T false = ⊥

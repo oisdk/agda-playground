@@ -15,7 +15,7 @@ private
   variable
     n m l : ℕ
 
-data Bal : ℕ → ℕ → ℕ → Type₀ where
+data Bal : ℕ → ℕ → ℕ → Type where
   ll : Bal (suc n) n (suc n)
   ee : Bal n n n
   rr : Bal n (suc n) (suc n)

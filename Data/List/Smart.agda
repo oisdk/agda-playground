@@ -25,7 +25,7 @@ sz []′ = zero
 sz (x ∷′ xs) = zero
 sz (xs ++′ ys) = sz′ xs (sz ys)
 
-_HasSize_ : List A → ℕ → Type₀
+_HasSize_ : List A → ℕ → Type
 xs HasSize n = T (sz xs ≡ᴮ n)
 
 data ListView {a} (A : Type a) : Type a where

@@ -76,15 +76,15 @@ weaken {lb = lb} {x = x} (k ︓ val , xs) = k ︓ val , xs
 -- -- Map′ V = Map (const V)
 
 -- -- infixr 5 _≔_,_
--- -- data RecordFrom (lb : ⌊∙⌋) : MapFrom lb (const Type₀) → Type (kℓ ℓ⊔ r₁ ℓ⊔ ℓsuc ℓzero) where
+-- -- data RecordFrom (lb : ⌊∙⌋) : MapFrom lb (const Type) → Type (kℓ ℓ⊔ r₁ ℓ⊔ ℓsuc ℓzero) where
 -- --   ∅ : RecordFrom lb ∅
--- --   _≔_,_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → {xs : MapFrom ⌊ k ⌋ (const Type₀)} {t : Type₀} → (v : t) → RecordFrom ⌊ k ⌋ xs → RecordFrom lb (k ︓ t , xs)
+-- --   _≔_,_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → {xs : MapFrom ⌊ k ⌋ (const Type)} {t : Type} → (v : t) → RecordFrom ⌊ k ⌋ xs → RecordFrom lb (k ︓ t , xs)
 
--- -- Record : Map′ Type₀ → Type _
+-- -- Record : Map′ Type → Type _
 -- -- Record = RecordFrom ⌊⊥⌋
 
 -- -- infixr 5 _∈_
--- -- _∈_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → MapFrom lb Val → Type₀
+-- -- _∈_ : (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → MapFrom lb Val → Type
 -- -- k ∈ xs = IsJust (xs [ k ]?)
 
 -- -- _[_]! : (xs : MapFrom lb Val) → (k : K) → ⦃ inBounds : lb <⌊ k ⌋ ⦄ → ⦃ k∈xs : k ∈ xs ⦄ → Val k
@@ -93,14 +93,14 @@ weaken {lb = lb} {x = x} (k ︓ val , xs) = k ︓ val , xs
 -- -- xs [ k ]! | nothing | _ = ⊥-elim it
 
 -- -- infixl 4 _[_]
--- -- _[_] : {xs : MapFrom lb (const Type₀)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ ⦃ k∈xs : k ∈ xs ⦄ → xs [ k ]!
+-- -- _[_] : {xs : MapFrom lb (const Type)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ ⦃ k∈xs : k ∈ xs ⦄ → xs [ k ]!
 -- -- _[_] {xs = xs} (k₂ ≔ v , r) k₁ with xs [ k₁ ]? | compare′ k₁ k₂
 -- -- (k₂ ≔ v , r) [ k₁ ] | _ | lt′ = ⊥-elim it
 -- -- (k₂ ≔ v , r) [ k₁ ] | _ | eq′ = v
 -- -- (k₂ ≔ v , r) [ k₁ ] | _ | gt′ = r [ k₁ ]
 
 -- -- infixl 4 _[_]≔_
--- -- _[_]≔_ : {xs : MapFrom lb (const Type₀)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → A → RecordFrom lb (xs [ k ]︓ A)
+-- -- _[_]≔_ : {xs : MapFrom lb (const Type)} → RecordFrom lb xs → (k : K) ⦃ inBounds : lb <⌊ k ⌋ ⦄ → A → RecordFrom lb (xs [ k ]︓ A)
 -- -- ∅ [ k ]≔ x = k ≔ x , ∅
 -- -- (k₂ ≔ v₁ , rs) [ k₁ ]≔ x with compare′ k₁ k₂
 -- -- (k₂ ≔ v₁ , rs) [ k₁ ]≔ x | lt′ = k₁ ≔ x , k₂ ≔ v₁ , rs

@@ -9,7 +9,7 @@ open import Relation.Binary.Construct.Bounded totalOrder
 
 open TotalOrder totalOrder using (_≤?_)
 
-data Colour : Type₀ where
+data Colour : Type where
   red black : Colour
 
 add-black : Colour → ℕ → ℕ
@@ -28,18 +28,18 @@ private
   variable
     lb ub : [∙]
 
-IsBlack : Tree lb ub n → Type₀
+IsBlack : Tree lb ub n → Type
 IsBlack (leaf x) = ⊤
 IsBlack (node x red tr tr₁) = ⊥
 IsBlack (node x black tr tr₁) = ⊤
 
-Valid-rec : Tree lb ub n → Type₀
+Valid-rec : Tree lb ub n → Type
 Valid-rec (leaf x) = ⊤
 Valid-rec (node x red   xs ys) = IsBlack xs × IsBlack ys × Valid-rec xs × Valid-rec ys
 Valid-rec (node x black xs ys) = Valid-rec xs × Valid-rec ys
 
 
-Valid : Tree lb ub n → Type₀
+Valid : Tree lb ub n → Type
 Valid tr = IsBlack tr × Valid-rec tr
 
 -- insertWithin : (x : E) →

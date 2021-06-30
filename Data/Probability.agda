@@ -22,7 +22,7 @@ euclidian n m (suc s) =
 normalise-suc : ℕ → ℕ → ℚ⁺
 normalise-suc n m = euclidian n m (n ℕ.+ m)
 
-data ℙ : Type₀ where
+data ℙ : Type where
   ℙ⁰ : ℙ
   ℙ¹ : ℙ
   ℙ∙ : ℚ⁺ → ℙ
@@ -98,7 +98,7 @@ open import Data.List.Sugar using (liftA2)
 -- mul (ℙ∙ x) (ℙ∙ y) = ℙ∙ (mul′ x y)
 
 
--- testMul : ℕ → Type₀
+-- testMul : ℕ → Type
 -- testMul n = liftA2 mul xs xs ≡ liftA2 mul″ xs xs
 --   where
 --     xs : List ℙ

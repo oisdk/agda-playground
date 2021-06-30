@@ -9,7 +9,7 @@ import Agda.Builtin.Nat as Nat
 
 open import Level
 
-data Ordering : ℕ → ℕ → Type₀ where
+data Ordering : ℕ → ℕ → Type where
   less    : ∀ m k → Ordering m (suc (m + k))
   equal   : ∀ m   → Ordering m m
   greater : ∀ m k → Ordering (suc (m + k)) m

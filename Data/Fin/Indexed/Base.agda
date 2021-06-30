@@ -14,7 +14,7 @@ private variable n m : ℕ
 -- I tend to use the other one because cubical
 -- Agda doesn't yet support transport along
 -- equalities of indexed types.
-data Fin : ℕ → Type₀ where
+data Fin : ℕ → Type where
   f0 : Fin (suc n)
   fs : Fin n → Fin (suc n)
 

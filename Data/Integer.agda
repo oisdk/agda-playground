@@ -9,7 +9,7 @@ import Data.Nat as ℕ
 import Data.Nat.Properties as ℕ
 open import Data.Bool
 
-data ℤ : Type₀ where
+data ℤ : Type where
   ⁺   : ℕ → ℤ
   ⁻suc : ℕ → ℤ
 

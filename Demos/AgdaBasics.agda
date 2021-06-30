@@ -6,7 +6,7 @@ open import Level
 open import Data.Nat
 open import Data.String
 
-data Bool : Type₀ where
+data Bool : Type where
   false : Bool
   true  : Bool
 

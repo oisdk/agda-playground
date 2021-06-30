@@ -33,7 +33,7 @@ import Data.Binary.Conversion.Fast as Fast
 
 open import Data.List using (List; _⋯_; map)
 
-round-trip : ℕ → Type₀
+round-trip : ℕ → Type
 round-trip n = map (fromZ ∘ toZ) nums ≡ nums
   where
   nums : List 𝔹

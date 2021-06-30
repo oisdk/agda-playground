@@ -26,7 +26,7 @@ open import Agda.Builtin.Nat using (_-_)
 --   parse ")()(("     = 1 ⟩⟨ 2
 --   parse ")(())(("   = 1 ⟩⟨ 2
 --   parse ")(())()((" = 1 ⟩⟨ 2
-record Bal : Type₀ where
+record Bal : Type where
   constructor _⟩⟨_
   field
     left  : ℕ

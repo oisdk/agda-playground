@@ -11,7 +11,7 @@ open import Data.Fin.Indexed
 --  The Universe of functors we're interested in.
 --
 --------------------------------------------------------------------------------
-data Functor (n : ℕ) : Type₀ where
+data Functor (n : ℕ) : Type where
   !     : Fin n → Functor n
   _⊕_   : (F G : Functor n) → Functor n
   _⊗_   : (F G : Functor n) → Functor n
@@ -23,7 +23,7 @@ infixl 6 _⊕_
 infixl 7 _⊗_
 
 Params : ℕ → Type₁
-Params = Vec Type₀
+Params = Vec Type
 
 variable
   n m k : ℕ
@@ -37,7 +37,7 @@ variable
 ---------------------------------------------------------------------------------
 
 mutual
-  ⟦_⟧ : Functor n → Params n → Type₀
+  ⟦_⟧ : Functor n → Params n → Type
   ⟦ ! i     ⟧ xs = xs [ i ]
   ⟦ F ⊕  G  ⟧ xs = ⟦ F ⟧ xs ⊎  ⟦ G ⟧ xs
   ⟦ F ⊗  G  ⟧ xs = ⟦ F ⟧ xs ×  ⟦ G ⟧ xs
@@ -45,7 +45,7 @@ mutual
   ⟦ ⓪       ⟧ xs = ⊥
   ⟦ ①       ⟧ xs = ⊤
 
-  record μ (F : Functor (suc n)) (As : Params n) : Type₀ where
+  record μ (F : Functor (suc n)) (As : Params n) : Type where
     pattern; inductive; constructor ⟨_⟩
     field unwrap : ⟦ F ⟧ (μ F As ∷ As)
 open μ public

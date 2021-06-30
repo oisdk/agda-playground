@@ -7,11 +7,11 @@ open import Data.Nat
 open import WellFounded
 
 infix 4 _≤_ _<_
-data _≤_ (n : ℕ) : ℕ → Type₀ where
+data _≤_ (n : ℕ) : ℕ → Type where
   n≤n : n ≤ n
   n≤s : ∀ {m} → n ≤ m → n ≤ suc m
 
-_<_ : ℕ → ℕ → Type₀
+_<_ : ℕ → ℕ → Type
 n < m = suc n ≤ m
 
 ≤-wellFounded : WellFounded _<_

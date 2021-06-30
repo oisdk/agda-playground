@@ -4,7 +4,7 @@ module Data.Empty.Base where
 
 open import Level
 
-data ⊥ : Type₀ where
+data ⊥ : Type where
 
 infix 4.5 ¬_
 ¬_ : Type a → Type a

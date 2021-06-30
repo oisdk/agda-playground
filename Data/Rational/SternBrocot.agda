@@ -50,7 +50,7 @@ euclidian n m (suc s) =
 normalise-suc : ℕ → ℕ → ℚ⁺
 normalise-suc n m = euclidian n m (n ℕ.+ m)
 
-ℚ : Type₀
+ℚ : Type
 ℚ = ℚ⁺
 
 import Data.Rational.Unnormalised as F

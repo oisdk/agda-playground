@@ -10,10 +10,10 @@ module Relation.Binary.Construct.Decision
 
 open TotalOrder ord renaming (refl to ≤-refl)
 
-_<′_ : A → A → Type₀
+_<′_ : A → A → Type
 x <′ y = T (does (x <? y))
 
-_≤′_ : A → A → Type₀
+_≤′_ : A → A → Type
 x ≤′ y = T (not (does (y <? x)))
 
 

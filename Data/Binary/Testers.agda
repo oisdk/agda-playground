@@ -10,7 +10,7 @@ open import Data.List.Sugar using (liftA2)
 
 test : (𝔹 → 𝔹 → 𝔹) →
        (ℕ → ℕ → ℕ) →
-       ℕ → Type₀
+       ℕ → Type
 test bf nf n = let ns = 0 ⋯ n in
   liftA2 (λ n m → bf ⟦ n ⇑⟧ ⟦ m ⇑⟧) ns ns ≡
   liftA2 (λ n m → ⟦ nf n m ⇑⟧) ns ns

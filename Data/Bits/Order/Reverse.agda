@@ -28,8 +28,8 @@ _<ᴮ_ : Bits → Bits → Bool
 xs <ᴮ ys = xs ≲ᴮ ys & false
 
 infix 4 _≤_ _<_
-_≤_ : Bits → Bits → Type₀
+_≤_ : Bits → Bits → Type
 xs ≤ ys = T (xs ≤ᴮ ys)
 
-_<_ : Bits → Bits → Type₀
+_<_ : Bits → Bits → Type
 xs < ys = T (xs <ᴮ ys)

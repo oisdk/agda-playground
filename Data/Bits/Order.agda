@@ -25,6 +25,6 @@ xs    <ᴮ []    = false
 1∷ xs <ᴮ 1∷ ys = xs <ᴮ ys
 
 infix 4 _≤_ _<_
-_≤_ _<_ : Bits → Bits → Type₀
+_≤_ _<_ : Bits → Bits → Type
 xs ≤ ys = T (xs ≤ᴮ ys)
 xs < ys = T (xs <ᴮ ys)

@@ -5,7 +5,7 @@ module BCK where
 open import Prelude hiding (B; C)
 
 infixl 4 _$$_
-data BCK : Type₀ where
+data BCK : Type where
   _$$_ : BCK → BCK → BCK
   B C K : BCK
 

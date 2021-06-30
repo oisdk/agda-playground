@@ -56,7 +56,7 @@ isSetℕ = Discrete→isSet discreteℕ
 +-comm x (suc y) = +-suc x y ; cong suc (+-comm x y)
 
 infix 4 _<_
-_<_ : ℕ → ℕ → Type₀
+_<_ : ℕ → ℕ → Type
 n < m = T (n <ᴮ m)
 
 infix 4 _≤ᴮ_
@@ -64,7 +64,7 @@ _≤ᴮ_ : ℕ → ℕ → Bool
 n ≤ᴮ m = not (m <ᴮ n)
 
 infix 4 _≤_
-_≤_ : ℕ → ℕ → Type₀
+_≤_ : ℕ → ℕ → Type
 n ≤ m = T (n ≤ᴮ m)
 
 infix 4 _≥ᴮ_
@@ -108,13 +108,13 @@ div-helper-lemma k m zero j = sym (+-idʳ k)
 div-helper-lemma k m (suc n) zero = div-helper-lemma (suc k) m n m ; sym (+-suc k (div-helper′ m n m))
 div-helper-lemma k m (suc n) (suc j) = div-helper-lemma k m n j
 
-Even : ℕ → Type₀
+Even : ℕ → Type
 Even n = T (even n)
 
 odd : ℕ → Bool
 odd n = not (rem n 2 ≡ᴮ 0)
 
-Odd : ℕ → Type₀
+Odd : ℕ → Type
 Odd n = T (odd n)
 
 s≤s : ∀ n m → n ≤ m → suc n ≤ suc m

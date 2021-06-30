@@ -3,7 +3,7 @@
 module Data.PolyP.Derivations.Levels where
 
 open import Data.PolyP
-open import Level hiding (Type) renaming (Type₀ to Type)
+open import Level hiding (Type) renaming (Type to Type)
 open import Data.PolyP.Types
 open import Data.Sum
 open import Data.Sigma

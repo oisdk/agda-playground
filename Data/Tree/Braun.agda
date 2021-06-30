@@ -5,7 +5,7 @@ module Data.Tree.Braun where
 open import Prelude
 open import Data.Nat
 
-data Bal (n : ℕ) : ℕ → ℕ → Type₀ where
+data Bal (n : ℕ) : ℕ → ℕ → Type where
   one : Bal n n       (1 + n * 2)
   two : Bal n (suc n) (2 + n * 2)
 

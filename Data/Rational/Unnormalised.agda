@@ -9,7 +9,7 @@ import Data.Nat as ℕ
 open import Data.Nat.DivMod using (nonZero)
 
 infixl 7 _/_ _/suc_
-record ℚ : Type₀ where
+record ℚ : Type where
   constructor _/suc_
   field
     num : ℤ

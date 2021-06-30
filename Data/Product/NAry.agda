@@ -12,7 +12,7 @@ private
     n : ℕ
     ℓ : Level
 
-Levels : ℕ → Type₀
+Levels : ℕ → Type
 Levels zero = ⊤
 Levels (suc n) = Level × Levels n
 
@@ -43,7 +43,7 @@ map-types : (fn : ∀ {ℓ} → Type ℓ → Type ℓ) → ∀ {n ls} → Types 
 map-types fn {zero} xs = xs
 map-types fn {suc n} (x , xs) = fn x , map-types fn xs
 
-data ArgForm : Type₀ where expl impl inst : ArgForm
+data ArgForm : Type where expl impl inst : ArgForm
 
 infixr 0 _[_]→_
 _[_]→_ : Type a → ArgForm → Type b → Type (a ℓ⊔ b)

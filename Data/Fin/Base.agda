@@ -7,7 +7,7 @@ open import Data.Nat.Base using (ℕ; suc; zero)
 open import Level
 open import Data.Empty
 
-Fin : ℕ → Type₀
+Fin : ℕ → Type
 Fin zero    = ⊥
 Fin (suc n) = Maybe (Fin n)
 
