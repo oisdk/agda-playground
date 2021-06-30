@@ -41,3 +41,4 @@ A ∋ x = x
 infix 0 case_of_
 case_of_ : A → (A → B) → B
 case x of f = f x
+{-# INLINE case_of_ #-}

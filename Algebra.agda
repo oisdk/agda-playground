@@ -250,6 +250,16 @@ record Monad ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   return : A → 𝐹 A
   return = pure
 
+record IsMonad {ℓ₁} {ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
+  infixl 1 _>>=_
+  field
+    _>>=_ : 𝐹 A → (A → 𝐹 B) → 𝐹 B
+    return : A → 𝐹 A
+
+    >>=-idˡ : (f : A → 𝐹 B) → (x : A) → (return x >>= f) ≡ f x
+    >>=-idʳ : (x : 𝐹 A) → (x >>= return) ≡ x
+    >>=-assoc : (xs : 𝐹 A) (f : A → 𝐹 B) (g : B → 𝐹 C) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
+
 record Alternative ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field
     applicative : Applicative ℓ₁ ℓ₂
