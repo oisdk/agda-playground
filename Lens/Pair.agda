@@ -6,13 +6,13 @@ open import Prelude
 open import Lens.Definition
 
 ⦅fst⦆ : Lens (A × B) A
-⦅fst⦆ .into (x , y) = lens-part x (_, y)
-⦅fst⦆ .get-set s v i = v
-⦅fst⦆ .set-get s i = s
-⦅fst⦆ .set-set s v₁ v₂ i = v₂ , s .snd
+⦅fst⦆ .fst (x , y) = lens-part x (_, y)
+⦅fst⦆ .snd .get-set s v i = v
+⦅fst⦆ .snd .set-get s i = s
+⦅fst⦆ .snd .set-set s v₁ v₂ i = v₂ , s .snd
 
 ⦅snd⦆ : Lens (A × B) B
-⦅snd⦆ .into (x , y) = lens-part y (x ,_)
-⦅snd⦆ .get-set s v i = v
-⦅snd⦆ .set-get s i = s
-⦅snd⦆ .set-set s v₁ v₂ i = s .fst , v₂
+⦅snd⦆ .fst (x , y) = lens-part y (x ,_)
+⦅snd⦆ .snd .get-set s v i = v
+⦅snd⦆ .snd .set-get s i = s
+⦅snd⦆ .snd .set-set s v₁ v₂ i = s .fst , v₂
