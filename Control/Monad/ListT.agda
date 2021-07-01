@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe --postfix-projections #-}
+{-# OPTIONS --cubical --postfix-projections #-}
 
 open import Prelude
 open import Algebra
@@ -11,6 +11,11 @@ module Control.Monad.ListT
   where
 
 open IsMonad is-mon
+
+postulate
+  cmap-return : (f : A → B) (x : ⟦ 𝔽 ⟧ A) →
+                (cmap f x ≡ (x >>= return ∘ f))
+
 
 infixr 5 _∷_
 mutual
@@ -50,6 +55,7 @@ module _ (P : List A → Type ℓ) where
         P
         (cong (xs .fst ,_) (funExt (λ x → wrapc-elimc (xs .snd x))))
         (ψ (cmap elimc xs))
+
 module _  (ϕ : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (const B)) → B) where
   para : List A → B
   parac : Cons A → ℭ𝔬𝔫𝔰 A (const B)
@@ -60,22 +66,53 @@ module _  (ϕ : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (const B)) → B) where
   parac [] = []
   parac (x ∷ xs) = x ∷ xs ⟨ para xs ⟩
 
+++-ϕ : List A → ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (const (List A))) → List A
+++-ϕ ys xs = xs >>= λ { [] → ys ; (x ∷ _ ⟨ xs ⟩) → return (x ∷ xs) }
+
 infixr 5 _++_
 _++_ : List A → List A → List A
-_++_ {A = A} xs ys = para ϕ xs
+xs ++ ys = para (++-ϕ ys) xs
+
+cmap-comp : (f : B → C) (g : A → B) (x : ⟦ 𝔽 ⟧ A) → cmap f (cmap g x) ≡ cmap (f ∘ g) x
+cmap-comp f g x = refl
+
+cmap-id : (x : ⟦ 𝔽 ⟧ A) → cmap id x ≡ x
+cmap-id x = refl
+
+open import Path.Reasoning
+
+++-id : (xs : List A) → xs ++ return [] ≡ xs
+++-id {A = A} = elim P ψ
   where
+  P : List A → Type ℓ
+  P xs = xs ++ return [] ≡ xs
+
   ϕ : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (const (List A))) → List A
-  ϕ xs = xs >>= λ { [] → ys ; (x ∷ _ ⟨ xs ⟩) → return (x ∷ xs) }
+  ϕ = ++-ϕ (return [])
 
+  ϕ′ : ℭ𝔬𝔫𝔰 A (const (List A)) → Cons A
+  ϕ′ [] = []
+  ϕ′ (x ∷ xs ⟨ P⟨xs⟩ ⟩) = x ∷ P⟨xs⟩
 
--- ++-id : (xs : List A) → xs ++ return [] ≡ xs
--- ++-id {A = A} = elim P ψ
---   where
---   P : List A → Type ℓ
---   P xs = xs ++ return [] ≡ xs
+  ϕ≡ : ∀ xs → ϕ xs ≡ (xs >>= return ∘′ ϕ′)
+  ϕ≡ xs = cong (xs >>=_) (funExt (λ { [] → refl ; (x ∷ xs ⟨ P⟨xs⟩ ⟩) → refl }))
 
---   ψ : (x : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A P)) → P (wrap P x)
---   ψ xs = {!!}
+  lemma : (xs : ℭ𝔬𝔫𝔰 A P) → ϕ′ (parac ϕ (wrapc P xs)) ≡ wrapc P xs
+  lemma [] = refl
+  lemma (x ∷ xs ⟨ P⟨xs⟩ ⟩) = cong (x ∷_) P⟨xs⟩
+
+  ψ : (xs : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A P)) → P (wrap P xs)
+  ψ xs =
+    wrap P xs ++ return [] ≡⟨⟩
+    para ϕ (wrap P xs) ≡⟨⟩
+    ϕ (cmap (parac ϕ) (wrap P xs)) ≡⟨ ϕ≡ _ ⟩
+    (cmap (parac ϕ) (wrap P xs) >>= return ∘′ ϕ′) ≡˘⟨ cmap-return ϕ′ _ ⟩
+    cmap ϕ′ (cmap (parac ϕ) (wrap P xs)) ≡⟨⟩
+    cmap (ϕ′ ∘ parac ϕ) (wrap P xs) ≡⟨⟩
+    cmap (ϕ′ ∘ parac ϕ) (cmap (wrapc P) xs) ≡⟨⟩
+    cmap (ϕ′ ∘ parac ϕ ∘ wrapc P) xs ≡⟨ cong (flip cmap xs) (funExt lemma) ⟩
+    wrap P xs ∎
+
 
 -- open import Cubical.Data.Sigma.Properties
 
