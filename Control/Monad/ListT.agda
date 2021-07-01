@@ -36,15 +36,19 @@ module _ (P : List A → Type ℓ) where
   module _ (ψ : (x : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A P)) → P (wrap x)) where
     elim : (x : List A) → P x
     elimc : Cons A → ℭ𝔬𝔫𝔰 A P
+    wrapc-elimc : (c : Cons A) → wrapc (elimc c) ≡ c
+
+    wrapc-elimc []       i = []
+    wrapc-elimc (x ∷ xs) i = x ∷ xs
 
     elimc [] = []
     elimc (x ∷ xs) = x ∷ xs ⟨ elim xs ⟩
 
-    elim xs = subst P (cong (fst xs ,_) (funExt (λ i → lemma (xs .snd i)))) (ψ (cmap elimc xs))
-      where
-      lemma : (c : Cons A) → wrapc (elimc c) ≡ c
-      lemma [] = refl
-      lemma (x ∷ xs) = refl
+    elim xs =
+      subst
+        P
+        (cong (xs .fst ,_) (funExt (λ x → wrapc-elimc (xs .snd x))))
+        (ψ (cmap elimc xs))
 
 para : (⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (const B)) → B) → List A → B
 para = elim (const _)
@@ -54,16 +58,20 @@ _++_ : List A → List A → List A
 _++_ {A = A} xs ys = para ϕ xs
   where
   ϕ : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A (const (List A))) → List A
-  ϕ xs = xs >>= λ { [] → ys ; (x ∷ _ ⟨ xs ⟩ ) → return (x ∷ xs) }
+  ϕ xs = xs >>= λ { [] → ys ; (x ∷ _ ⟨ xs ⟩) → return (x ∷ xs) }
+
+-- open import Cubical.Data.Sigma.Properties
 
 -- ++-assoc : (xs ys zs : List A) → (xs ++ ys) ++ zs ≡ xs ++ (ys ++ zs)
 -- ++-assoc {A = A} xs ys zs = elim P ψ xs
 --   where
 --   P : List A → Type ℓ
 --   P xs′ = (xs′ ++ ys) ++ zs ≡ xs′ ++ (ys ++ zs)
+--   {-# INLINE P #-}
 
 --   ψ : (x : ⟦ 𝔽 ⟧ (ℭ𝔬𝔫𝔰 A P)) → P (wrap P x)
---   ψ xs = {!!}
+--   ψ xs = ΣPathTransport→PathΣ _ _ ({!refl!} , {!!})
+
 -- _>>=′_ : List A → (A → List B) → List B
 -- _>>=′_ {A = A} {B = B} xs k = cata ϕ xs
 --   where
