@@ -24,12 +24,11 @@ mutual
   merge = foldr mergeˡ id
 
   mergeˡ :  E → (List E → List E) → List E → List E
-  mergeˡ x xs [] = x ∷ xs []
+  mergeˡ x xs []       = x ∷ xs []
   mergeˡ x xs (y ∷ ys) = merge⁺ x xs y ys (x ≤ᵇ y)
 
   merge⁺ :  E → (List E → List E) → E → List E → Bool → List E
-  merge⁺ x xs y ys true  = x ∷ xs (y ∷ ys)
-  merge⁺ x xs y ys false = y ∷ mergeˡ x xs ys
+  merge⁺ x xs y ys = bool′ (y ∷ mergeˡ x xs ys) (x ∷ xs (y ∷ ys))
 
 merge-idʳ : ∀ xs → merge xs [] ≡ xs
 merge-idʳ [] = refl
