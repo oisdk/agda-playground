@@ -1,3 +1,4 @@
 name: agda-playground
 include: .
 depend: cubical
+flags: --without-K --postfix-projections --cubical --guardedness
