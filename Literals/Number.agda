@@ -3,5 +3,3 @@
 module Literals.Number where
 
 open import Agda.Builtin.FromNat public
-
-open Number ⦃ ... ⦄ public
