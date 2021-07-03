@@ -21,12 +21,15 @@ open import Strict
 
 sringFromNatRec : ℕ → ℕ → 𝑅
 sringFromNatRec zero    _       = 0#
+sringFromNatRec (suc 0) _       = 1#
+sringFromNatRec (suc 1) _       = 2#
+sringFromNatRec (suc 2) _       = 1# + 2#
 sringFromNatRec (suc n) (suc w) =
   let! r =! sringFromNatRec (n ÷ 2) w in!
   if even n
     then 1# + (r * 2#)
     else (1# + r) * 2#
-sringFromNatRec (suc _) zero = 0# -- will not happen
+sringFromNatRec _ zero = 0# -- will not happen
 
 sringFromNat : ℕ → 𝑅
 sringFromNat n = sringFromNatRec n n
