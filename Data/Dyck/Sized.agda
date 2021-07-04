@@ -62,10 +62,30 @@ foldlNN : ∀ {A : Type a} {p} (P : ℕ → ℕ → Type p) →
 foldlNN {n = zero} P f s b xs = b
 foldlNN {n = suc n} P f s b (x ∷ xs) = foldlNN P f s (s x b) xs
 
+open import Cubical.Foundations.Prelude using (substRefl)
+
 stack→tree→stack⊙ :  {st : Vec Tree n} (is : Stack n m) →
- tree→stack (stack→tree⊙ is st)
-   ≡[ i ≔ Stack 0 (stack→tree-size⊙ {st = st} is i) ]≡
+ subst (Stack 0) (stack→tree-size⊙ is) (tree→stack (stack→tree⊙ is st))
+   ≡
      foldlNN Stack size⊙ tree→stack⊙ is st
-stack→tree→stack⊙  []       = refl
+stack→tree→stack⊙  []       = substRefl {B = Stack 0} _
 stack→tree→stack⊙ (push is) = stack→tree→stack⊙ is
 stack→tree→stack⊙ (pull is) = stack→tree→stack⊙ is
+
+STree : ℕ → Type
+STree = fiber size
+
+open import Cubical.Data.Sigma.Properties using (Σ≡Prop)
+open import Data.Nat.Properties using (isSetℕ)
+
+tree-stack : STree n ⇔ Stack 0 n
+tree-stack .fun (t , n) = subst (Stack 0) n (tree→stack t)
+tree-stack .inv st .fst = stack→tree st
+tree-stack .inv st .snd = stack→tree-size⊙ st
+tree-stack .leftInv  (t , sz≡) =
+  Σ≡Prop
+  (λ _ → isSetℕ _ _)
+  (J
+    (λ n sz≡ → stack→tree (subst (Stack 0) sz≡ (tree→stack t)) ≡ t)
+    (cong stack→tree (substRefl {B = Stack 0} (tree→stack t)) ; tree→stack→tree⊙ t) sz≡)
+tree-stack .rightInv st = stack→tree→stack⊙ st
