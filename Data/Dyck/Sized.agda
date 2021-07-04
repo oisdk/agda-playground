@@ -12,10 +12,11 @@ private
   variable
     n⊙ m⊙ k⊙ : ℕ → ℕ
 
+infixr 6 ⟨_ ⟩_
 data Stack : ℕ → ℕ → Type where
-  [] : Stack 1 0
-  push : Stack (1 + n) m → Stack n (1 + m)
-  pull : Stack (1 + n) m → Stack (2 + n) m
+  ⟩! : Stack 1 0
+  ⟨_ : Stack (1 + n) m → Stack n (1 + m)
+  ⟩_ : Stack (1 + n) m → Stack (2 + n) m
 
 data Tree : Type where
   ⟨⟩ : Tree
@@ -29,25 +30,25 @@ size : Tree → ℕ
 size t = size⊙ t zero
 
 tree→stack⊙ : (t : Tree) → Stack (suc m) k → Stack m (size⊙ t k)
-tree→stack⊙ ⟨⟩         = push
-tree→stack⊙ (xs * ys) = tree→stack⊙ xs ∘ tree→stack⊙ ys ∘ pull
+tree→stack⊙ ⟨⟩         = ⟨_
+tree→stack⊙ (xs * ys) = tree→stack⊙ xs ∘ tree→stack⊙ ys ∘ ⟩_
 
 tree→stack : (t : Tree) → Stack 0 (size t)
-tree→stack tr = tree→stack⊙ tr []
+tree→stack tr = tree→stack⊙ tr ⟩!
 
 stack→tree⊙ : Stack n m → Vec Tree n → Tree
-stack→tree⊙ []        (v ∷ [])       = v
-stack→tree⊙ (push is) st             = stack→tree⊙ is (⟨⟩ ∷ st)
-stack→tree⊙ (pull is) (t₁ ∷ t₂ ∷ st) = stack→tree⊙ is (t₂ * t₁ ∷ st)
+stack→tree⊙ ⟩!        (v ∷ [])       = v
+stack→tree⊙ (⟨ is) st             = stack→tree⊙ is (⟨⟩ ∷ st)
+stack→tree⊙ (⟩ is) (t₁ ∷ t₂ ∷ st) = stack→tree⊙ is (t₂ * t₁ ∷ st)
 
 stack→tree : Stack 0 n → Tree
 stack→tree ds = stack→tree⊙ ds []
 
 stack→tree-size⊙ :  {st : Vec Tree n} (is : Stack n m) →
  size (stack→tree⊙ is st) ≡ foldl′ size⊙ m st
-stack→tree-size⊙  []       = refl
-stack→tree-size⊙ (push is) = stack→tree-size⊙ is
-stack→tree-size⊙ (pull is) = stack→tree-size⊙ is
+stack→tree-size⊙  ⟩!       = refl
+stack→tree-size⊙ (⟨ is) = stack→tree-size⊙ is
+stack→tree-size⊙ (⟩ is) = stack→tree-size⊙ is
 
 tree→stack→tree⊙ :  {is : Stack (1 + n) m} {st : Vec Tree n} (e : Tree) →
   stack→tree⊙ (tree→stack⊙ e is) st ≡ stack→tree⊙ is (e ∷ st)
@@ -68,9 +69,9 @@ stack→tree→stack⊙ :  {st : Vec Tree n} (is : Stack n m) →
  subst (Stack 0) (stack→tree-size⊙ is) (tree→stack (stack→tree⊙ is st))
    ≡
      foldlNN Stack size⊙ tree→stack⊙ is st
-stack→tree→stack⊙  []       = substRefl {B = Stack 0} _
-stack→tree→stack⊙ (push is) = stack→tree→stack⊙ is
-stack→tree→stack⊙ (pull is) = stack→tree→stack⊙ is
+stack→tree→stack⊙  ⟩!       = substRefl {B = Stack 0} _
+stack→tree→stack⊙ (⟨ is) = stack→tree→stack⊙ is
+stack→tree→stack⊙ (⟩ is) = stack→tree→stack⊙ is
 
 STree : ℕ → Type
 STree = fiber size
@@ -89,3 +90,27 @@ tree-stack .leftInv  (t , sz≡) =
     (λ n sz≡ → stack→tree (subst (Stack 0) sz≡ (tree→stack t)) ≡ t)
     (cong stack→tree (substRefl {B = Stack 0} (tree→stack t)) ; tree→stack→tree⊙ t) sz≡)
 tree-stack .rightInv st = stack→tree→stack⊙ st
+
+open import Data.List
+
+support-dyck : ∀ n m → List (Stack n m)
+support-dyck = λ n m → sup-k n m id []
+  module ListDyck where
+  Diff : Type → Type₁
+  Diff A = ∀ {B : Type} → (A → B) → List B → List B
+
+  mutual
+    sup-k : ∀ n m → Diff (Stack n m)
+    sup-k n m k = end n m k ∘ lefts n m k ∘ rights n m k
+
+    lefts : ∀ n m → Diff (Stack n m)
+    lefts n zero    k = id
+    lefts n (suc m) k = sup-k (suc n) m (k ∘ ⟨_)
+
+    rights : ∀ n m → Diff (Stack n m)
+    rights (suc (suc n)) m k = sup-k (suc n) m (k ∘ ⟩_)
+    rights _             m k = id
+
+    end : ∀ n m → Diff (Stack n m)
+    end 1 0 k xs = k ⟩! ∷ xs
+    end _ _ k = id
