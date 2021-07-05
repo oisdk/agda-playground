@@ -93,15 +93,21 @@ tree-stack .rightInv st = stack→tree→stack⊙ st
 
 open import Data.List
 
+
+Diff : Type → Type₁
+Diff A = ∀ {B : Type} → (A → B) → List B → List B
+
+infixr 5 _++′_
+_++′_ : Diff A → Diff A → Diff A
+xs ++′ ys = λ k → xs k ∘ ys k
+
 support-dyck : ∀ n m → List (Stack n m)
 support-dyck = λ n m → sup-k n m id []
   module ListDyck where
-  Diff : Type → Type₁
-  Diff A = ∀ {B : Type} → (A → B) → List B → List B
 
   mutual
     sup-k : ∀ n m → Diff (Stack n m)
-    sup-k n m k = end n m k ∘ lefts n m k ∘ rights n m k
+    sup-k n m = end n m ++′ lefts n m  ++′ rights n m
 
     lefts : ∀ n m → Diff (Stack n m)
     lefts n zero    k = id
@@ -114,3 +120,41 @@ support-dyck = λ n m → sup-k n m id []
     end : ∀ n m → Diff (Stack n m)
     end 1 0 k xs = k ⟩! ∷ xs
     end _ _ k = id
+
+open import Data.List.Membership
+open import Data.Fin
+
+cover-dyck : (x : Stack n m) → x ∈ support-dyck n m
+cover-dyck x = go _ _ x id []
+  where
+  open ListDyck
+
+  mutual
+    pushLefts : ∀ n m (k : Stack n m → B) x xs → x ∈ xs → x ∈ lefts n m k xs
+    pushLefts n (suc m) k = pushSup (suc n) m (λ z → k (⟨ z))
+    pushLefts _ zero    k x xs p = p
+
+    pushEnd : ∀ n m (k : Stack n m → B) x xs → x ∈ xs → x ∈ end n m k xs
+    pushEnd 1 0 k x xs (i , p) = fs i , p
+    pushEnd zero zero k x xs p = p
+    pushEnd zero (suc m) k x xs p = p
+    pushEnd (suc (suc n)) zero k x xs p = p
+    pushEnd (suc zero) (suc m) k x xs p = p
+    pushEnd (suc (suc n)) (suc m) k x xs p = p
+
+    pushRights : ∀ n m (k : Stack n m → B) x xs → x ∈ xs → x ∈ rights n m k xs
+    pushRights (suc zero) m k x xs p = p
+    pushRights (suc (suc n)) m k = pushSup (suc n) m λ z → k (⟩ z)
+    pushRights zero _ k x xs p = p
+
+    pushSup : ∀ n m (k : Stack n m → B) x xs → x ∈ xs → x ∈ sup-k n m k xs
+    pushSup n m k x xs p = pushEnd n m k x (lefts n m k (rights n m k xs)) (pushLefts n m k x (rights n m k xs) (pushRights n m k x xs p))
+
+  go : ∀ n m → (x : Stack n m) → (k : Stack n m → A) → (xs : List A) → k x ∈ sup-k n m k xs
+  go .1 .0 ⟩! k xs = f0 , refl
+  go 0 (suc m) (⟨ x) k xs = go 1 m x (k ∘ ⟨_) xs
+  go 1 (suc m) (⟨ x) k xs = go 2 m x (k ∘ ⟨_) xs
+  go (suc n@(suc _)) (suc m) (⟨ x) k xs = go (suc (suc n)) m x (k ∘ ⟨_) (rights (suc n) (suc m) k xs)
+  go (suc n) m (⟩ x) k xs =
+    let p = go n m x (k ∘ ⟩_) xs
+    in pushEnd (suc n) m k (k (⟩ x)) (lefts (suc n) m k _) (pushLefts (suc n) m k (k (⟩ x)) (rights (suc n) m k xs) p)
