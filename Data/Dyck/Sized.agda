@@ -135,17 +135,15 @@ cover-dyck x = go _ _ x id []
     pushLefts _ zero    k x xs p = p
 
     pushEnd : ∀ n m (k : Stack n m → B) x xs → x ∈ xs → x ∈ end n m k xs
+    pushEnd 0 m k x xs p = p
     pushEnd 1 0 k x xs (i , p) = fs i , p
-    pushEnd zero zero k x xs p = p
-    pushEnd zero (suc m) k x xs p = p
-    pushEnd (suc (suc n)) zero k x xs p = p
-    pushEnd (suc zero) (suc m) k x xs p = p
-    pushEnd (suc (suc n)) (suc m) k x xs p = p
+    pushEnd 1 (suc m) k x xs p = p
+    pushEnd (suc (suc n)) m k x xs p = p
 
     pushRights : ∀ n m (k : Stack n m → B) x xs → x ∈ xs → x ∈ rights n m k xs
-    pushRights (suc zero) m k x xs p = p
     pushRights (suc (suc n)) m k = pushSup (suc n) m λ z → k (⟩ z)
-    pushRights zero _ k x xs p = p
+    pushRights 1 _ _ _ _ p = p
+    pushRights 0 _ _ _ _ p = p
 
     pushSup : ∀ n m (k : Stack n m → B) x xs → x ∈ xs → x ∈ sup-k n m k xs
     pushSup n m k x xs p = pushEnd n m k x (lefts n m k (rights n m k xs)) (pushLefts n m k x (rights n m k xs) (pushRights n m k x xs p))
