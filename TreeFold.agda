@@ -12,8 +12,8 @@ record Spine (A : Type a) : Type a where
   inductive
   constructor _^_&_
   field
-    depth : ℕ
-    val : A
+    zeroes : ℕ
+    one : A
     tail : Maybe (Spine A)
 
 module TheFold (f : A → A → A) (z : A) where
