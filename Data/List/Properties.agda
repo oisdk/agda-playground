@@ -82,3 +82,22 @@ open import Function.Injective
 ++-inj : (xs : List A) → Injective (xs ++_)
 ++-inj []       ys zs ys≡zs = ys≡zs
 ++-inj (x ∷ xs) ys zs ys≡zs = ++-inj xs ys zs (∷-inj x (xs ++ ys) (xs ++ zs) ys≡zs)
+
+open import Algebra
+
+module _ (mon : Monoid b) where
+  open Monoid mon
+
+  module _ (f : A → 𝑆) where
+    monStepL : 𝑆 → A → 𝑆
+    monStepL xs x = xs ∙ f x
+    {-# INLINE monStepL #-}
+
+    foldMapL : List A → 𝑆
+    foldMapL = foldl monStepL ε
+
+    foldMapLStep : ∀ x xs → f x ∙ foldMapL xs ≡ foldMapL (x ∷ xs)
+    foldMapLStep x xs = foldl-fusion (f x ∙_) ε (λ y z → sym (assoc (f x) y (f z))) xs ; cong (flip (foldl monStepL) xs) (∙ε (f x) ; sym (ε∙ (f x)))
+
+    foldl-foldr-monoid : (xs : List A) → foldMapL xs ≡ foldr (_∙_ ∘ f) ε xs
+    foldl-foldr-monoid = foldr-universal _ (_∙_ ∘ f) ε refl λ x xs → sym (foldMapLStep x xs)
