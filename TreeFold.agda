@@ -47,33 +47,24 @@ module TheFold (f : A → A → A) where
 open TheFold using (treeFold; treeFoldHom) public
 
 module LeftFold (f : A → A → A) where
-  open TheFold (flip f) using (_^_∹_)
-
-  ⟦_⟧⇓ : Spine A → A
-  ⟦ _ ^ x & nothing ⟧⇓ = x
-  ⟦ _ ^ x & just xs ⟧⇓ = f ⟦ xs ⟧⇓ x
-
-  buildSpine : Spine A → List A → Spine A
-  buildSpine = foldl (flip (zero ^_∹_))
+  open TheFold (flip f) using (_^_∹_; ⟦_⟧⇓)
 
   module _ (z : A) where
     ⟦_⟧⇑ : List A → Spine A
-    ⟦_⟧⇑ = buildSpine (zero ^ z & nothing)
+    ⟦_⟧⇑ = foldl (flip (zero ^_∹_)) (zero ^ z & nothing)
 
     treeFoldL : List A → A
     treeFoldL = ⟦_⟧⇓ ∘ ⟦_⟧⇑
 
-  module _ (f-assoc : Associative f) where
-    open import Path.Reasoning
+    module _ (f-assoc : Associative f) where
+      ∹-hom : ∀ n x xs → ⟦ n ^ x ∹ xs ⟧⇓ ≡ f ⟦ xs ⟧⇓ x
+      ∹-hom n x (zero  ^ y & nothing) = refl
+      ∹-hom n x (zero  ^ y & just xs) = ∹-hom _ (f y x) xs ; sym (f-assoc ⟦ xs ⟧⇓ y x)
+      ∹-hom n x (suc m ^ y & nothing) = refl
+      ∹-hom n x (suc m ^ y & just xs) = refl
 
-    lhom : ∀ n x xs → ⟦ n ^ x ∹ xs ⟧⇓ ≡ f ⟦ xs ⟧⇓ x
-    lhom n x (zero  ^ y & nothing) = refl
-    lhom n x (zero  ^ y & just xs) = lhom _ (f y x) xs ; sym (f-assoc ⟦ xs ⟧⇓ y x)
-    lhom n x (suc m ^ y & nothing) = refl
-    lhom n x (suc m ^ y & just xs) = refl
-
-    treeFoldLHom : ∀ z xs → ⟦ ⟦ z ⟧⇑ xs ⟧⇓ ≡ foldl f z xs
-    treeFoldLHom z = foldl-fusion ⟦_⟧⇓ (zero ^ z & nothing) (flip (lhom zero))
+      treeFoldLHom : ∀ xs → ⟦ ⟦ xs ⟧⇑ ⟧⇓ ≡ foldl f z xs
+      treeFoldLHom = foldl-fusion ⟦_⟧⇓ (zero ^ z & nothing) (flip (∹-hom zero))
 
 
   
