@@ -8,7 +8,7 @@ open import Algebra using (Associative)
 open import Data.List.Properties using (foldr-fusion)
 
 infixr 5 _^_&_
-record Spine {a} (A : Type a) : Type a where
+record Spine (A : Type a) : Type a where
   inductive
   constructor _^_&_
   field
@@ -16,7 +16,7 @@ record Spine {a} (A : Type a) : Type a where
     val : A
     tail : Maybe (Spine A)
 
-module TheFold {a} {A : Type a} (f : A → A → A) (z : A) where
+module TheFold (f : A → A → A) (z : A) where
   infixr 5 _^_∹_
   _^_∹_ : ℕ → A → Spine A → Spine A
   n ^ x ∹ zero  ^ y & nothing = suc n ^ f x y & nothing
