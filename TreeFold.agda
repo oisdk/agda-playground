@@ -36,17 +36,17 @@ module TheFold (f : A → A → A) where
     treeFold = ⟦_⟧⇓ ∘ ⟦_⟧⇑
 
     module _ (f-assoc : Associative f) where
-      ∹-hom : ∀ n x xs → ⟦ n ^ x ∹ xs ⟧⇓ ≡ f x ⟦ xs ⟧⇓
-      ∹-hom n x (zero  ^ _ & nothing) = refl
-      ∹-hom n x (zero  ^ y & just xs) = ∹-hom (suc n) (f x y) xs ; f-assoc x y ⟦ xs ⟧⇓
-      ∹-hom n x (suc _ ^ _ & nothing) = refl
-      ∹-hom n x (suc _ ^ _ & just _ ) = refl
+      ∹-hom : ∀ {n} x xs → ⟦ n ^ x ∹ xs ⟧⇓ ≡ f x ⟦ xs ⟧⇓
+      ∹-hom x (zero  ^ _ & nothing) = refl
+      ∹-hom x (zero  ^ y & just xs) = ∹-hom (f x y) xs ; f-assoc x y ⟦ xs ⟧⇓
+      ∹-hom x (suc _ ^ _ & nothing) = refl
+      ∹-hom x (suc _ ^ _ & just _ ) = refl
 
       treeFoldHom : ∀ xs → ⟦ ⟦ xs ⟧⇑ ⟧⇓ ≡ foldr f z xs
-      treeFoldHom = foldr-fusion ⟦_⟧⇓ (zero ^ z & nothing) (∹-hom zero)
+      treeFoldHom = foldr-fusion ⟦_⟧⇓ (zero ^ z & nothing) ∹-hom
 open TheFold using (treeFold; treeFoldHom) public
 
-module LeftFold (f : A → A → A) where
+module TheLeftFold (f : A → A → A) where
   open TheFold (flip f) using (_^_∹_; ⟦_⟧⇓)
 
   module _ (z : A) where
@@ -57,15 +57,12 @@ module LeftFold (f : A → A → A) where
     treeFoldL = ⟦_⟧⇓ ∘ ⟦_⟧⇑
 
     module _ (f-assoc : Associative f) where
-      ∹-hom : ∀ n x xs → ⟦ n ^ x ∹ xs ⟧⇓ ≡ f ⟦ xs ⟧⇓ x
-      ∹-hom n x (zero  ^ y & nothing) = refl
-      ∹-hom n x (zero  ^ y & just xs) = ∹-hom _ (f y x) xs ; sym (f-assoc ⟦ xs ⟧⇓ y x)
-      ∹-hom n x (suc m ^ y & nothing) = refl
-      ∹-hom n x (suc m ^ y & just xs) = refl
+      ∹-hom : ∀ {n} x xs → ⟦ n ^ x ∹ xs ⟧⇓ ≡ f ⟦ xs ⟧⇓ x
+      ∹-hom x (zero  ^ y & nothing) = refl
+      ∹-hom x (zero  ^ y & just xs) = ∹-hom (f y x) xs ; sym (f-assoc ⟦ xs ⟧⇓ y x)
+      ∹-hom x (suc m ^ y & nothing) = refl
+      ∹-hom x (suc m ^ y & just xs) = refl
 
       treeFoldLHom : ∀ xs → ⟦ ⟦ xs ⟧⇑ ⟧⇓ ≡ foldl f z xs
-      treeFoldLHom = foldl-fusion ⟦_⟧⇓ (zero ^ z & nothing) (flip (∹-hom zero))
-
-
-  
-
+      treeFoldLHom = foldl-fusion ⟦_⟧⇓ (zero ^ z & nothing) (flip ∹-hom)
+open TheLeftFold using (treeFoldL; treeFoldLHom)
