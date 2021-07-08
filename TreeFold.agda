@@ -21,7 +21,7 @@ module TreeFoldR (f : A → A → A) (z : A) where
   infixr 5 _^_∹_
   _^_∹_ : A → ℕ → Spine A → Spine A
   x ^ n ∹ &0 = x ^ n & &0
-  x ^ n ∹ y ^ zero  & xs = f x y ^ suc n & xs
+  x ^ n ∹ y ^ zero  & xs = f x y ^ suc n ∹ xs
   x ^ n ∹ y ^ suc m & xs = x ^ n & y ^ m & xs
 
   _∹_ : A → Spine A → Spine A
@@ -33,7 +33,7 @@ module TreeFoldR (f : A → A → A) (z : A) where
 
   ∹-hom : Associative f → ∀ x xs → ⟦ x ^ n ∹ xs ⟧⇓ ≡ f x ⟦ xs ⟧⇓
   ∹-hom p x &0 = refl
-  ∹-hom p x (y ^ zero  & xs) = p x y ⟦ xs ⟧⇓
+  ∹-hom p x (y ^ zero  & xs) = ∹-hom p (f x y) xs ; p x y ⟦ xs ⟧⇓
   ∹-hom p x (y ^ suc n & xs) = refl
 
   ⟦_⟧⇑ : List A → Spine A
@@ -45,28 +45,81 @@ module TreeFoldR (f : A → A → A) (z : A) where
   treeFoldHom : Associative f → ∀ xs → treeFold xs ≡ foldr f z xs
   treeFoldHom f-assoc = foldr-fusion ⟦_⟧⇓ &0 (∹-hom f-assoc)
 
-open TreeFoldR using (treeFold; treeFoldHom) public
+-- open TreeFoldR using (treeFold; treeFoldHom) public
 
--- -- module TreeFoldL (f : A → A → A) (z : A) where
--- --   open BinaryOps (flip f) public
+-- module DistribProof (f : A → A → A) (f-assoc : Associative f) where
+--   open TreeFoldR f
 
--- --   ⟦_⟧⇑ : List A → Spine A
--- --   ⟦_⟧⇑ = foldl (flip _∹_) (sing z)
+--   distrib-end : ∀ x y xs → ⟦ f x y ⟧⇓ xs ≡ f (⟦ x ⟧⇓ xs) y
+--   distrib-end x y &0 = refl
+--   distrib-end x y (z ^ _ & xs) = cong (f z) (distrib-end x y xs) ; sym (f-assoc z (⟦ x ⟧⇓ xs) y)
 
--- --   treeFoldL : List A → A
--- --   treeFoldL = ⟦_⟧⇓ ∘ ⟦_⟧⇑
+-- open import Path.Reasoning
 
--- --   treeFoldLHom : Associative f → ∀ xs → treeFoldL xs ≡ foldl f z xs
--- --   treeFoldLHom f-assoc = foldl-fusion ⟦_⟧⇓ (sing z) (flip (∹-hom (λ x y z → sym (f-assoc z y x))))
+-- module TreeFoldL (f : A → A → A) (z : A) where
+--   open TreeFoldR (flip f) z using (_∹_) public
 
--- -- open TreeFoldL using (treeFoldL; treeFoldLHom)
+--   ⟦_⟧⇑ : List A → Spine A
+--   ⟦_⟧⇑ = foldl (flip _∹_) &0
 
--- -- module TreeFoldL′ (f : A → A → A) (z : A) where
--- --   infixr 5 _^_∹_
--- --   _^_∹_ : ℕ → A → Spine A → Spine A
--- --   n ^ x ∹ zero  ^ y & &0 = let! xy =! f y x in! suc n ^ xy & &0
--- --   n ^ x ∹ zero  ^ y & just xs = let! xy =! f y x in! suc n ^ xy ∹ xs
--- --   n ^ x ∹ suc m ^ y & xs      = n ^ x & just (m ^ y & xs)
+--   ⟦_,_⟧⇓′ : A → Spine A → A
+--   ⟦ a , &0 ⟧⇓′ = a
+--   ⟦ a , x ^ _ & xs ⟧⇓′ = ⟦ f a x , xs ⟧⇓′
+
+--   ⟦_⟧⇓ : Spine A → A
+--   ⟦_⟧⇓ = ⟦ z ,_⟧⇓′
+
+--   treeFoldL : List A → A
+--   treeFoldL = ⟦_⟧⇓ ∘ ⟦_⟧⇑
+
+--   module Right = TreeFoldR (flip f)
+
+--   module _ (f-assoc : Associative f) where
+
+--     flip-assoc : Associative (flip f)
+--     flip-assoc x y z = sym (f-assoc z y x)
+
+--     ∹-hom : ∀ x xs → ⟦ x ∹ xs ⟧⇓ ≡ f ⟦ xs ⟧⇓ x
+--     ∹-hom x &0 = refl
+--     ∹-hom x (y ^ zero  & xs) = {!!}
+--     ∹-hom x (y ^ suc n & xs) = {!!}
+
+--     treeFoldLHom : Associative f → ∀ xs → treeFoldL xs ≡ foldl f z xs
+--     treeFoldLHom f-assoc = foldl-fusion ⟦_⟧⇓ &0 {!!} -- (flip (∹-hom (λ x y z → sym (f-assoc z y x))))
+
+
+-- open TreeFoldL using (treeFoldL; treeFoldLHom)
+
+-- module TreeFoldL′ (f : A → A → A) (z : A) where
+--   infixr 5 _^_∹_
+--   _^_∹_ : A → ℕ → Spine A → Spine A
+--   x ^ n ∹ &0 = x ^ n & &0
+--   x ^ n ∹ y ^ zero  & xs = let! xy =! f x y in! xy ^ suc n ∹ xs
+--   x ^ n ∹ y ^ suc m & xs = x ^ n & y ^ m & xs
+
+--   _∹_ : A → Spine A → Spine A
+--   _∹_ = _^ zero ∹_
+
+--   ⟦_,_⟧⇓′ : A → Spine A → A
+--   ⟦ a , &0 ⟧⇓′ = a
+--   ⟦ a , x ^ _ & xs ⟧⇓′ = ⟦ f a x , xs ⟧⇓′
+
+--   ⟦_⟧⇓ : Spine A → A
+--   ⟦_⟧⇓ = ⟦ z ,_⟧⇓′
+
+--   module Lazy = TreeFoldL f
+
+--   open import Path.Reasoning
+
+--   -- llemma : ∀ x y xs → Lazy.⟦ x ⟧⇓ (f xs y) ≡ Lazy.⟦ f x y ⟧⇓ xs
+--   -- llemma x y &0 = refl
+--   -- llemma x y (z ^ _ & xs) = cong (flip f y) (llemma x z xs) ; {!!}
+
+--   -- conc-lemma : ∀ z xs → ⟦ z , xs ⟧⇓′ ≡ Lazy.⟦ z ⟧⇓ xs
+--   -- conc-lemma z &0 = refl
+--   -- conc-lemma z (x ^ n & xs) = {!!}
+
+-- -- $!-≡ ⟦_, xs ⟧⇓′ (f z x) ; conc-lemma (f z x) xs ; {!!}
 
 -- --   _∹_ : A → Spine A → Spine A
 -- --   _∹_ = zero ^_∹_
