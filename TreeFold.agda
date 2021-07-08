@@ -17,7 +17,7 @@ private variable n : ℕ
 sing : A → Spine A
 sing = _^ zero & &0
 
-module TreeFoldR (f : A → A → A) (z : A) where
+module Cons (f : A → A → A) where
   infixr 5 _^_∹_
   _^_∹_ : A → ℕ → Spine A → Spine A
   x ^ n ∹ &0 = x ^ n & &0
@@ -26,26 +26,61 @@ module TreeFoldR (f : A → A → A) (z : A) where
 
   _∹_ : A → Spine A → Spine A
   _∹_ = _^ zero ∹_
+  
 
-  ⟦_⟧⇓ : Spine A → A
-  ⟦ &0 ⟧⇓ = z
-  ⟦ x ^ n & xs ⟧⇓ = f x ⟦ xs ⟧⇓
+module TreeFoldR (f : A → A → A) (z : A) where
+  open Cons f
 
-  ∹-hom : Associative f → ∀ x xs → ⟦ x ^ n ∹ xs ⟧⇓ ≡ f x ⟦ xs ⟧⇓
+  fold : Spine A → A
+  fold &0 = z
+  fold (x ^ n & xs) = f x (fold xs)
+
+  ∹-hom : Associative f → ∀ x xs → fold (x ^ n ∹ xs) ≡ f x (fold xs)
   ∹-hom p x &0 = refl
-  ∹-hom p x (y ^ zero  & xs) = ∹-hom p (f x y) xs ; p x y ⟦ xs ⟧⇓
+  ∹-hom p x (y ^ zero  & xs) = ∹-hom p (f x y) xs ; p x y (fold xs)
   ∹-hom p x (y ^ suc n & xs) = refl
 
-  ⟦_⟧⇑ : List A → Spine A
-  ⟦_⟧⇑ = foldr _∹_ &0
+  spine : List A → Spine A
+  spine = foldr _∹_ &0
 
   treeFold : List A → A
-  treeFold = ⟦_⟧⇓ ∘ ⟦_⟧⇑
+  treeFold = fold ∘ spine
   
   treeFoldHom : Associative f → ∀ xs → treeFold xs ≡ foldr f z xs
-  treeFoldHom f-assoc = foldr-fusion ⟦_⟧⇓ &0 (∹-hom f-assoc)
+  treeFoldHom f-assoc = foldr-fusion fold &0 (∹-hom f-assoc)
 
 open TreeFoldR using (treeFold; treeFoldHom) public
+
+open import Path.Reasoning
+
+module TreeFoldL (f : A → A → A) where
+  fold : A → Spine A → A
+  fold x &0 = x
+  fold x (y ^ _ & xs) = fold (f y x) xs
+
+  open Cons (flip f)
+
+  spine : List A → Spine A
+  spine = foldl (flip _∹_) &0
+
+  treeFoldL : A → List A → A
+  treeFoldL z = fold z ∘ spine
+
+
+--   -- fold-lemma 
+
+-- open TreeFoldL using (treeFoldL)
+
+-- data Tree : Type where
+--   _*_ : Tree → Tree → Tree
+--   ⟅_⟆ : ℕ → Tree
+--   ⟅⟆ : Tree
+
+-- ex : Tree
+-- ex = treeFoldL _*_ ⟅⟆ (map ⟅_⟆ (1 ⋯ 10))
+
+
+
 
 -- module DistribProof (f : A → A → A) (f-assoc : Associative f) where
 --   open TreeFoldR f
