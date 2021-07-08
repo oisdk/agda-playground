@@ -6,6 +6,7 @@ open import Level
 open import Agda.Builtin.List using (List; _∷_; []) public
 open import Data.Nat.Base
 open import Function
+open import Strict
 
 foldr : (A → B → B) → B → List A → B
 foldr f b [] = b
@@ -14,6 +15,14 @@ foldr f b (x ∷ xs) = f x (foldr f b xs)
 foldl : (B → A → B) → B → List A → B
 foldl f b [] = b
 foldl f b (x ∷ xs) = foldl f (f b x) xs
+
+foldl′ : (B → A → B) → B → List A → B
+foldl′ f b [] = b
+foldl′ f b (x ∷ xs) = let! z =! f b x in! foldl′ f z xs
+
+foldr′ : (A → B → B) → B → List A → B
+foldr′ f b [] = b
+foldr′ f b (x ∷ xs) = f x $! foldr′ f b xs
 
 infixr 5 _++_
 _++_ : List A → List A → List A

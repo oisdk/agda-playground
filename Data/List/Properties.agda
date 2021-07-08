@@ -5,6 +5,7 @@ module Data.List.Properties where
 open import Data.List
 open import Prelude
 open import Data.Fin
+open import Strict.Properties
 
 map-length : (f : A → B) (xs : List A)
            → length xs ≡ length (map f xs)
@@ -101,3 +102,11 @@ module _ (mon : Monoid b) where
 
     foldl-foldr-monoid : (xs : List A) → foldMapL xs ≡ foldr (_∙_ ∘ f) ε xs
     foldl-foldr-monoid = foldr-universal _ (_∙_ ∘ f) ε refl λ x xs → sym (foldMapLStep x xs)
+
+foldl′-foldl : (f : B → A → B) (z : B) (xs : List A) → foldl f z xs ≡ foldl′ f z xs
+foldl′-foldl f z [] = refl
+foldl′-foldl f z (x ∷ xs) = foldl′-foldl f (f z x) xs ; sym ($!-≡ (λ y → foldl′ f y xs) (f z x))
+
+foldr′-foldr : (f : A → B → B) (z : B) (xs : List A) → foldr f z xs ≡ foldr′ f z xs
+foldr′-foldr f z [] = refl
+foldr′-foldr f z (x ∷ xs) = cong (f x) (foldr′-foldr f z xs) ; sym ($!-≡ (f x) (foldr′ f z xs))
