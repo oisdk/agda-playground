@@ -8,13 +8,8 @@ open import Algebra using (Associative)
 open import Data.List.Properties using (foldr-fusion; foldl-fusion; foldl′-foldl)
 
 infixr 5 _^_&_
-record Spine (A : Type a) : Type a where
-  inductive
-  constructor _^_&_
-  field
-    zeroes : ℕ
-    one : A
-    tail : Maybe (Spine A)
+data Spine (A : Type a) : Type a where
+  _^_&_ : ℕ → A → Maybe (Spine A) → Spine A
 
 private variable n : ℕ
 
