@@ -45,7 +45,7 @@ module TreeFoldR (f : A → A → A) (z : A) where
   treeFoldHom : Associative f → ∀ xs → treeFold xs ≡ foldr f z xs
   treeFoldHom f-assoc = foldr-fusion ⟦_⟧⇓ &0 (∹-hom f-assoc)
 
--- open TreeFoldR using (treeFold; treeFoldHom) public
+open TreeFoldR using (treeFold; treeFoldHom) public
 
 -- module DistribProof (f : A → A → A) (f-assoc : Associative f) where
 --   open TreeFoldR f
