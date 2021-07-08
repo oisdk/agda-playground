@@ -69,8 +69,8 @@ _⊛_ : List ℤ → List ℤ → List ℤ
 xs ⊛ ys = ⟨ length xs ℕ.+ length ys ⟩ xs ⊛ ys
 
 
-e : List ℤ
-e = (⁺ 2 ∷ ⁺ 5 ∷ []) ⊛ (⁺ 1 ∷ ⁺ 1 ∷ [])
+-- e : List ℤ
+-- e = (⁺ 2 ∷ ⁺ 5 ∷ []) ⊛ (⁺ 1 ∷ ⁺ 1 ∷ [])
 
-_ : e ≡ ⁺ 2 ∷ ⁺ 7 ∷ ⁺ 5 ∷ ⁺ 0 ∷ []
-_ = refl
+-- _ : e ≡ ⁺ 2 ∷ ⁺ 7 ∷ ⁺ 5 ∷ ⁺ 0 ∷ []
+-- _ = refl
