@@ -21,11 +21,11 @@ private variable n : ℕ
 sing : A → Spine A
 sing = zero ^_& nothing
 
-module BinaryOps (_*_ : A → A → A) where
+module BinaryOps (f : A → A → A) where
   infixr 5 _^_∹_
   _^_∹_ : ℕ → A → Spine A → Spine A
-  n ^ x ∹ zero  ^ y & nothing = suc n ^ (x * y) & nothing
-  n ^ x ∹ zero  ^ y & just xs = suc n ^ (x * y) ∹ xs
+  n ^ x ∹ zero  ^ y & nothing = suc n ^ f x y & nothing
+  n ^ x ∹ zero  ^ y & just xs = suc n ^ f x y ∹ xs
   n ^ x ∹ suc m ^ y & xs      = n ^ x & just (m ^ y & xs)
 
   _∹_ : A → Spine A → Spine A
@@ -33,11 +33,11 @@ module BinaryOps (_*_ : A → A → A) where
 
   ⟦_⟧⇓ : Spine A → A
   ⟦ _ ^ x & nothing ⟧⇓ = x
-  ⟦ _ ^ x & just xs ⟧⇓ = x * ⟦ xs ⟧⇓
+  ⟦ _ ^ x & just xs ⟧⇓ = f x ⟦ xs ⟧⇓
 
-  ∹-hom : Associative _*_ → ∀ x xs → ⟦ n ^ x ∹ xs ⟧⇓ ≡ x * ⟦ xs ⟧⇓
+  ∹-hom : Associative f → ∀ x xs → ⟦ n ^ x ∹ xs ⟧⇓ ≡ f x ⟦ xs ⟧⇓
   ∹-hom _ x (zero  ^ _ & nothing) = refl
-  ∹-hom p x (zero  ^ y & just xs) = ∹-hom p (x * y) xs ; p x y ⟦ xs ⟧⇓
+  ∹-hom p x (zero  ^ y & just xs) = ∹-hom p (f x y) xs ; p x y ⟦ xs ⟧⇓
   ∹-hom _ x (suc _ ^ _ & nothing) = refl
   ∹-hom _ x (suc _ ^ _ & just _ ) = refl
 
