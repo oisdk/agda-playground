@@ -14,9 +14,6 @@ data Spine (A : Type a) : Type a where
 
 private variable n : ℕ
 
-sing : A → Spine A
-sing = _^ zero & &0
-
 module Cons (f : A → A → A) where
   infixr 5 _^_∹_
   _^_∹_ : A → ℕ → Spine A → Spine A
@@ -101,4 +98,3 @@ module TreeFoldL′ (f : A → A → A) (z : A) where
     Lazy.treeFoldLHom p xs
 
 open TreeFoldL′ using (treeFoldL′; treeFoldL′Hom) public
-
