@@ -20,8 +20,8 @@ open import Relation.Nullary.Decidable.Properties using (from-reflects)
 open import Path.Reasoning
 
 mutual
-  merge : List E → List E → List E
-  merge = foldr mergeˡ id
+  _⋎_ : List E → List E → List E
+  _⋎_ = foldr mergeˡ id
 
   mergeˡ :  E → (List E → List E) → List E → List E
   mergeˡ x xs []       = x ∷ xs []
@@ -30,14 +30,14 @@ mutual
   merge⁺ :  E → (List E → List E) → E → List E → Bool → List E
   merge⁺ x xs y ys = bool′ (y ∷ mergeˡ x xs ys) (x ∷ xs (y ∷ ys))
 
-merge-idʳ : ∀ xs → merge xs [] ≡ xs
+merge-idʳ : ∀ xs → xs ⋎ [] ≡ xs
 merge-idʳ [] = refl
 merge-idʳ (x ∷ xs) = cong (x ∷_) (merge-idʳ xs)
 
-merge-assoc : Associative merge
+merge-assoc : Associative _⋎_
 merge-assoc []       ys zs = refl
-merge-assoc (x ∷ xs) [] zs = cong (λ xs′ → mergeˡ x (merge xs′) zs) (merge-idʳ xs)
-merge-assoc (x ∷ xs) (y ∷ ys) [] = merge-idʳ (merge (x ∷ xs) (y ∷ ys)) ; cong (merge (x ∷ xs)) (sym (merge-idʳ (y ∷ ys)))
+merge-assoc (x ∷ xs) [] zs = cong (λ xs′ → mergeˡ x (xs′ ⋎_) zs) (merge-idʳ xs)
+merge-assoc (x ∷ xs) (y ∷ ys) [] = merge-idʳ ((x ∷ xs) ⋎ (y ∷ ys)) ; cong ((x ∷ xs) ⋎_) (sym (merge-idʳ (y ∷ ys)))
 merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs)
   with merge-assoc xs (y ∷ ys) (z ∷ zs)
      | merge-assoc (x ∷ xs) ys (z ∷ zs)
@@ -46,11 +46,11 @@ merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs)
      | y ≤? z in y≤?z
 ... | _ | _ | r | no x≰y | no y≰z rewrite y≤?z rewrite x≤?y =
   cong (z ∷_) r ;
-  cong (merge⁺ x (merge xs) z (merge (y ∷ ys) zs))
+  cong (merge⁺ x (xs ⋎_) z ((y ∷ ys) ⋎ zs))
     (sym (from-reflects false (x ≤? z) (<⇒≱ (<-trans (≰⇒> y≰z) (≰⇒> x≰y)))))
 ... | _ | r | _ | no  x≰y | yes y≤z rewrite y≤?z rewrite x≤?y = cong (y ∷_) r
 ... | r | _ | _ | yes x≤y | yes y≤z rewrite y≤?z rewrite x≤?y =
-  cong (merge⁺ x (merge (merge xs (y ∷ ys))) z zs)
+  cong (merge⁺ x ((xs ⋎ (y ∷ ys)) ⋎_) z zs)
     (from-reflects true (x ≤? z) (≤-trans x≤y y≤z)) ;
   cong (x ∷_) r
 merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | rx≤z | _ | rx≰z | yes x≤y | no y≰z with x ≤? z
@@ -58,9 +58,9 @@ merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | rx≤z | _ | rx≰z | yes x≤y |
 ... | yes x≤z rewrite y≤?z = cong (x ∷_) rx≤z
 
 merge-sort : List E → List E
-merge-sort = treeFold merge [] ∘ map (_∷ [])
+merge-sort = treeFold _⋎_ [] ∘ map (_∷ [])
 
-merge-insert : ∀ x xs → merge (x ∷ []) xs ≡ insert x xs
+merge-insert : ∀ x xs → (x ∷ []) ⋎ xs ≡ insert x xs
 merge-insert x [] = refl
 merge-insert x (y ∷ xs) with x ≤ᵇ y
 ... | false = cong (y ∷_) (merge-insert x xs)
@@ -69,8 +69,8 @@ merge-insert x (y ∷ xs) with x ≤ᵇ y
 merge≡insert-sort : ∀ xs → merge-sort xs ≡ insert-sort xs
 merge≡insert-sort xs =
   merge-sort xs                      ≡⟨⟩
-  treeFold merge [] (map (_∷ []) xs) ≡⟨ treeFoldHom merge [] merge-assoc (map (_∷ []) xs) ⟩
-  foldr merge [] (map (_∷ []) xs)    ≡⟨ map-fusion merge [] (_∷ []) xs ⟩
-  foldr (λ x → merge (x ∷ [])) [] xs ≡⟨ cong (λ f → foldr f [] xs) (funExt (funExt ∘ merge-insert)) ⟩
+  treeFold _⋎_ [] (map (_∷ []) xs)   ≡⟨ treeFoldHom _⋎_ [] merge-assoc (map (_∷ []) xs) ⟩
+  foldr _⋎_ [] (map (_∷ []) xs)      ≡⟨ map-fusion _⋎_ [] (_∷ []) xs ⟩
+  foldr (λ x → (x ∷ []) ⋎_) [] xs    ≡⟨ cong (λ f → foldr f [] xs) (funExt (funExt ∘ merge-insert)) ⟩
   foldr insert [] xs                 ≡⟨⟩
   insert-sort xs ∎
