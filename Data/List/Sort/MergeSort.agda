@@ -19,16 +19,12 @@ open import Algebra
 open import Relation.Nullary.Decidable.Properties using (from-reflects)
 open import Path.Reasoning
 
-mutual
-  _⋎_ : List E → List E → List E
-  _⋎_ = foldr mergeˡ id
+mergeˡ :  E → (List E → List E) → List E → List E
+mergeˡ x xs []       = x ∷ xs []
+mergeˡ x xs (y ∷ ys) = bool′ (y ∷ mergeˡ x xs ys) (x ∷ xs (y ∷ ys)) (x ≤ᵇ y)
 
-  mergeˡ :  E → (List E → List E) → List E → List E
-  mergeˡ x xs []       = x ∷ xs []
-  mergeˡ x xs (y ∷ ys) = merge⁺ x xs y ys (x ≤ᵇ y)
-
-  merge⁺ :  E → (List E → List E) → E → List E → Bool → List E
-  merge⁺ x xs y ys = bool′ (y ∷ mergeˡ x xs ys) (x ∷ xs (y ∷ ys))
+_⋎_ : List E → List E → List E
+_⋎_ = foldr mergeˡ id
 
 merge-idʳ : ∀ xs → xs ⋎ [] ≡ xs
 merge-idʳ [] = refl
@@ -46,11 +42,11 @@ merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs)
      | y ≤? z in y≤?z
 ... | _ | _ | r | no x≰y | no y≰z rewrite y≤?z rewrite x≤?y =
   cong (z ∷_) r ;
-  cong (merge⁺ x (xs ⋎_) z ((y ∷ ys) ⋎ zs))
+  cong (bool′ _ _)
     (sym (from-reflects false (x ≤? z) (<⇒≱ (<-trans (≰⇒> y≰z) (≰⇒> x≰y)))))
 ... | _ | r | _ | no  x≰y | yes y≤z rewrite y≤?z rewrite x≤?y = cong (y ∷_) r
 ... | r | _ | _ | yes x≤y | yes y≤z rewrite y≤?z rewrite x≤?y =
-  cong (merge⁺ x ((xs ⋎ (y ∷ ys)) ⋎_) z zs)
+  cong (bool′ _ _)
     (from-reflects true (x ≤? z) (≤-trans x≤y y≤z)) ;
   cong (x ∷_) r
 merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) | rx≤z | _ | rx≰z | yes x≤y | no y≰z with x ≤? z
