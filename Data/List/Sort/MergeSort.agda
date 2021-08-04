@@ -21,7 +21,7 @@ open import Path.Reasoning
 
 mergeˡ :  E → (List E → List E) → List E → List E
 mergeˡ x xs []       = x ∷ xs []
-mergeˡ x xs (y ∷ ys) = bool′ (y ∷ mergeˡ x xs ys) (x ∷ xs (y ∷ ys)) (x ≤ᵇ y)
+mergeˡ x xs (y ∷ ys) = if x ≤ᵇ y then x ∷ xs (y ∷ ys) else y ∷ mergeˡ x xs ys
 
 _⋎_ : List E → List E → List E
 _⋎_ = foldr mergeˡ id
