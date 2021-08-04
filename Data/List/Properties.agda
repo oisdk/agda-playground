@@ -46,6 +46,9 @@ foldr-universal h f e base step [] = base
 foldr-universal h f e base step (x ∷ xs) =
   step x xs ; cong (f x) (foldr-universal h f e base step xs)
 
+foldr-id : (xs : List A) → xs ≡ foldr _∷_ [] xs
+foldr-id = foldr-universal id _∷_ [] refl (λ _ _ → refl)
+
 foldr-fusion : ∀ (f : C → A) {_⊕_ : B → C → C} {_⊗_ : B → A → A} e
               → (∀ x y → f (x ⊕ y) ≡ x ⊗ f y)
               → ∀ xs → f (foldr _⊕_ e xs) ≡ foldr _⊗_ (f e) xs
