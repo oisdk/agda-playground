@@ -304,10 +304,8 @@ record Foldable ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   foldr : {A B : Type ℓ₁} → (A → B → B) → B → 𝐹 A → B
   foldr f b xs = foldMap ⦃ endoMonoid _ ⦄ f xs b
 
-record GradedMonad ℓ₁ ℓ₂ ℓ₃ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃)) where
-  field
-    monoid : Monoid ℓ₁
-  open Monoid monoid public
+record GradedMonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
+  open Monoid monoid
   field
     𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₃
     pure  : A → 𝐹 ε A

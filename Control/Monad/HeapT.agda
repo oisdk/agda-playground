@@ -9,9 +9,11 @@ open import Data.List using (List; _∷_; []; foldr)
 
 module Control.Monad.HeapT
   {ℓ}
-  (gmon : GradedMonad ℓ ℓ ℓ)
+  (monoid : Monoid ℓ)
+  (gmon : GradedMonad monoid ℓ ℓ)
   where
 
+open Monoid monoid
 open GradedMonad gmon
 
 private
