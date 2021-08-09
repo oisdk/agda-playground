@@ -20,34 +20,38 @@ private
   variable
     w : 𝑆
 
-infixr 5 ⌊_⌋∷_ _⋊_∷_ _++_
+infixr 5 _∷_
+infixr 6 _⋊_
 infixr 1 _>>=ᴴ_
 
-data Branch (A : Type ℓ) : Type ℓ where
-  []    : Branch A
-  ⌊_⌋∷_ : A → 𝐹 ε (Branch A) → Branch A
-  _⋊_∷_ : (w : 𝑆) → 𝐹 w (Branch A) → 𝐹 ε (Branch A) → Branch A
+mutual
+  data Node (A : Type ℓ) : Type ℓ where
+    ⌊_⌋ : A → Node A
+    _⋊_ : (w : 𝑆) → 𝐹 w (Branch A) → Node A
+
+  data Branch (A : Type ℓ) : Type ℓ where
+    []  : Branch A
+    _∷_ : Node A → 𝐹 ε (Branch A) → Branch A
 
 Heap : Type ℓ → Type ℓ
 Heap A = 𝐹 ε (Branch A)
 
 _++_ : 𝐹 w (Branch A) → 𝐹 ε (Branch A) → 𝐹 w (Branch A)
 xs ++ ys =
-  xs >>=ε λ  {  []        → ys
-             ;  (⌊ x  ⌋∷ xs)  → pure (⌊ x  ⌋∷ xs ++ ys)
-             ;  (w ⋊ x ∷ xs)  → pure (w ⋊ x ∷ xs ++ ys) }
+  xs >>=ε λ  {  []       → ys
+             ;  (x ∷ xs) → pure ( x ∷ xs ++ ys) }
 
 _>>=ᴴ_ : 𝐹 w (Branch A) → (A → Heap B) → 𝐹 w (Branch B)
 xs >>=ᴴ f =
   xs >>=ε λ  {  []              → pure []
-             ;  (⌊ x   ⌋∷ xs)  → f x ++ (xs >>=ᴴ f)
+             ;  (⌊ x ⌋   ∷ xs)  → f x ++ (xs >>=ᴴ f)
              ;  (w ⋊ ys ∷ xs)  → pure (w ⋊ (ys >>=ᴴ f) ∷ (xs >>=ᴴ f)) }
 
 pureᴴ : A → Heap A
-pureᴴ x = pure (⌊ x ⌋∷ pure [])
+pureᴴ x = pure (⌊ x ⌋ ∷ pure [])
 
 liftᴴ : 𝐹 w A → Heap A
-liftᴴ xs = pure (_ ⋊ map (λ x → ⌊ x ⌋∷ pure []) xs ∷ pure [])
+liftᴴ xs = pure (_ ⋊ map (λ x → ⌊ x ⌋ ∷ pure []) xs ∷ pure [])
 
 Root : Type ℓ → Type ℓ
 Root A = ∃[ w ] 𝐹 w (Branch A)
@@ -55,7 +59,7 @@ Root A = ∃[ w ] 𝐹 w (Branch A)
 flatten : 𝐹 w (Branch A) → 𝐹 w (List A × List (Root A))
 flatten xs =
   xs >>=ε λ  {  []            → pure ([] , [])
-             ;  (⌊ x  ⌋∷ xs)  → map (map₁ (x ∷_)) (flatten xs)
+             ;  (⌊ x ⌋ ∷ xs)  → map (map₁ (x ∷_)) (flatten xs)
              ;  (w ⋊ x ∷ xs)  → map (map₂ ((w , x) ∷_)) (flatten xs) }
 
 module PopMin
