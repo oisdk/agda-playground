@@ -22,7 +22,6 @@ private
 
 infixr 5 _∷_
 infixr 6 _⋊_
-infixr 1 _>>=ᴴ_
 
 mutual
   data Node (A : Type ℓ) : Type ℓ where
@@ -36,16 +35,22 @@ mutual
 Heap : Type ℓ → Type ℓ
 Heap A = 𝐹 ε (Branch A)
 
+infixr 5 _++_
 _++_ : 𝐹 w (Branch A) → 𝐹 ε (Branch A) → 𝐹 w (Branch A)
 xs ++ ys =
   xs >>=ε λ  {  []       → ys
-             ;  (x ∷ xs) → pure ( x ∷ xs ++ ys) }
+             ;  (x ∷ xs) → pure (x ∷ xs ++ ys) }
 
-_>>=ᴴ_ : 𝐹 w (Branch A) → (A → Heap B) → 𝐹 w (Branch B)
-xs >>=ᴴ f =
-  xs >>=ε λ  {  []              → pure []
-             ;  (⌊ x ⌋   ∷ xs)  → f x ++ (xs >>=ᴴ f)
-             ;  (w ⋊ ys ∷ xs)  → pure (w ⋊ (ys >>=ᴴ f) ∷ (xs >>=ᴴ f)) }
+infixr 1 _>>=ᴺ_ _>>=ᴴ_
+mutual
+  _>>=ᴺ_ : Node A → (A → Heap B) → Heap B
+  ⌊ x ⌋  >>=ᴺ f = f x
+  w ⋊ x  >>=ᴺ f = pure (w ⋊ (x >>=ᴴ f) ∷ pure [])
+
+  _>>=ᴴ_ : 𝐹 w (Branch A) → (A → Heap B) → 𝐹 w (Branch B)
+  xs >>=ᴴ f =
+    xs >>=ε λ  {  []        → pure []
+               ;  (x ∷ xs)  → (x >>=ᴺ f) ++ (xs >>=ᴴ f) }
 
 pureᴴ : A → Heap A
 pureᴴ x = pure (⌊ x ⌋ ∷ pure [])
