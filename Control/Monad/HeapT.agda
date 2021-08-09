@@ -25,7 +25,7 @@ infixr 6 _⋊_
 
 mutual
   record Root (A : Type ℓ) : Type ℓ where
-    inductive; pattern
+    coinductive
     constructor _⋊_
     field
       weight : 𝑆
@@ -53,7 +53,7 @@ infixr 1 _>>=ᴺ_ _>>=ᴴ_
 mutual
   _>>=ᴺ_ : Node A → (A → Heap B) → Heap B
   ⌊ x ⌋  >>=ᴺ f = f x
-  ⌈ w ⋊ x ⌉  >>=ᴺ f = pure (⌈ w ⋊ (x >>=ᴴ f) ⌉ ∷ pure [])
+  ⌈ x ⌉  >>=ᴺ f = pure (⌈ weight x ⋊ (step x >>=ᴴ f) ⌉ ∷ pure [])
 
   _>>=ᴴ_ : 𝐹 w (Branch A) → (A → Heap B) → 𝐹 w (Branch B)
   xs >>=ᴴ f =
@@ -77,9 +77,9 @@ module PopMin
   (decomp : ∀ {A B w₁ w₂ w₃} → 𝐹 (w₁ ∙ w₂) A → 𝐹 (w₁ ∙ w₃) B → 𝐹 w₁ (𝐹 w₂ A × 𝐹 w₃ B)) where
 
   _∪_ : Root A → Root A → Root A
-  (wˣ ⋊ xs) ∪ (wʸ ⋊ ys) with wˣ ≤|≥ wʸ
-  ... | inl (k , wʸ≡wˣ∙k) = wˣ ⋊ map (λ { (xs , ys) → ⌈ k ⋊ ys ⌉ ∷ xs }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) xs) (subst (flip 𝐹 _) wʸ≡wˣ∙k ys))
-  ... | inr (k , wˣ≡wʸ∙k) = wʸ ⋊ map (λ { (ys , xs) → ⌈ k ⋊ xs ⌉ ∷ ys }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) ys) (subst (flip 𝐹 _) wˣ≡wʸ∙k xs))
+  xs ∪ ys with weight xs ≤|≥ weight ys
+  ... | inl (k , wʸ≡wˣ∙k) = weight xs ⋊ map (λ { (xs , ys) → ⌈ k ⋊ ys ⌉ ∷ xs }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) (step xs)) (subst (flip 𝐹 _) wʸ≡wˣ∙k (step ys)))
+  ... | inr (k , wˣ≡wʸ∙k) = weight ys ⋊ map (λ { (ys , xs) → ⌈ k ⋊ xs ⌉ ∷ ys }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) (step ys)) (subst (flip 𝐹 _) wˣ≡wʸ∙k (step xs)))
 
   ⋃⁺ : Root A → List (Root A) → Root A
   ⋃⁺ x₁ []             = x₁
