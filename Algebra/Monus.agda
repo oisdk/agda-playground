@@ -186,13 +186,15 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   PartialOrder.preorder partialOrder = preorder
   PartialOrder.antisym partialOrder = antisym
 
--- We can from a CCMM from a POM with the relevant properties
-module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._∙_ tmapom)) where
-  open TMAPOM tmapom
+-- Cancellative total minimal antisymmetric pom (has monus)
+record CTMAPOM ℓ : Type (ℓsuc ℓ) where
+  field tmapom : TMAPOM ℓ
+  open TMAPOM tmapom public
+  field cancel : Cancellativeˡ _∙_
 
-  module NonCancel where
+  module cmm where
     _∸_ : 𝑆 → 𝑆 → 𝑆
-    x ∸ y = either (const ε) fst (x ≤|≥ y)
+    x ∸ y = either′ (const ε) fst (x ≤|≥ y)
 
     ∸≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
     ∸≤ x y x≤y with x ≤|≥ y
@@ -268,18 +270,16 @@ module POMToMonus {ℓ} (tmapom : TMAPOM ℓ) (cancel : Cancellativeˡ (TMAPOM._
         k₁     ≡⟨ cancel y k₁ (z ∙ k₂) lemma₁ ⟩
         z ∙ k₂ ∎
 
-  cmm : CMM _
-  cmm = record { NonCancel ; commutativeMonoid = commutativeMonoid }
-
-  open NonCancel
+  open cmm public
 
   ∸‿cancel : ∀ x y → (x ∙ y) ∸ x ≡ y
   ∸‿cancel x y with (x ∙ y) ≤|≥ x
   ∸‿cancel x y | inl x∙y≤x = sym (cancel x y ε (antisym x∙y≤x x≤x∙y ; sym (∙ε x)))
   ∸‿cancel x y | inr (k , x∙y≡x∙k) = sym (cancel x y k x∙y≡x∙k)
 
-pomToMonus : (tmapom : TMAPOM a) → (cancel : Cancellativeˡ (TMAPOM._∙_ tmapom)) → CCMM a
-pomToMonus t c = record { POMToMonus t c }
+  ccmm : CCMM _
+  ccmm = record { ∸‿cancel = ∸‿cancel
+                ; cmm = record { cmm ; commutativeMonoid = commutativeMonoid } }
 
 -- We can construct the viterbi semiring by adjoining a top element to
 -- a tapom
