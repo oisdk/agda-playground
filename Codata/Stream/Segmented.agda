@@ -6,12 +6,11 @@ open import Algebra.Monus
 
 module Codata.Stream.Segmented
   {ℓ}
-  (mon : TMAPOM ℓ)
-  (𝓌𝒻 : WellFounded (TMAPOM._<_ mon))
-  (cancelˡ : Cancellativeˡ (TMAPOM._∙_ mon))
+  (mon : CTMAPOM ℓ)
+  (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon))
   where
 
-open TMAPOM mon
+open CTMAPOM mon
 
 module Approach1 where
   record Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
@@ -34,15 +33,11 @@ module Approach1 where
   pure x .size = ε
   pure x .tail _ = nothing
 
-  ≤-pos-< : ∀ x y → (x≤y : x ≤ y) → fst x≤y ≢ ε → x < y
-  ≤-pos-< x y (k₁ , y≡x∙k₁) k₁≢ε (k₂ , x≡y∙k₂) =
-    k₁≢ε (zeroSumFree k₁ k₂ (sym (cancelˡ x ε (k₁ ∙ k₂) (∙ε x ; x≡y∙k₂ ; cong (_∙ k₂) y≡x∙k₁ ; assoc x k₁ k₂))))
-
   module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
     repeat′ : Acc _<_ i → Stream′ A i
     repeat′ a .head = x
     repeat′ a .size = s
-    repeat′ (acc wf) .tail (k , p) = just (repeat′ (wf _ (≤-pos-< k _ (s , p ; comm s k) s≢ε)))
+    repeat′ (acc wf) .tail (k , p) = just (repeat′ (wf _ (≤⇒≢ε⇒< k _ (s , p ; comm s k) s≢ε)))
 
     repeat : Stream A
     repeat = repeat′ (𝓌𝒻 _)
@@ -65,9 +60,6 @@ module Approach1 where
   take x xs = head (xs {i = x}) ∷ take′ x xs
 
 module Approach2 where
-  _∸_ : 𝑆 → 𝑆 → 𝑆
-  x ∸ y = (fst ▿ fst) (x ≤|≥ y)
-
   record Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
     inductive
     field
@@ -83,10 +75,13 @@ module Approach2 where
   Stream A = ∀ {i} → Stream′ A i
 
   lemma₁ : ∀ x y → x < y → x ≢ ε → y ∸ x < y
-  lemma₁ = {!!}
+  lemma₁ x y x<y x≢ε y-x≤y = x≢ε (cancelʳ y x ε (cong (x ∙_) lemma₃ ; ∸‿comm x y ; cong (y ∙_) (∸≤ x y (<⇒≤ x<y)) ; comm y ε))
+    where
+    lemma₃ : y ≡ y ∸ x
+    lemma₃ = antisym y-x≤y (x , sym (∙ε y) ; sym (cong (y ∙_) (∸≤ x y (<⇒≤ x<y))) ; ∸‿comm y x ; comm x (y ∸ x) )
 
-  lemma₂ : ∀ x → ¬ (x < x ∸ ε)
-  lemma₂ = {!!}
+  lemma₂ : ∀ x → x ≮ x ∸ ε
+  lemma₂ x x<x∸ε = x<x∸ε (subst (_≤ x) (sym (∸ε x)) ≤-refl)
 
   pure : A → Stream A
   pure x .weight = ε

@@ -105,6 +105,7 @@ record TMAPOM ℓ : Type (ℓsuc ℓ) where
   zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
   zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
 
+
 -- Commutative Monoids with Monus
 record CMM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
@@ -185,6 +186,13 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   partialOrder : PartialOrder _ _
   PartialOrder.preorder partialOrder = preorder
   PartialOrder.antisym partialOrder = antisym
+
+  ≤⇒≢ε⇒< : ∀ x y → (x≤y : x ≤ y) → fst x≤y ≢ ε → y ≰ x
+  ≤⇒≢ε⇒< x y (k₁ , y≡x∙k₁) k₁≢ε (k₂ , x≡y∙k₂) =
+    k₁≢ε (zeroSumFree k₁ k₂ (sym (cancelˡ x ε (k₁ ∙ k₂) (∙ε x ; x≡y∙k₂ ; cong (_∙ k₂) y≡x∙k₁ ; assoc x k₁ k₂))))
+
+  ≤⇒<⇒≢ε : ∀ x y → (x≤y : x ≤ y) → y ≰ x → fst x≤y ≢ ε
+  ≤⇒<⇒≢ε x y (k₁ , y≡x∙k₁) y≰x k₁≡ε = y≰x (ε , sym (∙ε y ; y≡x∙k₁ ; cong (x ∙_) k₁≡ε ; ∙ε x))
 
 -- Cancellative total minimal antisymmetric pom (has monus)
 record CTMAPOM ℓ : Type (ℓsuc ℓ) where
@@ -280,6 +288,13 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   ccmm : CCMM _
   ccmm = record { ∸‿cancel = ∸‿cancel
                 ; cmm = record { cmm ; commutativeMonoid = commutativeMonoid } }
+
+  open CCMM ccmm public
+    using (cancelʳ; cancelˡ; ∸ε; ≤⇒≢ε⇒<; ≤⇒<⇒≢ε)
+
+  <⇒≤×≢ε : ∀ x y → x < y → Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)
+  <⇒≤×≢ε x y x<y .fst = <⇒≤ x<y
+  <⇒≤×≢ε x y x<y .snd = ≤⇒<⇒≢ε x y (<⇒≤ x<y) x<y
 
 -- We can construct the viterbi semiring by adjoining a top element to
 -- a tapom
