@@ -74,11 +74,9 @@ module Approach2 where
   Stream : Type a → Type (a ℓ⊔ ℓ)
   Stream A = ∀ {i} → Stream′ A i
 
-  lemma₁ : ∀ x y → x < y → x ≢ ε → y ∸ x < y
-  lemma₁ x y x<y x≢ε y-x≤y = x≢ε (cancelʳ y x ε (cong (x ∙_) lemma₃ ; ∸‿comm x y ; cong (y ∙_) (∸≤ x y (<⇒≤ x<y)) ; comm y ε))
-    where
-    lemma₃ : y ≡ y ∸ x
-    lemma₃ = antisym y-x≤y (x , sym (∙ε y) ; sym (cong (y ∙_) (∸≤ x y (<⇒≤ x<y))) ; ∸‿comm y x ; comm x (y ∸ x) )
+  lemma₁ : ∀ x y → x ≤ y → x ≢ ε → y ∸ x < y
+  lemma₁ x y x<y x≢ε (k , y-x≡y∙k) =
+    x≢ε (zeroSumFree x k (sym (cancelˡ y ε (k ∙ x) (cong (y ∙_) (sym (∸≤ x y x<y)) ; ∸‿comm y x ; cong (x ∙_) y-x≡y∙k ; comm x (y ∙ k) ; assoc y k x) ; comm k x)))
 
   lemma₂ : ∀ x → x ≮ x ∸ ε
   lemma₂ x x<x∸ε = x<x∸ε (subst (_≤ x) (sym (∸ε x)) ≤-refl)
@@ -93,7 +91,7 @@ module Approach2 where
     repeat′ : Acc _<_ i → Stream′ A i
     repeat′ a .weight = s
     repeat′ a .uncons s<i .fst = x
-    repeat′ {i} (acc wf) .uncons s<i .snd = repeat′ (wf _ (lemma₁ s i s<i s≢ε))
+    repeat′ {i} (acc wf) .uncons s<i .snd = repeat′ (wf _ (lemma₁ s i (<⇒≤ s<i) s≢ε))
 
     repeat : Stream A
     repeat = repeat′ (𝓌𝒻 _)
