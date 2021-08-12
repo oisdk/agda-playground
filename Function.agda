@@ -36,6 +36,14 @@ _$_ : ∀ {A : Type a} {B : A → Type b}
 f $ x = f x
 {-# INLINE _$_ #-}
 
+infixl 0 _|>_
+_|>_ : ∀ {A : Type a} {B : A → Type b}
+      → (x : A)
+      → (∀ (x : A) → B x)
+      → B x
+_|>_ = flip _$_
+{-# INLINE _|>_ #-}
+
 infixl 1 _⟨_⟩_
 _⟨_⟩_ : A → (A → B → C) → B → C
 x ⟨ f ⟩ y = f x y

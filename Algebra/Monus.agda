@@ -189,10 +189,25 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
 
   ≤⇒≢ε⇒< : ∀ x y → (x≤y : x ≤ y) → fst x≤y ≢ ε → y ≰ x
   ≤⇒≢ε⇒< x y (k₁ , y≡x∙k₁) k₁≢ε (k₂ , x≡y∙k₂) =
-    k₁≢ε (zeroSumFree k₁ k₂ (sym (cancelˡ x ε (k₁ ∙ k₂) (∙ε x ; x≡y∙k₂ ; cong (_∙ k₂) y≡x∙k₁ ; assoc x k₁ k₂))))
+    [ x ∙ ε         ≡⟨ ∙ε x ⟩
+      x             ≡⟨ x≡y∙k₂ ⟩
+      y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
+      (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
+      x ∙ (k₁ ∙ k₂) ∎       ]⇒ x ∙ ε ≡ x ∙ (k₁ ∙ k₂)
+    ⟨ cancelˡ x ε (k₁ ∙ k₂) ⟩⇒ ε ≡ k₁ ∙ k₂
+    ⟨ sym                   ⟩⇒ k₁ ∙ k₂ ≡ ε
+    ⟨ zeroSumFree k₁ k₂     ⟩⇒ k₁ ≡ ε
+    ⟨ k₁≢ε                  ⟩⇒ ⊥ ⇒∎
 
   ≤⇒<⇒≢ε : ∀ x y → (x≤y : x ≤ y) → y ≰ x → fst x≤y ≢ ε
-  ≤⇒<⇒≢ε x y (k₁ , y≡x∙k₁) y≰x k₁≡ε = y≰x (ε , sym (∙ε y ; y≡x∙k₁ ; cong (x ∙_) k₁≡ε ; ∙ε x))
+  ≤⇒<⇒≢ε x y (k₁ , y≡x∙k₁) y≰x k₁≡ε =   y≰x λ
+    where
+    .fst → ε
+    .snd → x      ≡˘⟨ ∙ε x ⟩
+           x ∙ ε  ≡˘⟨ cong (x ∙_) k₁≡ε ⟩
+           x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
+           y      ≡˘⟨ ∙ε y ⟩ 
+           y ∙ ε ∎
 
 -- Cancellative total minimal antisymmetric pom (has monus)
 record CTMAPOM ℓ : Type (ℓsuc ℓ) where
