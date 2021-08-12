@@ -200,7 +200,7 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
     ⟨ k₁≢ε                  ⟩⇒ ⊥ ⇒∎
 
   ≤⇒<⇒≢ε : ∀ x y → (x≤y : x ≤ y) → y ≰ x → fst x≤y ≢ ε
-  ≤⇒<⇒≢ε x y (k₁ , y≡x∙k₁) y≰x k₁≡ε =   y≰x λ
+  ≤⇒<⇒≢ε x y (k₁ , y≡x∙k₁) y≰x k₁≡ε = y≰x λ
     where
     .fst → ε
     .snd → x      ≡˘⟨ ∙ε x ⟩
@@ -208,6 +208,20 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
            x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
            y      ≡˘⟨ ∙ε y ⟩ 
            y ∙ ε ∎
+
+  ≤-cancelʳ : ∀ x y z → y ∙ x ≤ z ∙ x → y ≤ z
+  ≤-cancelʳ x y z (k , z∙x≡y∙x∙k) .fst = k
+  ≤-cancelʳ x y z (k , z∙x≡y∙x∙k) .snd = cancelʳ x z (y ∙ k) $
+    z ∙ x ≡⟨ z∙x≡y∙x∙k ⟩
+    (y ∙ x) ∙ k ≡⟨ assoc y x k ⟩
+    y ∙ (x ∙ k) ≡⟨ cong (y ∙_) (comm x k) ⟩
+    y ∙ (k ∙ x) ≡˘⟨ assoc y k x ⟩
+    (y ∙ k) ∙ x ∎
+
+  ≤-cancelˡ : ∀ x y z → x ∙ y ≤ x ∙ z → y ≤ z
+  ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .fst = k
+  ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .snd = cancelˡ x z (y ∙ k) (x∙z≡x∙y∙k ; assoc x y k)
+
 
 -- Cancellative total minimal antisymmetric pom (has monus)
 record CTMAPOM ℓ : Type (ℓsuc ℓ) where
@@ -297,8 +311,8 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
 
   ∸‿cancel : ∀ x y → (x ∙ y) ∸ x ≡ y
   ∸‿cancel x y with (x ∙ y) ≤|≥ x
-  ∸‿cancel x y | inl x∙y≤x = sym (cancel x y ε (antisym x∙y≤x x≤x∙y ; sym (∙ε x)))
-  ∸‿cancel x y | inr (k , x∙y≡x∙k) = sym (cancel x y k x∙y≡x∙k)
+  ... | inl x∙y≤x = sym (cancel x y ε (antisym x∙y≤x x≤x∙y ; sym (∙ε x)))
+  ... | inr (k , x∙y≡x∙k) = sym (cancel x y k x∙y≡x∙k)
 
   ccmm : CCMM _
   ccmm = record { ∸‿cancel = ∸‿cancel
@@ -310,6 +324,11 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   <⇒≤×≢ε : ∀ x y → x < y → Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)
   <⇒≤×≢ε x y x<y .fst = <⇒≤ x<y
   <⇒≤×≢ε x y x<y .snd = ≤⇒<⇒≢ε x y (<⇒≤ x<y) x<y
+
+  x∸y≤x : ∀ x y → x ∸ y ≤ x
+  x∸y≤x x y with x ≤|≥ y
+  ... | inl (k , p) = positive x
+  ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k
 
 -- We can construct the viterbi semiring by adjoining a top element to
 -- a tapom
