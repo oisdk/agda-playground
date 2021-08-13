@@ -139,6 +139,15 @@ record CMM ℓ : Type (ℓsuc ℓ) where
     ε ∸ k       ≡⟨ ε∸ k ⟩
     ε ∎
 
+  ∣_-_∣ : 𝑆 → 𝑆 → 𝑆
+  ∣ x - y ∣ = (x ∸ y) ∙ (y ∸ x)
+
+  _⊔₂_ : 𝑆 → 𝑆 → 𝑆
+  x ⊔₂ y = x ∙ y ∙ ∣ x - y ∣
+
+  _⊓₂_ : 𝑆 → 𝑆 → 𝑆
+  x ⊓₂ y = (x ∙ y) ∸ ∣ x - y ∣
+
 -- Cancellative Commutative Monoids with Monus
 record CCMM ℓ : Type (ℓsuc ℓ) where
   field cmm : CMM ℓ
@@ -319,7 +328,7 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
                 ; cmm = record { cmm ; commutativeMonoid = commutativeMonoid } }
 
   open CCMM ccmm public
-    using (cancelʳ; cancelˡ; ∸ε; ≤⇒≢ε⇒<; ≤⇒<⇒≢ε)
+    using (cancelʳ; cancelˡ; ∸ε; ≤⇒≢ε⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_)
 
   <⇒≤×≢ε : ∀ x y → x < y → Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)
   <⇒≤×≢ε x y x<y .fst = <⇒≤ x<y
@@ -329,6 +338,38 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   x∸y≤x x y with x ≤|≥ y
   ... | inl (k , p) = positive x
   ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k
+
+  2× : 𝑆 → 𝑆
+  2× x = x ∙ x
+
+  open import Relation.Binary.Lattice totalOrder
+
+  double-max : ∀ x y → 2× (x ⊔ y) ≡ x ⊔₂ y
+  double-max x y with x ≤|≥ y | y ≤|≥ x
+  double-max x y | inl x≤y | inl y≤x =
+    x ∙ x ≡⟨ cong (x ∙_) (antisym x≤y y≤x) ⟩
+    x ∙ y ≡˘⟨ ∙ε (x ∙ y) ⟩
+    (x ∙ y) ∙ ε ≡˘⟨ cong ((x ∙ y) ∙_)  (ε∙ ε) ⟩
+    (x ∙ y) ∙ (ε ∙ ε) ∎
+  double-max x y | inl x≤y | inr (k , y≡x∙k) =
+    y ∙ y ≡⟨ cong (y ∙_) y≡x∙k ⟩
+    y ∙ (x ∙ k) ≡˘⟨ assoc y x k ⟩
+    (y ∙ x) ∙ k ≡⟨ cong (_∙ k) (comm y x) ⟩
+    (x ∙ y) ∙ k ≡˘⟨ cong ((x ∙ y) ∙_) (ε∙ k) ⟩
+    (x ∙ y) ∙ (ε ∙ k) ∎
+  double-max x y | inr (k , x≡y∙k) | inl y≤x =
+    x ∙ x ≡⟨ cong (x ∙_) x≡y∙k ⟩
+    x ∙ (y ∙ k) ≡˘⟨ assoc x y k ⟩
+    (x ∙ y) ∙ k ≡˘⟨ cong ((x ∙ y) ∙_) (∙ε k) ⟩
+    (x ∙ y) ∙ (k ∙ ε) ∎
+  double-max x y | inr (k₁ , x≡y∙k₁) | inr (k₂ , y≡x∙k₂) =
+    x ∙ x ≡⟨ cong (x ∙_) (antisym (k₂ , y≡x∙k₂) (k₁ , x≡y∙k₁)) ⟩
+    x ∙ y ≡⟨ cong₂ _∙_ x≡y∙k₁ y≡x∙k₂ ⟩
+    (y ∙ k₁) ∙ (x ∙ k₂) ≡˘⟨ assoc (y ∙ k₁) x k₂ ⟩
+    ((y ∙ k₁) ∙ x) ∙ k₂ ≡⟨ cong (_∙ k₂) (comm (y ∙ k₁) x) ⟩
+    (x ∙ (y ∙ k₁)) ∙ k₂ ≡˘⟨ cong (_∙ k₂) (assoc x y k₁) ⟩
+    ((x ∙ y) ∙ k₁) ∙ k₂ ≡⟨ assoc (x ∙ y) k₁ k₂ ⟩
+    (x ∙ y) ∙ (k₁ ∙ k₂) ∎
 
 -- We can construct the viterbi semiring by adjoining a top element to
 -- a tapom
