@@ -31,6 +31,11 @@ record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
     (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
     x ∙ (k₁ ∙ k₂) ∎
 
+  infix 4 _≺_
+  _≺_ : 𝑆 → 𝑆 → Type _
+  x ≺ y = ∃[ k ] ((y ≡ x ∙ k) × (k ≢ ε))
+
+
 -- Total Antisymmetric POM
 record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field pom : POM ℓ₁ ℓ₂
@@ -74,6 +79,7 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
   ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
   ≤-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
 
+
 algebraic-pom : ∀ {ℓ} → CommutativeMonoid ℓ → POM ℓ ℓ
 algebraic-pom mon = record { AlgebraicPOM mon }
 
@@ -89,10 +95,15 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
   infix 4 _≤|≥_
   field _≤|≥_ : Total _≤_
 
+  <⇒≺ : ∀ x y → y ≰ x → x ≺ y
+  <⇒≺ x y x<y with x ≤|≥ y
+  ... | inl (k , y≡x∙k) = k , y≡x∙k , λ k≡ε → x<y (ε , sym (∙ε y ; y≡x∙k ; cong (x ∙_) k≡ε ; ∙ε x))
+  ... | inr y≤x = ⊥-elim (x<y y≤x)
+
 -- Total Minimal Antisymmetric POM
 record TMAPOM ℓ : Type (ℓsuc ℓ) where
   field tmpom : TMPOM ℓ
-  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans)
+  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans; _≺_)
   field antisym : Antisymmetric _≤_
 
   tapom : TAPOM _ _
@@ -196,8 +207,8 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   PartialOrder.preorder partialOrder = preorder
   PartialOrder.antisym partialOrder = antisym
 
-  ≤⇒≢ε⇒< : ∀ x y → (x≤y : x ≤ y) → fst x≤y ≢ ε → y ≰ x
-  ≤⇒≢ε⇒< x y (k₁ , y≡x∙k₁) k₁≢ε (k₂ , x≡y∙k₂) =
+  ≺⇒< : ∀ x y → x ≺ y → y ≰ x
+  ≺⇒< x y (k₁ , y≡x∙k₁ , k₁≢ε) (k₂ , x≡y∙k₂) =
     [ x ∙ ε         ≡⟨ ∙ε x ⟩
       x             ≡⟨ x≡y∙k₂ ⟩
       y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
@@ -328,19 +339,7 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
                 ; cmm = record { cmm ; commutativeMonoid = commutativeMonoid } }
 
   open CCMM ccmm public
-    using (cancelʳ; cancelˡ; ∸ε; ≤⇒≢ε⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_)
-
-  infix 4 _≺_
-  _≺_ : 𝑆 → 𝑆 → Type _
-  x ≺ y = ∃[ k ] ((y ≡ x ∙ k) × (k ≢ ε))
-
-  <⇒≺ : ∀ x y → x < y → x ≺ y
-  <⇒≺ x y x<y .fst = <⇒≤ x<y .fst
-  <⇒≺ x y x<y .snd .fst = <⇒≤ x<y .snd
-  <⇒≺ x y x<y .snd .snd = ≤⇒<⇒≢ε x y (<⇒≤ x<y) x<y
-
-  ≺⇒< : ∀ x y → x ≺ y → x < y
-  ≺⇒< x y (k , y≡x∙k , k≢ε) = ≤⇒≢ε⇒< x y (k , y≡x∙k) k≢ε
+    using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_)
 
   x∸y≤x : ∀ x y → x ∸ y ≤ x
   x∸y≤x x y with x ≤|≥ y
