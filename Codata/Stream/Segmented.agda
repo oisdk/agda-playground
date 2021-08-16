@@ -13,7 +13,7 @@ module Codata.Stream.Segmented
 open CTMAPOM mon
 
 data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
-  cons : ∀ w → ((w≺i : w ≺ i) → A × Stream′ A (fst (fst w≺i))) → Stream′ A i
+  cons : ∀ w → ((w≺i : w ≺ i) → A × Stream′ A (fst w≺i)) → Stream′ A i
 
 private
   variable
@@ -30,9 +30,9 @@ pure x {i} = cons ε λ ε≺i → x , empty
 
 module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
   mutual
-    repeat″ : Acc _≺_ i → (s≺i : s ≺ i) → A × Stream′ A (fst (fst s≺i))
+    repeat″ : Acc _≺_ i → (s≺i : s ≺ i) → A × Stream′ A (fst s≺i)
     repeat″ a        s≺i .fst = x
-    repeat″ (acc wf) ((k , i≡s∙k) , k≢ε) .snd = repeat′ (wf k ((s , i≡s∙k ; comm s k) , s≢ε))
+    repeat″ (acc wf) (k , i≡s∙k , k≢ε) .snd = repeat′ (wf k (s , i≡s∙k ; comm s k , s≢ε))
 
     repeat′ : Acc _≺_ i → Stream′ A i
     repeat′ a = cons s (repeat″ a)

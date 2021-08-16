@@ -332,14 +332,15 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
 
   infix 4 _≺_
   _≺_ : 𝑆 → 𝑆 → Type _
-  x ≺ y = Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)
+  x ≺ y = ∃[ k ] ((y ≡ x ∙ k) × (k ≢ ε))
 
   <⇒≺ : ∀ x y → x < y → x ≺ y
-  <⇒≺ x y x<y .fst = <⇒≤ x<y
-  <⇒≺ x y x<y .snd = ≤⇒<⇒≢ε x y (<⇒≤ x<y) x<y
+  <⇒≺ x y x<y .fst = <⇒≤ x<y .fst
+  <⇒≺ x y x<y .snd .fst = <⇒≤ x<y .snd
+  <⇒≺ x y x<y .snd .snd = ≤⇒<⇒≢ε x y (<⇒≤ x<y) x<y
 
   ≺⇒< : ∀ x y → x ≺ y → x < y
-  ≺⇒< x y = uncurry (≤⇒≢ε⇒< x y)
+  ≺⇒< x y (k , y≡x∙k , k≢ε) = ≤⇒≢ε⇒< x y (k , y≡x∙k) k≢ε
 
   x∸y≤x : ∀ x y → x ∸ y ≤ x
   x∸y≤x x y with x ≤|≥ y
