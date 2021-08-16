@@ -103,7 +103,7 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
 -- Total Minimal Antisymmetric POM
 record TMAPOM ℓ : Type (ℓsuc ℓ) where
   field tmpom : TMPOM ℓ
-  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans; _≺_)
+  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans; _≺_; <⇒≺)
   field antisym : Antisymmetric _≤_
 
   tapom : TAPOM _ _
