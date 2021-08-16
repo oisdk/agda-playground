@@ -7,12 +7,11 @@ open import Algebra.Monus
 module Codata.Stream.Segmented
   {ℓ}
   (mon : CTMAPOM ℓ)
-  (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon))
   where
 
 open CTMAPOM mon
 
-module Approach1 where
+module Approach1 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
   record Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
     inductive
     field
@@ -59,12 +58,12 @@ module Approach1 where
   take : 𝑆 → Stream A → List A
   take x xs = head (xs {i = x}) ∷ take′ x xs
 
-module Approach2 where
+module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._≺_ mon)) where
   record Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
     inductive
     field
       weight : 𝑆
-      uncons : (w<i : weight < i) → A × Stream′ A (i ∸ weight)
+      uncons : (w<i : weight ≺ i) → A × Stream′ A (i ∸ weight)
   open Stream′ public
 
   private
@@ -74,24 +73,23 @@ module Approach2 where
   Stream : Type a → Type (a ℓ⊔ ℓ)
   Stream A = ∀ {i} → Stream′ A i
 
-  lemma₁ : ∀ x y → x ≤ y → x ≢ ε → y ∸ x < y
-  lemma₁ x y x<y x≢ε (k , y-x≡y∙k) =
-    x≢ε (zeroSumFree x k (sym (cancelˡ y ε (k ∙ x) (cong (y ∙_) (sym (∸≤ x y x<y)) ; ∸‿comm y x ; cong (x ∙_) y-x≡y∙k ; comm x (y ∙ k) ; assoc y k x) ; comm k x)))
-
-  lemma₂ : ∀ x → x ≮ x ∸ ε
-  lemma₂ x x<x∸ε = x<x∸ε (subst (_≤ x) (sym (∸ε x)) ≤-refl)
-
   pure : A → Stream A
   pure x .weight = ε
   pure x .uncons ε<i .fst = x
   pure x {i} .uncons ε<i .snd .weight = i
-  pure x .uncons ε<i .snd .uncons i<i∸ε = ⊥-elim (lemma₂ _ i<i∸ε)
+  pure x .uncons ((k₁ , i≡ε∙k₁) , k₁≢ε) .snd .uncons ((k₂ , i∸ε≡i∙k₂) , k₂≢ε) = ⊥-elim (k₂≢ε (cancelˡ _ k₂ ε (sym i∸ε≡i∙k₂ ; ∸ε _ ; sym (∙ε _))))
+
 
   module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
-    repeat′ : Acc _<_ i → Stream′ A i
+    repeat′ : Acc _≺_ i → Stream′ A i
     repeat′ a .weight = s
     repeat′ a .uncons s<i .fst = x
-    repeat′ {i} (acc wf) .uncons s<i .snd = repeat′ (wf _ (lemma₁ s i (<⇒≤ s<i) s≢ε))
+    repeat′ {i} (acc wf) .uncons s≺i .snd = repeat′ (wf _ ((s , lemma i s s≺i) , s≢ε))
+      where
+      lemma : ∀ x y → y ≺ x → x ≡ (x ∸ y) ∙ y
+      lemma x y (y≤x , _) with x ≤|≥ y 
+      ... | inl x≤y = antisym x≤y y≤x ; sym (ε∙ y)
+      ... | inr (k , x≡y∙k) = x≡y∙k ; comm y k
 
     repeat : Stream A
     repeat = repeat′ (𝓌𝒻 _)
