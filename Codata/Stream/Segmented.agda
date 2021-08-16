@@ -28,6 +28,10 @@ empty {i = i} = cons i λ i<i → ⊥-elim (≺⇒< i i i<i ≤-refl)
 pure : A → Stream A
 pure x {i} = cons ε λ ε≺i → x , empty
 
+replicate : ℕ → A → Stream A
+replicate zero    x = empty
+replicate (suc n) x = cons ε λ ε≺i → x , replicate n x
+
 module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
   mutual
     repeat″ : Acc _≺_ i → (s≺i : s ≺ i) → A × Stream′ A (fst s≺i)
