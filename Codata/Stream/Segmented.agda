@@ -12,8 +12,9 @@ module Codata.Stream.Segmented
 
 open CTMAPOM mon
 
+infixr 5 _◃_
 data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
-  cons : ∀ w → ((w≺i : w ≺ i) → A × Stream′ A (fst w≺i)) → Stream′ A i
+  _◃_ : ∀ w → ((w≺i : w ≺ i) → A × Stream′ A (fst w≺i)) → Stream′ A i
 
 private
   variable
@@ -23,14 +24,14 @@ Stream : Type a → Type (a ℓ⊔ ℓ)
 Stream A = ∀ {i} → Stream′ A i
 
 empty : Stream A
-empty {i = i} = cons i λ i<i → ⊥-elim (≺⇒< i i i<i ≤-refl)
+empty {i = i} = i ◃ λ i<i → ⊥-elim (≺⇒< i i i<i ≤-refl)
 
 pure : A → Stream A
-pure x {i} = cons ε λ ε≺i → x , empty
+pure x {i} = ε ◃ λ ε≺i → x , empty
 
 replicate : ℕ → A → Stream A
 replicate zero    x = empty
-replicate (suc n) x = cons ε λ ε≺i → x , replicate n x
+replicate (suc n) x = ε ◃ λ ε≺i → x , replicate n x
 
 module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
   mutual
@@ -39,19 +40,19 @@ module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
     repeat″ (acc wf) (k , i≡s∙k , k≢ε) .snd = repeat′ (wf k (s , i≡s∙k ; comm s k , s≢ε))
 
     repeat′ : Acc _≺_ i → Stream′ A i
-    repeat′ a = cons s (repeat″ a)
+    repeat′ a = s ◃ repeat″ a
 
   repeat : Stream A
   repeat = repeat′ (fdc _)
 
 map : (A → B) → Stream′ A i → Stream′ B i
-map f (cons w xs) = cons w λ w≺i → case xs w≺i of λ { (y , ys) → f y , map f ys }
+map f (w ◃ xs) = w ◃ λ w≺i → case xs w≺i of λ { (y , ys) → f y , map f ys }
 
 open import Data.List using (List; _∷_; [])
 
 take′ : ∀ i → Stream′ A i → List A
-take′ i (cons w xs) with w <? i
-... | no  _ = []
+take′ i (w ◃ xs) with w <? i
+... | no _ = []
 ... | yes w<i with xs (<⇒≺ _ _ w<i)
 ... | y , ys = y ∷ take′ _ ys
 
