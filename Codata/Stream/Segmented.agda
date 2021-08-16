@@ -7,96 +7,97 @@ open import Algebra.Monus
 module Codata.Stream.Segmented
   {ℓ}
   (mon : CTMAPOM ℓ)
+  (fdc : WellFounded (CTMAPOM._≺_ mon))
   where
 
 open CTMAPOM mon
 
-module Approach1 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
-  record Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
-    inductive
-    field
-      head : A
-      size : 𝑆
-      tail : (p : size ≤ i) → Maybe (Stream′ A (fst p))
-  open Stream′ public
+data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
+  cons : ∀ w → ((w≺i : w ≺ i) → A × Stream′ A (fst (fst w≺i))) → Stream′ A i
 
-  private
-    variable
-      i j : 𝑆
+private
+  variable
+    i j : 𝑆
 
-  Stream : Type a → Type (a ℓ⊔ ℓ)
-  Stream A = ∀ {i} → Stream′ A i
+Stream : Type a → Type (a ℓ⊔ ℓ)
+Stream A = ∀ {i} → Stream′ A i
 
-  pure : A → Stream A
-  pure x .head = x
-  pure x .size = ε
-  pure x .tail _ = nothing
+empty : Stream A
+empty {i = i} = cons i λ i<i → ⊥-elim (≺⇒< i i i<i ≤-refl)
 
-  module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
-    repeat′ : Acc _<_ i → Stream′ A i
-    repeat′ a .head = x
-    repeat′ a .size = s
-    repeat′ (acc wf) .tail (k , p) = just (repeat′ (wf _ (≤⇒≢ε⇒< k _ (s , p ; comm s k) s≢ε)))
+pure : A → Stream A
+pure x {i} = cons ε λ ε≺i → x , empty
 
-    repeat : Stream A
-    repeat = repeat′ (𝓌𝒻 _)
+module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
+  mutual
+    repeat″ : Acc _≺_ i → (s≺i : s ≺ i) → A × Stream′ A (fst (fst s≺i))
+    repeat″ a        s≺i .fst = x
+    repeat″ (acc wf) ((k , i≡s∙k) , k≢ε) .snd = repeat′ (wf k ((s , i≡s∙k ; comm s k) , s≢ε))
 
-  map : (A → B) → Stream′ A i → Stream′ B i
-  map f xs .head = f (xs .head)
-  map f xs .size = xs .size
-  map f xs .tail p = case xs .tail p of λ { nothing → nothing ; (just xs′) → just (map f xs′) }
+    repeat′ : Acc _≺_ i → Stream′ A i
+    repeat′ a = cons s (repeat″ a)
 
-  open import Data.List using (List; _∷_; [])
+  repeat : Stream A
+  repeat = repeat′ (fdc _)
 
-  take′ : ∀ i → Stream′ A i → List A
-  take′ i xs with size xs ≤? i
-  take′ i xs | no  _   = []
-  take′ i xs | yes s≤i with tail xs s≤i
-  take′ i xs | yes s≤i | nothing = []
-  take′ i xs | yes s≤i | just xs′ = head xs′ ∷ take′ _ xs′
+map : (A → B) → Stream′ A i → Stream′ B i
+map f (cons w xs) = cons w λ w≺i → case xs w≺i of λ { (y , ys) → f y , map f ys }
 
-  take : 𝑆 → Stream A → List A
-  take x xs = head (xs {i = x}) ∷ take′ x xs
+open import Data.List using (List; _∷_; [])
 
-module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._≺_ mon)) where
-  data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
-    cons : ∀ w → ((w≺i : w ≺ i) → A × Stream′ A (fst (fst w≺i))) → Stream′ A i
+take′ : ∀ i → Stream′ A i → List A
+take′ i (cons w xs) with w <? i
+... | no  _ = []
+... | yes w<i with xs (<⇒≺ _ _ w<i)
+... | y , ys = y ∷ take′ _ ys
 
-  private
-    variable
-      i j : 𝑆
+take : 𝑆 → Stream A → List A
+take x xs = take′ x xs
 
-  Stream : Type a → Type (a ℓ⊔ ℓ)
-  Stream A = ∀ {i} → Stream′ A i
 
-  empty : Stream A
-  empty {i = i} = cons i λ i<i → ⊥-elim (≺⇒< i i i<i ≤-refl)
+-- module Approach1 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
+--   record Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
+--     inductive
+--     field
+--       head : A
+--       size : 𝑆
+--       tail : (p : size ≤ i) → Maybe (Stream′ A (fst p))
+--   open Stream′ public
 
-  pure : A → Stream A
-  pure x {i} = cons ε λ ε≺i → x , empty
+--   private
+--     variable
+--       i j : 𝑆
 
-  module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
-    mutual
-      repeat″ : Acc _≺_ i → (s≺i : s ≺ i) → A × Stream′ A (fst (fst s≺i))
-      repeat″ a s≺i .fst = x
-      repeat″ {i = i} (acc wf) ((k , i≡s∙k) , k≢ε) .snd = repeat′ (wf k ((s , i≡s∙k ; comm s k) , s≢ε))
+--   Stream : Type a → Type (a ℓ⊔ ℓ)
+--   Stream A = ∀ {i} → Stream′ A i
 
-      repeat′ : Acc _≺_ i → Stream′ A i
-      repeat′ a = cons s (repeat″ a)
+--   pure : A → Stream A
+--   pure x .head = x
+--   pure x .size = ε
+--   pure x .tail _ = nothing
 
-    repeat : Stream A
-    repeat = repeat′ (𝓌𝒻 _)
+--   module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
+--     repeat′ : Acc _<_ i → Stream′ A i
+--     repeat′ a .head = x
+--     repeat′ a .size = s
+--     repeat′ (acc wf) .tail (k , p) = just (repeat′ (wf _ (≤⇒≢ε⇒< k _ (s , p ; comm s k) s≢ε)))
 
-  map : (A → B) → Stream′ A i → Stream′ B i
-  map f (cons w xs) = cons w λ w≺i → case xs w≺i of λ { (y , ys) → f y , map f ys }
+--     repeat : Stream A
+--     repeat = repeat′ (𝓌𝒻 _)
 
-  open import Data.List using (List; _∷_; [])
+--   map : (A → B) → Stream′ A i → Stream′ B i
+--   map f xs .head = f (xs .head)
+--   map f xs .size = xs .size
+--   map f xs .tail p = case xs .tail p of λ { nothing → nothing ; (just xs′) → just (map f xs′) }
 
-  take′ : ∀ i → Stream′ A i → List A
-  take′ i (cons w xs) with w <? i
-  ... | no  _ = []
-  ... | yes w<i with xs (<⇒≺ _ _ w<i)
-  ... | y , ys = y ∷ take′ _ ys
+--   open import Data.List using (List; _∷_; [])
 
-  take : 𝑆 → Stream A → List A
-  take x xs = take′ x xs
+--   take′ : ∀ i → Stream′ A i → List A
+--   take′ i xs with size xs ≤? i
+--   take′ i xs | no  _   = []
+--   take′ i xs | yes s≤i with tail xs s≤i
+--   take′ i xs | yes s≤i | nothing = []
+--   take′ i xs | yes s≤i | just xs′ = head xs′ ∷ take′ _ xs′
+
+--   take : 𝑆 → Stream A → List A
+--   take x xs = head (xs {i = x}) ∷ take′ x xs
