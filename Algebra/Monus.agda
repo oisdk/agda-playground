@@ -330,7 +330,11 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   open CCMM ccmm public
     using (cancelʳ; cancelˡ; ∸ε; ≤⇒≢ε⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_)
 
-  <⇒≤×≢ε : ∀ x y → x < y → Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)
+  infix 4 _≺_
+  _≺_ : 𝑆 → 𝑆 → Type _
+  x ≺ y = Σ[ x≤y ⦂ x ≤ y ] (fst x≤y ≢ ε)
+
+  <⇒≤×≢ε : ∀ x y → x < y → x ≺ y
   <⇒≤×≢ε x y x<y .fst = <⇒≤ x<y
   <⇒≤×≢ε x y x<y .snd = ≤⇒<⇒≢ε x y (<⇒≤ x<y) x<y
 
@@ -370,6 +374,11 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
     (x ∙ (y ∙ k₁)) ∙ k₂ ≡˘⟨ cong (_∙ k₂) (assoc x y k₁) ⟩
     ((x ∙ y) ∙ k₁) ∙ k₂ ≡⟨ assoc (x ∙ y) k₁ k₂ ⟩
     (x ∙ y) ∙ (k₁ ∙ k₂) ∎
+
+  open import Data.Sigma.Properties
+
+  ≤-prop : ∀ x y → isProp (x ≤ y)
+  ≤-prop x y (k₁ , y≡x∙k₁) (k₂ , y≡x∙k₂) = Σ≡Prop (λ _ → total⇒isSet _ _) (cancelˡ x k₁ k₂ (sym y≡x∙k₁ ; y≡x∙k₂))
 
 -- We can construct the viterbi semiring by adjoining a top element to
 -- a tapom
