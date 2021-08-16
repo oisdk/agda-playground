@@ -104,11 +104,16 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
   _∸_ : 𝑆 → 𝑆 → 𝑆
   x ∸ y = either′ (const ε) fst (x ≤|≥ y)
 
+  x∸y≤x : ∀ x y → x ∸ y ≤ x
+  x∸y≤x x y with x ≤|≥ y
+  ... | inl (k , p) = positive x
+  ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k
+
 
 -- Total Minimal Antisymmetric POM
 record TMAPOM ℓ : Type (ℓsuc ℓ) where
   field tmpom : TMPOM ℓ
-  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans; _≺_; <⇒≺; _∸_)
+  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans; _≺_; <⇒≺; _∸_; x∸y≤x)
   field antisym : Antisymmetric _≤_
 
   tapom : TAPOM _ _
@@ -349,11 +354,6 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
 
   open CCMM ccmm public
     using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_)
-
-  x∸y≤x : ∀ x y → x ∸ y ≤ x
-  x∸y≤x x y with x ≤|≥ y
-  ... | inl (k , p) = positive x
-  ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k
 
   2× : 𝑆 → 𝑆
   2× x = x ∙ x
