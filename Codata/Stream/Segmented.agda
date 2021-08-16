@@ -59,15 +59,8 @@ module Approach1 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
   take x xs = head (xs {i = x}) ∷ take′ x xs
 
 module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._≺_ mon)) where
-  data Wrap (A : Type a) : Type a where
-    ◃_ : A → Wrap A
-
-  record Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
-    inductive
-    field
-      weight : 𝑆
-      uncons : (w<i : weight ≺ i) → A × Wrap (Stream′ A (fst (fst w<i)))
-  open Stream′ public
+  data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
+    cons : ∀ w → ((w≺i : w ≺ i) → A × Stream′ A (fst (fst w≺i))) → Stream′ A i
 
   private
     variable
@@ -77,35 +70,33 @@ module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._≺_ mon)) where
   Stream A = ∀ {i} → Stream′ A i
 
   empty : Stream A
-  empty {i = i} .weight = i
-  empty {i = i} .uncons i<i = ⊥-elim (≺⇒< i i i<i ≤-refl)
+  empty {i = i} = cons i λ i<i → ⊥-elim (≺⇒< i i i<i ≤-refl)
 
   pure : A → Stream A
-  pure x .weight = ε
-  pure x {i} .uncons ε<i .fst = x
-  pure x {i} .uncons ε<i .snd = ◃ empty
+  pure x {i} = cons ε λ ε≺i → x , empty
 
   module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
-    repeat′ : Acc _≺_ i → Stream′ A i
-    repeat′ a .weight = s
-    repeat′ a .uncons s<i .fst = x
-    repeat′ {i = i} (acc wf) .uncons ((k , i≡s∙k) , k≢ε) .snd = ◃ repeat′ (wf k ((s , i≡s∙k ; comm s k) , s≢ε))
+    mutual
+      repeat″ : Acc _≺_ i → (s≺i : s ≺ i) → A × Stream′ A (fst (fst s≺i))
+      repeat″ a s≺i .fst = x
+      repeat″ {i = i} (acc wf) ((k , i≡s∙k) , k≢ε) .snd = repeat′ (wf k ((s , i≡s∙k ; comm s k) , s≢ε))
+
+      repeat′ : Acc _≺_ i → Stream′ A i
+      repeat′ a = cons s (repeat″ a)
 
     repeat : Stream A
     repeat = repeat′ (𝓌𝒻 _)
 
   map : (A → B) → Stream′ A i → Stream′ B i
-  map f xs .weight = xs .weight
-  map f xs .uncons w<i with uncons xs w<i
-  map f xs .uncons w<i | y , ◃ ys = f y , ◃ map f ys
+  map f (cons w xs) = cons w λ w≺i → case xs w≺i of λ { (y , ys) → f y , map f ys }
 
   open import Data.List using (List; _∷_; [])
 
   take′ : ∀ i → Stream′ A i → List A
-  take′ i xs with weight xs <? i
+  take′ i (cons w xs) with w <? i
   ... | no  _ = []
-  ... | yes w<i with xs .uncons (<⇒≺ _ _ w<i)
-  ... | y , ◃ ys = y ∷ take′ _ ys
+  ... | yes w<i with xs (<⇒≺ _ _ w<i)
+  ... | y , ys = y ∷ take′ _ ys
 
   take : 𝑆 → Stream A → List A
   take x xs = take′ x xs
