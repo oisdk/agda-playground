@@ -58,7 +58,7 @@ module Approach1 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
   take : 𝑆 → Stream A → List A
   take x xs = head (xs {i = x}) ∷ take′ x xs
 
-module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
+module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._≺_ mon)) where
   data Wrap (A : Type a) : Type a where
     ◃_ : A → Wrap A
 
@@ -66,7 +66,7 @@ module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
     inductive
     field
       weight : 𝑆
-      uncons : (w<i : weight < i) → A × Wrap (Stream′ A (i ∸ weight))
+      uncons : (w<i : weight ≺ i) → A × Wrap (Stream′ A (fst (fst w<i)))
   open Stream′ public
 
   private
@@ -78,7 +78,7 @@ module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
 
   empty : Stream A
   empty {i = i} .weight = i
-  empty {i = i} .uncons i<i = ⊥-elim (i<i ≤-refl)
+  empty {i = i} .uncons i<i = ⊥-elim (≺⇒< i i i<i ≤-refl)
 
   pure : A → Stream A
   pure x .weight = ε
@@ -86,16 +86,10 @@ module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
   pure x {i} .uncons ε<i .snd = ◃ empty
 
   module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
-    repeat′ : Acc _<_ i → Stream′ A i
+    repeat′ : Acc _≺_ i → Stream′ A i
     repeat′ a .weight = s
     repeat′ a .uncons s<i .fst = x
-    repeat′ {i = i} (acc wf) .uncons s<i .snd = ◃ repeat′ (wf (i ∸ s) (≺⇒< _ _ (lemma i s<i)))
-      where
-      lemma : ∀ x → s < x → x ∸ s ≺ x
-      lemma x s<x .fst = x∸y≤x x s
-      lemma x s<x .snd with x ≤|≥ s
-      ... | inl x≤s = ⊥-elim (s<x x≤s)
-      ... | inr _ = s≢ε
+    repeat′ {i = i} (acc wf) .uncons ((k , i≡s∙k) , k≢ε) .snd = ◃ repeat′ (wf k ((s , i≡s∙k ; comm s k) , s≢ε))
 
     repeat : Stream A
     repeat = repeat′ (𝓌𝒻 _)
@@ -109,9 +103,9 @@ module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
 
   take′ : ∀ i → Stream′ A i → List A
   take′ i xs with weight xs <? i
-  take′ i xs | no  _ = []
-  take′ i xs | yes w<i with xs .uncons w<i
-  take′ i xs | yes w<i | y , ◃ ys = y ∷ take′ _ ys
+  ... | no  _ = []
+  ... | yes w<i with xs .uncons (<⇒≺ _ _ w<i)
+  ... | y , ◃ ys = y ∷ take′ _ ys
 
   take : 𝑆 → Stream A → List A
   take x xs = take′ x xs
