@@ -100,10 +100,15 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
   ... | inl (k , y≡x∙k) = k , y≡x∙k , λ k≡ε → x<y (ε , sym (∙ε y ; y≡x∙k ; cong (x ∙_) k≡ε ; ∙ε x))
   ... | inr y≤x = ⊥-elim (x<y y≤x)
 
+  infixl 6 _∸_
+  _∸_ : 𝑆 → 𝑆 → 𝑆
+  x ∸ y = either′ (const ε) fst (x ≤|≥ y)
+
+
 -- Total Minimal Antisymmetric POM
 record TMAPOM ℓ : Type (ℓsuc ℓ) where
   field tmpom : TMPOM ℓ
-  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans; _≺_; <⇒≺)
+  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans; _≺_; <⇒≺; _∸_)
   field antisym : Antisymmetric _≤_
 
   tapom : TAPOM _ _
@@ -115,6 +120,22 @@ record TMAPOM ℓ : Type (ℓsuc ℓ) where
 
   zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
   zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
+
+  ≤‿∸‿cancel : ∀ x y → x ≤ y → (y ∸ x) ∙ x ≡ y
+  ≤‿∸‿cancel x y x≤y with y ≤|≥ x
+  ... | inl y≤x = ε∙ x ; antisym x≤y y≤x
+  ... | inr (k , y≡x∙k) = comm k x ; sym y≡x∙k
+
+  ∸‿comm : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
+  ∸‿comm x y with y ≤|≥ x | x ≤|≥ y
+  ∸‿comm x y | inl y≤x | inl x≤y = cong (_∙ ε) (antisym x≤y y≤x)
+  ∸‿comm x y | inr (k , y≡x∙k) | inl x≤y = sym y≡x∙k ; sym (∙ε y)
+  ∸‿comm x y | inl y≤x | inr (k , x≥y) = ∙ε x ; x≥y
+  ∸‿comm x y | inr (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
+    x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
+    y      ≡⟨ antisym  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁) ⟩
+    x      ≡⟨ x≡y∙k₂ ⟩
+    y ∙ k₂ ∎
 
 
 -- Commutative Monoids with Monus
@@ -250,9 +271,6 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   field cancel : Cancellativeˡ _∙_
 
   module cmm where
-    _∸_ : 𝑆 → 𝑆 → 𝑆
-    x ∸ y = either′ (const ε) fst (x ≤|≥ y)
-
     ∸≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
     ∸≤ x y x≤y with x ≤|≥ y
     ∸≤ x y x≤y | inl _ = refl
@@ -269,17 +287,6 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
 
     ε∸ : ∀ x → ε ∸ x ≡ ε
     ε∸ x = ∸≤ ε x (positive x)
-
-    ∸‿comm : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
-    ∸‿comm x y with y ≤|≥ x | x ≤|≥ y
-    ∸‿comm x y | inl y≤x | inl x≤y = cong (_∙ ε) (antisym x≤y y≤x)
-    ∸‿comm x y | inr (k , y≡x∙k) | inl x≤y = sym y≡x∙k ; sym (∙ε y)
-    ∸‿comm x y | inl y≤x | inr (k , x≥y) = ∙ε x ; x≥y
-    ∸‿comm x y | inr (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
-      x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
-      y      ≡⟨ antisym  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁) ⟩
-      x      ≡⟨ x≡y∙k₂ ⟩
-      y ∙ k₂ ∎
 
     ∸‿assoc : ∀ x y z → (x ∸ y) ∸ z ≡ x ∸ (y ∙ z)
     ∸‿assoc x y z with x ≤|≥ y
@@ -336,7 +343,9 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
 
   ccmm : CCMM _
   ccmm = record { ∸‿cancel = ∸‿cancel
-                ; cmm = record { cmm ; commutativeMonoid = commutativeMonoid } }
+                ; cmm = record { cmm
+                               ; ∸‿comm = ∸‿comm
+                               ; commutativeMonoid = commutativeMonoid } }
 
   open CCMM ccmm public
     using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_)
