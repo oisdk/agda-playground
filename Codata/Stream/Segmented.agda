@@ -59,11 +59,14 @@ module Approach1 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
   take x xs = head (xs {i = x}) ∷ take′ x xs
 
 module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._≺_ mon)) where
+  data Cons (A : Type a) (B : Type b) : Type (a ℓ⊔ b) where
+    _◃_ : A → B → Cons A B
+
   record Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
     inductive
     field
       weight : 𝑆
-      uncons : (w<i : weight ≺ i) → A × Stream′ A (i ∸ weight)
+      uncons : (w<i : weight ≺ i) → Cons A (Stream′ A (i ∸ weight))
   open Stream′ public
 
   private
@@ -75,16 +78,15 @@ module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._≺_ mon)) where
 
   pure : A → Stream A
   pure x .weight = ε
-  pure x .uncons ε<i .fst = x
-  pure x {i} .uncons ε<i .snd .weight = i
-  pure x .uncons ((k₁ , i≡ε∙k₁) , k₁≢ε) .snd .uncons ((k₂ , i∸ε≡i∙k₂) , k₂≢ε) = ⊥-elim (k₂≢ε (cancelˡ _ k₂ ε (sym i∸ε≡i∙k₂ ; ∸ε _ ; sym (∙ε _))))
-
+  pure x {i} .uncons ε<i = x ◃ λ
+    where
+    .weight → i
+    .uncons ((k₂ , i∸ε≡i∙k₂) , k₂≢ε) → ⊥-elim (k₂≢ε (cancelˡ _ k₂ ε (sym i∸ε≡i∙k₂ ; ∸ε _ ; sym (∙ε _))))
 
   module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
     repeat′ : Acc _≺_ i → Stream′ A i
     repeat′ a .weight = s
-    repeat′ a .uncons s<i .fst = x
-    repeat′ {i} (acc wf) .uncons s≺i .snd = repeat′ (wf _ ((s , lemma i s s≺i) , s≢ε))
+    repeat′ {i = i} (acc wf) .uncons s<i = x ◃ repeat′ (wf _ ((s , lemma i s s<i) , s≢ε))
       where
       lemma : ∀ x y → y ≺ x → x ≡ (x ∸ y) ∙ y
       lemma x y (y≤x , _) with x ≤|≥ y 
@@ -94,6 +96,7 @@ module Approach2 (𝓌𝒻 : WellFounded (CTMAPOM._≺_ mon)) where
     repeat : Stream A
     repeat = repeat′ (𝓌𝒻 _)
 
-  -- map : (A → B) → Stream′ A i → Stream′ B i
-  -- map f xs .weight = xs .weight
-  -- map f xs .uncons w<i = case xs .uncons w<i of λ { (y , ys) → f y , map f ys }
+  map : (A → B) → Stream′ A i → Stream′ B i
+  map f xs .weight = xs .weight
+  map f xs .uncons w<i with uncons xs w<i
+  map f xs .uncons w<i | y ◃ ys = f y ◃ map f ys
