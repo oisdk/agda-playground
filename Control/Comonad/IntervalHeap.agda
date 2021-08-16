@@ -17,7 +17,7 @@ open TMAPOM mon
 
 mutual
   record Heap (A : Type a) : Type (s ℓ⊔ a) where
-    inductive; constructor _≺_
+    inductive; constructor _◃_
     field
       hd : A
       tl : Next A
@@ -59,7 +59,7 @@ mutual
   tabulate : State A → Heap A
   tabulate f =
     let x , s = f ε
-    in x ≺ λ where .next → stepFrom f s (s ≟ ε)
+    in x ◃ λ where .next → stepFrom f s (s ≟ ε)
 
 pop-ε : (xs : Heap A) (a : Acc _<_ ε) → pop′ ε a xs .fst ≡ xs .hd
 pop-ε xs _ with xs .tl .next
@@ -73,7 +73,7 @@ pop-ε xs _ | until s s≢ε ys | yes s≤ε = ⊥-elim (s≢ε (antisym s≤ε 
 -- slide xs | [] = xs
 -- slide xs | [] = []
 
--- pop-tl : ∀ (x : A) s₁ (s₁≢ε : s₁ ≢ ε) xs s₂ → pop (x ≺ ⟪ until s₁ s₁≢ε xs ⟫) (s₁ ∙ s₂) ≡ pop xs s₂
+-- pop-tl : ∀ (x : A) s₁ (s₁≢ε : s₁ ≢ ε) xs s₂ → pop (x ◃ ⟪ until s₁ s₁≢ε xs ⟫) (s₁ ∙ s₂) ≡ pop xs s₂
 -- pop-tl x s₁ s₁≢ε xs s₂ with s₁ ≤? (s₁ ∙ s₂)
 -- pop-tl x s₁ s₁≢ε xs s₂ | no  s₁≰s₁∙s₂ = ⊥-elim (s₁≰s₁∙s₂ (s₂ , refl))
 -- pop-tl x s₁ s₁≢ε xs s₂ | yes (k , s₁≤s₁∙s₂) =
@@ -85,13 +85,13 @@ pop-ε xs _ | until s s≢ε ys | yes s≤ε = ⊥-elim (s≢ε (antisym s≤ε 
 
 -- mutual
 --   seg-leftInv′ : (xs : Heap A) → stepFrom (pop xs) (pop xs ε .snd) (pop xs ε .snd ≟ ε) ≡ xs .tl .next
---   seg-leftInv′ (x ≺ xs) with pop (x ≺ xs) ε .snd ≟ ε
---   seg-leftInv′ (x ≺ xs) | yes s≡ε = {!!}
---   seg-leftInv′ (x ≺ xs) | no  s≢ε = {!!}
+--   seg-leftInv′ (x ◃ xs) with pop (x ◃ xs) ε .snd ≟ ε
+--   seg-leftInv′ (x ◃ xs) | yes s≡ε = {!!}
+--   seg-leftInv′ (x ◃ xs) | no  s≢ε = {!!}
 
 --   seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x
---   seg-leftInv (x ≺ xs) i .hd = pop-ε (x ≺ xs) (wf ε) i
---   seg-leftInv (x ≺ xs) i .tl .next = seg-leftInv′ (x ≺ xs) i
+--   seg-leftInv (x ◃ xs) i .hd = pop-ε (x ◃ xs) (wf ε) i
+--   seg-leftInv (x ◃ xs) i .tl .next = seg-leftInv′ (x ◃ xs) i
 
 -- state-iso : Heap A ⇔ State A
 -- state-iso .fun = pop
