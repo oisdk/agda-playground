@@ -1,4 +1,30 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --safe #-}
+
+-- This is a file for dealing with Monuses: these are monoids that are like the
+-- positive half of a group. Much of my info on them comes from these papers:
+--
+-- * Wehrung, Friedrich. ‘Injective Positively Ordered Monoids I’. Journal of
+--   Pure and Applied Algebra 83, no. 1 (11 November 1992): 43–82.
+--   https://doi.org/10.1016/0022-4049(92)90104-N.
+-- * Wehrung, Friedrich. ‘Embedding Simple Commutative Monoids into Simple
+--   Refinement Monoids’. Semigroup Forum 56, no. 1 (January 1998): 104–29.
+--   https://doi.org/10.1007/s00233-002-7008-0.
+-- * Amer, K. ‘Equationally Complete Classes of Commutative Monoids with Monus’.
+--   Algebra Universalis 18, no. 1 (1 February 1984): 129–31.
+--   https://doi.org/10.1007/BF01182254.
+-- * Wehrung, Friedrich. ‘Metric Properties of Positively Ordered Monoids’.
+--   Forum Mathematicum 5, no. 5 (1993).
+--   https://doi.org/10.1515/form.1993.5.183.
+-- * Wehrung, Friedrich. ‘Restricted Injectivity, Transfer Property and
+--   Decompositions of Separative Positively Ordered Monoids.’ Communications in
+--   Algebra 22, no. 5 (1 January 1994): 1747–81.
+--   https://doi.org/10.1080/00927879408824934.
+--
+-- These monoids have a preorder defined on them, the algebraic preorder:
+-- 
+--   x ≤ y = ∃[ z ] (y ≡ x ∙ z)
+--
+-- The _∸_ operator extracts the z from above, if it exists.
 
 module Algebra.Monus where
 
@@ -8,7 +34,10 @@ open import Relation.Binary
 open import Path.Reasoning
 open import Function.Reasoning
 
--- Positively ordered monoids
+-- Positively ordered monoids.
+--
+-- These are monoids which have a preorder that respects the monoid operation
+-- in a straightforward way.
 record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field commutativeMonoid : CommutativeMonoid ℓ₁
   open CommutativeMonoid commutativeMonoid public
@@ -22,7 +51,7 @@ record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   x≤x∙y {x} {y} = subst (_≤ x ∙ y) (∙ε x) (≤-cong x (positive y))
 
   ≤-congʳ : ∀ x {y z} → y ≤ z → y ∙ x ≤ z ∙ x
-  ≤-congʳ x {y} {z} p = subst (y ∙ x ≤_) (comm x z) (subst (_≤ x ∙ z) (comm x y) (≤-cong x p))
+  ≤-congʳ x {y} {z} p = subst₂ _≤_ (comm x y) (comm x z) (≤-cong x p)
 
   alg-≤-trans : ∀ {x y z k₁ k₂} → y ≡ x ∙ k₁ → z ≡ y ∙ k₂ → z ≡ x ∙ (k₁ ∙ k₂)
   alg-≤-trans {x} {y} {z} {k₁} {k₂} y≡x∙k₁ z≡y∙k₂ =

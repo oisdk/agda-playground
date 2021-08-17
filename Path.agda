@@ -24,7 +24,7 @@ open import Cubical.Foundations.Everything
         ; transp
         ; J
         )
-  renaming (_∙_ to _;_)
+  renaming (_∙_ to _;_; subst2 to subst₂)
   public
 
 open import Data.Empty using (¬_)
