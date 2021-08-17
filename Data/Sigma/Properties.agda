@@ -11,7 +11,7 @@ private
     B : A → Type b
     C : Σ A B → Type c
 
-reassoc : Σ (Σ A B) C ⇔ Σ[ x ⦂ A ] Σ[ y ⦂ B x ] C (x , y)
+reassoc : Σ (Σ A B) C ⇔ Σ[ x ⦂ A ] × Σ[ y ⦂ B x ] × C (x , y)
 reassoc .fun       ((x , y) , z)    = x , (y , z)
 reassoc .inv       (x , (y , z))    = (x , y) , z
 reassoc .leftInv   ((x , y) , z) i  = ((x , y) , z)

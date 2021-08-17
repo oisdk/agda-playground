@@ -69,7 +69,7 @@ length = foldr (const suc) zero λ _ _ _ → refl
 
 infixr 5 _∈_ _∉_
 _∈_ : A → Row A → Type _
-x ∈ xs = ∃[ ys ] (x ∷ ys ≡ xs)
+x ∈ xs = ∃[ ys ] × (x ∷ ys ≡ xs)
 
 _∉_ : A → Row A → Type _
 x ∉ xs = ¬ (x ∈ xs)

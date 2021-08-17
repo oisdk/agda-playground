@@ -67,7 +67,7 @@ hSetExp  X Y .Exponential.uniq X₁ f .snd .snd {y} x = cong curry (sym x)
 open import Categories.Pullback
 
 hSetHasPullbacks : HasPullbacks hSetCategory
-hSetHasPullbacks {X = X} {Y = Y} {Z = Z} f g .Pullback.P = ∃[ ab ] (f (fst ab) ≡ g (snd ab)) , isOfHLevelΣ 2 (X .snd ⟨×⟩ Y .snd) λ xy → isProp→isSet (Z .snd (f (xy .fst)) (g (xy .snd)))
+hSetHasPullbacks {X = X} {Y = Y} {Z = Z} f g .Pullback.P = ∃[ ab ] × (f (fst ab) ≡ g (snd ab)) , isOfHLevelΣ 2 (X .snd ⟨×⟩ Y .snd) λ xy → isProp→isSet (Z .snd (f (xy .fst)) (g (xy .snd)))
 hSetHasPullbacks f g .Pullback.p₁ ((x , _) , _) = x
 hSetHasPullbacks f g .Pullback.p₂ ((_ , y) , _) = y
 hSetHasPullbacks f g .Pullback.commute = funExt snd
@@ -97,10 +97,10 @@ lemma23 {P = P} (x , y) = rec (λ xs ys → Σ≡Prop (snd ∘ P) (y (xs .fst) (
 
 module _ {A : Type a} {P : A → Type b} (R : ∀ x → P x → hProp c) where
   uniqueChoice : (Π[ x ⦂ A ] (∃!′ (P x) (λ u → R x u .fst))) →
-                 Σ[ f ⦂ Π[ x ⦂ A ] P x ] Π[ x ⦂ A ] (R x (f x) .fst)
+                 Σ[ f ⦂ Π[ x ⦂ A ] P x ] × Π[ x ⦂ A ] (R x (f x) .fst)
   uniqueChoice H = fst ∘ mid , snd ∘ mid
     where
-    mid : Π[ x ⦂ A ] Σ[ u ⦂ P x ] (R x u .fst)
+    mid : Π[ x ⦂ A ] Σ[ u ⦂ P x ] × (R x u .fst)
     mid x = lemma23 {P = R x} (H x)
 
 open import HITs.PropositionalTruncation.Sugar
@@ -110,14 +110,14 @@ module CoeqProofs {X Y : Ob} (f : X ⟶ Y) where
   KernelPair = hSetHasPullbacks f f
 
   Im : Ob
-  Im = ∃[ b ] ∥ fiber f b ∥ , isOfHLevelΣ 2 (Y .snd) λ _ → isProp→isSet squash
+  Im = ∃[ b ] × ∥ fiber f b ∥ , isOfHLevelΣ 2 (Y .snd) λ _ → isProp→isSet squash
 
   im : X ⟶ Im
   im x = f x , ∣ x , refl ∣
 
   open Pullback KernelPair
 
-  lem : ∀ {H : Ob} (h : X ⟶ H) → h ∘ p₁ ≡ h ∘ p₂ → Σ[ f ⦂ (Im ⟶ H) ] Π[ x ⦂ Im .fst ] (∀ y → im y ≡ x → h y ≡ f x)
+  lem : ∀ {H : Ob} (h : X ⟶ H) → h ∘ p₁ ≡ h ∘ p₂ → Σ[ f ⦂ (Im ⟶ H) ] × Π[ x ⦂ Im .fst ] (∀ y → im y ≡ x → h y ≡ f x)
   lem {H = H} h eq = uniqueChoice R prf
     where
     R : Im .fst → H .fst → hProp _
@@ -177,7 +177,7 @@ module ExtactProofs {X : Ob} {R : X .fst → X .fst → hProp ℓ}
   ℛ x y = R x y .fst
 
   Src : Ob
-  Src .fst = ∃[ x,y ] (uncurry ℛ x,y)
+  Src .fst = ∃[ x,y ] × (uncurry ℛ x,y)
   Src .snd = isOfHLevelΣ 2 (X .snd ⟨×⟩ X .snd) λ _ → isProp→isSet (R _ _ .snd)
 
   pr₁ pr₂ : Src ⟶ X

@@ -14,10 +14,10 @@ private
   variable
     n m : ℕ
 
-suc-natfin : Σ[ m ⦂ ℕ ] (m ℕ.< n) → Σ[ m ⦂ ℕ ] (m ℕ.< suc n)
+suc-natfin : Σ[ m ⦂ ℕ ] × (m ℕ.< n) → Σ[ m ⦂ ℕ ] × (m ℕ.< suc n)
 suc-natfin (m , p) = suc m , p
 
-Fin-to-Nat-lt : Fin n → Σ[ m ⦂ ℕ ] (m ℕ.< n)
+Fin-to-Nat-lt : Fin n → Σ[ m ⦂ ℕ ] × (m ℕ.< n)
 Fin-to-Nat-lt {n = suc n} f0 = zero , tt
 Fin-to-Nat-lt {n = suc n} (fs x) = suc-natfin (Fin-to-Nat-lt x)
 
@@ -33,7 +33,7 @@ Fin-Nat-lt-leftInv : (x : Fin n) → uncurry Fin-from-Nat-lt (Fin-to-Nat-lt x) �
 Fin-Nat-lt-leftInv {n = suc n} f0 = refl
 Fin-Nat-lt-leftInv {n = suc n} (fs x) = cong fs (Fin-Nat-lt-leftInv x)
 
-Fin-Nat-lt : Fin n ⇔ Σ[ m ⦂ ℕ ] (m ℕ.< n)
+Fin-Nat-lt : Fin n ⇔ Σ[ m ⦂ ℕ ] × (m ℕ.< n)
 Fin-Nat-lt .fun = Fin-to-Nat-lt
 Fin-Nat-lt .inv = uncurry Fin-from-Nat-lt
 Fin-Nat-lt .rightInv = uncurry Fin-Nat-lt-rightInv

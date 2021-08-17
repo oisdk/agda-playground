@@ -22,7 +22,7 @@ n ≢ᶠ m = T (not (discreteFin n m .does))
 n ≡ᶠ m = T (discreteFin n m .does)
 
 _F↣_ : ℕ → ℕ → Type
-n F↣ m = Σ[ f ⦂ (Fin n → Fin m) ] ∀ {x y} → x ≢ᶠ y → f x ≢ᶠ f y
+n F↣ m = Σ[ f ⦂ (Fin n → Fin m) ] × ∀ {x y} → x ≢ᶠ y → f x ≢ᶠ f y
 
 shift : (x y : Fin (suc n)) → x ≢ᶠ y → Fin n
 shift          f0     (fs y)  x≢y = y

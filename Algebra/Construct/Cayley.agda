@@ -10,7 +10,7 @@ module Algebra.Construct.Cayley {a} (mon : Monoid a) where
 open Monoid mon
 
 𝒞 : Type a
-𝒞 = Σ[ f ⦂ (𝑆 → 𝑆) ] ∀ x → ∥ f ε ∙ x ≡ f x ∥
+𝒞 = Σ[ f ⦂ (𝑆 → 𝑆) ] × ∀ x → ∥ f ε ∙ x ≡ f x ∥
 
 
 ⟦_⇓⟧ : 𝒞 → 𝑆

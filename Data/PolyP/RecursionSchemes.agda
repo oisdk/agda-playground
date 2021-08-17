@@ -157,11 +157,11 @@ module Categorical (F : Functor (suc n)) (As : Params n) where
   {-# INLINE _≗_ #-}
 
   Alg : Type₁
-  Alg = Σ[ A ⦂ Type ] (⟦ F ⟧ (A ∷ As) → A)
+  Alg = Σ[ A ⦂ Type ] × (⟦ F ⟧ (A ∷ As) → A)
 
   -- Hom
   _⟶_ : Alg → Alg → Type
-  (A , a) ⟶ (B , b) = Σ[ h ⦂ (A → B) ] (h ∘ a ≗ b ∘ map F f0 h)
+  (A , a) ⟶ (B , b) = Σ[ h ⦂ (A → B) ] × (h ∘ a ≗ b ∘ map F f0 h)
 
   variable
     X Y Z : Alg
@@ -348,7 +348,7 @@ module AnaTermDisplay
   {As : Params n}
   where
   pr-ana :  WellFounded _<_ →
-            ((x : A) → ⟦ F ⟧ ((∃[ y ] (y < x)) ∷ As)) → A → μ F As
+            ((x : A) → ⟦ F ⟧ ((∃[ y ] × (y < x)) ∷ As)) → A → μ F As
   pr-ana wf = AnaTerm.pr-ana wf
 
 module Truncate {B : Type} {_<_ : B → B → Type} (<-wellFounded : WellFounded _<_)
@@ -367,6 +367,6 @@ module TruncDisplay
   {F : Functor (suc n)}
   {As : Params n} where
   trunc :  WellFounded _<_ →
-           ((x : A) -> ⟦ F ⟧ (ν F As ∷ As) → ⟦ F ⟧ ((ν F As × ∃[ y ] (y < x)) ∷ As)) →
+           ((x : A) -> ⟦ F ⟧ (ν F As ∷ As) → ⟦ F ⟧ ((ν F As × ∃[ y ] × (y < x)) ∷ As)) →
            A → ν F As → μ F As
   trunc wf step = Truncate.trunc wf step

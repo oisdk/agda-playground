@@ -73,7 +73,7 @@ flatten xs =
              ;  (⌈ x ⌉ ∷ xs)  → map (map₂ (x ∷_)) (flatten xs) }
 
 module PopMin
-  (_≤|≥_ : Total (λ x y → ∃[ z ] (y ≡ x ∙ z)))
+  (_≤|≥_ : Total (λ x y → ∃[ z ] × (y ≡ x ∙ z)))
   (decomp : ∀ {A B w₁ w₂ w₃} → 𝐹 (w₁ ∙ w₂) A → 𝐹 (w₁ ∙ w₃) B → 𝐹 w₁ (𝐹 w₂ A × 𝐹 w₃ B)) where
 
   _∪_ : Root A → Root A → Root A

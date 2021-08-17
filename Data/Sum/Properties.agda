@@ -6,7 +6,7 @@ open import Prelude
 open import Data.Sum
 open import Data.Bool
 
-sumAsSigma : A ⊎ B ≃ Σ[ x ⦂ Bool ] (if x then A else B)
+sumAsSigma : A ⊎ B ≃ Σ[ x ⦂ Bool ] × (if x then A else B)
 sumAsSigma = isoToEquiv $
   iso
     (either (true ,_) (false ,_))

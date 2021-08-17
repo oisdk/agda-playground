@@ -37,7 +37,7 @@ record PreCategory ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   _≅_ : Ob → Ob → Type _
 
   Isomorphism : (X ⟶ Y) → Type ℓ₂
-  Isomorphism {X} {Y} f = Σ[ g ⦂ Y ⟶ X ] ((g · f ≡ Id) × (f · g ≡ Id))
+  Isomorphism {X} {Y} f = Σ[ g ⦂ Y ⟶ X ] × (g · f ≡ Id) × (f · g ≡ Id)
 
   X ≅ Y = Σ (X ⟶ Y) Isomorphism
 

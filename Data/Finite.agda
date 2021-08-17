@@ -6,7 +6,7 @@ open import Prelude
 open import Data.Fin
 
 𝒞 : Type a → Type a
-𝒞 A = ∃[ n ] ∥ A ≃ Fin n ∥
+𝒞 A = ∃[ n ] × ∥ A ≃ Fin n ∥
 
 ℂ : Type _
-ℂ = Σ[ T ⦂ Type ] 𝒞 T
+ℂ = Σ[ T ⦂ Type ] × 𝒞 T

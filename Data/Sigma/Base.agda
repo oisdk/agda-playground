@@ -14,13 +14,13 @@ infixr 4.5 ∃-syntax
 ∃-syntax : ∀ {a b} {A : Type a} (B : A → Type b) → Type (a ℓ⊔ b)
 ∃-syntax = ∃
 
-syntax ∃-syntax (λ x → e) = ∃[ x ] e
+syntax ∃-syntax (λ x → e) = ∃[ x ] × e
 
 infixr 4.5 Σ⦂-syntax
 Σ⦂-syntax : (A : Type a) (B : A → Type b) → Type (a ℓ⊔ b)
 Σ⦂-syntax = Σ
 
-syntax Σ⦂-syntax t (λ x → e) = Σ[ x ⦂ t ] e
+syntax Σ⦂-syntax t (λ x → e) = Σ[ x ⦂ t ] × e
 
 infixr 4.5 _×_
 _×_ : (A : Type a) → (B : Type b) → Type (a ℓ⊔ b)

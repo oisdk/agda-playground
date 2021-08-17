@@ -22,7 +22,7 @@ tab-length : ∀ n (f : Fin n → A) → length (tabulate n f) ≡ n
 tab-length zero f _ = zero
 tab-length (suc n) f i = suc (tab-length n (f ∘ fs) i)
 
-tab-distrib : ∀ n (f : Fin n → A) m → ∃[ i ] (f i ≡ tabulate n f ! m)
+tab-distrib : ∀ n (f : Fin n → A) m → ∃[ i ] × (f i ≡ tabulate n f ! m)
 tab-distrib (suc n) f f0 = f0 , refl
 tab-distrib (suc n) f (fs m) = let i , p = tab-distrib n (f ∘ fs) m in fs i , p
 
