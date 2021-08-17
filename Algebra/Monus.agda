@@ -35,7 +35,6 @@ record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   _≺_ : 𝑆 → 𝑆 → Type _
   x ≺ y = ∃[ k ] ((y ≡ x ∙ k) × (k ≢ ε))
 
-
 -- Total Antisymmetric POM
 record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field pom : POM ℓ₁ ℓ₂
@@ -79,7 +78,6 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
   ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
   ≤-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
 
-
 algebraic-pom : ∀ {ℓ} → CommutativeMonoid ℓ → POM ℓ ℓ
 algebraic-pom mon = record { AlgebraicPOM mon }
 
@@ -97,8 +95,12 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
 
   <⇒≺ : ∀ x y → y ≰ x → x ≺ y
   <⇒≺ x y x<y with x ≤|≥ y
-  ... | inl (k , y≡x∙k) = k , y≡x∙k , λ k≡ε → x<y (ε , sym (∙ε y ; y≡x∙k ; cong (x ∙_) k≡ε ; ∙ε x))
   ... | inr y≤x = ⊥-elim (x<y y≤x)
+  ... | inl (k , y≡x∙k) = λ
+    where
+    .fst → k
+    .snd .fst → y≡x∙k
+    .snd .snd k≡ε → x<y (ε , sym (∙ε y ; y≡x∙k ; cong (x ∙_) k≡ε ; ∙ε x))
 
   infixl 6 _∸_
   _∸_ : 𝑆 → 𝑆 → 𝑆
@@ -108,7 +110,6 @@ record TMPOM ℓ : Type (ℓsuc ℓ) where
   x∸y≤x x y with x ≤|≥ y
   ... | inl (k , p) = positive x
   ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k
-
 
 -- Total Minimal Antisymmetric POM
 record TMAPOM ℓ : Type (ℓsuc ℓ) where
@@ -133,15 +134,14 @@ record TMAPOM ℓ : Type (ℓsuc ℓ) where
 
   ∸‿comm : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
   ∸‿comm x y with y ≤|≥ x | x ≤|≥ y
-  ∸‿comm x y | inl y≤x | inl x≤y = cong (_∙ ε) (antisym x≤y y≤x)
-  ∸‿comm x y | inr (k , y≡x∙k) | inl x≤y = sym y≡x∙k ; sym (∙ε y)
-  ∸‿comm x y | inl y≤x | inr (k , x≥y) = ∙ε x ; x≥y
-  ∸‿comm x y | inr (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
+  ... | inl y≤x | inl x≤y = cong (_∙ ε) (antisym x≤y y≤x)
+  ... | inr (k , y≡x∙k) | inl x≤y = sym y≡x∙k ; sym (∙ε y)
+  ... | inl y≤x | inr (k , x≥y) = ∙ε x ; x≥y
+  ... | inr (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
     x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
     y      ≡⟨ antisym  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁) ⟩
     x      ≡⟨ x≡y∙k₂ ⟩
     y ∙ k₂ ∎
-
 
 -- Commutative Monoids with Monus
 record CMM ℓ : Type (ℓsuc ℓ) where
@@ -266,8 +266,8 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
 
   ≤-cancelˡ : ∀ x y z → x ∙ y ≤ x ∙ z → y ≤ z
   ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .fst = k
-  ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .snd = cancelˡ x z (y ∙ k) (x∙z≡x∙y∙k ; assoc x y k)
-
+  ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .snd =
+    cancelˡ x z (y ∙ k) (x∙z≡x∙y∙k ; assoc x y k)
 
 -- Cancellative total minimal antisymmetric pom (has monus)
 record CTMAPOM ℓ : Type (ℓsuc ℓ) where
