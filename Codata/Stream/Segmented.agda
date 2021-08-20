@@ -16,10 +16,10 @@ infixr 5 _◃_
 data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
   _◃_ : ∀ w → ((w≺i : w ≺ i) → A × Stream′ A (fst w≺i)) → Stream′ A i
 
--- I think this is an overcomplicated way of writing:
+-- I think this is isomorphic to the following:
 -- 
 -- data Stream′ (A : Type a) : 𝑆 → Type (a ℓ⊔ ℓ) where
---   _◃_ : ∀ w {ws} → A → Stream′ A ws → Stream′ A (w ∙ ws)
+--   _◃_ : ∀ w {ws} → (ws ≢ ε → A × Stream′ A ws) → Stream′ A (w ∙ ws)
 --
 -- Or something.
 
