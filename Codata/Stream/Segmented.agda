@@ -12,26 +12,20 @@ module Codata.Stream.Segmented
 
 open CTMAPOM mon
 
+-- This is a type for coinductive streams, with a "sized types" parameter which
+-- can be an arbitrary monus.
 infixr 5 _◃_
 data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
   _◃_ : ∀ w → ((w≺i : w ≺ i) → A × Stream′ A (fst w≺i)) → Stream′ A i
+--              ^^^^^^^^^^^^
+--              This is a proposition, by the way.
 
--- I think this is isomorphic to the following:
--- 
--- data Stream′ (A : Type a) : 𝑆 → Type (a ℓ⊔ ℓ) where
---   _◃_ : ∀ w {ws} → (ws ≢ ε → A × Stream′ A ws) → Stream′ A (w ∙ ws)
---
--- Which makes it seem like it should be basically this:
---
--- data Stream′ (A : Type a) : 𝑆 → Type (a ℓ⊔ ℓ) where
---   _◃_,_ : ∀ w {ws} → A → Stream′ A ws → Stream′ A (w ∙ ws)
+Stream : Type a → Type (a ℓ⊔ ℓ)
+Stream A = ∀ {i} → Stream′ A i
 
 private
   variable
     i j : 𝑆
-
-Stream : Type a → Type (a ℓ⊔ ℓ)
-Stream A = ∀ {i} → Stream′ A i
 
 empty : Stream A
 empty {i = i} = i ◃ λ i<i → ⊥-elim (≺⇒< i i i<i ≤-refl)

@@ -421,6 +421,12 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   ≤-prop : ∀ x y → isProp (x ≤ y)
   ≤-prop x y (k₁ , y≡x∙k₁) (k₂ , y≡x∙k₂) = Σ≡Prop (λ _ → total⇒isSet _ _) (cancelˡ x k₁ k₂ (sym y≡x∙k₁ ; y≡x∙k₂))
 
+  open import Cubical.Foundations.HLevels using (isProp×)
+  open import Data.Empty.Properties using (isProp¬)
+
+  ≺-prop : ∀ x y → isProp (x ≺ y)
+  ≺-prop x y (k₁ , y≡x∙k₁ , k₁≢ε) (k₂ , y≡x∙k₂ , k₂≢ε) = Σ≡Prop (λ k → isProp× (total⇒isSet _ _) (isProp¬ _)) (cancelˡ x k₁ k₂ (sym y≡x∙k₁ ; y≡x∙k₂))
+
 -- We can construct the viterbi semiring by adjoining a top element to
 -- a tapom
 module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
