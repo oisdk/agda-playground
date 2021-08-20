@@ -21,7 +21,10 @@ data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
 -- data Stream′ (A : Type a) : 𝑆 → Type (a ℓ⊔ ℓ) where
 --   _◃_ : ∀ w {ws} → (ws ≢ ε → A × Stream′ A ws) → Stream′ A (w ∙ ws)
 --
--- Or something.
+-- Which makes it seem like it should be basically this:
+--
+-- data Stream′ (A : Type a) : 𝑆 → Type (a ℓ⊔ ℓ) where
+--   _◃_,_ : ∀ w {ws} → A → Stream′ A ws → Stream′ A (w ∙ ws)
 
 private
   variable
