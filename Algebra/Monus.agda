@@ -298,6 +298,9 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .snd =
     cancelˡ x z (y ∙ k) (x∙z≡x∙y∙k ; assoc x y k)
 
+  ≺-irrefl : Irreflexive _≺_
+  ≺-irrefl {x} (k , x≡x∙k , k≢ε) = k≢ε (sym (cancelˡ x ε k (∙ε x ; x≡x∙k)))
+
 -- Cancellative total minimal antisymmetric pom (has monus)
 record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   field tmapom : TMAPOM ℓ
@@ -382,7 +385,7 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
                                ; commutativeMonoid = commutativeMonoid } }
 
   open CCMM ccmm public
-    using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_)
+    using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_; ≺-irrefl)
 
   2× : 𝑆 → 𝑆
   2× x = x ∙ x

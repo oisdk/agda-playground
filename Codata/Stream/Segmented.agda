@@ -7,12 +7,12 @@ open import Algebra.Monus
 module Codata.Stream.Segmented
   {ℓ}
   (mon : CTMAPOM ℓ)
-  (fdc : WellFounded (CTMAPOM._≺_ mon))
+  
   where
 
 open CTMAPOM mon
 
--- This is a type for coinductive streams, with a "sized types" parameter which
+-- This is a type for coinductive lists, with a "sized types" parameter which
 -- can be an arbitrary monus.
 infixr 5 _◃_
 data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
@@ -20,6 +20,10 @@ data Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
 --              ^^^^^^^^^^^^
 --              This is a proposition, by the way.
 
+-- The monus parameter tells you how much you can inspect into the stream.
+-- The Stream′ A i type, then, represents a stream that's defined for a depth
+-- of i; this type is a true "stream" (again, actually a colist), which is
+-- defined for any depth.
 Stream : Type a → Type (a ℓ⊔ ℓ)
 Stream A = ∀ {i} → Stream′ A i
 
@@ -27,17 +31,35 @@ private
   variable
     i j : 𝑆
 
-empty : Stream A
-empty {i = i} = i ◃ λ i<i → ⊥-elim (≺⇒< i i i<i ≤-refl)
+--------------------------------------------------------------------------------
+-- Finite colists
+--------------------------------------------------------------------------------
 
+-- empty list
+empty : Stream A
+empty {i = i} = i ◃ λ i≺i → ⊥-elim (≺-irrefl i≺i)
+
+_◃_∷_ : 𝑆 → A → Stream A → Stream A
+(w ◃ x ∷ xs) {i} = w ◃ λ w≺i → x , xs
+
+cons′ : ∀ w → A → Stream′ A i → Stream′ A (w ∙ i)
+cons′ w x xs = w ◃ λ { (k , w∙i≡w∙k , k≢ε) → x , subst (Stream′ _) (cancelˡ w _ k w∙i≡w∙k) xs }
+
+-- singleton
 pure : A → Stream A
-pure x {i} = ε ◃ λ ε≺i → x , empty
+pure x = ε ◃ λ ε≺i → x , empty
 
 replicate : ℕ → A → Stream A
 replicate zero    x = empty
 replicate (suc n) x = ε ◃ λ ε≺i → x , replicate n x
 
-module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
+--------------------------------------------------------------------------------
+-- Infinite colists
+--------------------------------------------------------------------------------
+
+-- The definition of the list lets us construct an infinite colist as long as
+-- every entry uses some "fuel".
+module _ (fdc : WellFounded _≺_) (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
   mutual
     repeat″ : Acc _≺_ i → (s≺i : s ≺ i) → A × Stream′ A (fst s≺i)
     repeat″ a        s≺i .fst = x
@@ -49,6 +71,9 @@ module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
   repeat : Stream A
   repeat = repeat′ (fdc _)
 
+--------------------------------------------------------------------------------
+-- Manipulating colists
+--------------------------------------------------------------------------------
 map : (A → B) → Stream′ A i → Stream′ B i
 map f (w ◃ xs) = w ◃ λ w≺i → case xs w≺i of λ { (y , ys) → f y , map f ys }
 
@@ -62,51 +87,3 @@ take′ i (w ◃ xs) with w <? i
 
 take : 𝑆 → Stream A → List A
 take x xs = take′ x xs
-
-
--- module Approach1 (𝓌𝒻 : WellFounded (CTMAPOM._<_ mon)) where
---   record Stream′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
---     inductive
---     field
---       head : A
---       size : 𝑆
---       tail : (p : size ≤ i) → Maybe (Stream′ A (fst p))
---   open Stream′ public
-
---   private
---     variable
---       i j : 𝑆
-
---   Stream : Type a → Type (a ℓ⊔ ℓ)
---   Stream A = ∀ {i} → Stream′ A i
-
---   pure : A → Stream A
---   pure x .head = x
---   pure x .size = ε
---   pure x .tail _ = nothing
-
---   module _ (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
---     repeat′ : Acc _<_ i → Stream′ A i
---     repeat′ a .head = x
---     repeat′ a .size = s
---     repeat′ (acc wf) .tail (k , p) = just (repeat′ (wf _ (≤⇒≢ε⇒< k _ (s , p ; comm s k) s≢ε)))
-
---     repeat : Stream A
---     repeat = repeat′ (𝓌𝒻 _)
-
---   map : (A → B) → Stream′ A i → Stream′ B i
---   map f xs .head = f (xs .head)
---   map f xs .size = xs .size
---   map f xs .tail p = case xs .tail p of λ { nothing → nothing ; (just xs′) → just (map f xs′) }
-
---   open import Data.List using (List; _∷_; [])
-
---   take′ : ∀ i → Stream′ A i → List A
---   take′ i xs with size xs ≤? i
---   take′ i xs | no  _   = []
---   take′ i xs | yes s≤i with tail xs s≤i
---   take′ i xs | yes s≤i | nothing = []
---   take′ i xs | yes s≤i | just xs′ = head xs′ ∷ take′ _ xs′
-
---   take : 𝑆 → Stream A → List A
---   take x xs = head (xs {i = x}) ∷ take′ x xs
