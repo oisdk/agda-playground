@@ -57,19 +57,26 @@ replicate (suc n) x = ε ◃ λ ε≺i → x , replicate n x
 -- Infinite colists
 --------------------------------------------------------------------------------
 
+module _ (fdc : WellFounded _≺_) (B : 𝑆 → Type b) where
+  module _ (ϕ : ∀ {i} → B i → ∃[ w ] × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i))) where
+    unfold′ : Acc _≺_ i → B i → Stream′ A i
+    unfold″ : Acc _≺_ i → ∃[ w ] × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i)) → Stream′ A i
+    unfold‴ : Acc _≺_ i → (j≺i : j ≺ i) → j ≢ ε → B (fst j≺i) → Stream′ A (fst j≺i)
+
+    unfold‴ (acc wf) (k , i≡j∙k , k≢ε) j≢ε xs = unfold′ (wf _ ((_ , i≡j∙k ; comm _ _ , j≢ε))) xs
+
+    unfold″ a (w , w≢ε , xs′) = w ◃ λ w≺i → map₂ (unfold‴ a w≺i w≢ε) (xs′ w≺i)
+
+    unfold′ a xs = unfold″ a (ϕ xs)
+
+    unfold : (∀ {i} → B i) → Stream A
+    unfold xs {i} = unfold′ (fdc i) xs
+
 -- The definition of the list lets us construct an infinite colist as long as
 -- every entry uses some "fuel".
 module _ (fdc : WellFounded _≺_) (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
-  mutual
-    repeat″ : Acc _≺_ i → (s≺i : s ≺ i) → A × Stream′ A (fst s≺i)
-    repeat″ a        s≺i .fst = x
-    repeat″ (acc wf) (k , i≡s∙k , k≢ε) .snd = repeat′ (wf k (s , i≡s∙k ; comm s k , s≢ε))
-
-    repeat′ : Acc _≺_ i → Stream′ A i
-    repeat′ a = s ◃ repeat″ a
-
   repeat : Stream A
-  repeat = repeat′ (fdc _)
+  repeat = unfold fdc (const ⊤) (λ _ → s , s≢ε , const (x , tt)) tt
 
 --------------------------------------------------------------------------------
 -- Manipulating colists
