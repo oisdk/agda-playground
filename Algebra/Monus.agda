@@ -22,7 +22,7 @@
 --
 -- These monoids have a preorder defined on them, the algebraic preorder:
 -- 
---   x ≤ y = ∃ z (y ≡ x ∙ z)
+--   x ≤ y = ∃ z × (y ≡ x ∙ z)
 --
 -- The _∸_ operator extracts the z from above, if it exists.
 
