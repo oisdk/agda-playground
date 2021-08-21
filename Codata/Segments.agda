@@ -51,8 +51,7 @@ replicate (suc n) x = ε ◃ λ ε≺i → x , replicate n x
 -- Infinite colists
 --------------------------------------------------------------------------------
 
-module _ (fdc : WellFounded _≺_) (B : 𝑆 → Type b) where
-  module _ (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i))) where
+module _ (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i))) where
     unfold′ : Acc _≺_ i → B i → Colist′ A i
     unfold″ : Acc _≺_ i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i)) → Colist′ A i
     unfold‴ : Acc _≺_ i → (j≺i : j ≺ i) → j ≢ ε → B (fst j≺i) → Colist′ A (fst j≺i)
@@ -63,14 +62,13 @@ module _ (fdc : WellFounded _≺_) (B : 𝑆 → Type b) where
 
     unfold′ a xs = unfold″ a (ϕ xs)
 
-    unfold : (∀ {i} → B i) → Colist A
-    unfold xs {i} = unfold′ (fdc i) xs
+unfold : (fdc : WellFounded _≺_) (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i))) → (∀ {i} → B i) → Colist A
+unfold fdc B ϕ xs {i} = unfold′ B ϕ (fdc i) xs
 
 -- The definition of the list lets us construct an infinite colist as long as
 -- every entry uses some "fuel".
-module _ (fdc : WellFounded _≺_) (s : 𝑆) (s≢ε : s ≢ ε) (x : A) where
-  repeat : Colist A
-  repeat = unfold fdc (const ⊤) (λ _ → s , s≢ε , const (x , tt)) tt
+repeat : (fdc : WellFounded _≺_) (s : 𝑆) (s≢ε : s ≢ ε) (x : A) → Colist A
+repeat fdc s s≢ε x = unfold fdc (const ⊤) (λ _ → s , s≢ε , const (x , tt)) tt
 
 --------------------------------------------------------------------------------
 -- Manipulating colists
