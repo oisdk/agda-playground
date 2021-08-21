@@ -60,8 +60,8 @@ record PreCategory ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   IsTerminal : Ob → Type _
   IsTerminal T = ∀ {X} → isContr (X ⟶ T)
 
-  Initial = ∃ IsInitial
-  Terminal = ∃ IsTerminal
+  Initial = ∃ x × IsInitial x
+  Terminal = ∃ x × IsTerminal x
 
   refl-≅ : X ≅ X
   refl-≅ .fst = Id

@@ -47,7 +47,7 @@ Valid tr = IsBlack tr × Valid-rec tr
 --                ([ x ] [≤] ub) →
 --                (tr : Tree lb ub n) →
 --                Valid-rec tr →
---                ∃[ c ] Σ (Tree lb ub (add-black c n)) Valid-rec
+--                ∃ c Σ (Tree lb ub (add-black c n)) Valid-rec
 -- insertWithin x lb≤x x≤ub (leaf _) val = red , node x red (leaf lb≤x) (leaf x≤ub) , tt , tt , tt , tt
 -- insertWithin x lb≤x x≤ub (node y c ls rs) val with x ≤? y
 -- insertWithin x lb≤x x≤ub (node y red   ls rs) val | inl x≤y with insertWithin x lb≤x x≤y ls (fst (snd (snd val)))

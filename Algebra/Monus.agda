@@ -22,7 +22,7 @@
 --
 -- These monoids have a preorder defined on them, the algebraic preorder:
 -- 
---   x ≤ y = ∃[ z ] (y ≡ x ∙ z)
+--   x ≤ y = ∃ z (y ≡ x ∙ z)
 --
 -- The _∸_ operator extracts the z from above, if it exists.
 
@@ -62,7 +62,7 @@ record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
 
   infix 4 _≺_
   _≺_ : 𝑆 → 𝑆 → Type _
-  x ≺ y = ∃[ k ] × (y ≡ x ∙ k) × (k ≢ ε)
+  x ≺ y = ∃ k × (y ≡ x ∙ k) × (k ≢ ε)
 
 -- Total Antisymmetric POM
 record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
@@ -85,7 +85,7 @@ module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
 
   infix 4 _≤_
   _≤_ : 𝑆 → 𝑆 → Type _
-  x ≤ y = ∃[ z ] × (y ≡ x ∙ z)
+  x ≤ y = ∃ z × (y ≡ x ∙ z)
 
   -- The snd here is the same proof as alg-≤-trans, so could be refactored out.
   ≤-trans : Transitive _≤_

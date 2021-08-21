@@ -68,7 +68,7 @@ singleton x xv = x ∹ xv & []
 insert : ∀ x → V x → Heap V → Heap V
 insert x xv = merge (singleton x xv)
 
-minView : Heap V → Maybe (∃[ p ] × V p × Heap (V ⊙ p))
+minView : Heap V → Maybe (∃ p × V p × Heap (V ⊙ p))
 minView [] = nothing
 minView (x ∹ xv & xs) = just (x , xv , mergeQs xs)
 

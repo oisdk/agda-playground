@@ -20,10 +20,10 @@ open import Relation.Nullary.Decidable.Logic
 private
   variable p : Level
 
-P∃◇ : ∀ {p} {P : A → Type p} → ∀ xs → ◇ P xs → ∥ ∃ P ∥
+P∃◇ : ∀ {p} {P : A → Type p} → ∀ xs → ◇ P xs → ∥ ∃ x × P x ∥
 P∃◇ {A = A} {P = P} = ∥ P∃◇′ ∥⇓
   where
-  P∃◇′ : xs ∈𝒦 A ⇒∥ (◇ P xs → ∥ ∃ P ∥) ∥
+  P∃◇′ : xs ∈𝒦 A ⇒∥ (◇ P xs → ∥ ∃ x × P x ∥) ∥
   ∥ P∃◇′ ∥-prop p q i ◇Pxs = squash (p ◇Pxs) (q ◇Pxs) i
   ∥ P∃◇′ ∥[] ()
   ∥ P∃◇′ ∥ x ∷ xs ⟨ Pxs ⟩ ◇Pxs =

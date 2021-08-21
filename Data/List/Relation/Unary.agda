@@ -18,7 +18,7 @@ module Inductive◇ where
    there  : ∀ {x xs} → ◇ P xs   → ◇ P (x ∷ xs)
 
 ◇ : (P : A → Type p) → List A → Type _
-◇ P xs = ∃[ i ] × P (xs ! i)
+◇ P xs = ∃ i × P (xs ! i)
 
 ◇! : (P : A → Type p) → List A → Type _
 ◇! P xs = isContr (◇ P xs)

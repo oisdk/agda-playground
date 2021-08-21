@@ -16,7 +16,7 @@ module _ {ℓ₁ ℓ₂} (C : Category ℓ₁ ℓ₂) where
         proj₁ : C [ obj , X ]
         proj₂ : C [ obj , Y ]
         ump : (f : C [ Z , X ]) (g : C [ Z , Y ]) →
-              ∃![ f×g ] ((C [ proj₁ ∘ f×g ] ≡ f) Prelude.× (C [ proj₂ ∘ f×g ] ≡ g))
+              ∃ f×g ! × ((C [ proj₁ ∘ f×g ] ≡ f) Prelude.× (C [ proj₂ ∘ f×g ] ≡ g))
       _P[_×_] : ∀ {Z} → (π₁ : C [ Z , X ]) (π₂ : C [ Z , Y ]) →
                 C [ Z , obj ]
       _P[_×_] π₁ π₂ = fst (ump π₁ π₂)

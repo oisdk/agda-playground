@@ -9,7 +9,7 @@ Stream : Type a → Type a
 Stream A = ℕ → A
 
 _∈_ : ∀ {A : Type a} (x : A) → Stream A → Type a
-x ∈ xs = ∃[ i ] × (xs i ≡ x)
+x ∈ xs = ∃ i × (xs i ≡ x)
 
 Countable : Type a → Type a
 Countable A = Σ[ xs ⦂ Stream A ] × (∀ x → x ∈ xs)

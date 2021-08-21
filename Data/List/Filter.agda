@@ -10,10 +10,10 @@ open import Data.Bool.Properties
 open import Data.Fin
 
 module _ {p} {P : A → Type p} where
-  filter : (P? : ∀ x → Dec (P x)) → List A → List (∃ P)
+  filter : (P? : ∀ x → Dec (P x)) → List A → List (∃ x × P x)
   filter P? = foldr f []
     where
-    f : _ → List (∃ P) → List (∃ P)
+    f : _ → List (∃ x × P x) → List (∃ x × P x)
     f y ys with P? y
     ... | yes t = (y , t) ∷ ys
     ... | no _  = ys

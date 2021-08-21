@@ -228,13 +228,13 @@ module _ {F : Functor (suc n)} {As : Params n} where
 module Eliminator {As : Params k}
          {F : Functor (suc k)}
          (P : μ F As → Type)
-         (f : (x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ map F f0 fst x ⟩)
+         (f : (x : ⟦ F ⟧ ((∃ x × P x) ∷ As)) → P ⟨ map F f0 fst x ⟩)
          where
   open import Path
   open Mapping
   open Cata
 
-  alg : ⟦ F ⟧ (∃ P ∷ As) → ∃ P
+  alg : ⟦ F ⟧ ((∃ x × P x) ∷ As) → ∃ x × P x
   alg x = ⟨ map F f0 fst x ⟩ , f x
 
   mutual
@@ -256,7 +256,7 @@ module Eliminator {As : Params k}
 
 module _ {F : Functor (suc n)} where
   elim : (P : μ F As → Type) →
-         ((x : ⟦ F ⟧ (∃ P ∷ As)) → P ⟨ map F f0 fst x ⟩) →
+         ((x : ⟦ F ⟧ ((∃ x × P x) ∷ As)) → P ⟨ map F f0 fst x ⟩) →
          (x : μ F As) → P x
   elim = Eliminator.elim
 
@@ -333,7 +333,7 @@ open AnaInfDisplay public
 module AnaTerm {B : Type} {_<_ : B → B → Type} (<-wellFounded : WellFounded _<_)
          {k} {F : Functor (suc k)}
          {As : Params k}
-         (coalg : (x : B) → ⟦ F ⟧ (∃ (_< x)  ∷ As)) where
+         (coalg : (x : B) → ⟦ F ⟧ ((∃ y × (y < x))  ∷ As)) where
 
   pr-anaAcc : (x : B) → Acc _<_ x → μ F As
   pr-anaAcc x (acc wf) = ⟨ map F f0 (λ { (x , p) → pr-anaAcc x (wf x p) }) (coalg x)  ⟩
@@ -348,12 +348,12 @@ module AnaTermDisplay
   {As : Params n}
   where
   pr-ana :  WellFounded _<_ →
-            ((x : A) → ⟦ F ⟧ ((∃[ y ] × (y < x)) ∷ As)) → A → μ F As
+            ((x : A) → ⟦ F ⟧ ((∃ y × (y < x)) ∷ As)) → A → μ F As
   pr-ana wf = AnaTerm.pr-ana wf
 
 module Truncate {B : Type} {_<_ : B → B → Type} (<-wellFounded : WellFounded _<_)
                 {k} {F : Functor (suc k)}
-                {As : Params k} (step : (x : B) -> ⟦ F ⟧ (ν F As ∷ As) → ⟦ F ⟧ ((ν F As × ∃ (_< x)) ∷ As)) where
+                {As : Params k} (step : (x : B) -> ⟦ F ⟧ (ν F As ∷ As) → ⟦ F ⟧ ((ν F As × ∃ y × (y < x)) ∷ As)) where
 
   truncAcc : (x : B) → Acc _<_ x → ν F As → μ F As
   truncAcc x (acc wf) xs = ⟨ map F f0 (λ { (ys , z , z<x) → truncAcc z (wf z z<x) ys}) (step x (xs .unfold)) ⟩
@@ -367,6 +367,6 @@ module TruncDisplay
   {F : Functor (suc n)}
   {As : Params n} where
   trunc :  WellFounded _<_ →
-           ((x : A) -> ⟦ F ⟧ (ν F As ∷ As) → ⟦ F ⟧ ((ν F As × ∃[ y ] × (y < x)) ∷ As)) →
+           ((x : A) -> ⟦ F ⟧ (ν F As ∷ As) → ⟦ F ⟧ ((ν F As × ∃ y × (y < x)) ∷ As)) →
            A → ν F As → μ F As
   trunc wf step = Truncate.trunc wf step

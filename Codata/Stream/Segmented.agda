@@ -56,9 +56,9 @@ replicate (suc n) x = ε ◃ λ ε≺i → x , replicate n x
 --------------------------------------------------------------------------------
 
 module _ (fdc : WellFounded _≺_) (B : 𝑆 → Type b) where
-  module _ (ϕ : ∀ {i} → B i → ∃[ w ] × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i))) where
+  module _ (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i))) where
     unfold′ : Acc _≺_ i → B i → Stream′ A i
-    unfold″ : Acc _≺_ i → ∃[ w ] × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i)) → Stream′ A i
+    unfold″ : Acc _≺_ i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i)) → Stream′ A i
     unfold‴ : Acc _≺_ i → (j≺i : j ≺ i) → j ≢ ε → B (fst j≺i) → Stream′ A (fst j≺i)
 
     unfold‴ (acc wf) (k , i≡j∙k , k≢ε) j≢ε xs = unfold′ (wf _ ((_ , i≡j∙k ; comm _ _ , j≢ε))) xs

@@ -12,10 +12,10 @@ private
     p : Level
 
 ◇⁺ : ∀ {A : Type a} (P : A → Type p) → A ⁺ → Type _
-◇⁺ P xs = ∃[ i ] × P (xs !⁺ i)
+◇⁺ P xs = ∃ i × P (xs !⁺ i)
 
 ◇⋆ : ∀ {A : Type a} (P : A → Type p) → A ⋆ → Type _
-◇⋆ P xs = ∃[ i ] × P (xs !⋆ i)
+◇⋆ P xs = ∃ i × P (xs !⋆ i)
 
 module Exists {a} {A : Type a} {p} (P : A → Type p) where
   push : ∀ {x xs} → ◇⋆ P xs → ◇⁺ P (x & xs)

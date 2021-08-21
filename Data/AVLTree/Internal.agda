@@ -289,9 +289,9 @@ alterF x xs bnds = go (ev xs) x xs bnds id
 
 open import Data.List
 
-toList⊙ : Tree Val lb ub n → List (∃ Val) → List (∃ Val)
+toList⊙ : Tree Val lb ub n → List (∃ x × Val x) → List (∃ x × Val x)
 toList⊙ (leaf lb<ub) ks = ks
 toList⊙ (node x xv bal xl xr) ks = toList⊙ xl ((x , xv) ∷ toList⊙ xr ks)
 
-toList : Tree Val lb ub n → List (∃ Val)
+toList : Tree Val lb ub n → List (∃ x × Val x)
 toList xs = toList⊙ xs []

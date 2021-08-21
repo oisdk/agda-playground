@@ -40,12 +40,12 @@ private
     V : 𝑆 → Type v
 
 Root : (𝑆 → Type v) → Type _
-Root V = ∃[ w ] × Heap (V ⊙ w)
+Root V = ∃ w × Heap (V ⊙ w)
 
 partition : Heap V → List (V ε) × List (Root V)
 partition = foldr f ([] , [])
   where
-    f : Node V → List (V ε) × List (∃[ w ] × Heap (V ⊙ w)) → List (V ε) × List (∃[ w ] × Heap (V ⊙ w))
+    f : Node V → List (V ε) × List (∃ w × Heap (V ⊙ w)) → List (V ε) × List (∃ w × Heap (V ⊙ w))
     f (leaf x) (ls , hs) = (x ∷ ls) , hs
     f (w ⋊ x)  (ls , hs) = ls , ((w , x) ∷ hs)
 
@@ -80,7 +80,7 @@ module _ {V : 𝑆 → Type v} where
   return : V ε → Heap V
   return x = leaf x ∷ []
 
-  weight : ∃ V → Heap V
+  weight : ∃ x × V x → Heap V
   weight (w , x) = (w ⋊ (leaf (subst V (sym (∙ε w)) x) ∷ [])) ∷ []
 
 _>>=_ : Heap V → (∀ {x} → V x → Heap (V ⊙ x)) → Heap V

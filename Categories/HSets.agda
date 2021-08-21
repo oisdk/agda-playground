@@ -67,7 +67,7 @@ hSetExp  X Y .Exponential.uniq X₁ f .snd .snd {y} x = cong curry (sym x)
 open import Categories.Pullback
 
 hSetHasPullbacks : HasPullbacks hSetCategory
-hSetHasPullbacks {X = X} {Y = Y} {Z = Z} f g .Pullback.P = ∃[ ab ] × (f (fst ab) ≡ g (snd ab)) , isOfHLevelΣ 2 (X .snd ⟨×⟩ Y .snd) λ xy → isProp→isSet (Z .snd (f (xy .fst)) (g (xy .snd)))
+hSetHasPullbacks {X = X} {Y = Y} {Z = Z} f g .Pullback.P = ∃ ab × (f (fst ab) ≡ g (snd ab)) , isOfHLevelΣ 2 (X .snd ⟨×⟩ Y .snd) λ xy → isProp→isSet (Z .snd (f (xy .fst)) (g (xy .snd)))
 hSetHasPullbacks f g .Pullback.p₁ ((x , _) , _) = x
 hSetHasPullbacks f g .Pullback.p₂ ((_ , y) , _) = y
 hSetHasPullbacks f g .Pullback.commute = funExt snd
@@ -110,7 +110,7 @@ module CoeqProofs {X Y : Ob} (f : X ⟶ Y) where
   KernelPair = hSetHasPullbacks f f
 
   Im : Ob
-  Im = ∃[ b ] × ∥ fiber f b ∥ , isOfHLevelΣ 2 (Y .snd) λ _ → isProp→isSet squash
+  Im = ∃ b × ∥ fiber f b ∥ , isOfHLevelΣ 2 (Y .snd) λ _ → isProp→isSet squash
 
   im : X ⟶ Im
   im x = f x , ∣ x , refl ∣
@@ -177,7 +177,7 @@ module ExtactProofs {X : Ob} {R : X .fst → X .fst → hProp ℓ}
   ℛ x y = R x y .fst
 
   Src : Ob
-  Src .fst = ∃[ x,y ] × (uncurry ℛ x,y)
+  Src .fst = ∃ x,y × (uncurry ℛ x,y)
   Src .snd = isOfHLevelΣ 2 (X .snd ⟨×⟩ X .snd) λ _ → isProp→isSet (R _ _ .snd)
 
   pr₁ pr₂ : Src ⟶ X

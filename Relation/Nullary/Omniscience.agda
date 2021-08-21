@@ -17,7 +17,7 @@ private
 
 Omniscient Exhaustible Prop-Omniscient : ∀ p {a} → Type a → Type _
 
-Omniscient p A = ∀ {P : A → Type p} → (∀ x → Dec (P x)) → Dec (∃[ x ] × P x)
+Omniscient p A = ∀ {P : A → Type p} → (∀ x → Dec (P x)) → Dec (∃ x × P x)
 
 Exhaustible p A = ∀ {P : A → Type p} → (∀ x → Dec (P x)) → Dec (∀ x → P x)
 
@@ -27,4 +27,4 @@ Omniscient→Exhaustible omn P? =
     (λ ¬∃P x → Dec→Stable _ (P? x) (¬∃P ∘ (x ,_)))
     (λ ¬∃P ∀P → ¬∃P λ p → p .snd (∀P (p .fst)))
     (! (omn (! ∘ P?)))
-Prop-Omniscient p A = ∀ {P : A → Type p} → (∀ x → Dec (P x)) → Dec ∥ ∃[ x ] × P x ∥
+Prop-Omniscient p A = ∀ {P : A → Type p} → (∀ x → Dec (P x)) → Dec ∥ ∃ x × P x ∥

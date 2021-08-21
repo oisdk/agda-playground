@@ -66,7 +66,7 @@ stream .leftInv = linv
 
 -- infixr 5 _∈²_
 -- _∈²_ : A → Stream (A ⁺) → Type _
--- x ∈² xs = ∃[ n ] x Kleene.∈⁺ xs n
+-- x ∈² xs = ∃ n x Kleene.∈⁺ xs n
 
 -- mutual
 --   ◇++⋆ : ∀ (x : A) y ys → x Kleene.∈⋆ y → x ∈ concat⋆ y ys

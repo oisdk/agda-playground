@@ -58,7 +58,7 @@ swapₚ x₁ x₂ xs x .inv = swapₚ-to x₂ x₁ xs x
 swapₚ x₁ x₂ xs x .leftInv  = swapₚ-inv x₁ x₂ xs x
 swapₚ x₁ x₂ xs x .rightInv = swapₚ-inv x₂ x₁ xs x
 
-Fin-length : (xs : List A) → ∃ (_∈ xs) ⇔ Fin (length xs)
+Fin-length : (xs : List A) → ∃ x × (x ∈ xs) ⇔ Fin (length xs)
 Fin-length xs .inv n = xs ! n , n , refl
 Fin-length xs .fun (x , n , p) = n
 Fin-length xs .leftInv (x , n , p) i .fst = p i

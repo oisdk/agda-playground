@@ -7,14 +7,11 @@ open import Agda.Builtin.Sigma
   public
 open import Level
 
-∃ : ∀ {a b} {A : Type a} (B : A → Type b) → Type (a ℓ⊔ b)
-∃ {A = A} = Σ A
-
 infixr 4.5 ∃-syntax
 ∃-syntax : ∀ {a b} {A : Type a} (B : A → Type b) → Type (a ℓ⊔ b)
-∃-syntax = ∃
+∃-syntax {A = A} = Σ A
 
-syntax ∃-syntax (λ x → e) = ∃[ x ] × e
+syntax ∃-syntax (λ x → e) = ∃ x × e
 
 infixr 4.5 Σ⦂-syntax
 Σ⦂-syntax : (A : Type a) (B : A → Type b) → Type (a ℓ⊔ b)
