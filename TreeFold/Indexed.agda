@@ -44,7 +44,7 @@ double≡*2 : ∀ n → n + n ≡ n * 2
 double≡*2 zero    = refl
 double≡*2 (suc n) = cong suc (ℕ.+-suc n n ; cong suc (double≡*2 n))
 
-module _ {t} (N : ℕ → Type t) (f : ∀ p n m → N (2^ p * n) → N (2^ p * m) → N (2^ p * (n + m))) (z : N 0) where
+module NonNorm {t} (N : ℕ → Type t) (f : ∀ p n m → N (2^ p * n) → N (2^ p * m) → N (2^ p * (n + m))) (z : N 0) where
   spine : Vec (N 1) n → Array (N ) ⟦ n ⇑⟧
   spine [] = []
   spine (x ∷ xs) = cons (λ n x y → subst N (double≡*2 n) (f 0 n n x y)) x (spine xs)
@@ -52,19 +52,20 @@ module _ {t} (N : ℕ → Type t) (f : ∀ p n m → N (2^ p * n) → N (2^ p * 
   unspine : Array N ns → N ⟦ ns ⇓⟧
   unspine = array-foldr N (λ n → f n 1) z
 
-  treeFold′ : Vec (N 1) n → N n
-  treeFold′ xs = subst N (𝔹-rightInv _) (unspine (spine xs))
-
-open import Path.Reasoning
-open import Data.Nat.Properties
-
-pow-dist : ∀ p n m → 2^ p * n + 2^ p * m ≡ 2^ p * (n + m)
-pow-dist zero    n m = refl
-pow-dist (suc p) n m =
-  (2^ p * n) * 2 + (2^ p * m) * 2 ≡˘⟨ +-*-distrib (2^ p * n) (2^ p * m) 2 ⟩
-  (2^ p * n + 2^ p * m) * 2 ≡⟨ cong (_* 2) (pow-dist p n m) ⟩
-  (2^ p * (n + m)) * 2 ∎
-
-module _ {t} (N : ℕ → Type t) (f : ∀ n m → N n → N m → N (n + m)) (z : N 0) where
   treeFold : Vec (N 1) n → N n
-  treeFold = treeFold′ N (λ p n m xs ys → subst N (pow-dist p n m) (f (2^ p * n) (2^ p * m) xs ys)) z
+  treeFold xs = subst N (𝔹-rightInv _) (unspine (spine xs))
+
+pow-suc : ∀ n m → (2^ n * 1) + (2^ n * m) ≡ (2^ n * suc m)
+pow-suc zero m = refl
+pow-suc (suc n) m = sym (ℕ.+-*-distrib (2^ n * 1) (2^ n * m) 2) ; cong (_* 2) (pow-suc n m)
+
+module _ {t} (N : ℕ → Type t) (f : ∀ {n m} → N n → N m → N (n + m)) (z : N 0) where
+  spine : Vec (N 1) n → Array (N ) ⟦ n ⇑⟧
+  spine [] = []
+  spine (x ∷ xs) = cons (λ n x y → subst N (double≡*2 n) (f x y)) x (spine xs)
+
+  unspine : Array N ns → N ⟦ ns ⇓⟧
+  unspine = array-foldr N (λ n m xs ys → subst N (pow-suc n m) (f xs ys)) z
+
+  treeFold : Vec (N 1) n → N n
+  treeFold xs = subst N (𝔹-rightInv _) (unspine (spine xs))
