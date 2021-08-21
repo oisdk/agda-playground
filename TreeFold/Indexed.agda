@@ -52,5 +52,19 @@ module _ {t} (N : ℕ → Type t) (f : ∀ p n m → N (2^ p * n) → N (2^ p * 
   unspine : Array N ns → N ⟦ ns ⇓⟧
   unspine = array-foldr N (λ n → f n 1) z
 
+  treeFold′ : Vec (N 1) n → N n
+  treeFold′ xs = subst N (𝔹-rightInv _) (unspine (spine xs))
+
+open import Path.Reasoning
+open import Data.Nat.Properties
+
+pow-dist : ∀ p n m → 2^ p * n + 2^ p * m ≡ 2^ p * (n + m)
+pow-dist zero    n m = refl
+pow-dist (suc p) n m =
+  (2^ p * n) * 2 + (2^ p * m) * 2 ≡˘⟨ +-*-distrib (2^ p * n) (2^ p * m) 2 ⟩
+  (2^ p * n + 2^ p * m) * 2 ≡⟨ cong (_* 2) (pow-dist p n m) ⟩
+  (2^ p * (n + m)) * 2 ∎
+
+module _ {t} (N : ℕ → Type t) (f : ∀ n m → N n → N m → N (n + m)) (z : N 0) where
   treeFold : Vec (N 1) n → N n
-  treeFold xs = subst N (𝔹-rightInv _) (unspine (spine xs))
+  treeFold = treeFold′ N (λ p n m xs ys → subst N (pow-dist p n m) (f (2^ p * n) (2^ p * m) xs ys)) z
