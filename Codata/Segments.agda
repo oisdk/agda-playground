@@ -53,18 +53,21 @@ replicate (suc n) x = x ∹ replicate n x
 
 module _ (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w<i : w < i) → A × B (i ∸ w))) where
     unfold′ : Acc _<_ i → B i → Colist′ A i
-    unfold″ : Acc _<_ i → ∃ w × (w ≢ ε) × ((w<i : w < i) → A × B (i ∸ w)) → Colist′ A i
+    unfold″ : Acc _<_ i → ∀ {w} →  (w ≢ ε) × ((w<i : w < i) → A × B (i ∸ w)) → w < i → A × Colist′ A (i ∸ w)
     unfold‴ : Acc _<_ i → (j<i : j < i) → j ≢ ε → B (i ∸ j) → Colist′ A (i ∸ j)
 
     unfold‴ {i} {j} (acc wf) j<i j≢ε xs = unfold′ (wf (i ∸ j) i∸j<i) xs
       where
       i∸j<i = ∸‿< i j (λ i≡ε → j<i (j , sym (cong (_∙ j) i≡ε ; ε∙ j))) j≢ε
 
-    unfold″ a (w , w≢ε , xs′) = w ◃ λ w<i → map₂ (unfold‴ a w<i w≢ε) (xs′ w<i)
+    unfold″ a {w} (w≢ε , xs′) w<i = map₂ (unfold‴ a w<i w≢ε) (xs′ w<i)
 
-    unfold′ a xs = unfold″ a (ϕ xs)
+    unfold′ a = uncurry _◃_ ∘ map₂ (unfold″ a) ∘ ϕ
 
-unfold : (fdc : WellFounded _<_) (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w<i : w < i) → A × B (i ∸ w))) → (∀ {i} → B i) → Colist A
+unfold : (fdc : WellFounded _<_)
+         (B : 𝑆 → Type b)
+         (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w<i : w < i) → A × B (i ∸ w))) →
+         (∀ {i} → B i) → Colist A
 unfold fdc B ϕ xs {i} = unfold′ B ϕ (fdc i) xs
 
 -- The definition of the list lets us construct an infinite colist as long as
