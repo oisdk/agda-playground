@@ -43,13 +43,15 @@ module _ {ℓ} (mon : Monad ℓ ℓ) where
 module _ {ℓ} (fun : Functor ℓ ℓ) where
   open Functor fun using (map; 𝐹)
   module _ {B : Type ℓ} (BIsSet : isSet B) where
+
     cata : (A → B) → (𝐹 B → B) → Free 𝐹 A → B
     cata h ϕ (lift x) = ϕ (map h x)
     cata h ϕ (return x) = h x
-    cata h ϕ (xs >>= k) = cata (λ x → cata h ϕ (k x)) ϕ xs
+    cata h ϕ (xs >>= k) = cata (cata h ϕ ∘ k) ϕ xs
+
     cata h ϕ (>>=-idˡ f x i) = cata h ϕ (f x)
     cata h ϕ (>>=-idʳ xs i) = cata h ϕ xs
-    cata h ϕ (>>=-assoc xs f g i) = cata (λ x → cata (λ x₁ → cata h ϕ (g x₁)) ϕ (f x)) ϕ xs
+    cata h ϕ (>>=-assoc xs f g i) = cata (cata (cata h ϕ ∘ g) ϕ ∘ f) ϕ xs
     cata h ϕ (trunc xs ys p q i j) =
       isOfHLevel→isOfHLevelDep 2
         (λ xs → BIsSet)
