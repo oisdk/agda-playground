@@ -2,10 +2,9 @@ open import Prelude
 open import Algebra
 open import Algebra.Monus
 
-module Codata.Stream.Segmented
+module Codata.Segments
   {ℓ}
   (mon : CTMAPOM ℓ)
-  
   where
 
 open CTMAPOM mon
