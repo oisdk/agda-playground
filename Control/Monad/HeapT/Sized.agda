@@ -69,13 +69,13 @@ flatten xs =
 
 module PopMin
   (decomp : ∀ {A B w₁ w₂ w₃} → 𝐹 (w₁ ∙ w₂) A → 𝐹 (w₁ ∙ w₃) B → 𝐹 w₁ (𝐹 w₂ A × 𝐹 w₃ B))
-  (strong : {w : 𝑆} → {A B : Type ℓ} → (A → 𝐹 w B) → 𝐹 w (A → B))
+  (choice : {w : 𝑆} → {A B : Type ℓ} → (A → 𝐹 w B) → 𝐹 w (A → B))
   where
 
   _∪_ : Root′ A i → Root′ A i → Root′ A i
   _∪_ {i = i} (wˣ ⋊ xs) (wʸ ⋊ ys) with wˣ ≤|≥ wʸ
   ... | inr (k , wˣ≡wʸ∙k) = {!!}
-  ... | inl (k , wʸ≡wˣ∙k) = wˣ ⋊ λ wˣ<i → map (λ { (xs , ys) → ⌈ k ⋊ (λ k<i∸wˣ → subst (𝐹 _ ∘ Branch _) (cong (_ ∸_) wʸ≡wˣ∙k ; sym (∸‿assoc _ wˣ k)) (map (_$ subst (_< i) (sym wʸ≡wˣ∙k) {!!})  ys)) ⌉ ∷ xs }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) (xs wˣ<i)) (subst (flip 𝐹 _) wʸ≡wˣ∙k (strong ys)))
+  ... | inl (k , wʸ≡wˣ∙k) = wˣ ⋊ λ wˣ<i → map (λ { (xs , ys) → ⌈ k ⋊ (λ k<i∸wˣ → subst (𝐹 _ ∘ Branch _) (cong (_ ∸_) wʸ≡wˣ∙k ; sym (∸‿assoc _ wˣ k)) (map (_$ subst (_< i) (sym wʸ≡wˣ∙k) {!!})  ys)) ⌉ ∷ xs }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) (xs wˣ<i)) (subst (flip 𝐹 _) wʸ≡wˣ∙k (choice ys)))
     where
     lemma : ∀ x y z → x < z → y < z ∸ x → x ∙ y < z
     lemma = {!!}

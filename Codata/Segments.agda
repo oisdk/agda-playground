@@ -19,7 +19,7 @@ private variable i j : 𝑆
 -- any given depth.
 infixr 5 _◃_
 data Colist′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
-  _◃_ : ∀ w → ((w<i : w < i) → A × Colist′ A (i ∸ w)) → Colist′ A i
+  _◃_ : ∀ w → ((w≤i : w ≤ i) → A × Colist′ A (i ∸ w)) → Colist′ A i
 --              ^^^^^^^^^^^^
 --              This is a proposition
 
@@ -35,38 +35,38 @@ Colist A = ∀ {i} → Colist′ A i
 _∹_ : A → Colist A → Colist A
 x ∹ xs = ε ◃ λ _ → x , xs
 
--- To terminate computation you use all the fuel, making an empty list.
-empty : Colist A
-empty {i = i} = i ◃ λ i<i → ⊥-elim (irrefl i<i)
+-- -- To terminate computation you use all the fuel, making an empty list.
+-- empty : Colist A
+-- empty {i = i} = i ◃ λ i<i → ⊥-elim (irrefl i<i)
 
--- singleton
-pure : A → Colist A
-pure x = x ∹ empty
+-- -- singleton
+-- pure : A → Colist A
+-- pure x = x ∹ empty
 
-replicate : ℕ → A → Colist A
-replicate zero    x = empty
-replicate (suc n) x = x ∹ replicate n x
+-- replicate : ℕ → A → Colist A
+-- replicate zero    x = empty
+-- replicate (suc n) x = x ∹ replicate n x
 
 --------------------------------------------------------------------------------
 -- Infinite colists
 --------------------------------------------------------------------------------
 
-module _ (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w<i : w < i) → A × B (i ∸ w))) where
+module _ (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w<i : w ≤ i) → A × B (i ∸ w))) where
     unfold′ : Acc _<_ i → B i → Colist′ A i
-    unfold″ : Acc _<_ i → ∀ {w} →  (w ≢ ε) × ((w<i : w < i) → A × B (i ∸ w)) → w < i → A × Colist′ A (i ∸ w)
-    unfold‴ : Acc _<_ i → (j<i : j < i) → j ≢ ε → B (i ∸ j) → Colist′ A (i ∸ j)
+    unfold″ : Acc _<_ i → ∀ {w} →  (w ≢ ε) × ((w<i : w ≤ i) → A × B (i ∸ w)) → w ≤ i → A × Colist′ A (i ∸ w)
+    unfold‴ : Acc _<_ i → (j<i : j ≤ i) → j ≢ ε → B (i ∸ j) → Colist′ A (i ∸ j)
 
-    unfold‴ {i} {j} (acc wf) j<i j≢ε xs = unfold′ (wf (i ∸ j) i∸j<i) xs
+    unfold‴ {i} {j} (acc wf) (k , i≡j∙k) j≢ε xs = unfold′ (wf (i ∸ j) i∸j<i) xs
       where
-      i∸j<i = ∸‿< i j (λ i≡ε → j<i (j , sym (cong (_∙ j) i≡ε ; ε∙ j))) j≢ε
+      i∸j<i = ∸‿< i j (λ i≡ε → j≢ε (zeroSumFree j k (sym i≡j∙k ; i≡ε))) j≢ε
 
-    unfold″ a {w} (w≢ε , xs′) w<i = map₂ (unfold‴ a w<i w≢ε) (xs′ w<i)
+    unfold″ a (w≢ε , xs′) w<i = map₂ (unfold‴ a w<i w≢ε) (xs′ w<i)
 
     unfold′ a = uncurry _◃_ ∘ map₂ (unfold″ a) ∘ ϕ
 
 unfold : (fdc : WellFounded _<_)
          (B : 𝑆 → Type b)
-         (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w<i : w < i) → A × B (i ∸ w))) →
+         (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w<i : w ≤ i) → A × B (i ∸ w))) →
          (∀ {i} → B i) → Colist A
 unfold fdc B ϕ xs {i} = unfold′ B ϕ (fdc i) xs
 
@@ -84,7 +84,7 @@ map f (w ◃ xs) = w ◃ λ w<i → case xs w<i of λ { (y , ys) → f y , map f
 open import Data.List using (List; _∷_; [])
 
 take′ : ∀ i → Colist′ A i → List A
-take′ i (w ◃ xs) with w <? i
+take′ i (w ◃ xs) with w ≤? i
 ... | no _ = []
 ... | yes w<i with xs w<i
 ... | y , ys = y ∷ take′ _ ys
