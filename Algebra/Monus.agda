@@ -214,6 +214,7 @@ record CMM ℓ : Type (ℓsuc ℓ) where
   _⊓₂_ : 𝑆 → 𝑆 → 𝑆
   x ⊓₂ y = (x ∙ y) ∸ ∣ x - y ∣
 
+
 -- Cancellative Commutative Monoids with Monus
 record CCMM ℓ : Type (ℓsuc ℓ) where
   field cmm : CMM ℓ
@@ -301,6 +302,12 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
   ≺-irrefl : Irreflexive _≺_
   ≺-irrefl {x} (k , x≡x∙k , k≢ε) = k≢ε (sym (cancelˡ x ε k (∙ε x ; x≡x∙k)))
 
+  ≤∸ : ∀ x y → (x≤y : x ≤ y) → y ∸ x ≡ fst x≤y
+  ≤∸ x y (k , y≡x∙k) =
+   y ∸ x       ≡⟨ cong (_∸ x) y≡x∙k ⟩
+   (x ∙ k) ∸ x ≡⟨ ∸‿cancel x k ⟩
+   k ∎
+
 -- Cancellative total minimal antisymmetric pom (has monus)
 record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   field tmapom : TMAPOM ℓ
@@ -385,7 +392,7 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
                                ; commutativeMonoid = commutativeMonoid } }
 
   open CCMM ccmm public
-    using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_; ≺-irrefl)
+    using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_; ≺-irrefl; ≤∸)
 
   2× : 𝑆 → 𝑆
   2× x = x ∙ x

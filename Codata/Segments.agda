@@ -19,9 +19,9 @@ private variable i j : 𝑆
 -- any given depth.
 infixr 5 _◃_
 data Colist′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
-  _◃_ : ∀ w → ((w≺i : w ≺ i) → A × Colist′ A (fst w≺i)) → Colist′ A i
---              ^^^^^^^^^^^^
---              This is a proposition, by the way.
+  _◃_ : ∀ w → ((w≺i : w ≺ i) → A × Colist′ A (i ∸ w)) → Colist′ A i
+--              ^^^^^^^^^^^^                  ^^^^^^^^
+--              This is a proposition         This is i ∸ w
 
 Colist : Type a → Type (a ℓ⊔ ℓ)
 Colist A = ∀ {i} → Colist′ A i
@@ -51,18 +51,18 @@ replicate (suc n) x = x ∹ replicate n x
 -- Infinite colists
 --------------------------------------------------------------------------------
 
-module _ (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i))) where
+module _ (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (i ∸ w))) where
     unfold′ : Acc _≺_ i → B i → Colist′ A i
-    unfold″ : Acc _≺_ i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i)) → Colist′ A i
-    unfold‴ : Acc _≺_ i → (j≺i : j ≺ i) → j ≢ ε → B (fst j≺i) → Colist′ A (fst j≺i)
+    unfold″ : Acc _≺_ i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (i ∸ w)) → Colist′ A i
+    unfold‴ : Acc _≺_ i → (j≺i : j ≺ i) → j ≢ ε → B (i ∸ j) → Colist′ A (i ∸ j)
 
-    unfold‴ (acc wf) (k , i≡j∙k , k≢ε) j≢ε xs = unfold′ (wf _ ((_ , i≡j∙k ; comm _ _ , j≢ε))) xs
+    unfold‴ (acc wf) (k , i≡j∙k , k≢ε) j≢ε xs = unfold′ (wf _ (_ , sym (≤‿∸‿cancel _ _ (k , i≡j∙k)) , j≢ε)) xs
 
     unfold″ a (w , w≢ε , xs′) = w ◃ λ w≺i → map₂ (unfold‴ a w≺i w≢ε) (xs′ w≺i)
 
     unfold′ a xs = unfold″ a (ϕ xs)
 
-unfold : (fdc : WellFounded _≺_) (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (fst w≺i))) → (∀ {i} → B i) → Colist A
+unfold : (fdc : WellFounded _≺_) (B : 𝑆 → Type b) (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w≺i : w ≺ i) → A × B (i ∸ w))) → (∀ {i} → B i) → Colist A
 unfold fdc B ϕ xs {i} = unfold′ B ϕ (fdc i) xs
 
 -- The definition of the list lets us construct an infinite colist as long as
