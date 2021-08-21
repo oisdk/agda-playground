@@ -321,7 +321,6 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
     x ∙ k ≡˘⟨ y≡x∙k ⟩
     y ∎
 
-
 -- Cancellative total minimal antisymmetric pom (has monus)
 record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   field tmapom : TMAPOM ℓ
