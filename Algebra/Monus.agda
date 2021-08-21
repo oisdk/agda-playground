@@ -408,9 +408,7 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
     using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_; ≺-irrefl; ≤∸)
 
   ∸‿< : ∀ x y → x ≢ ε → y ≢ ε → x ∸ y < x
-  ∸‿< x y x≢ε y≢ε (k₁ , x∸y≡x∙k₁) with x ≤|≥ y
-  ... | inl (k₂ , y≡x∙k₂) = x≢ε (zeroSumFree x k₁ (sym x∸y≡x∙k₁))
-  ... | inr (k₂ , x≡y∙k₂) = y≢ε (zeroSumFree y k₁ (comm y k₁ ; sym (cancelˡ x ε (k₁ ∙ y) (∙ε x ; x≡y∙k₂ ; cong (y ∙_) x∸y≡x∙k₁ ; comm _ _ ; assoc x k₁ y))))
+  ∸‿< x y x≢ε y≢ε = ≺⇒< (x ∸ y) x (∸‿≺ x y x≢ε y≢ε)
 
   2× : 𝑆 → 𝑆
   2× x = x ∙ x
