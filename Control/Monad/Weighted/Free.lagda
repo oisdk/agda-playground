@@ -23,8 +23,8 @@ open import Control.Monad.Weighted.Functor
 inj : A → Weighted A
 inj x = 1# ◃ x ∷ []
 
-module Proof {ℓ} (mod : Semimodule rng ℓ) (vIsSet : isSet (Semimodule.𝑉 mod)) where
-  module Mod = Semimodule mod
+module Proof {ℓ} (mod : LeftSemimodule rng ℓ) (vIsSet : isSet (LeftSemimodule.𝑉 mod)) where
+  module Mod = LeftSemimodule mod
   open Mod using (_⋊_; _∪_; ∅) renaming (𝑉 to 𝑀)
 \end{code}
 %<*hom>
@@ -65,7 +65,7 @@ module Proof {ℓ} (mod : Semimodule rng ℓ) (vIsSet : isSet (Semimodule.𝑉 m
         ⟦ p ◃ x ∷ xs ⟧ ≡⟨⟩
         (p ⋊ h x) ∪ ⟦ xs ⟧ ≡˘⟨ cong (_∪ ⟦ xs ⟧) (cong (p ⋊_) (inv x)) ⟩
         p ⋊ f (inj x) ∪ ⟦ xs ⟧ ≡˘⟨ cong (_∪ ⟦ xs ⟧) (Hom.⋊-homo p _) ⟩
-        f (p ⋊′ inj x) ∪ ⟦ xs ⟧ ≡⟨ cong (_∪ ⟦ xs ⟧) (cong f (cong (_◃ x ∷ []) (∗1 p))) ⟩
+        f (p ⋊′ inj x) ∪ ⟦ xs ⟧ ≡⟨ cong (_∪ ⟦ xs ⟧) (cong f (cong (_◃ x ∷ []) (*1 p))) ⟩
         f (p ◃ x ∷ []) ∪ ⟦ xs ⟧ ≡⟨ cong (f (p ◃ x ∷ []) ∪_) pxs ⟩
         f (p ◃ x ∷ []) ∪ f xs ≡˘⟨ Hom.∙-homo _ _ ⟩
         f (p ◃ x ∷ xs) ∎
@@ -98,9 +98,9 @@ module Proof {ℓ} (mod : Semimodule rng ℓ) (vIsSet : isSet (Semimodule.𝑉 m
     ⋊-hom r .fst [] = sym (Mod.⋊∅ r)
     ⋊-hom r .fst (p ◃ x ∷ xs ⟨ pxs ⟩) =
       ⟦ r ⋊′ (p ◃ x ∷ xs) ⟧ ≡⟨⟩
-      ⟦ r ∗ p ◃ x ∷ r ⋊′ xs ⟧ ≡⟨⟩
-      (r ∗ p) ⋊ h x ∪ ⟦ r ⋊′ xs ⟧ ≡⟨ cong ((r ∗ p) ⋊ h x ∪_) pxs ⟩
-      (r ∗ p) ⋊ h x ∪ r ⋊ ⟦ xs ⟧ ≡⟨ cong (_∪ r ⋊ ⟦ xs ⟧) (Mod.⟨∗⟩⋊ _ _ _) ⟩
+      ⟦ r * p ◃ x ∷ r ⋊′ xs ⟧ ≡⟨⟩
+      (r * p) ⋊ h x ∪ ⟦ r ⋊′ xs ⟧ ≡⟨ cong ((r * p) ⋊ h x ∪_) pxs ⟩
+      (r * p) ⋊ h x ∪ r ⋊ ⟦ xs ⟧ ≡⟨ cong (_∪ r ⋊ ⟦ xs ⟧) (Mod.⟨*⟩⋊ _ _ _) ⟩
       r ⋊ (p ⋊ h x) ∪ r ⋊ ⟦ xs ⟧ ≡˘⟨ Mod.⋊⟨∪⟩ r _ _ ⟩
       r ⋊ (p ⋊ h x ∪ ⟦ xs ⟧) ≡⟨⟩
       r ⋊ ⟦ p ◃ x ∷ xs ⟧ ∎

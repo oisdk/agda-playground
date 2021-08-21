@@ -17,19 +17,19 @@ open import Control.Monad.Weighted.Union rng
 open import Control.Monad.Weighted.Cond rng
 
 module _ {a} {A : Type a} where
-  semimodule : Semimodule rng (ℓ ℓ⊔ a)
-  Monoid.𝑆 (CommutativeMonoid.monoid (Semimodule.semimodule semimodule)) = Weighted A
-  Monoid._∙_ (CommutativeMonoid.monoid (Semimodule.semimodule semimodule)) = _∪_
-  Monoid.ε (CommutativeMonoid.monoid (Semimodule.semimodule semimodule)) = []
-  Monoid.assoc (CommutativeMonoid.monoid (Semimodule.semimodule semimodule)) xs ys zs = sym (∪-assoc xs ys zs)
-  Monoid.ε∙ (CommutativeMonoid.monoid (Semimodule.semimodule semimodule)) _ = refl
-  Monoid.∙ε (CommutativeMonoid.monoid (Semimodule.semimodule semimodule)) xs = ∪-idr xs
-  CommutativeMonoid.comm (Semimodule.semimodule semimodule) = ∪-com
-  Semimodule._⋊_ semimodule = _⋊_
-  Semimodule.⟨∗⟩⋊ semimodule = ∗-assoc-⋊
-  Semimodule.⟨+⟩⋊ semimodule x y xs = sym (⋊-distribʳ x y xs)
-  Semimodule.⋊⟨∪⟩ semimodule x y xs = sym (⋊-distribˡ x y xs)
-  Semimodule.1⋊ semimodule = 1⋊
-  Semimodule.0⋊ semimodule = 0⋊
-  Semimodule.⋊∅ semimodule = ⋊∅
+  semimodule : LeftSemimodule rng (ℓ ℓ⊔ a)
+  semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid.𝑆 = Weighted A
+  semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid._∙_ = _∪_
+  semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid.ε = []
+  semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid.assoc xs ys zs = sym (∪-assoc xs ys zs)
+  semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid.ε∙ _ = refl
+  semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid.∙ε xs = ∪-idr xs
+  semimodule .LeftSemimodule.semimodule .CommutativeMonoid.comm = ∪-com
+  semimodule .LeftSemimodule._⋊_ = _⋊_
+  semimodule .LeftSemimodule.⟨*⟩⋊ = *-assoc-⋊
+  semimodule .LeftSemimodule.⟨+⟩⋊ x y xs = sym (⋊-distribʳ x y xs)
+  semimodule .LeftSemimodule.⋊⟨∪⟩ x y xs = sym (⋊-distribˡ x y xs)
+  semimodule .LeftSemimodule.1⋊ = 1⋊
+  semimodule .LeftSemimodule.0⋊ = 0⋊
+  semimodule .LeftSemimodule.⋊∅ = ⋊∅
 \end{code}

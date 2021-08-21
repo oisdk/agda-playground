@@ -13,6 +13,7 @@ open import Path
 open import Path.Reasoning
 open import Data.Sigma
 open import Function hiding (_∘_; id)
+open import Prelude hiding (_∘_; id)
 
 open import Control.Monad.Weighted.Definition rng
 open import Control.Monad.Weighted.Eliminators rng
@@ -25,7 +26,7 @@ module _ {v} {V : Type v} {𝒸 : Level} where
 \end{code}
 %<*w-alg>
 \begin{code}
-  W-Alg = Σ[ A ⦂ (Weighted V → Type 𝒸) ] (Ψ V A)
+  W-Alg = Σ[ A ⦂ (Weighted V → Type 𝒸) ] × Ψ V A
 \end{code}
 %</w-alg>
 \begin{code}
@@ -33,7 +34,7 @@ module _ {v} {V : Type v} {𝒸 : Level} where
 \end{code}
 %<*w-alg-hom>
 \begin{code}
-  (A , a) ⟶ (B , b) = Σ[ h ⦂ A ⇒ B ] ∀ xs → h (a .fst xs) ≡[ i ≔ B (map-id h xs i) ]≡ b .fst (map h xs)
+  (A , a) ⟶ (B , b) = Σ[ h ⦂ (A ⇒ B) ] × ∀ xs → h (a .fst xs) ≡[ i ≔ B (map-id h xs i) ]≡ b .fst (map h xs)
 \end{code}
 %</w-alg-hom>
 \begin{code}
