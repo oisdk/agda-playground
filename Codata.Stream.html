@@ -67,25 +67,25 @@
 
 <a id="1522" class="Comment">-- infixr 5 _∈²_</a>
 <a id="1539" class="Comment">-- _∈²_ : A → Stream (A ⁺) → Type _</a>
-<a id="1575" class="Comment">-- x ∈² xs = ∃[ n ] x Kleene.∈⁺ xs n</a>
+<a id="1575" class="Comment">-- x ∈² xs = ∃ n x Kleene.∈⁺ xs n</a>
 
-<a id="1613" class="Comment">-- mutual</a>
-<a id="1623" class="Comment">--   ◇++⋆ : ∀ (x : A) y ys → x Kleene.∈⋆ y → x ∈ concat⋆ y ys</a>
-<a id="1685" class="Comment">--   ◇++⋆ x (∹ y) ys x∈y = ◇++⁺ x y ys x∈y</a>
+<a id="1610" class="Comment">-- mutual</a>
+<a id="1620" class="Comment">--   ◇++⋆ : ∀ (x : A) y ys → x Kleene.∈⋆ y → x ∈ concat⋆ y ys</a>
+<a id="1682" class="Comment">--   ◇++⋆ x (∹ y) ys x∈y = ◇++⁺ x y ys x∈y</a>
 
-<a id="1729" class="Comment">--   ◇++⁺ : ∀ (x : A) y ys → x Kleene.∈⁺ y → x ∈ concat⁺ y ys</a>
-<a id="1791" class="Comment">--   ◇++⁺ x y ys (f0 , x∈y) = zero , x∈y</a>
-<a id="1832" class="Comment">--   ◇++⁺ x y ys (fs n , x∈y) = let m , p = ◇++⋆ x (y .tail) ys (n , x∈y) in suc m , p</a>
+<a id="1726" class="Comment">--   ◇++⁺ : ∀ (x : A) y ys → x Kleene.∈⁺ y → x ∈ concat⁺ y ys</a>
+<a id="1788" class="Comment">--   ◇++⁺ x y ys (f0 , x∈y) = zero , x∈y</a>
+<a id="1829" class="Comment">--   ◇++⁺ x y ys (fs n , x∈y) = let m , p = ◇++⋆ x (y .tail) ys (n , x∈y) in suc m , p</a>
 
-<a id="1920" class="Comment">-- mutual</a>
-<a id="1930" class="Comment">--   ++◇⋆ : ∀ (x : A) y ys → x ∈ concat ys → x ∈ concat⋆ y ys</a>
-<a id="1992" class="Comment">--   ++◇⋆ x [] ys x∈ys = x∈ys</a>
-<a id="2022" class="Comment">--   ++◇⋆ x (∹ y) ys x∈ys = ++◇⁺ x y ys x∈ys</a>
+<a id="1917" class="Comment">-- mutual</a>
+<a id="1927" class="Comment">--   ++◇⋆ : ∀ (x : A) y ys → x ∈ concat ys → x ∈ concat⋆ y ys</a>
+<a id="1989" class="Comment">--   ++◇⋆ x [] ys x∈ys = x∈ys</a>
+<a id="2019" class="Comment">--   ++◇⋆ x (∹ y) ys x∈ys = ++◇⁺ x y ys x∈ys</a>
 
-<a id="2068" class="Comment">--   ++◇⁺ : ∀ (x : A) y ys → x ∈ concat ys → x ∈ concat⁺ y ys</a>
-<a id="2130" class="Comment">--   ++◇⁺ x y ys x∈ys = let n , p = ++◇⋆ x (y .tail) ys x∈ys in suc n , p</a>
+<a id="2065" class="Comment">--   ++◇⁺ : ∀ (x : A) y ys → x ∈ concat ys → x ∈ concat⁺ y ys</a>
+<a id="2127" class="Comment">--   ++◇⁺ x y ys x∈ys = let n , p = ++◇⋆ x (y .tail) ys x∈ys in suc n , p</a>
 
-<a id="2205" class="Comment">-- concat-∈ : ∀ (x : A) xs → x ∈² xs → x ∈ concat xs</a>
-<a id="2258" class="Comment">-- concat-∈ x xs (zero  , x∈xs) = ◇++⁺ x (xs zero) (xs ∘ suc) x∈xs</a>
-<a id="2325" class="Comment">-- concat-∈ x xs (suc n , x∈xs) = ++◇⁺ x (xs zero) (xs ∘ suc) (concat-∈ x (xs ∘ suc) (n , x∈xs))</a>
+<a id="2202" class="Comment">-- concat-∈ : ∀ (x : A) xs → x ∈² xs → x ∈ concat xs</a>
+<a id="2255" class="Comment">-- concat-∈ x xs (zero  , x∈xs) = ◇++⁺ x (xs zero) (xs ∘ suc) x∈xs</a>
+<a id="2322" class="Comment">-- concat-∈ x xs (suc n , x∈xs) = ++◇⁺ x (xs zero) (xs ∘ suc) (concat-∈ x (xs ∘ suc) (n , x∈xs))</a>
 </pre></body></html>
