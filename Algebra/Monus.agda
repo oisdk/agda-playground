@@ -172,6 +172,11 @@ record TMAPOM ℓ : Type (ℓsuc ℓ) where
     x      ≡⟨ x≡y∙k₂ ⟩
     y ∙ k₂ ∎
 
+  ∸‿≺ : ∀ x y → x ≢ ε → y ≢ ε → x ∸ y ≺ x
+  ∸‿≺ x y x≢ε y≢ε with x ≤|≥ y
+  ... | inl _ = x , sym (ε∙ x) , x≢ε
+  ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k , y≢ε
+
 -- Commutative Monoids with Monus
 record CMM ℓ : Type (ℓsuc ℓ) where
   field commutativeMonoid : CommutativeMonoid ℓ
@@ -308,6 +313,15 @@ record CCMM ℓ : Type (ℓsuc ℓ) where
    (x ∙ k) ∸ x ≡⟨ ∸‿cancel x k ⟩
    k ∎
 
+  ≤‿∸‿cancel : ∀ x y → x ≤ y → (y ∸ x) ∙ x ≡ y
+  ≤‿∸‿cancel x y (k , y≡x∙k) =
+    (y ∸ x) ∙ x ≡⟨ cong (λ y → (y ∸ x) ∙ x) y≡x∙k ⟩
+    ((x ∙ k) ∸ x) ∙ x ≡⟨ cong (_∙ x) (∸‿cancel x k) ⟩
+    k ∙ x ≡⟨ comm k x ⟩
+    x ∙ k ≡˘⟨ y≡x∙k ⟩
+    y ∎
+
+
 -- Cancellative total minimal antisymmetric pom (has monus)
 record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   field tmapom : TMAPOM ℓ
@@ -393,6 +407,11 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
 
   open CCMM ccmm public
     using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_; ≺-irrefl; ≤∸)
+
+  ∸‿< : ∀ x y → x ≢ ε → y ≢ ε → x ∸ y < x
+  ∸‿< x y x≢ε y≢ε (k₁ , x∸y≡x∙k₁) with x ≤|≥ y
+  ... | inl (k₂ , y≡x∙k₂) = x≢ε (zeroSumFree x k₁ (sym x∸y≡x∙k₁))
+  ... | inr (k₂ , x≡y∙k₂) = y≢ε (zeroSumFree y k₁ (comm y k₁ ; sym (cancelˡ x ε (k₁ ∙ y) (∙ε x ; x≡y∙k₂ ; cong (y ∙_) x∸y≡x∙k₁ ; comm _ _ ; assoc x k₁ y))))
 
   2× : 𝑆 → 𝑆
   2× x = x ∙ x
