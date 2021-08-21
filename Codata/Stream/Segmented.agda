@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Prelude
 open import Algebra
 open import Algebra.Monus
