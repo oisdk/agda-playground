@@ -9,43 +9,43 @@ module Codata.Segments
 
 open CTMAPOM mon
 
--- This is a type for coinductive lists, with a "sized types" parameter which
--- can be an arbitrary monus.
+private variable i j : 𝑆
+
+-- This is a type which contains some finite and some infinite lists.
+-- The idea is that each entry contains a parameter (w) which says
+-- how much coinductive "fuel" it uses.
+-- The Colist′ A i type represents a colist which is defined down to depth
+-- i; the Colist A type represents a "true" colist, i.e. a colist defined for
+-- any given depth.
 infixr 5 _◃_
 data Colist′ {a} (A : Type a) (i : 𝑆) : Type (a ℓ⊔ ℓ) where
   _◃_ : ∀ w → ((w≺i : w ≺ i) → A × Colist′ A (fst w≺i)) → Colist′ A i
 --              ^^^^^^^^^^^^
 --              This is a proposition, by the way.
 
--- The monus parameter tells you how much you can inspect into the list.
 Colist : Type a → Type (a ℓ⊔ ℓ)
 Colist A = ∀ {i} → Colist′ A i
-
-private
-  variable
-    i j : 𝑆
 
 --------------------------------------------------------------------------------
 -- Finite colists
 --------------------------------------------------------------------------------
 
--- empty list
+-- By adding a finite prefix you don't have to use any of the fuel.
+
+_∹_ : A → Colist A → Colist A
+x ∹ xs = ε ◃ λ _ → x , xs
+
+-- To terminate computation you use all the fuel, making an empty list.
 empty : Colist A
 empty {i = i} = i ◃ λ i≺i → ⊥-elim (≺-irrefl i≺i)
 
-_◃_∷_ : 𝑆 → A → Colist A → Colist A
-(w ◃ x ∷ xs) {i} = w ◃ λ w≺i → x , xs
-
-cons′ : ∀ w → A → Colist′ A i → Colist′ A (w ∙ i)
-cons′ w x xs = w ◃ λ { (k , w∙i≡w∙k , k≢ε) → x , subst (Colist′ _) (cancelˡ w _ k w∙i≡w∙k) xs }
-
 -- singleton
 pure : A → Colist A
-pure x = ε ◃ λ ε≺i → x , empty
+pure x = x ∹ empty
 
 replicate : ℕ → A → Colist A
 replicate zero    x = empty
-replicate (suc n) x = ε ◃ λ ε≺i → x , replicate n x
+replicate (suc n) x = x ∹ replicate n x
 
 --------------------------------------------------------------------------------
 -- Infinite colists
