@@ -96,47 +96,55 @@ EqualityProof-Alg F P = Alg F (λ xs → let Pxs = P xs in lhs Pxs ≡ rhs Pxs)
 eq-coh : {P : ∀ {A} → Free F A → AnEquality G A} {alg : EqualityProof-Alg F P} → Coherent alg
 eq-coh {P = P} = prop-coh λ xs → let Pxs = P xs in trunc (lhs Pxs) (rhs Pxs)
 
--- open import Algebra
+open import Algebra
 
--- module _ {F : Type a → Type a} where
---   freeMonad : Monad a (ℓsuc a)
---   freeMonad .Monad.𝐹 = Free F
---   freeMonad .Monad.isMonad .IsMonad._>>=_ = _>>=_
---   freeMonad .Monad.isMonad .IsMonad.return = return
---   freeMonad .Monad.isMonad .IsMonad.>>=-idˡ = >>=-idˡ
---   freeMonad .Monad.isMonad .IsMonad.>>=-idʳ = >>=-idʳ
---   freeMonad .Monad.isMonad .IsMonad.>>=-assoc = >>=-assoc
+module _ {F : Type a → Type a} where
+  freeMonad : Monad a (ℓsuc a)
+  freeMonad .Monad.𝐹 = Free F
+  freeMonad .Monad.isMonad .IsMonad._>>=_ = _>>=_
+  freeMonad .Monad.isMonad .IsMonad.return = return
+  freeMonad .Monad.isMonad .IsMonad.>>=-idˡ = >>=-idˡ
+  freeMonad .Monad.isMonad .IsMonad.>>=-idʳ = >>=-idʳ
+  freeMonad .Monad.isMonad .IsMonad.>>=-assoc = >>=-assoc
 
--- module _ {ℓ} (mon : Monad ℓ ℓ) where
---   module F = Monad mon
+module _ {ℓ} (mon : Monad ℓ ℓ) where
+  module F = Monad mon
 
---   open F using (𝐹)
+  open F using (𝐹)
 
---   module _ {G : Type ℓ → Type ℓ} (FisSet : ∀ {T} → isSet (𝐹 T)) (h : ∀ {T} → G T → 𝐹 T) where
---     ⟦_⟧ : Free G A → 𝐹 A
---     ⟦ lift x ⟧ = h x
---     ⟦ return x ⟧ = F.return x
---     ⟦ xs >>= k ⟧ = ⟦ xs ⟧ F.>>= λ x → ⟦ k x ⟧
---     ⟦ >>=-idˡ f x i ⟧ = F.>>=-idˡ (⟦_⟧ ∘ f) x i
---     ⟦ >>=-idʳ xs i ⟧ = F.>>=-idʳ ⟦ xs ⟧ i
---     ⟦ >>=-assoc xs f g i ⟧ = F.>>=-assoc ⟦ xs ⟧ (⟦_⟧ ∘ f) (⟦_⟧ ∘ g) i
+  module _ {G : Type ℓ → Type ℓ} (FisSet : ∀ {T} → isSet (𝐹 T)) (h : ∀ {T} → G T → 𝐹 T) where
+    ⟦_⟧′ : Free G A → 𝐹 A
+    ⟦ lift x ⟧′ = h x
+    ⟦ return x ⟧′ = F.return x
+    ⟦ xs >>= k ⟧′ = ⟦ xs ⟧′ F.>>= λ x → ⟦ k x ⟧′
+    ⟦ >>=-idˡ f x i ⟧′ = F.>>=-idˡ (⟦_⟧′ ∘ f) x i
+    ⟦ >>=-idʳ xs i ⟧′ = F.>>=-idʳ ⟦ xs ⟧′ i
+    ⟦ >>=-assoc xs f g i ⟧′ = F.>>=-assoc ⟦ xs ⟧′ (⟦_⟧′ ∘ f) (⟦_⟧′ ∘ g) i
 
---     ⟦ trunc xs ys p q i j ⟧ =
---       isOfHLevel→isOfHLevelDep 2
---         (λ xs → FisSet)
---         ⟦ xs ⟧ ⟦ ys ⟧
---         (cong ⟦_⟧ p) (cong ⟦_⟧ q)
---         (trunc xs ys p q)
---         i j
+    ⟦ trunc xs ys p q i j ⟧′ =
+      isOfHLevel→isOfHLevelDep 2
+        (λ xs → FisSet)
+        ⟦ xs ⟧′ ⟦ ys ⟧′
+        (cong ⟦_⟧′ p) (cong ⟦_⟧′ q)
+        (trunc xs ys p q)
+        i j
 
---     -- module _ (hom : MonadHomomorphism freeMonad {F = G} ⟶ mon) where
---     --   module Hom = MonadHomomorphism_⟶_ hom
---     --   open Hom using (f)
+    module _ (hom : MonadHomomorphism freeMonad {F = G} ⟶ mon) where
+      module Hom = MonadHomomorphism_⟶_ hom
+      open Hom using (f)
 
---     --   uniq : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) (xs : Free G A) → ⟦ xs ⟧ ≡ f xs
+      uniq-alg : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) → Ψ[ xs ⦂ G * ] ⇒ ⟦ xs ⟧′ ≡ f xs
+      uniq-alg inv .snd = prop-coh λ xs → FisSet _ _
+      uniq-alg inv .fst (liftF x) = sym (inv x)
+      uniq-alg inv .fst (returnF x) = sym (Hom.return-homo x)
+      uniq-alg inv .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) = cong₂ F._>>=_ P⟨xs⟩ (funExt P⟨∘k⟩) ; Hom.>>=-homo xs k
+
+      uniq : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) → (xs : Free G A) → ⟦ xs ⟧′ ≡ f xs
+      uniq inv = ⟦ uniq-alg inv ⟧
+
 --     --   uniq inv (lift x) = sym (inv x)
 --     --   uniq inv (return x) = sym (Hom.return-homo x)
---     --   uniq inv (xs >>= k) = cong₂ F._>>=_ (uniq inv xs) (funExt (λ x → uniq inv (k x))) ; Hom.>>=-homo xs k
+--     --   uniq inv (xs >>= k) = 
 
 --     --   uniq inv (>>=-idˡ f₁ x i) = FisSet {!f (>>=-idˡ f₁ x i0)!} {!!} {!!} {!!} i
 
