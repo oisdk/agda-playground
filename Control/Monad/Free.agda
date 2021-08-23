@@ -48,6 +48,7 @@ record Coherent {a p} {F : Type a → Type a} {P : ∀ {T} → Free F T → Type
       ψ (bindF (xs >>= f) (ψ (bindF xs Pxs f Pf)) g Pg)
         ≡[ i ≔ P (>>=-assoc xs f g i) ]≡
           ψ (bindF xs Pxs (λ x → f x >>= g) λ x → ψ (bindF (f x) (Pf x) g Pg))
+open Coherent public
 
 Ψ : (F : Type a → Type a) (P : ∀ {T} → Free F T → Type p) → Type _
 Ψ F P = Σ (Alg F P) Coherent
@@ -58,77 +59,92 @@ syntax Ψ F (λ v → e) = Ψ[ v ⦂ F * ] ⇒ e
 Φ : (Type a → Type a) → Type b → Type _
 Φ A B = Ψ A (λ _ → B)
 
-open import Algebra
+⟦_⟧ : Ψ F P → (xs : Free F A) → P xs
+⟦ alg ⟧ (lift x) = alg .fst (liftF x)
+⟦ alg ⟧ (return x) = alg .fst (returnF x)
+⟦ alg ⟧ (xs >>= k) = alg .fst (bindF xs (⟦ alg ⟧ xs) k (⟦ alg ⟧ ∘ k))
+⟦ alg ⟧ (>>=-idˡ f k i) = alg .snd .c->>=idˡ f (⟦ alg ⟧ ∘ f) k i
+⟦ alg ⟧ (>>=-idʳ xs i) = alg .snd .c->>=idʳ xs (⟦ alg ⟧ xs) i
+⟦ alg ⟧ (>>=-assoc xs f g i) = alg .snd .c->>=assoc xs (⟦ alg ⟧ xs) f (⟦ alg ⟧ ∘ f) g (⟦ alg ⟧ ∘ g) i
+⟦ alg ⟧ (trunc xs ys p q i j) =
+  isOfHLevel→isOfHLevelDep 2
+    (alg .snd .c-set)
+    (⟦ alg ⟧ xs) (⟦ alg ⟧ ys)
+    (cong ⟦ alg ⟧ p) (cong ⟦ alg ⟧ q)
+    (trunc xs ys p q)
+    i j
 
-module _ {F : Type a → Type a} where
-  freeMonad : Monad a (ℓsuc a)
-  freeMonad .Monad.𝐹 = Free F
-  freeMonad .Monad.isMonad .IsMonad._>>=_ = _>>=_
-  freeMonad .Monad.isMonad .IsMonad.return = return
-  freeMonad .Monad.isMonad .IsMonad.>>=-idˡ = >>=-idˡ
-  freeMonad .Monad.isMonad .IsMonad.>>=-idʳ = >>=-idʳ
-  freeMonad .Monad.isMonad .IsMonad.>>=-assoc = >>=-assoc
+-- open import Algebra
 
-module _ {ℓ} (mon : Monad ℓ ℓ) where
-  module F = Monad mon
+-- module _ {F : Type a → Type a} where
+--   freeMonad : Monad a (ℓsuc a)
+--   freeMonad .Monad.𝐹 = Free F
+--   freeMonad .Monad.isMonad .IsMonad._>>=_ = _>>=_
+--   freeMonad .Monad.isMonad .IsMonad.return = return
+--   freeMonad .Monad.isMonad .IsMonad.>>=-idˡ = >>=-idˡ
+--   freeMonad .Monad.isMonad .IsMonad.>>=-idʳ = >>=-idʳ
+--   freeMonad .Monad.isMonad .IsMonad.>>=-assoc = >>=-assoc
 
-  open F using (𝐹)
+-- module _ {ℓ} (mon : Monad ℓ ℓ) where
+--   module F = Monad mon
 
-  module _ {G : Type ℓ → Type ℓ} (FisSet : ∀ {T} → isSet (𝐹 T)) (h : ∀ {T} → G T → 𝐹 T) where
-    ⟦_⟧ : Free G A → 𝐹 A
-    ⟦ lift x ⟧ = h x
-    ⟦ return x ⟧ = F.return x
-    ⟦ xs >>= k ⟧ = ⟦ xs ⟧ F.>>= λ x → ⟦ k x ⟧
-    ⟦ >>=-idˡ f x i ⟧ = F.>>=-idˡ (⟦_⟧ ∘ f) x i
-    ⟦ >>=-idʳ xs i ⟧ = F.>>=-idʳ ⟦ xs ⟧ i
-    ⟦ >>=-assoc xs f g i ⟧ = F.>>=-assoc ⟦ xs ⟧ (⟦_⟧ ∘ f) (⟦_⟧ ∘ g) i
+--   open F using (𝐹)
 
-    ⟦ trunc xs ys p q i j ⟧ =
-      isOfHLevel→isOfHLevelDep 2
-        (λ xs → FisSet)
-        ⟦ xs ⟧ ⟦ ys ⟧
-        (cong ⟦_⟧ p) (cong ⟦_⟧ q)
-        (trunc xs ys p q)
-        i j
+--   module _ {G : Type ℓ → Type ℓ} (FisSet : ∀ {T} → isSet (𝐹 T)) (h : ∀ {T} → G T → 𝐹 T) where
+--     ⟦_⟧ : Free G A → 𝐹 A
+--     ⟦ lift x ⟧ = h x
+--     ⟦ return x ⟧ = F.return x
+--     ⟦ xs >>= k ⟧ = ⟦ xs ⟧ F.>>= λ x → ⟦ k x ⟧
+--     ⟦ >>=-idˡ f x i ⟧ = F.>>=-idˡ (⟦_⟧ ∘ f) x i
+--     ⟦ >>=-idʳ xs i ⟧ = F.>>=-idʳ ⟦ xs ⟧ i
+--     ⟦ >>=-assoc xs f g i ⟧ = F.>>=-assoc ⟦ xs ⟧ (⟦_⟧ ∘ f) (⟦_⟧ ∘ g) i
 
-    -- module _ (hom : MonadHomomorphism freeMonad {F = G} ⟶ mon) where
-    --   module Hom = MonadHomomorphism_⟶_ hom
-    --   open Hom using (f)
+--     ⟦ trunc xs ys p q i j ⟧ =
+--       isOfHLevel→isOfHLevelDep 2
+--         (λ xs → FisSet)
+--         ⟦ xs ⟧ ⟦ ys ⟧
+--         (cong ⟦_⟧ p) (cong ⟦_⟧ q)
+--         (trunc xs ys p q)
+--         i j
 
-    --   uniq : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) (xs : Free G A) → ⟦ xs ⟧ ≡ f xs
-    --   uniq inv (lift x) = sym (inv x)
-    --   uniq inv (return x) = sym (Hom.return-homo x)
-    --   uniq inv (xs >>= k) = cong₂ F._>>=_ (uniq inv xs) (funExt (λ x → uniq inv (k x))) ; Hom.>>=-homo xs k
+--     -- module _ (hom : MonadHomomorphism freeMonad {F = G} ⟶ mon) where
+--     --   module Hom = MonadHomomorphism_⟶_ hom
+--     --   open Hom using (f)
 
-    --   uniq inv (>>=-idˡ f₁ x i) = FisSet {!f (>>=-idˡ f₁ x i0)!} {!!} {!!} {!!} i
+--     --   uniq : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) (xs : Free G A) → ⟦ xs ⟧ ≡ f xs
+--     --   uniq inv (lift x) = sym (inv x)
+--     --   uniq inv (return x) = sym (Hom.return-homo x)
+--     --   uniq inv (xs >>= k) = cong₂ F._>>=_ (uniq inv xs) (funExt (λ x → uniq inv (k x))) ; Hom.>>=-homo xs k
 
-    --   uniq inv (>>=-idʳ xs i) = {!!}
-    --   uniq inv (>>=-assoc xs f₁ g i) = {!!}
+--     --   uniq inv (>>=-idˡ f₁ x i) = FisSet {!f (>>=-idˡ f₁ x i0)!} {!!} {!!} {!!} i
 
-    --   uniq inv (trunc xs ys p q i j) =
-    --     isOfHLevel→isOfHLevelDep 2
-    --       (λ xs → isProp→isSet (FisSet _ _))
-    --       (uniq inv xs) (uniq inv ys)
-    --       (cong (uniq inv) p) (cong (uniq inv) q)
-    --       (trunc xs ys p q)
-    --       i j
+--     --   uniq inv (>>=-idʳ xs i) = {!!}
+--     --   uniq inv (>>=-assoc xs f₁ g i) = {!!}
 
-module _ {ℓ} (fun : Functor ℓ ℓ) where
-  open Functor fun using (map; 𝐹)
-  module _ {B : Type ℓ} (BIsSet : isSet B) where
+--     --   uniq inv (trunc xs ys p q i j) =
+--     --     isOfHLevel→isOfHLevelDep 2
+--     --       (λ xs → isProp→isSet (FisSet _ _))
+--     --       (uniq inv xs) (uniq inv ys)
+--     --       (cong (uniq inv) p) (cong (uniq inv) q)
+--     --       (trunc xs ys p q)
+--     --       i j
 
-    cata : (A → B) → (𝐹 B → B) → Free 𝐹 A → B
-    cata h ϕ (lift x) = ϕ (map h x)
-    cata h ϕ (return x) = h x
-    cata h ϕ (xs >>= k) = cata (cata h ϕ ∘ k) ϕ xs
+-- module _ {ℓ} (fun : Functor ℓ ℓ) where
+--   open Functor fun using (map; 𝐹)
+--   module _ {B : Type ℓ} (BIsSet : isSet B) where
 
-    cata h ϕ (>>=-idˡ f x i) = cata h ϕ (f x)
-    cata h ϕ (>>=-idʳ xs i) = cata h ϕ xs
-    cata h ϕ (>>=-assoc xs f g i) = cata (cata (cata h ϕ ∘ g) ϕ ∘ f) ϕ xs
-    cata h ϕ (trunc xs ys p q i j) =
-      isOfHLevel→isOfHLevelDep 2
-        (λ xs → BIsSet)
-        (cata h ϕ xs) (cata h ϕ ys)
-        (cong (cata h ϕ) p) (cong (cata h ϕ) q)
-        (trunc xs ys p q)
-        i j
+--     cata : (A → B) → (𝐹 B → B) → Free 𝐹 A → B
+--     cata h ϕ (lift x) = ϕ (map h x)
+--     cata h ϕ (return x) = h x
+--     cata h ϕ (xs >>= k) = cata (cata h ϕ ∘ k) ϕ xs
+
+--     cata h ϕ (>>=-idˡ f x i) = cata h ϕ (f x)
+--     cata h ϕ (>>=-idʳ xs i) = cata h ϕ xs
+--     cata h ϕ (>>=-assoc xs f g i) = cata (cata (cata h ϕ ∘ g) ϕ ∘ f) ϕ xs
+--     cata h ϕ (trunc xs ys p q i j) =
+--       isOfHLevel→isOfHLevelDep 2
+--         (λ xs → BIsSet)
+--         (cata h ϕ xs) (cata h ϕ ys)
+--         (cong (cata h ϕ) p) (cong (cata h ϕ) q)
+--         (trunc xs ys p q)
+--         i j
