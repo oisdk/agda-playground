@@ -24,6 +24,7 @@ data FreeF (F : Type a → Type a)  (P : ∀ {T} → Free F T → Type b) (A : T
 private
   variable
     F : Type a → Type a
+    G : Type b → Type b
     p : Level
     P : ∀ {T} → Free F T → Type p
 
@@ -37,7 +38,7 @@ Alg F P = ∀ {A} → (xs : FreeF F P A) → P ⟪ xs ⟫
 
 record Coherent {a p} {F : Type a → Type a} {P : ∀ {T} → Free F T → Type p} (ψ : Alg F P) : Type (ℓsuc a ℓ⊔ p) where
   field
-    c-set : ∀ {T} xs → isSet (P {T = T} xs)
+    c-set : ∀ {T} xs → isSet (P {T = T} xs) -- possibly needs to be isSet T → isSet (P {T = T} xs)
 
     c->>=idˡ : ∀ (f : A → Free F B) Pf x → ψ (bindF (return x) (ψ (returnF x)) f Pf) ≡[ i ≔ P (>>=-idˡ f x i) ]≡ Pf x
     c->>=idʳ : ∀ (x : Free F A) Px → ψ (bindF x Px return (λ y → ψ (returnF y))) ≡[ i ≔ P (>>=-idʳ x i) ]≡ Px
@@ -73,6 +74,27 @@ syntax Ψ F (λ v → e) = Ψ[ v ⦂ F * ] ⇒ e
     (cong ⟦ alg ⟧ p) (cong ⟦ alg ⟧ q)
     (trunc xs ys p q)
     i j
+
+prop-coh : {alg : Alg F P} → (∀ {T} xs → isProp (P {T} xs)) → Coherent alg
+prop-coh P-isProp .c-set xs = isProp→isSet (P-isProp xs)
+prop-coh {P = P} P-isProp .c->>=idˡ f Pf x =
+  toPathP (P-isProp (f x) (transp (λ i → P (>>=-idˡ f x i)) i0 _) _)
+prop-coh {P = P} P-isProp .c->>=idʳ x Px =
+  toPathP (P-isProp x (transp (λ i → P (>>=-idʳ x i)) i0 _) _)
+prop-coh {P = P} P-isProp .c->>=assoc xs Pxs f Pf g Pg =
+  toPathP (P-isProp (xs >>= (λ x → f x >>= g)) (transp (λ i → P (>>=-assoc xs f g i)) i0 _) _)
+
+infix 4 _⊜_
+record AnEquality (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
+  constructor _⊜_
+  field lhs rhs : Free F A
+open AnEquality public
+
+EqualityProof-Alg : (F : Type a → Type a) (P : ∀ {A} → Free F A → AnEquality G A) → Type _
+EqualityProof-Alg F P = Alg F (λ xs → let Pxs = P xs in lhs Pxs ≡ rhs Pxs)
+
+eq-coh : {P : ∀ {A} → Free F A → AnEquality G A} {alg : EqualityProof-Alg F P} → Coherent alg
+eq-coh {P = P} = prop-coh λ xs → let Pxs = P xs in trunc (lhs Pxs) (rhs Pxs)
 
 -- open import Algebra
 
