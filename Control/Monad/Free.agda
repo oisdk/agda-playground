@@ -16,7 +16,58 @@ data Free (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
 
   trunc : isSet (Free F A)
 
+data FreeF (F : Type a → Type a)  (P : ∀ {T} → Free F T → Type b) (A : Type a) : Type (ℓsuc a ℓ⊔ b) where
+  liftF : F A → FreeF F P A
+  returnF : A → FreeF F P A
+  bindF : (xs : Free F B) (P⟨xs⟩ : P xs) (k : B → Free F A) (P⟨∘k⟩ : ∀ x → P (k x)) → FreeF F P A
+
+private
+  variable
+    F : Type a → Type a
+    p : Level
+    P : ∀ {T} → Free F T → Type p
+
+⟪_⟫ : FreeF F P A → Free F A
+⟪ liftF x ⟫ = lift x
+⟪ returnF x ⟫ = return x
+⟪ bindF xs P⟨xs⟩ k P⟨∘k⟩ ⟫ = xs >>= k
+
+Alg : (F : Type a → Type a) (P : ∀ {T} → Free F T → Type b) → Type _
+Alg F P = ∀ {A} → (xs : FreeF F P A) → P ⟪ xs ⟫
+
+record Coherent {a p} {F : Type a → Type a} {P : ∀ {T} → Free F T → Type p} (ψ : Alg F P) : Type (ℓsuc a ℓ⊔ p) where
+  field
+    c-set : ∀ {T} xs → isSet (P {T = T} xs)
+
+    c->>=idˡ : ∀ (f : A → Free F B) Pf x → ψ (bindF (return x) (ψ (returnF x)) f Pf) ≡[ i ≔ P (>>=-idˡ f x i) ]≡ Pf x
+    c->>=idʳ : ∀ (x : Free F A) Px → ψ (bindF x Px return (λ y → ψ (returnF y))) ≡[ i ≔ P (>>=-idʳ x i) ]≡ Px
+    c->>=assoc : ∀
+      (xs : Free F C) Pxs
+      (f : C → Free F B) Pf
+      (g : B → Free F A) Pg →
+      ψ (bindF (xs >>= f) (ψ (bindF xs Pxs f Pf)) g Pg)
+        ≡[ i ≔ P (>>=-assoc xs f g i) ]≡
+          ψ (bindF xs Pxs (λ x → f x >>= g) λ x → ψ (bindF (f x) (Pf x) g Pg))
+
+Ψ : (F : Type a → Type a) (P : ∀ {T} → Free F T → Type p) → Type _
+Ψ F P = Σ (Alg F P) Coherent
+
+infixr 1 Ψ
+syntax Ψ F (λ v → e) = Ψ[ v ⦂ F * ] ⇒ e
+
+Φ : (Type a → Type a) → Type b → Type _
+Φ A B = Ψ A (λ _ → B)
+
 open import Algebra
+
+module _ {F : Type a → Type a} where
+  freeMonad : Monad a (ℓsuc a)
+  freeMonad .Monad.𝐹 = Free F
+  freeMonad .Monad.isMonad .IsMonad._>>=_ = _>>=_
+  freeMonad .Monad.isMonad .IsMonad.return = return
+  freeMonad .Monad.isMonad .IsMonad.>>=-idˡ = >>=-idˡ
+  freeMonad .Monad.isMonad .IsMonad.>>=-idʳ = >>=-idʳ
+  freeMonad .Monad.isMonad .IsMonad.>>=-assoc = >>=-assoc
 
 module _ {ℓ} (mon : Monad ℓ ℓ) where
   module F = Monad mon
@@ -39,6 +90,28 @@ module _ {ℓ} (mon : Monad ℓ ℓ) where
         (cong ⟦_⟧ p) (cong ⟦_⟧ q)
         (trunc xs ys p q)
         i j
+
+    -- module _ (hom : MonadHomomorphism freeMonad {F = G} ⟶ mon) where
+    --   module Hom = MonadHomomorphism_⟶_ hom
+    --   open Hom using (f)
+
+    --   uniq : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) (xs : Free G A) → ⟦ xs ⟧ ≡ f xs
+    --   uniq inv (lift x) = sym (inv x)
+    --   uniq inv (return x) = sym (Hom.return-homo x)
+    --   uniq inv (xs >>= k) = cong₂ F._>>=_ (uniq inv xs) (funExt (λ x → uniq inv (k x))) ; Hom.>>=-homo xs k
+
+    --   uniq inv (>>=-idˡ f₁ x i) = FisSet {!f (>>=-idˡ f₁ x i0)!} {!!} {!!} {!!} i
+
+    --   uniq inv (>>=-idʳ xs i) = {!!}
+    --   uniq inv (>>=-assoc xs f₁ g i) = {!!}
+
+    --   uniq inv (trunc xs ys p q i j) =
+    --     isOfHLevel→isOfHLevelDep 2
+    --       (λ xs → isProp→isSet (FisSet _ _))
+    --       (uniq inv xs) (uniq inv ys)
+    --       (cong (uniq inv) p) (cong (uniq inv) q)
+    --       (trunc xs ys p q)
+    --       i j
 
 module _ {ℓ} (fun : Functor ℓ ℓ) where
   open Functor fun using (map; 𝐹)
