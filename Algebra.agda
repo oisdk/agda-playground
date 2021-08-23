@@ -237,18 +237,6 @@ record Applicative ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
     <*>-interchange : (u : 𝐹 (A → B)) → (y : A) → u <*> pure y ≡ map (_$ y) u
     <*>-comp : (u : 𝐹 (B → C)) → (v : 𝐹 (A → B)) → (w : 𝐹 A) → pure _∘′_ <*> u <*> v <*> w ≡ u <*> (v <*> w)
 
-record Monad ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field
-    applicative : Applicative ℓ₁ ℓ₂
-  open Applicative applicative public
-  infixl 1 _>>=_
-  field
-    _>>=_ : 𝐹 A → (A → 𝐹 B) → 𝐹 B
-    >>=-idˡ : (f : A → 𝐹 B) → (x : A) → (pure x >>= f) ≡ f x
-    >>=-idʳ : (x : 𝐹 A) → (x >>= pure) ≡ x
-    >>=-assoc : (xs : 𝐹 A) (f : A → 𝐹 B) (g : B → 𝐹 C) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
-  return : A → 𝐹 A
-  return = pure
 
 record IsMonad {ℓ₁} {ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
   infixl 1 _>>=_
@@ -259,6 +247,24 @@ record IsMonad {ℓ₁} {ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) : Type (�
     >>=-idˡ : (f : A → 𝐹 B) → (x : A) → (return x >>= f) ≡ f x
     >>=-idʳ : (x : 𝐹 A) → (x >>= return) ≡ x
     >>=-assoc : (xs : 𝐹 A) (f : A → 𝐹 B) (g : B → 𝐹 C) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
+
+record Monad ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
+  field
+    𝐹 : Type ℓ₁ → Type ℓ₂
+    isMonad : IsMonad 𝐹
+  open IsMonad isMonad public
+
+record MonadHomomorphism_⟶_
+         {ℓ₁ ℓ₂ ℓ₃}
+         (from : Monad ℓ₁ ℓ₂)
+         (to : Monad ℓ₁ ℓ₃) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
+  module F = Monad from
+  module T = Monad to
+
+  field
+    f : F.𝐹 A → T.𝐹 A
+    >>=-homo : (xs : F.𝐹 A) (k : A → F.𝐹 B) → (f xs T.>>= (f ∘ k)) ≡ f (xs F.>>= k)
+    return-homo : (x : A) → f (F.return x) ≡ T.return x
 
 record Alternative ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field
