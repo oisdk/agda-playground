@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --allow-unsolved-metas #-}
 
 module Control.Monad.Free where
 
@@ -10,11 +10,11 @@ data Free (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
   return : A → Free F A
   _>>=_ : Free F B → (B → Free F A) → Free F A
 
-  >>=-idˡ : (f : B → Free F A) (x : B) → (return x >>= f) ≡ f x
-  >>=-idʳ : (x : Free F A) → (x >>= return) ≡ x
-  >>=-assoc : (xs : Free F C) (f : C → Free F B) (g : B → Free F A) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
+  >>=-idˡ   : isSet A → (f : B → Free F A) (x : B) → (return x >>= f) ≡ f x
+  >>=-idʳ   : isSet A → (x : Free F A) → (x >>= return) ≡ x
+  >>=-assoc : isSet A → (xs : Free F C) (f : C → Free F B) (g : B → Free F A) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
 
-  trunc : isSet (Free F A)
+  trunc : isSet A → isSet (Free F A)
 
 data FreeF (F : Type a → Type a)  (P : ∀ {T} → Free F T → Type b) (A : Type a) : Type (ℓsuc a ℓ⊔ b) where
   liftF : F A → FreeF F P A
@@ -38,16 +38,16 @@ Alg F P = ∀ {A} → (xs : FreeF F P A) → P ⟪ xs ⟫
 
 record Coherent {a p} {F : Type a → Type a} {P : ∀ {T} → Free F T → Type p} (ψ : Alg F P) : Type (ℓsuc a ℓ⊔ p) where
   field
-    c-set : ∀ {T} xs → isSet (P {T = T} xs) -- possibly needs to be isSet T → isSet (P {T = T} xs)
+    c-set : ∀ {T} → isSet T → ∀ xs → isSet (P {T = T} xs) -- possibly needs to be isSet T → isSet (P {T = T} xs)
 
-    c->>=idˡ : ∀ (f : A → Free F B) Pf x → ψ (bindF (return x) (ψ (returnF x)) f Pf) ≡[ i ≔ P (>>=-idˡ f x i) ]≡ Pf x
-    c->>=idʳ : ∀ (x : Free F A) Px → ψ (bindF x Px return (λ y → ψ (returnF y))) ≡[ i ≔ P (>>=-idʳ x i) ]≡ Px
-    c->>=assoc : ∀
+    c->>=idˡ : ∀ (isb : isSet B) (f : A → Free F B) Pf x → ψ (bindF (return x) (ψ (returnF x)) f Pf) ≡[ i ≔ P (>>=-idˡ isb f x i) ]≡ Pf x
+    c->>=idʳ : ∀ (isa : isSet A) (x : Free F A) Px → ψ (bindF x Px return (λ y → ψ (returnF y))) ≡[ i ≔ P (>>=-idʳ isa x i) ]≡ Px
+    c->>=assoc : ∀ (isa : isSet A)
       (xs : Free F C) Pxs
       (f : C → Free F B) Pf
       (g : B → Free F A) Pg →
       ψ (bindF (xs >>= f) (ψ (bindF xs Pxs f Pf)) g Pg)
-        ≡[ i ≔ P (>>=-assoc xs f g i) ]≡
+        ≡[ i ≔ P (>>=-assoc isa xs f g i) ]≡
           ψ (bindF xs Pxs (λ x → f x >>= g) λ x → ψ (bindF (f x) (Pf x) g Pg))
 open Coherent public
 
@@ -64,37 +64,37 @@ syntax Ψ F (λ v → e) = Ψ[ v ⦂ F * ] ⇒ e
 ⟦ alg ⟧ (lift x) = alg .fst (liftF x)
 ⟦ alg ⟧ (return x) = alg .fst (returnF x)
 ⟦ alg ⟧ (xs >>= k) = alg .fst (bindF xs (⟦ alg ⟧ xs) k (⟦ alg ⟧ ∘ k))
-⟦ alg ⟧ (>>=-idˡ f k i) = alg .snd .c->>=idˡ f (⟦ alg ⟧ ∘ f) k i
-⟦ alg ⟧ (>>=-idʳ xs i) = alg .snd .c->>=idʳ xs (⟦ alg ⟧ xs) i
-⟦ alg ⟧ (>>=-assoc xs f g i) = alg .snd .c->>=assoc xs (⟦ alg ⟧ xs) f (⟦ alg ⟧ ∘ f) g (⟦ alg ⟧ ∘ g) i
-⟦ alg ⟧ (trunc xs ys p q i j) =
+⟦ alg ⟧ (>>=-idˡ iss f k i) = alg .snd .c->>=idˡ iss f (⟦ alg ⟧ ∘ f) k i
+⟦ alg ⟧ (>>=-idʳ iss xs i) = alg .snd .c->>=idʳ iss xs (⟦ alg ⟧ xs) i
+⟦ alg ⟧ (>>=-assoc iss xs f g i) = alg .snd .c->>=assoc iss xs (⟦ alg ⟧ xs) f (⟦ alg ⟧ ∘ f) g (⟦ alg ⟧ ∘ g) i
+⟦ alg ⟧ (trunc AIsSet xs ys p q i j) =
   isOfHLevel→isOfHLevelDep 2
-    (alg .snd .c-set)
+    (alg .snd .c-set AIsSet)
     (⟦ alg ⟧ xs) (⟦ alg ⟧ ys)
     (cong ⟦ alg ⟧ p) (cong ⟦ alg ⟧ q)
-    (trunc xs ys p q)
+    (trunc AIsSet xs ys p q)
     i j
 
-prop-coh : {alg : Alg F P} → (∀ {T} xs → isProp (P {T} xs)) → Coherent alg
-prop-coh P-isProp .c-set xs = isProp→isSet (P-isProp xs)
-prop-coh {P = P} P-isProp .c->>=idˡ f Pf x =
-  toPathP (P-isProp (f x) (transp (λ i → P (>>=-idˡ f x i)) i0 _) _)
-prop-coh {P = P} P-isProp .c->>=idʳ x Px =
-  toPathP (P-isProp x (transp (λ i → P (>>=-idʳ x i)) i0 _) _)
-prop-coh {P = P} P-isProp .c->>=assoc xs Pxs f Pf g Pg =
-  toPathP (P-isProp (xs >>= (λ x → f x >>= g)) (transp (λ i → P (>>=-assoc xs f g i)) i0 _) _)
+prop-coh : {alg : Alg F P} → (∀ {T} → isSet T → ∀ xs → isProp (P {T} xs)) → Coherent alg
+prop-coh P-isProp .c-set TIsSet xs = isProp→isSet (P-isProp TIsSet xs)
+prop-coh {P = P} P-isProp .c->>=idˡ iss f Pf x =
+  toPathP (P-isProp iss (f x) (transp (λ i → P (>>=-idˡ iss f x i)) i0 _) _)
+prop-coh {P = P} P-isProp .c->>=idʳ iss x Px =
+  toPathP (P-isProp iss x (transp (λ i → P (>>=-idʳ iss x i)) i0 _) _)
+prop-coh {P = P} P-isProp .c->>=assoc iss xs Pxs f Pf g Pg =
+  toPathP (P-isProp iss (xs >>= (λ x → f x >>= g)) (transp (λ i → P (>>=-assoc iss xs f g i)) i0 _) _)
 
-infix 4 _⊜_
-record AnEquality (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
-  constructor _⊜_
-  field lhs rhs : Free F A
-open AnEquality public
+-- infix 4 _⊜_
+-- record AnEquality (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
+--   constructor _⊜_
+--   field lhs rhs : Free F A
+-- open AnEquality public
 
-EqualityProof-Alg : (F : Type a → Type a) (P : ∀ {A} → Free F A → AnEquality G A) → Type _
-EqualityProof-Alg F P = Alg F (λ xs → let Pxs = P xs in lhs Pxs ≡ rhs Pxs)
+-- EqualityProof-Alg : (F : Type a → Type a) (P : ∀ {A} → Free F A → AnEquality G A) → Type _
+-- EqualityProof-Alg F P = Alg F (λ xs → let Pxs = P xs in lhs Pxs ≡ rhs Pxs)
 
-eq-coh : {P : ∀ {A} → Free F A → AnEquality G A} {alg : EqualityProof-Alg F P} → Coherent alg
-eq-coh {P = P} = prop-coh λ xs → let Pxs = P xs in trunc (lhs Pxs) (rhs Pxs)
+-- eq-coh : {P : ∀ {A} → Free F A → AnEquality G A} {alg : EqualityProof-Alg F P} → Coherent alg
+-- eq-coh {P = P} = prop-coh λ xs → let Pxs = P xs in trunc (lhs Pxs) (rhs Pxs)
 
 open import Algebra
 
@@ -103,30 +103,30 @@ module _ {F : Type a → Type a} where
   freeMonad .Monad.𝐹 = Free F
   freeMonad .Monad.isMonad .IsMonad._>>=_ = _>>=_
   freeMonad .Monad.isMonad .IsMonad.return = return
-  freeMonad .Monad.isMonad .IsMonad.>>=-idˡ = >>=-idˡ
-  freeMonad .Monad.isMonad .IsMonad.>>=-idʳ = >>=-idʳ
-  freeMonad .Monad.isMonad .IsMonad.>>=-assoc = >>=-assoc
+  freeMonad .Monad.isMonad .IsMonad.>>=-idˡ = >>=-idˡ {!!}
+  freeMonad .Monad.isMonad .IsMonad.>>=-idʳ = >>=-idʳ {!!}
+  freeMonad .Monad.isMonad .IsMonad.>>=-assoc = >>=-assoc {!!}
 
 module _ {ℓ} (mon : Monad ℓ ℓ) where
   module F = Monad mon
 
   open F using (𝐹)
 
-  module _ {G : Type ℓ → Type ℓ} (FisSet : ∀ {T} → isSet (𝐹 T)) (h : ∀ {T} → G T → 𝐹 T) where
+  module _ {G : Type ℓ → Type ℓ} (FisSet : ∀ {T} → isSet T → isSet (𝐹 T)) (h : ∀ {T} → G T → 𝐹 T) where
     ⟦_⟧′ : Free G A → 𝐹 A
     ⟦ lift x ⟧′ = h x
     ⟦ return x ⟧′ = F.return x
     ⟦ xs >>= k ⟧′ = ⟦ xs ⟧′ F.>>= λ x → ⟦ k x ⟧′
-    ⟦ >>=-idˡ f x i ⟧′ = F.>>=-idˡ (⟦_⟧′ ∘ f) x i
-    ⟦ >>=-idʳ xs i ⟧′ = F.>>=-idʳ ⟦ xs ⟧′ i
-    ⟦ >>=-assoc xs f g i ⟧′ = F.>>=-assoc ⟦ xs ⟧′ (⟦_⟧′ ∘ f) (⟦_⟧′ ∘ g) i
+    ⟦ >>=-idˡ _ f x i ⟧′ = F.>>=-idˡ (⟦_⟧′ ∘ f) x i
+    ⟦ >>=-idʳ _ xs i ⟧′ = F.>>=-idʳ ⟦ xs ⟧′ i
+    ⟦ >>=-assoc _ xs f g i ⟧′ = F.>>=-assoc ⟦ xs ⟧′ (⟦_⟧′ ∘ f) (⟦_⟧′ ∘ g) i
 
-    ⟦ trunc xs ys p q i j ⟧′ =
+    ⟦ trunc iss xs ys p q i j ⟧′ =
       isOfHLevel→isOfHLevelDep 2
-        (λ xs → FisSet)
+        (λ xs → FisSet iss)
         ⟦ xs ⟧′ ⟦ ys ⟧′
         (cong ⟦_⟧′ p) (cong ⟦_⟧′ q)
-        (trunc xs ys p q)
+        (trunc iss xs ys p q)
         i j
 
     module _ (hom : MonadHomomorphism freeMonad {F = G} ⟶ mon) where
@@ -134,7 +134,7 @@ module _ {ℓ} (mon : Monad ℓ ℓ) where
       open Hom using (f)
 
       uniq-alg : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) → Ψ[ xs ⦂ G * ] ⇒ ⟦ xs ⟧′ ≡ f xs
-      uniq-alg inv .snd = prop-coh λ xs → FisSet _ _
+      uniq-alg inv .snd = prop-coh λ iss xs → FisSet iss _ _
       uniq-alg inv .fst (liftF x) = sym (inv x)
       uniq-alg inv .fst (returnF x) = sym (Hom.return-homo x)
       uniq-alg inv .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) = cong₂ F._>>=_ P⟨xs⟩ (funExt P⟨∘k⟩) ; Hom.>>=-homo xs k
@@ -142,39 +142,20 @@ module _ {ℓ} (mon : Monad ℓ ℓ) where
       uniq : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) → (xs : Free G A) → ⟦ xs ⟧′ ≡ f xs
       uniq inv = ⟦ uniq-alg inv ⟧
 
---     --   uniq inv (lift x) = sym (inv x)
---     --   uniq inv (return x) = sym (Hom.return-homo x)
---     --   uniq inv (xs >>= k) = 
-
---     --   uniq inv (>>=-idˡ f₁ x i) = FisSet {!f (>>=-idˡ f₁ x i0)!} {!!} {!!} {!!} i
-
---     --   uniq inv (>>=-idʳ xs i) = {!!}
---     --   uniq inv (>>=-assoc xs f₁ g i) = {!!}
-
---     --   uniq inv (trunc xs ys p q i j) =
---     --     isOfHLevel→isOfHLevelDep 2
---     --       (λ xs → isProp→isSet (FisSet _ _))
---     --       (uniq inv xs) (uniq inv ys)
---     --       (cong (uniq inv) p) (cong (uniq inv) q)
---     --       (trunc xs ys p q)
---     --       i j
+open import Cubical.Foundations.HLevels using (isSetΠ)
 
 module _ {ℓ} (fun : Functor ℓ ℓ) where
   open Functor fun using (map; 𝐹)
   module _ {B : Type ℓ} (BIsSet : isSet B) where
 
-    cata : (A → B) → (𝐹 B → B) → Free 𝐹 A → B
-    cata h ϕ (lift x) = ϕ (map h x)
-    cata h ϕ (return x) = h x
-    cata h ϕ (xs >>= k) = cata (cata h ϕ ∘ k) ϕ xs
+    cata-alg : (𝐹 B → B) → Ψ 𝐹 λ {T} _ → (T → B) → B
+    cata-alg ϕ .fst (liftF x) h = ϕ (map h x)
+    cata-alg ϕ .fst (returnF x) h = h x
+    cata-alg ϕ .fst (bindF _ P⟨xs⟩ _ P⟨∘k⟩) h = P⟨xs⟩ (flip P⟨∘k⟩ h)
+    cata-alg ϕ .snd .c-set _ _ = isSetΠ λ _ → BIsSet
+    cata-alg ϕ .snd .c->>=idˡ isb f Pf x = refl
+    cata-alg ϕ .snd .c->>=idʳ isa x Px = refl
+    cata-alg ϕ .snd .c->>=assoc isa xs Pxs f Pf g Pg = refl
 
-    cata h ϕ (>>=-idˡ f x i) = cata h ϕ (f x)
-    cata h ϕ (>>=-idʳ xs i) = cata h ϕ xs
-    cata h ϕ (>>=-assoc xs f g i) = cata (cata (cata h ϕ ∘ g) ϕ ∘ f) ϕ xs
-    cata h ϕ (trunc xs ys p q i j) =
-      isOfHLevel→isOfHLevelDep 2
-        (λ xs → BIsSet)
-        (cata h ϕ xs) (cata h ϕ ys)
-        (cong (cata h ϕ) p) (cong (cata h ϕ) q)
-        (trunc xs ys p q)
-        i j
+    cata : (A → B) → (𝐹 B → B) → Free 𝐹 A → B
+    cata h ϕ xs = ⟦ cata-alg ϕ ⟧ xs h
