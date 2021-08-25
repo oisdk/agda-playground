@@ -27,3 +27,7 @@ just _  >> y = y
 guard : Bool → Maybe ⊤
 guard false = nothing
 guard true  = just tt
+
+_<|>_ : Maybe A → Maybe A → Maybe A
+nothing     <|> ys = ys
+xs@(just _) <|> _ = xs
