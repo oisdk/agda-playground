@@ -91,7 +91,9 @@ module _
     unfold′ a = uncurry _◃_
               ∘ map₂
                 (λ { (w≢ε , xs′) w<i →
-                       map₂ (case a of λ { (acc wf) → unfold′ (wf _ (∸‿<-< _ _ w<i w≢ε)) })
+                       map₂ (case a of
+                              λ { (acc wf) →
+                                    unfold′ (wf _ (∸‿<-< _ _ w<i w≢ε)) })
                             (xs′ w<i) })
               ∘ ϕ
 
