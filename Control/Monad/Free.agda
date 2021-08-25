@@ -99,42 +99,43 @@ prop-coh {P = P} P-isProp .c->>=assoc iss xs Pxs f Pf g Pg =
 open import Algebra
 
 module _ {F : Type a → Type a} where
-  freeMonad : Monad a (ℓsuc a)
-  freeMonad .Monad.𝐹 = Free F
-  freeMonad .Monad.isMonad .IsMonad._>>=_ = _>>=_
-  freeMonad .Monad.isMonad .IsMonad.return = return
-  freeMonad .Monad.isMonad .IsMonad.>>=-idˡ = >>=-idˡ {!!}
-  freeMonad .Monad.isMonad .IsMonad.>>=-idʳ = >>=-idʳ {!!}
-  freeMonad .Monad.isMonad .IsMonad.>>=-assoc = >>=-assoc {!!}
+  freeMonad : SetMonad a (ℓsuc a)
+  freeMonad .SetMonad.𝐹 = Free F
+  freeMonad .SetMonad.isSetMonad .IsSetMonad._>>=_ = _>>=_
+  freeMonad .SetMonad.isSetMonad .IsSetMonad.return = return
+  freeMonad .SetMonad.isSetMonad .IsSetMonad.>>=-idˡ = >>=-idˡ
+  freeMonad .SetMonad.isSetMonad .IsSetMonad.>>=-idʳ = >>=-idʳ
+  freeMonad .SetMonad.isSetMonad .IsSetMonad.>>=-assoc = >>=-assoc
+  freeMonad .SetMonad.isSetMonad .IsSetMonad.trunc = trunc
 
-module _ {ℓ} (mon : Monad ℓ ℓ) where
-  module F = Monad mon
+module _ {ℓ} (mon : SetMonad ℓ ℓ) where
+  module F = SetMonad mon
 
   open F using (𝐹)
 
-  module _ {G : Type ℓ → Type ℓ} (FisSet : ∀ {T} → isSet T → isSet (𝐹 T)) (h : ∀ {T} → G T → 𝐹 T) where
+  module _ {G : Type ℓ → Type ℓ} (h : ∀ {T} → G T → 𝐹 T) where
     ⟦_⟧′ : Free G A → 𝐹 A
     ⟦ lift x ⟧′ = h x
     ⟦ return x ⟧′ = F.return x
     ⟦ xs >>= k ⟧′ = ⟦ xs ⟧′ F.>>= λ x → ⟦ k x ⟧′
-    ⟦ >>=-idˡ _ f x i ⟧′ = F.>>=-idˡ (⟦_⟧′ ∘ f) x i
-    ⟦ >>=-idʳ _ xs i ⟧′ = F.>>=-idʳ ⟦ xs ⟧′ i
-    ⟦ >>=-assoc _ xs f g i ⟧′ = F.>>=-assoc ⟦ xs ⟧′ (⟦_⟧′ ∘ f) (⟦_⟧′ ∘ g) i
+    ⟦ >>=-idˡ iss f x i ⟧′ = F.>>=-idˡ iss (⟦_⟧′ ∘ f) x i
+    ⟦ >>=-idʳ iss xs i ⟧′ = F.>>=-idʳ iss ⟦ xs ⟧′ i
+    ⟦ >>=-assoc iss xs f g i ⟧′ = F.>>=-assoc iss ⟦ xs ⟧′ (⟦_⟧′ ∘ f) (⟦_⟧′ ∘ g) i
 
     ⟦ trunc iss xs ys p q i j ⟧′ =
       isOfHLevel→isOfHLevelDep 2
-        (λ xs → FisSet iss)
+        (λ xs → F.trunc iss)
         ⟦ xs ⟧′ ⟦ ys ⟧′
         (cong ⟦_⟧′ p) (cong ⟦_⟧′ q)
         (trunc iss xs ys p q)
         i j
 
-    module _ (hom : MonadHomomorphism freeMonad {F = G} ⟶ mon) where
-      module Hom = MonadHomomorphism_⟶_ hom
+    module _ (hom : SetMonadHomomorphism freeMonad {F = G} ⟶ mon) where
+      module Hom = SetMonadHomomorphism_⟶_ hom
       open Hom using (f)
 
       uniq-alg : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) → Ψ[ xs ⦂ G * ] ⇒ ⟦ xs ⟧′ ≡ f xs
-      uniq-alg inv .snd = prop-coh λ iss xs → FisSet iss _ _
+      uniq-alg inv .snd = prop-coh λ iss xs → F.trunc iss _ _
       uniq-alg inv .fst (liftF x) = sym (inv x)
       uniq-alg inv .fst (returnF x) = sym (Hom.return-homo x)
       uniq-alg inv .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) = cong₂ F._>>=_ P⟨xs⟩ (funExt P⟨∘k⟩) ; Hom.>>=-homo xs k

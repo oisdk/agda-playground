@@ -248,6 +248,7 @@ record IsMonad {ℓ₁} {ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) : Type (�
     >>=-idʳ : (x : 𝐹 A) → (x >>= return) ≡ x
     >>=-assoc : (xs : 𝐹 A) (f : A → 𝐹 B) (g : B → 𝐹 C) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
 
+
 record Monad ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field
     𝐹 : Type ℓ₁ → Type ℓ₂
@@ -260,6 +261,36 @@ record MonadHomomorphism_⟶_
          (to : Monad ℓ₁ ℓ₃) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
   module F = Monad from
   module T = Monad to
+
+  field
+    f : F.𝐹 A → T.𝐹 A
+    >>=-homo : (xs : F.𝐹 A) (k : A → F.𝐹 B) → (f xs T.>>= (f ∘ k)) ≡ f (xs F.>>= k)
+    return-homo : (x : A) → f (F.return x) ≡ T.return x
+
+record IsSetMonad {ℓ₁} {ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
+  infixl 1 _>>=_
+  field
+    _>>=_ : 𝐹 A → (A → 𝐹 B) → 𝐹 B
+    return : A → 𝐹 A
+
+    trunc : isSet A → isSet (𝐹 A)
+
+    >>=-idˡ   : isSet B → (f : A → 𝐹 B) → (x : A) → (return x >>= f) ≡ f x
+    >>=-idʳ   : isSet A → (x : 𝐹 A) → (x >>= return) ≡ x
+    >>=-assoc : isSet C → (xs : 𝐹 A) (f : A → 𝐹 B) (g : B → 𝐹 C) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
+
+record SetMonad ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
+  field
+    𝐹 : Type ℓ₁ → Type ℓ₂
+    isSetMonad : IsSetMonad 𝐹
+  open IsSetMonad isSetMonad public
+
+record SetMonadHomomorphism_⟶_
+         {ℓ₁ ℓ₂ ℓ₃}
+         (from : SetMonad ℓ₁ ℓ₂)
+         (to : SetMonad ℓ₁ ℓ₃) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
+  module F = SetMonad from
+  module T = SetMonad to
 
   field
     f : F.𝐹 A → T.𝐹 A
