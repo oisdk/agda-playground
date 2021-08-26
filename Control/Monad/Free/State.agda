@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Prelude hiding (⊤)
 
 module Control.Monad.Free.State {ℓ} (S : Type ℓ) (isSetS : isSet S) where
