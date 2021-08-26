@@ -160,3 +160,6 @@ module _ {ℓ} (fun : Functor ℓ ℓ) where
 
     cata : (A → B) → (𝐹 B → B) → Free 𝐹 A → B
     cata h ϕ xs = ⟦ cata-alg ϕ ⟧ xs h
+
+_>>_ : Free F A → Free F B → Free F B
+xs >> ys = xs >>= const ys
