@@ -97,7 +97,7 @@ record Coherent {a p} {F} {R} {P} ψ where
               (iss : isSet V) →
               (e : Γ) →
               let lhs , rhs = eqn e in
-              PathP (λ j → P V (quot i iss e j)) (⟦ ψ ⟧↑ lhs) (⟦ ψ ⟧↑ rhs)
+              ⟦ ψ ⟧↑ lhs ≡[ j ≔ P V (quot i iss e j) ]≡ ⟦ ψ ⟧↑ rhs
 open Coherent public
 
 open import Path.Reasoning
@@ -119,7 +119,10 @@ lemma₂ alg (xs >>=′ k) i =
 ⟦ alg ⟧ (>>=-idˡ iss f k i) = alg .snd .c->>=idˡ iss f (⟦ alg ⟧ ∘ f) k i
 ⟦ alg ⟧ (>>=-idʳ iss xs i) = alg .snd .c->>=idʳ iss xs (⟦ alg ⟧ xs) i
 ⟦ alg ⟧ (>>=-assoc iss xs f g i) = alg .snd .c->>=assoc iss xs (⟦ alg ⟧ xs) f (⟦ alg ⟧ ∘ f) g (⟦ alg ⟧ ∘ g) i
-⟦_⟧ {P = P} alg (quot ind iss e i) = subst₂ (PathP (λ j → P _ (quot ind iss e j))) (lemma₂ alg _) (lemma₂ alg _) (alg .snd .c-quot ind iss e) i
+⟦_⟧ {R = R} {P = P} alg (quot ind iss e i) =
+  let Γ , v , eqn = R ! ind
+      lhs , rhs = eqn e
+  in subst₂ (PathP (λ j → P v (quot ind iss e j))) (lemma₂ alg lhs) (lemma₂ alg rhs) (alg .snd .c-quot ind iss e) i
 
 ⟦ alg ⟧ (trunc AIsSet xs ys p q i j) =
   isOfHLevel→isOfHLevelDep 2
