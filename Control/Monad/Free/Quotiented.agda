@@ -44,7 +44,7 @@ record Law (F : Type a → Type a) : Type (ℓsuc a) where
   field
     Γ : Type a
     ν : Type a
-    law : Γ → Equation F ν
+    eqn : Γ → Equation F ν
 open Law public
 
 Theory : (Type a → Type a) → Type (ℓsuc a)
@@ -232,7 +232,7 @@ prop-coh {P = P} P-isProp .c->>=idʳ iss x Px =
 prop-coh {P = P} P-isProp .c->>=assoc iss xs Pxs f Pf g Pg =
   toPathP (P-isProp iss (xs >>= (λ x → f x >>= g)) (transp (λ i → P _ (>>=-assoc iss xs f g i)) i0 _) _)
 prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i iss e =
-  toPathP (P-isProp iss (∣ (𝒯 !! i) .law e .rhs ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
+  toPathP (P-isProp iss (∣ (𝒯 !! i) .eqn e .rhs ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
 
 -- A more conventional catamorphism
 module _ {ℓ} (fun : Functor ℓ ℓ) where
