@@ -82,6 +82,9 @@ mutual
   ∣ return′ x ∣↑ = return x
   ∣ xs >>=′ k ∣↑ = ∣ xs ∣↑ >>= (∣_∣↑ ∘ k)
 
+_>>_ : Free F 𝒯 A → Free F 𝒯 B → Free F 𝒯 B
+xs >> ys = xs >>= const ys
+
 --------------------------------------------------------------------------------
 -- Recursion Schemes
 --------------------------------------------------------------------------------
@@ -152,44 +155,53 @@ record Coherent {a p}
              ⟦ ψ ⟧↑ lhs ≡[ j ≔ P ν (quot i iss γ j) ]≡ ⟦ ψ ⟧↑ rhs
 open Coherent public
 
-open import Path.Reasoning
-
+-- A full dependent algebra
 Ψ : (F : Type a → Type a) (𝒯 : Theory F) (P : ∀ T → Free F 𝒯 T → Type p) → Type _
 Ψ F 𝒯 P = Σ (Alg F 𝒯 P) Coherent
 
-⟦_⟧ : Ψ F 𝒯 P → (xs : Free F 𝒯 A) → P A xs
+-- Running the algebra
+module _ (ψ : Ψ F 𝒯 P) where
+  ⟦_⟧ : (xs : Free F 𝒯 A) → P A xs
 
-{-# TERMINATING #-}
-lemma₂ : (alg : Ψ F 𝒯 P) (xs : Syntax F A) → ⟦ fst alg ⟧↑ xs ≡ ⟦ alg ⟧ ∣ xs ∣↑
-lemma₂ alg (lift′ x) i = fst alg (liftF x)
-lemma₂ alg (return′ x) i = fst alg (returnF x)
-lemma₂ alg (xs >>=′ k) i =
-  fst alg
-      (bindF ∣ xs ∣↑ (lemma₂ alg xs i) (λ x → ∣ k x ∣↑)
-       (λ x → lemma₂ alg (k x) i))
+  -- We need the terminating pragma here because Agda can't see that ∣_∣↑ makes
+  -- something the same size (I think)
+  {-# TERMINATING #-}
+  undecorate : (xs : Syntax F A) → ⟦ fst ψ ⟧↑ xs ≡ ⟦ ∣ xs ∣↑ ⟧
+  undecorate (lift′ x) i = fst ψ (liftF x)
+  undecorate (return′ x) i = fst ψ (returnF x)
+  undecorate (xs >>=′ k) i =
+    fst ψ
+        (bindF ∣ xs ∣↑ (undecorate xs i) (λ x → ∣ k x ∣↑)
+        (λ x → undecorate (k x) i))
 
-⟦ alg ⟧ (lift x) = alg .fst (liftF x)
-⟦ alg ⟧ (return x) = alg .fst (returnF x)
-⟦ alg ⟧ (xs >>= k) = alg .fst (bindF xs (⟦ alg ⟧ xs) k (⟦ alg ⟧ ∘ k))
-⟦ alg ⟧ (>>=-idˡ iss f k i) = alg .snd .c->>=idˡ iss f (⟦ alg ⟧ ∘ f) k i
-⟦ alg ⟧ (>>=-idʳ iss xs i) = alg .snd .c->>=idʳ iss xs (⟦ alg ⟧ xs) i
-⟦ alg ⟧ (>>=-assoc iss xs f g i) = alg .snd .c->>=assoc iss xs (⟦ alg ⟧ xs) f (⟦ alg ⟧ ∘ f) g (⟦ alg ⟧ ∘ g) i
-⟦_⟧ {𝒯 = 𝒯} {P = P} alg (quot ind iss e i) =
-  let Γ , v , eqn = 𝒯 ! ind
-      lhs , rhs = eqn e
-  in subst₂ (PathP (λ j → P v (quot ind iss e j))) (lemma₂ alg lhs) (lemma₂ alg rhs) (alg .snd .c-quot ind iss e) i
+  ⟦ lift x ⟧ = ψ .fst (liftF x)
+  ⟦ return x ⟧ = ψ .fst (returnF x)
+  ⟦ xs >>= k ⟧ = ψ .fst (bindF xs ⟦ xs ⟧ k (⟦_⟧ ∘ k))
 
-⟦ alg ⟧ (trunc AIsSet xs ys p q i j) =
-  isOfHLevel→isOfHLevelDep 2
-    (alg .snd .c-set AIsSet)
-    (⟦ alg ⟧ xs) (⟦ alg ⟧ ys)
-    (cong ⟦ alg ⟧ p) (cong ⟦ alg ⟧ q)
-    (trunc AIsSet xs ys p q)
-    i j
+  ⟦ >>=-idˡ iss f k i ⟧ = ψ .snd .c->>=idˡ iss f (⟦_⟧ ∘ f) k i
+  ⟦ >>=-idʳ iss xs i ⟧ = ψ .snd .c->>=idʳ iss xs ⟦ xs ⟧ i
+  ⟦ >>=-assoc iss xs f g i ⟧ =
+    ψ .snd .c->>=assoc iss xs ⟦ xs ⟧ f (⟦_⟧ ∘ f) g (⟦_⟧ ∘ g) i
 
+  ⟦ quot p iss e i ⟧ =
+      subst₂ (PathP (λ j → P _ (quot p iss e j)))
+              (undecorate _)
+              (undecorate _)
+              (ψ .snd .c-quot p iss e) i
+
+  ⟦ trunc AIsSet xs ys p q i j ⟧ =
+    isOfHLevel→isOfHLevelDep 2
+      (ψ .snd .c-set AIsSet)
+      ⟦ xs ⟧ ⟦ ys ⟧
+      (cong ⟦_⟧ p) (cong ⟦_⟧ q)
+      (trunc AIsSet xs ys p q)
+      i j
+
+-- Non-dependent algebras
 Φ : (F : Type a → Type a) → (𝒯 : Theory F) → (Type a → Type b) → Type _
 Φ A 𝒯 B = Ψ A 𝒯 (λ T _ → B T)
 
+-- For a proposition, use this to prove the algebra is coherent
 prop-coh : {alg : Alg F 𝒯 P} → (∀ {T} → isSet T → ∀ xs → isProp (P T xs)) → Coherent alg
 prop-coh P-isProp .c-set TIsSet xs = isProp→isSet (P-isProp TIsSet xs)
 prop-coh {P = P} P-isProp .c->>=idˡ iss f Pf x =
@@ -203,42 +215,29 @@ prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i iss e =
 
 
 open import Algebra
-
 open import Cubical.Foundations.HLevels using (isSetΠ)
 
+-- A more conventional catamorphism
 module _ {ℓ} (fun : Functor ℓ ℓ) where
   open Functor fun using (map; 𝐹)
   module _ {B : Type ℓ} {𝒯 : Theory 𝐹} (BIsSet : isSet B) where
     module _ (ϕ : 𝐹 B → B) where
-      act : Alg 𝐹 𝒯 λ T _ → (T → B) → B
-      act (liftF x) h = ϕ (map h x)
-      act (returnF x) h = h x
-      act (bindF _ P⟨xs⟩ _ P⟨∘k⟩) h = P⟨xs⟩ (flip P⟨∘k⟩ h)
+      ϕ₁ : Alg 𝐹 𝒯 λ T _ → (T → B) → B
+      ϕ₁ (liftF x) h = ϕ (map h x)
+      ϕ₁ (returnF x) h = h x
+      ϕ₁ (bindF _ P⟨xs⟩ _ P⟨∘k⟩) h = P⟨xs⟩ (flip P⟨∘k⟩ h)
 
-
-    module _ (ϕ : 𝐹 B → B) where
       InTheory : Type _
-      InTheory = 
-       ∀ (i : Fin (length 𝒯)) →
-              let Γ , V , eqn = 𝒯 ! i in
-              (f : V → B)
-              (iss : isSet V) →
-              (e : Γ) →
-              let lhs , rhs = eqn e in
-              (⟦ act ϕ ⟧↑ lhs f) ≡ (⟦ act ϕ ⟧↑ rhs f)
+      InTheory = Quotiented 𝒯 λ lhs rhs → ∀ f → ⟦ ϕ₁ ⟧↑ lhs f ≡ ⟦ ϕ₁ ⟧↑ rhs f
 
-    module _ (ϕ : 𝐹 B → B) (act-lemma : InTheory ϕ) where
-
-      cata-alg : Ψ 𝐹 𝒯 λ T _ → (T → B) → B
-      cata-alg .fst = act ϕ
-      cata-alg .snd .c-set _ _ = isSetΠ λ _ → BIsSet
-      cata-alg .snd .c->>=idˡ isb f Pf x = refl
-      cata-alg .snd .c->>=idʳ isa x Px = refl
-      cata-alg .snd .c->>=assoc isa xs Pxs f Pf g Pg = refl
-      cata-alg .snd .c-quot i iss e j f = act-lemma i f iss e j
+      module _ (ϕ-coh : InTheory) where
+        cata-coh : Coherent ϕ₁
+        cata-coh .c-set _ _ = isSetΠ λ _ → BIsSet
+        cata-coh .c->>=idˡ isb f Pf x = refl
+        cata-coh .c->>=idʳ isa x Px = refl
+        cata-coh .c->>=assoc isa xs Pxs f Pf g Pg = refl
+        cata-coh .c-quot i iss e j f = ϕ-coh i iss e f j
 
     cata : (A → B) → (ϕ : 𝐹 B → B) → InTheory ϕ → Free 𝐹 𝒯 A → B
-    cata h ϕ l xs = ⟦ cata-alg ϕ l ⟧ xs h
+    cata h ϕ coh xs = ⟦ ϕ₁ ϕ , cata-coh ϕ coh ⟧ xs h
 
-_>>_ : Free F 𝒯 A → Free F 𝒯 B → Free F 𝒯 B
-xs >> ys = xs >>= const ys
