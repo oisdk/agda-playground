@@ -12,15 +12,15 @@ private
     F : Type a → Type a
     G : Type b → Type b
 
+data Syntax (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
+  lift′ : F A → Syntax F A
+  return′ : A → Syntax F A
+  _>>=′_ : Syntax F B → (B → Syntax F A) → Syntax F A
+
+Eqn : (Type a → Type a) → Type _
+Eqn {a = a} F = ∀ {T : Type a} → Syntax F T → Syntax F T → Type a
+
 mutual
-  data Syntax (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
-    lift′ : F A → Syntax F A
-    return′ : A → Syntax F A
-    _>>=′_ : Syntax F B → (B → Syntax F A) → Syntax F A
-
-  Eqn : (Type a → Type a) → Type _
-  Eqn {a = a} F = ∀ {T : Type a} → Syntax F T → Syntax F T → Type a
-
   data Free (F : Type a → Type a) (R : Eqn F) (A : Type a)  : Type (ℓsuc a) where
     lift : F A → Free F R A
 
