@@ -34,15 +34,17 @@ module RawMonadSyntax where
 
 -- All of these quotients are defined on syntax trees, since otherwise we get a
 -- cyclic dependency.
-Equation : (Type a → Type a) → Type a → Type a → Type (ℓsuc a)
-Equation Σ Γ ν = Γ → Syntax Σ ν × Syntax Σ ν
+record Equation (Σ : Type a → Type a) (ν : Type a) : Type (ℓsuc a) where
+  constructor _⊜_
+  field lhs rhs : Syntax Σ ν
+open Equation public
 
 record Law (F : Type a → Type a) : Type (ℓsuc a) where
   constructor _↦_⦂_
   field
     Γ : Type a
     ν : Type a
-    law : Equation F Γ ν
+    law : Γ → Equation F ν
 open Law public
 
 Theory : (Type a → Type a) → Type (ℓsuc a)
@@ -56,8 +58,7 @@ Quotiented 𝒯 cons =
       let Γ ↦ ν ⦂ 𝓉 = 𝒯 !! i in -- one of the equations in the list
       isSet ν → -- I *think* this is needed
       (γ : Γ) → -- The environment, basically the needed things for the equation
-      let lhs , rhs = 𝓉 γ in -- The two sides of the equation
-      cons lhs rhs
+      cons (lhs (𝓉 γ)) (rhs (𝓉 γ))
 
 --------------------------------------------------------------------------------
 -- The free monad, quotiented over a theory
@@ -165,8 +166,7 @@ record Coherent {a p}
              let Γ ↦ ν ⦂ 𝓉 = 𝒯 !! i in
              (iss : isSet ν) →
              (γ : Γ) →
-             let lhs , rhs = 𝓉 γ in
-             ⟦ ψ ⟧↑ lhs ≡[ j ≔ P ν (quot i iss γ j) ]≡ ⟦ ψ ⟧↑ rhs
+             ⟦ ψ ⟧↑ (lhs (𝓉 γ)) ≡[ j ≔ P ν (quot i iss γ j) ]≡ ⟦ ψ ⟧↑ (rhs (𝓉 γ))
 open Coherent public
 
 -- A full dependent algebra
@@ -232,7 +232,7 @@ prop-coh {P = P} P-isProp .c->>=idʳ iss x Px =
 prop-coh {P = P} P-isProp .c->>=assoc iss xs Pxs f Pf g Pg =
   toPathP (P-isProp iss (xs >>= (λ x → f x >>= g)) (transp (λ i → P _ (>>=-assoc iss xs f g i)) i0 _) _)
 prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i iss e =
-  toPathP (P-isProp iss (∣ (𝒯 !! i) .law e .snd ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
+  toPathP (P-isProp iss (∣ (𝒯 !! i) .law e .rhs ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
 
 -- A more conventional catamorphism
 module _ {ℓ} (fun : Functor ℓ ℓ) where

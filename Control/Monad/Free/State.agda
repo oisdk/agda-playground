@@ -26,31 +26,31 @@ module Laws where
   law₁ .Γ = S × S
 
   law₁ .ν = ⊤
-  law₁ .law (u , u′) .fst = do put u
+  law₁ .law (u , u′) .lhs = do put u
                                put u′
-  law₁ .law (u , u′) .snd = put u′
+  law₁ .law (u , u′) .rhs = put u′
 
   law₂ .Γ = S
   law₂ .ν = S
-  law₂ .law u .fst = do put u
+  law₂ .law u .lhs = do put u
                         u′ ← get
                         return u′
-  law₂ .law u .snd = do put u
+  law₂ .law u .rhs = do put u
                         return u
 
   law₃ .Γ = ⊤
   law₃ .ν = S × S
-  law₃ .law _ .fst = do s  ← get
+  law₃ .law _ .lhs = do s  ← get
                         s′ ← get
                         return (s , s′)
-  law₃ .law _ .snd = do s ← get
+  law₃ .law _ .rhs = do s ← get
                         return (s , s)
 
   law₄ .Γ = ⊤
   law₄ .ν = ⊤
-  law₄ .law _ .fst = do s ← get
+  law₄ .law _ .lhs = do s ← get
                         put s
-  law₄ .law _ .snd = return tt
+  law₄ .law _ .rhs = return tt
 
   StateLaws : Theory StateF
   StateLaws = [ law₁ , law₂ , law₃ , law₄ ]
