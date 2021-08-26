@@ -2,8 +2,7 @@ module Control.Monad.Free.Quotiented where
 
 open import Prelude
 open import Data.List hiding (map)
-open import Data.List.Relation.Unary
-open import Data.Fin
+open import Data.Fin.Sigma
 open import Algebra
 open import Cubical.Foundations.HLevels using (isSetΠ)
 
@@ -42,7 +41,7 @@ private variable 𝒯 : Theory F
 Quotiented : Theory F → (∀ {ν} → Syntax F ν → Syntax F ν → Type b) → Type _
 Quotiented 𝒯 cons =
       (i : Fin (length 𝒯)) → -- An index into the list of equations
-      let Γ , ν , 𝓉 = 𝒯 ! i in -- one of the equations in the list
+      let Γ , ν , 𝓉 = 𝒯 !! i in -- one of the equations in the list
       isSet ν → -- I *think* this is needed
       (γ : Γ) → -- The environment, basically the needed things for the equation
       let lhs , rhs = 𝓉 γ in -- The two sides of the equation
@@ -150,7 +149,7 @@ record Coherent {a p}
           ψ (bindF xs Pxs (λ x → f x >>= g) λ x → ψ (bindF (f x) (Pf x) g Pg))
 
     c-quot : (i : Fin (length 𝒯)) →
-             let Γ , ν , 𝓉 = 𝒯 ! i in
+             let Γ , ν , 𝓉 = 𝒯 !! i in
              (iss : isSet ν) →
              (γ : Γ) →
              let lhs , rhs = 𝓉 γ in
@@ -221,7 +220,7 @@ prop-coh {P = P} P-isProp .c->>=idʳ iss x Px =
 prop-coh {P = P} P-isProp .c->>=assoc iss xs Pxs f Pf g Pg =
   toPathP (P-isProp iss (xs >>= (λ x → f x >>= g)) (transp (λ i → P _ (>>=-assoc iss xs f g i)) i0 _) _)
 prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i iss e =
-  toPathP (P-isProp iss (∣ (𝒯 ! i) .snd .snd e .snd ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
+  toPathP (P-isProp iss (∣ (𝒯 !! i) .snd .snd e .snd ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
 
 -- A more conventional catamorphism
 module _ {ℓ} (fun : Functor ℓ ℓ) where

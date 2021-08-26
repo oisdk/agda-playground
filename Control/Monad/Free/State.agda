@@ -51,8 +51,8 @@ state-alg .snd .c-set isSetT _ = isSetState isSetT
 state-alg .snd .c->>=idˡ isb f Pf x = refl
 state-alg .snd .c->>=idʳ isa x Px = refl
 state-alg .snd .c->>=assoc isa xs Pxs f Pf g Pg = refl
-state-alg .snd .c-quot nothing iss γ = refl
-state-alg .snd .c-quot (just nothing) iss γ = refl
+state-alg .snd .c-quot (0 , p) iss γ = refl
+state-alg .snd .c-quot (1 , p) iss γ = refl
 
 runState : State A → S → A × S
 runState = ⟦ state-alg ⟧
@@ -66,16 +66,16 @@ functorState .Functor.map-id i (putF s k) = putF s k
 functorState .Functor.map-comp f g i (getF k) = getF (f ∘ g ∘ k)
 functorState .Functor.map-comp f g i (putF s k) = putF s (f (g k))
 
-
 runState′ : isSet A → State A → S → A × S
-runState′ isSetA = cata functorState (isSetState isSetA) _,_ ϕ lemma
+runState′ isSetA = cata functorState (isSetState isSetA) _,_ ϕ ℒ
   where
   ϕ : StateF (S → A × S) → S → A × S
-  ϕ = (λ { (getF k) s → k s s ; (putF s₂ k) s₁ → k s₂ })
+  ϕ (getF k) s = k s s
+  ϕ (putF s₂ k) s₁ = k s₂
 
-  lemma : InTheory functorState (isSetState isSetA) ϕ
-  lemma nothing f iss e = refl
-  lemma (just nothing) f iss e = refl
+  ℒ : InTheory functorState {𝒯 = StateLaws} (isSetState isSetA) ϕ
+  ℒ (0 , p) f iss e = refl
+  ℒ (1 , p) f iss e = refl
 
 -- open import Data.Nat using (_∸_)
 
