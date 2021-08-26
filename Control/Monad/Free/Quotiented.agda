@@ -4,6 +4,8 @@ open import Prelude
 open import Data.List hiding (map)
 open import Data.List.Relation.Unary
 open import Data.Fin
+open import Algebra
+open import Cubical.Foundations.HLevels using (isSetΠ)
 
 --------------------------------------------------------------------------------
 -- Some functors
@@ -220,9 +222,6 @@ prop-coh {P = P} P-isProp .c->>=assoc iss xs Pxs f Pf g Pg =
   toPathP (P-isProp iss (xs >>= (λ x → f x >>= g)) (transp (λ i → P _ (>>=-assoc iss xs f g i)) i0 _) _)
 prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i iss e =
   toPathP (P-isProp iss (∣ (𝒯 ! i) .snd .snd e .snd ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
-
-open import Algebra
-open import Cubical.Foundations.HLevels using (isSetΠ)
 
 -- A more conventional catamorphism
 module _ {ℓ} (fun : Functor ℓ ℓ) where

@@ -1,90 +1,90 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 
-module Control.Monad.Free.State where
+open import Prelude hiding (⊤)
+
+module Control.Monad.Free.State {ℓ} (S : Type ℓ) (isSetS : isSet S) where
 
 open import Control.Monad.Free.Quotiented
-open import Prelude hiding (⊤)
 open import Data.Unit.UniversePolymorphic
 open import Algebra
 open import Data.List
 open import Data.List.Syntax
+open import Cubical.Foundations.HLevels using (isSetΠ; isSet×)
 
+data StateF (A : Type ℓ) : Type ℓ where
+  getF : (k : S → A) → StateF A
+  putF : (s : S) (k : A) → StateF A
 
-private variable S : Type a
-
-data StateF (S : Type a) (A : Type a)  : Type a where
-  getF : (S → A) → StateF S A
-  putF : S → A → StateF S A
-
-put′ : S → Syntax (StateF S) ⊤
+put′ : S → Syntax StateF ⊤
 put′ x = lift′ (putF x _)
 
-get′ : Syntax (StateF S) S
+get′ : Syntax StateF S
 get′ = lift′ (getF id)
 
-_>>′_ : Syntax (StateF S) A → Syntax (StateF S) B → Syntax (StateF S) B
+_>>′_ : Syntax StateF A → Syntax StateF B → Syntax StateF B
 xs >>′ ys = xs >>=′ const ys
 
-StateLaws : Theory (StateF S)
-StateLaws {S = S} =
+StateLaws : Theory StateF
+StateLaws =
   ((S × S) , ⊤ , (λ { (u , u′) → (put′ u >>′ put′ u′) , (put′ u′) })) ∷
   (S , S , (λ u → (put′ u >>′ get′) , lift′ (putF u u))) ∷
   []
 
-State : Type a → Type a → Type _
-State S = Free (StateF S) StateLaws
+State : Type ℓ → Type _
+State = Free StateF StateLaws
 
-get : State A A
+get : State S
 get = lift (getF id)
 
-put : A → State A ⊤
+put : S → State ⊤
 put x = lift (putF x _)
 
-module _ {s} {S : Type s} where
-  functorState : Functor s s
-  functorState .Functor.𝐹 = StateF S
-  functorState .Functor.map f (getF x) = getF (f ∘ x)
-  functorState .Functor.map f (putF s x) = putF s (f x)
-  functorState .Functor.map-id i (getF x) = getF x
-  functorState .Functor.map-id i (putF x x₁) = putF x x₁
-  functorState .Functor.map-comp f g i (getF x) = getF (f ∘ g ∘ x)
-  functorState .Functor.map-comp f g i (putF x x₁) = putF x (f (g x₁))
+isSetState : isSet A → isSet (S → A × S)
+isSetState isSetA = isSetΠ λ _ → isSet× isSetA isSetS
 
-runState-alg : Φ (StateF S) StateLaws λ A → S → A × S
-runState-alg .fst (liftF (getF k)) s = k s , s
-runState-alg .fst (liftF (putF s₂ k)) s₁ = k , s₂
-runState-alg .fst (returnF x) s = x , s
-runState-alg .fst (bindF _ P⟨xs⟩ _ P⟨∘k⟩) s = uncurry P⟨∘k⟩ (P⟨xs⟩ s)
-runState-alg .snd .c-set = {!!}
-runState-alg .snd .c->>=idˡ isb f Pf x = refl
-runState-alg .snd .c->>=idʳ isa x Px = refl
-runState-alg .snd .c->>=assoc isa xs Pxs f Pf g Pg = refl
-runState-alg .snd .c-quot nothing iss e = refl
-runState-alg .snd .c-quot (just nothing) iss e = refl
+state-alg : Φ[ StateF ⋆ A / StateLaws ] ⇒ (S → A × S)
+state-alg .fst (liftF (getF k)) s = k s , s
+state-alg .fst (liftF (putF s₂ k)) s₁ = k , s₂
+state-alg .fst (returnF x) s = x , s
+state-alg .fst (bindF _ P⟨xs⟩ _ P⟨∘k⟩) s = uncurry P⟨∘k⟩ (P⟨xs⟩ s)
+state-alg .snd .c-set isSetT _ = isSetState isSetT
+state-alg .snd .c->>=idˡ isb f Pf x = refl
+state-alg .snd .c->>=idʳ isa x Px = refl
+state-alg .snd .c->>=assoc isa xs Pxs f Pf g Pg = refl
+state-alg .snd .c-quot nothing iss γ = refl
+state-alg .snd .c-quot (just nothing) iss γ = refl
 
-runState : State S A → S → A × S
-runState = cata functorState {!!} _,_ ϕ lemma
+runState : State A → S → A × S
+runState = ⟦ state-alg ⟧
+
+functorState : Functor ℓ ℓ
+functorState .Functor.𝐹 = StateF
+functorState .Functor.map f (getF k) = getF (f ∘ k)
+functorState .Functor.map f (putF s k) = putF s (f k)
+functorState .Functor.map-id i (getF k) = getF k
+functorState .Functor.map-id i (putF s k) = putF s k
+functorState .Functor.map-comp f g i (getF k) = getF (f ∘ g ∘ k)
+functorState .Functor.map-comp f g i (putF s k) = putF s (f (g k))
+
+
+runState′ : isSet A → State A → S → A × S
+runState′ isSetA = cata functorState (isSetState isSetA) _,_ ϕ lemma
   where
-  ϕ : StateF S (S → A × S) → S → A × S
+  ϕ : StateF (S → A × S) → S → A × S
   ϕ = (λ { (getF k) s → k s s ; (putF s₂ k) s₁ → k s₂ })
 
-  lemma : InTheory functorState {!!} ϕ
+  lemma : InTheory functorState (isSetState isSetA) ϕ
   lemma nothing f iss e = refl
   lemma (just nothing) f iss e = refl
 
---   -- lemma′ : ∀ {T} → (f : T → (S → A × S)) (xs ys : Syntax (StateF S) T) → xs ≐ ys ∈ StateLaws → ⟦ act functorState {!!} ϕ ⟧↑ xs f ≡ ⟦ act functorState {!!} ϕ ⟧↑ ys f
---   -- lemma′ f (lift′ x) ys (nothing , xs~ys) = let p = xs~ys in {!!}
---   -- lemma′ f (return′ x) ys (nothing , xs~ys) = {!!}
---   -- lemma′ f (xs >>=′ x) ys (nothing , xs~ys) = {!!}
+-- open import Data.Nat using (_∸_)
 
--- -- open import Data.Nat using (_∸_)
+-- example : State ℕ ℕ
+-- example = do
+--   x ← get
+--   put (suc x)
+--   put x
+--   return (x ∸ 1)
 
--- -- example : State ℕ ℕ
--- -- example = do
--- --   x ← get
--- --   put (suc x)
--- --   put x
--- --   return (x ∸ 1)
-
--- -- res : ℕ × ℕ
--- -- res = runState example 5
+-- res : ℕ × ℕ
+-- res = runState example 5
