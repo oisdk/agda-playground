@@ -20,9 +20,13 @@ private variable
 --------------------------------------------------------------------------------
 
 data Syntax (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
-  lift′   : (Fx : F A) → Syntax F A
-  return′ : (x  : A) → Syntax F A
-  _>>=′_  : (xs : Syntax F B) → (k : B → Syntax F A) → Syntax F A
+  lift   : (Fx : F A) → Syntax F A
+  return : (x  : A) → Syntax F A
+  _>>=_  : (xs : Syntax F B) → (k : B → Syntax F A) → Syntax F A
+
+module RawMonadSyntax where
+  _>>_ : Syntax F A → Syntax F B → Syntax F B
+  xs >> ys = xs >>= const ys
 
 --------------------------------------------------------------------------------
 -- Quotients for functors
@@ -33,15 +37,23 @@ data Syntax (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
 Equation : (Type a → Type a) → Type a → Type a → Type (ℓsuc a)
 Equation Σ Γ ν = Γ → Syntax Σ ν × Syntax Σ ν
 
+record Law (F : Type a → Type a) : Type (ℓsuc a) where
+  constructor _↦_⦂_
+  field
+    Γ : Type a
+    ν : Type a
+    law : Equation F Γ ν
+open Law public
+
 Theory : (Type a → Type a) → Type (ℓsuc a)
-Theory Σ = List (∃ Γ × ∃ ν × Equation Σ Γ ν)
+Theory Σ = List (Law Σ)
 
 private variable 𝒯 : Theory F
 
 Quotiented : Theory F → (∀ {ν} → Syntax F ν → Syntax F ν → Type b) → Type _
 Quotiented 𝒯 cons =
       (i : Fin (length 𝒯)) → -- An index into the list of equations
-      let Γ , ν , 𝓉 = 𝒯 !! i in -- one of the equations in the list
+      let Γ ↦ ν ⦂ 𝓉 = 𝒯 !! i in -- one of the equations in the list
       isSet ν → -- I *think* this is needed
       (γ : Γ) → -- The environment, basically the needed things for the equation
       let lhs , rhs = 𝓉 γ in -- The two sides of the equation
@@ -79,12 +91,13 @@ mutual
   -- The fact that we're doing all this conversion is what makes things trickier
   -- later (and also that this is interleaved with the data definition).
   ∣_∣↑ : Syntax F A → Free F 𝒯 A
-  ∣ lift′ x   ∣↑ = lift x
-  ∣ return′ x ∣↑ = return x
-  ∣ xs >>=′ k ∣↑ = ∣ xs ∣↑ >>= (∣_∣↑ ∘ k)
+  ∣ lift x   ∣↑ = lift x
+  ∣ return x ∣↑ = return x
+  ∣ xs >>= k ∣↑ = ∣ xs ∣↑ >>= (∣_∣↑ ∘ k)
 
-_>>_ : Free F 𝒯 A → Free F 𝒯 B → Free F 𝒯 B
-xs >> ys = xs >>= const ys
+module FreeMonadSyntax where
+  _>>_ : Free F 𝒯 A → Free F 𝒯 B → Free F 𝒯 B
+  xs >> ys = xs >>= const ys
 
 --------------------------------------------------------------------------------
 -- Recursion Schemes
@@ -118,9 +131,9 @@ Alg F 𝒯 P = ∀ {A} → (xs : FreeF F 𝒯 P A) → P A ⟪ xs ⟫
 
 -- You can run a non-coherent algebra on a syntax tree
 ⟦_⟧↑ : Alg F 𝒯 P → (xs : Syntax F A) → P A ∣ xs ∣↑
-⟦ alg ⟧↑ (lift′ x) = alg (liftF x)
-⟦ alg ⟧↑ (return′ x) = alg (returnF x)
-⟦ alg ⟧↑ (xs >>=′ k) = alg (bindF ∣ xs ∣↑ (⟦ alg ⟧↑ xs) (∣_∣↑ ∘ k) (⟦ alg ⟧↑ ∘ k))
+⟦ alg ⟧↑ (lift x) = alg (liftF x)
+⟦ alg ⟧↑ (return x) = alg (returnF x)
+⟦ alg ⟧↑ (xs >>= k) = alg (bindF ∣ xs ∣↑ (⟦ alg ⟧↑ xs) (∣_∣↑ ∘ k) (⟦ alg ⟧↑ ∘ k))
 
 -- Coherency for an algebra: an algebra that's coherent can be run on a proper
 -- Free monad.
@@ -149,7 +162,7 @@ record Coherent {a p}
           ψ (bindF xs Pxs (λ x → f x >>= g) λ x → ψ (bindF (f x) (Pf x) g Pg))
 
     c-quot : (i : Fin (length 𝒯)) →
-             let Γ , ν , 𝓉 = 𝒯 !! i in
+             let Γ ↦ ν ⦂ 𝓉 = 𝒯 !! i in
              (iss : isSet ν) →
              (γ : Γ) →
              let lhs , rhs = 𝓉 γ in
@@ -171,7 +184,6 @@ syntax Ψ-syntax F 𝒯 (λ xs → P) = Ψ[ xs ⦂ F ⋆ * / 𝒯 ] ⇒ P
 
 syntax Φ F 𝒯 (λ A → B) = Φ[ F ⋆ A / 𝒯 ] ⇒ B
 
-
 -- Running the algebra
 module _ (ψ : Ψ F 𝒯 P) where
   ⟦_⟧ : (xs : Free F 𝒯 A) → P A xs
@@ -180,9 +192,9 @@ module _ (ψ : Ψ F 𝒯 P) where
   -- something the same size (I think)
   {-# TERMINATING #-}
   undecorate : (xs : Syntax F A) → ⟦ fst ψ ⟧↑ xs ≡ ⟦ ∣ xs ∣↑ ⟧
-  undecorate (lift′ x) i = fst ψ (liftF x)
-  undecorate (return′ x) i = fst ψ (returnF x)
-  undecorate (xs >>=′ k) i =
+  undecorate (lift x) i = fst ψ (liftF x)
+  undecorate (return x) i = fst ψ (returnF x)
+  undecorate (xs >>= k) i =
     fst ψ
         (bindF ∣ xs ∣↑ (undecorate xs i) (λ x → ∣ k x ∣↑)
         (λ x → undecorate (k x) i))
@@ -220,7 +232,7 @@ prop-coh {P = P} P-isProp .c->>=idʳ iss x Px =
 prop-coh {P = P} P-isProp .c->>=assoc iss xs Pxs f Pf g Pg =
   toPathP (P-isProp iss (xs >>= (λ x → f x >>= g)) (transp (λ i → P _ (>>=-assoc iss xs f g i)) i0 _) _)
 prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i iss e =
-  toPathP (P-isProp iss (∣ (𝒯 !! i) .snd .snd e .snd ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
+  toPathP (P-isProp iss (∣ (𝒯 !! i) .law e .snd ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
 
 -- A more conventional catamorphism
 module _ {ℓ} (fun : Functor ℓ ℓ) where

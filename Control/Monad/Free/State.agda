@@ -15,20 +15,49 @@ data StateF (A : Type ℓ) : Type ℓ where
   getF : (k : S → A) → StateF A
   putF : (s : S) (k : A) → StateF A
 
-put′ : S → Syntax StateF ⊤
-put′ x = lift′ (putF x _)
+module Laws where
+  open RawMonadSyntax
+  put : S → Syntax StateF ⊤
+  put x = lift (putF x _)
 
-get′ : Syntax StateF S
-get′ = lift′ (getF id)
+  get : Syntax StateF S
+  get = lift (getF id)
 
-_>>′_ : Syntax StateF A → Syntax StateF B → Syntax StateF B
-xs >>′ ys = xs >>=′ const ys
+  law₁ law₂ law₃ law₄ : Law StateF
 
-StateLaws : Theory StateF
-StateLaws =
-  ((S × S) , ⊤ , (λ { (u , u′) → (put′ u >>′ put′ u′) , (put′ u′) })) ∷
-  (S , S , (λ u → (put′ u >>′ get′) , lift′ (putF u u))) ∷
-  []
+  law₁ .Γ = S × S
+
+  law₁ .ν = ⊤
+  law₁ .law (u , u′) .fst = do put u
+                               put u′
+  law₁ .law (u , u′) .snd = put u′
+
+  law₂ .Γ = S
+  law₂ .ν = S
+  law₂ .law u .fst = do put u
+                        u′ ← get
+                        return u′
+  law₂ .law u .snd = do put u
+                        return u
+
+  law₃ .Γ = ⊤
+  law₃ .ν = S × S
+  law₃ .law _ .fst = do s  ← get
+                        s′ ← get
+                        return (s , s′)
+  law₃ .law _ .snd = do s ← get
+                        return (s , s)
+
+  law₄ .Γ = ⊤
+  law₄ .ν = ⊤
+  law₄ .law _ .fst = do s ← get
+                        put s
+  law₄ .law _ .snd = return tt
+
+  StateLaws : Theory StateF
+  StateLaws = [ law₁ , law₂ , law₃ , law₄ ]
+
+open Laws using (StateLaws)
 
 State : Type ℓ → Type _
 State = Free StateF StateLaws
@@ -53,6 +82,8 @@ state-alg .snd .c->>=idʳ isa x Px = refl
 state-alg .snd .c->>=assoc isa xs Pxs f Pf g Pg = refl
 state-alg .snd .c-quot (0 , p) iss γ = refl
 state-alg .snd .c-quot (1 , p) iss γ = refl
+state-alg .snd .c-quot (2 , p) iss γ = refl
+state-alg .snd .c-quot (3 , p) iss γ = refl
 
 runState : State A → S → A × S
 runState = ⟦ state-alg ⟧
@@ -76,6 +107,8 @@ runState′ isSetA = cata functorState (isSetState isSetA) _,_ ϕ ℒ
   ℒ : InTheory functorState {𝒯 = StateLaws} (isSetState isSetA) ϕ
   ℒ (0 , p) f iss e = refl
   ℒ (1 , p) f iss e = refl
+  ℒ (2 , p) f iss e = refl
+  ℒ (3 , p) f iss e = refl
 
 -- open import Data.Nat using (_∸_)
 
