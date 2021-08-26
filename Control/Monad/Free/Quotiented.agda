@@ -13,15 +13,17 @@ private
     G : Type b → Type b
 
 data Syntax (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
-  lift′   : F A → Syntax F A
-  return′ : A → Syntax F A
-  _>>=′_  : Syntax F B → (B → Syntax F A) → Syntax F A
+  lift′   : (Fx : F A) → Syntax F A
+  return′ : (x  : A) → Syntax F A
+  _>>=′_  : (xs : Syntax F B) → (k : B → Syntax F A) → Syntax F A
 
 Equation : (Type a → Type a) → Type a → Type a → Type (ℓsuc a)
 Equation F Γ v = Γ → Syntax F v × Syntax F v
 
 Theory : (Type a → Type a) → Type (ℓsuc a)
 Theory F = List (∃ Γ × ∃ v × Equation F Γ v)
+
+private variable R : Theory F
 
 mutual
   data Free (F : Type a → Type a) (R : Theory F) : Type a → Type (ℓsuc a) where
@@ -45,13 +47,12 @@ mutual
       ∣ lhs ∣↑ ≡ ∣ rhs ∣↑
      
 
-  ∣_∣↑ : {R : Theory F} → Syntax F A → Free F R A
-  ∣ lift′ x ∣↑ = lift x
+  ∣_∣↑ : Syntax F A → Free F R A
+  ∣ lift′ x   ∣↑ = lift x
   ∣ return′ x ∣↑ = return x
-  ∣ x >>=′ k ∣↑ = ∣ x ∣↑ >>= (∣_∣↑ ∘ k)
+  ∣ xs >>=′ k ∣↑ = ∣ xs ∣↑ >>= (∣_∣↑ ∘ k)
 
 private variable
-    R : Theory F
     p : Level
     P : ∀ T → Free F R T → Type p
 
