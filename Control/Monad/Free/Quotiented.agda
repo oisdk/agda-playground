@@ -159,6 +159,18 @@ open Coherent public
 Ψ : (F : Type a → Type a) (𝒯 : Theory F) (P : ∀ T → Free F 𝒯 T → Type p) → Type _
 Ψ F 𝒯 P = Σ (Alg F 𝒯 P) Coherent
 
+Ψ-syntax : (F : Type a → Type a) (𝒯 : Theory F) (P : ∀ {T} → Free F 𝒯 T → Type p) → Type _
+Ψ-syntax F 𝒯 P = Ψ F 𝒯 (λ T → P {T})
+
+syntax Ψ-syntax F 𝒯 (λ xs → P) = Ψ[ xs ⦂ F ⋆ * / 𝒯 ] ⇒ P
+
+-- Non-dependent algebras
+Φ : (F : Type a → Type a) → (𝒯 : Theory F) → (Type a → Type b) → Type _
+Φ A 𝒯 B = Ψ A 𝒯 (λ T _ → B T)
+
+syntax Φ F 𝒯 (λ A → B) = Φ[ F ⋆ A / 𝒯 ] ⇒ B
+
+
 -- Running the algebra
 module _ (ψ : Ψ F 𝒯 P) where
   ⟦_⟧ : (xs : Free F 𝒯 A) → P A xs
@@ -197,10 +209,6 @@ module _ (ψ : Ψ F 𝒯 P) where
       (trunc AIsSet xs ys p q)
       i j
 
--- Non-dependent algebras
-Φ : (F : Type a → Type a) → (𝒯 : Theory F) → (Type a → Type b) → Type _
-Φ A 𝒯 B = Ψ A 𝒯 (λ T _ → B T)
-
 -- For a proposition, use this to prove the algebra is coherent
 prop-coh : {alg : Alg F 𝒯 P} → (∀ {T} → isSet T → ∀ xs → isProp (P T xs)) → Coherent alg
 prop-coh P-isProp .c-set TIsSet xs = isProp→isSet (P-isProp TIsSet xs)
@@ -212,7 +220,6 @@ prop-coh {P = P} P-isProp .c->>=assoc iss xs Pxs f Pf g Pg =
   toPathP (P-isProp iss (xs >>= (λ x → f x >>= g)) (transp (λ i → P _ (>>=-assoc iss xs f g i)) i0 _) _)
 prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i iss e =
   toPathP (P-isProp iss (∣ (𝒯 ! i) .snd .snd e .snd ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
-
 
 open import Algebra
 open import Cubical.Foundations.HLevels using (isSetΠ)
@@ -238,6 +245,9 @@ module _ {ℓ} (fun : Functor ℓ ℓ) where
         cata-coh .c->>=assoc isa xs Pxs f Pf g Pg = refl
         cata-coh .c-quot i iss e j f = ϕ-coh i iss e f j
 
+        cata-alg : Φ[ 𝐹 ⋆ A / 𝒯 ] ⇒ ((A → B) → B)
+        cata-alg = ϕ₁ , cata-coh
+
     cata : (A → B) → (ϕ : 𝐹 B → B) → InTheory ϕ → Free 𝐹 𝒯 A → B
-    cata h ϕ coh xs = ⟦ ϕ₁ ϕ , cata-coh ϕ coh ⟧ xs h
+    cata h ϕ coh xs = ⟦ cata-alg ϕ coh ⟧ xs h
 
