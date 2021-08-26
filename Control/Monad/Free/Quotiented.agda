@@ -146,74 +146,41 @@ prop-coh {R = R} {P = P} P-isProp .c-quot i iss e =
 
 open import Algebra
 
--- -- module _ {F : Type a → Type a} where
--- --   freeMonad : SetMonad a (ℓsuc a)
--- --   freeMonad .SetMonad.𝐹 = Free F
--- --   freeMonad .SetMonad.isSetMonad .IsSetMonad._>>=_ = _>>=_
--- --   freeMonad .SetMonad.isSetMonad .IsSetMonad.return = return
--- --   freeMonad .SetMonad.isSetMonad .IsSetMonad.>>=-idˡ = >>=-idˡ
--- --   freeMonad .SetMonad.isSetMonad .IsSetMonad.>>=-idʳ = >>=-idʳ
--- --   freeMonad .SetMonad.isSetMonad .IsSetMonad.>>=-assoc = >>=-assoc
--- --   freeMonad .SetMonad.isSetMonad .IsSetMonad.trunc = trunc
+open import Cubical.Foundations.HLevels using (isSetΠ)
 
--- -- module _ {ℓ} (mon : SetMonad ℓ ℓ) where
--- --   module F = SetMonad mon
+module _ {ℓ} (fun : Functor ℓ ℓ) where
+  open Functor fun using (map; 𝐹)
+  module _ {B : Type ℓ} {R : Theory 𝐹} (BIsSet : isSet B) where
+    module _ (ϕ : 𝐹 B → B) where
+      act : Alg 𝐹 R λ T _ → (T → B) → B
+      act (liftF x) h = ϕ (map h x)
+      act (returnF x) h = h x
+      act (bindF _ P⟨xs⟩ _ P⟨∘k⟩) h = P⟨xs⟩ (flip P⟨∘k⟩ h)
 
--- --   open F using (𝐹)
 
--- --   module _ {G : Type ℓ → Type ℓ} (h : ∀ {T} → G T → 𝐹 T) where
--- --     ⟦_⟧′ : Free G A → 𝐹 A
--- --     ⟦ lift x ⟧′ = h x
--- --     ⟦ return x ⟧′ = F.return x
--- --     ⟦ xs >>= k ⟧′ = ⟦ xs ⟧′ F.>>= λ x → ⟦ k x ⟧′
--- --     ⟦ >>=-idˡ iss f x i ⟧′ = F.>>=-idˡ iss (⟦_⟧′ ∘ f) x i
--- --     ⟦ >>=-idʳ iss xs i ⟧′ = F.>>=-idʳ iss ⟦ xs ⟧′ i
--- --     ⟦ >>=-assoc iss xs f g i ⟧′ = F.>>=-assoc iss ⟦ xs ⟧′ (⟦_⟧′ ∘ f) (⟦_⟧′ ∘ g) i
+    module _ (ϕ : 𝐹 B → B) where
+      InTheory : Type _
+      InTheory = 
+       ∀ (i : Fin (length R)) →
+              let Γ , V , eqn = R ! i in
+              (f : V → B)
+              (iss : isSet V) →
+              (e : Γ) →
+              let lhs , rhs = eqn e in
+              (⟦ act ϕ ⟧↑ lhs f) ≡ (⟦ act ϕ ⟧↑ rhs f)
 
--- --     ⟦ trunc iss xs ys p q i j ⟧′ =
--- --       isOfHLevel→isOfHLevelDep 2
--- --         (λ xs → F.trunc iss)
--- --         ⟦ xs ⟧′ ⟦ ys ⟧′
--- --         (cong ⟦_⟧′ p) (cong ⟦_⟧′ q)
--- --         (trunc iss xs ys p q)
--- --         i j
+    module _ (ϕ : 𝐹 B → B) (act-lemma : InTheory ϕ) where
 
--- --     module _ (hom : SetMonadHomomorphism freeMonad {F = G} ⟶ mon) where
--- --       module Hom = SetMonadHomomorphism_⟶_ hom
--- --       open Hom using (f)
+      cata-alg : Ψ 𝐹 R λ T _ → (T → B) → B
+      cata-alg .fst = act ϕ
+      cata-alg .snd .c-set _ _ = isSetΠ λ _ → BIsSet
+      cata-alg .snd .c->>=idˡ isb f Pf x = refl
+      cata-alg .snd .c->>=idʳ isa x Px = refl
+      cata-alg .snd .c->>=assoc isa xs Pxs f Pf g Pg = refl
+      cata-alg .snd .c-quot i iss e j f = act-lemma i f iss e j
 
--- --       uniq-alg : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) → Ψ[ xs ⦂ G * ] ⇒ ⟦ xs ⟧′ ≡ f xs
--- --       uniq-alg inv .snd = prop-coh λ iss xs → F.trunc iss _ _
--- --       uniq-alg inv .fst (liftF x) = sym (inv x)
--- --       uniq-alg inv .fst (returnF x) = sym (Hom.return-homo x)
--- --       uniq-alg inv .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) = cong₂ F._>>=_ P⟨xs⟩ (funExt P⟨∘k⟩) ; Hom.>>=-homo xs k
-
--- --       uniq : (inv : ∀ {A : Type _} → (x : G A) → f (lift x) ≡ h x) → (xs : Free G A) → ⟦ xs ⟧′ ≡ f xs
--- --       uniq inv = ⟦ uniq-alg inv ⟧
-
--- open import Cubical.Foundations.HLevels using (isSetΠ)
-
--- module _ {ℓ} (fun : Functor ℓ ℓ) where
---   open Functor fun using (map; 𝐹)
---   module _ {B : Type ℓ} (R : Theory 𝐹) (BIsSet : isSet B) where
---     module _ (ϕ : 𝐹 B → B) where
---       act : Alg 𝐹 R λ T _ → (T → B) → B
---       act (liftF x) h = ϕ (map h x)
---       act (returnF x) h = h x
---       act (bindF _ P⟨xs⟩ _ P⟨∘k⟩) h = P⟨xs⟩ (flip P⟨∘k⟩ h)
-
---     module _ (ϕ : 𝐹 B → B) (act-lemma : ∀ {T} → (f : T → B) (xs ys : Syntax 𝐹 T) → xs ≐ ys ∈ R → ⟦ act ϕ ⟧↑ xs f ≡ ⟦ act ϕ ⟧↑ ys f) where
-
---       cata-alg : Ψ 𝐹 R λ T _ → (T → B) → B
---       cata-alg .fst = act ϕ
---       cata-alg .snd .c-set _ _ = isSetΠ λ _ → BIsSet
---       cata-alg .snd .c->>=idˡ isb f Pf x = refl
---       cata-alg .snd .c->>=idʳ isa x Px = refl
---       cata-alg .snd .c->>=assoc isa xs Pxs f Pf g Pg = refl
---       cata-alg .snd .c-quot = {!!}
-
---     cata : (A → B) → (ϕ : 𝐹 B → B) (act-lemma : ∀ {T} → (f : T → B) (xs ys : Syntax 𝐹 T) → xs ≐ ys ∈ R → ⟦ act ϕ ⟧↑ xs f ≡ ⟦ act ϕ ⟧↑ ys f) → Free 𝐹 R A → B
---     cata h ϕ l xs = ⟦ cata-alg ϕ l ⟧ xs h
+    cata : (A → B) → (ϕ : 𝐹 B → B) → InTheory ϕ → Free 𝐹 R A → B
+    cata h ϕ l xs = ⟦ cata-alg ϕ l ⟧ xs h
 
 _>>_ : Free F R A → Free F R B → Free F R B
 xs >> ys = xs >>= const ys
