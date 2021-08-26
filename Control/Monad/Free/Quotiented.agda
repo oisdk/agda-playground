@@ -66,9 +66,9 @@ data FreeF (F : Type a → Type a) (R : Theory F) (P : ∀ T → Free F R T → 
 ⟪ bindF xs P⟨xs⟩ k P⟨∘k⟩ ⟫ = xs >>= k
 
 Alg : (F : Type a → Type a) → (R : Theory F) → (P : ∀ T → Free F R T → Type b) → Type _
-Alg F R P = ∀ {A} → (xs : FreeF F R P A) → P _ ⟪ xs ⟫
+Alg F R P = ∀ {A} → (xs : FreeF F R P A) → P A ⟪ xs ⟫
 
-⟦_⟧↑ : Alg F R P → (xs : Syntax F A) → P _ ∣ xs ∣↑
+⟦_⟧↑ : Alg F R P → (xs : Syntax F A) → P A ∣ xs ∣↑
 ⟦ alg ⟧↑ (lift′ x) = alg (liftF x)
 ⟦ alg ⟧↑ (return′ x) = alg (returnF x)
 ⟦ alg ⟧↑ (xs >>=′ k) = alg (bindF ∣ xs ∣↑ (⟦ alg ⟧↑ xs) (∣_∣↑ ∘ k) (⟦ alg ⟧↑ ∘ k))
