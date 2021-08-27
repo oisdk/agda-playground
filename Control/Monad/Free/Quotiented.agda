@@ -53,12 +53,12 @@ Theory Σ = List (Law Σ)
 private variable 𝒯 : Theory F
 
 Quotiented : Theory F → (∀ {ν} → Syntax F ν → Syntax F ν → Type b) → Type _
-Quotiented 𝒯 cons =
+Quotiented 𝒯 R =
       (i : Fin (length 𝒯)) → -- An index into the list of equations
       let Γ ↦ ν ⦂ 𝓉 = 𝒯 !! i in -- one of the equations in the list
       isSet ν → -- I *think* this is needed
       (γ : Γ) → -- The environment, basically the needed things for the equation
-      cons (lhs (𝓉 γ)) (rhs (𝓉 γ))
+      R (lhs (𝓉 γ)) (rhs (𝓉 γ))
 
 --------------------------------------------------------------------------------
 -- The free monad, quotiented over a theory
@@ -85,7 +85,7 @@ mutual
     trunc : isSet A → isSet (Free F 𝒯 A)
 
   -- This is the quotient for the theory.
-    quot : Quotiented 𝒯 λ lhs rhs → ∣ lhs ∣↑ ≡ ∣ rhs ∣↑
+    quot : Quotiented 𝒯 (λ lhs rhs → ∣ lhs ∣↑ ≡ ∣ rhs ∣↑)
      
   -- This converts from the unquotiented syntax to the free type.
   -- You cannot go the other way!
@@ -108,7 +108,7 @@ private variable
   p : Level
   P : ∀ T → Free F 𝒯 T → Type p
 
--- The functor for a free monad
+-- The functor for a free monad (not really! This is a "raw" free functor)
 data FreeF (F : Type a → Type a)
            (𝒯 : Theory F)
            (P : ∀ T → Free F 𝒯 T → Type b)
@@ -119,6 +119,8 @@ data FreeF (F : Type a → Type a)
           (P⟨xs⟩ : P _ xs)
           (k : B → Free F 𝒯 A)
           (P⟨∘k⟩ : ∀ x → P _ (k x)) → FreeF F 𝒯 P A
+
+-- There can also be a quotiented free functor (I think)
 
 -- The "in" function
 ⟪_⟫ : FreeF F 𝒯 P A → Free F 𝒯 A
