@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 open import Prelude hiding (⊤)
 
 module Control.Monad.Free.State {ℓ} (S : Type ℓ) (isSetS : isSet S) where
@@ -85,6 +87,28 @@ state-alg .snd .c-quot (3 , p) iss γ = refl
 
 runState : State A → S → A × S
 runState = ⟦ state-alg ⟧
+
+open FreeMonadSyntax
+
+fromState : (S → A × S) → State A
+fromState k = lift (getF k) >>= λ { (x , s) → lift (putF s x) }
+  -- s₁ ← get
+  -- let x , s₂ = k s₁
+  -- put s₂
+  -- return x
+
+state-state : State A ⇔ (S → A × S)
+state-state .fun = runState
+state-state .inv = fromState
+state-state .rightInv b = refl
+state-state .leftInv = ⟦ lemma ⟧
+  where
+  lemma : Ψ[ xs ⦂ StateF ⋆ * / StateLaws ] ⇒ (fromState (runState xs) ≡ xs)
+  lemma .snd = prop-coh λ isSetA _ → trunc isSetA _ _ 
+  lemma .fst (liftF (getF k)) = {!!}
+  lemma .fst (liftF (putF s k)) = {!!}
+  lemma .fst (returnF x) = {!!}
+  lemma .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) = {!!}
 
 functorState : Functor ℓ ℓ
 functorState .Functor.𝐹 = StateF
