@@ -109,7 +109,7 @@ state-state isSetA .leftInv xs = ⟦ lemma ⟧ xs isSetA
   dup x = x , x
 
   lemma : Ψ StateF StateLaws (λ A xs → isSet A → fromState (runState xs) ≡ xs)
-  lemma .snd = {!!}
+  lemma .snd = prop-coh λ isSetT xs lhs rhs → funExt λ isSetT′ → trunc isSetT _ _ (lhs isSetT′) (rhs isSetT′)
 
 
   lemma .fst (liftF (getF k)) iss =
