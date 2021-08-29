@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Relation.Binary.Equivalence.PropHIT</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+
+<a id="35" class="Keyword">module</a> <a id="42" href="Relation.Binary.Equivalence.PropHIT.html" class="Module">Relation.Binary.Equivalence.PropHIT</a> <a id="78" class="Keyword">where</a>
+
+<a id="85" class="Keyword">open</a> <a id="90" class="Keyword">import</a> <a id="97" href="Prelude.html" class="Module">Prelude</a>
+<a id="105" class="Keyword">open</a> <a id="110" class="Keyword">import</a> <a id="117" href="Relation.Nullary.Stable.html" class="Module">Relation.Nullary.Stable</a>
+<a id="141" class="Keyword">open</a> <a id="146" class="Keyword">import</a> <a id="153" href="HITs.PropositionalTruncation.html" class="Module">HITs.PropositionalTruncation</a>
+<a id="182" class="Keyword">open</a> <a id="187" class="Keyword">import</a> <a id="194" href="HITs.PropositionalTruncation.Sugar.html" class="Module">HITs.PropositionalTruncation.Sugar</a>
+<a id="229" class="Keyword">open</a> <a id="234" class="Keyword">import</a> <a id="241" href="Relation.Binary.html" class="Module">Relation.Binary</a>
+
+<a id="258" class="Keyword">infix</a> <a id="264" class="Number">4</a> <a id="266" href="Relation.Binary.Equivalence.PropHIT.html#270" class="Function Operator">_≐_</a>
+<a id="_≐_"></a><a id="270" href="Relation.Binary.Equivalence.PropHIT.html#270" class="Function Operator">_≐_</a> <a id="274" class="Symbol">:</a> <a id="276" href="Level.html#255" class="Generalizable">A</a> <a id="278" class="Symbol">→</a> <a id="280" href="Level.html#255" class="Generalizable">A</a> <a id="282" class="Symbol">→</a> <a id="284" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="289" class="Symbol">_</a>
+<a id="291" href="Relation.Binary.Equivalence.PropHIT.html#291" class="Bound">x</a> <a id="293" href="Relation.Binary.Equivalence.PropHIT.html#270" class="Function Operator">≐</a> <a id="295" href="Relation.Binary.Equivalence.PropHIT.html#295" class="Bound">y</a> <a id="297" class="Symbol">=</a> <a id="299" href="Cubical.HITs.PropositionalTruncation.Base.html#249" class="Datatype Operator">∥</a> <a id="301" href="Relation.Binary.Equivalence.PropHIT.html#291" class="Bound">x</a> <a id="303" href="Agda.Builtin.Cubical.Path.html#381" class="Function Operator">≡</a> <a id="305" href="Relation.Binary.Equivalence.PropHIT.html#295" class="Bound">y</a> <a id="307" href="Cubical.HITs.PropositionalTruncation.Base.html#249" class="Datatype Operator">∥</a>
+
+<a id="310" class="Keyword">import</a> <a id="317" href="Relation.Binary.Equivalence.Reasoning.html" class="Module">Relation.Binary.Equivalence.Reasoning</a>
+
+<a id="356" class="Keyword">module</a> <a id="363" href="Relation.Binary.Equivalence.PropHIT.html#363" class="Module">_</a> <a id="365" class="Symbol">{</a><a id="366" href="Relation.Binary.Equivalence.PropHIT.html#366" class="Bound">A</a> <a id="368" class="Symbol">:</a> <a id="370" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="375" href="Level.html#239" class="Generalizable">a</a><a id="376" class="Symbol">}</a> <a id="378" class="Keyword">where</a>
+  <a id="386" href="Relation.Binary.Equivalence.PropHIT.html#386" class="Function">prop-equiv</a> <a id="397" class="Symbol">:</a> <a id="399" href="Relation.Binary.html#6653" class="Record">Equivalence</a> <a id="411" href="Relation.Binary.Equivalence.PropHIT.html#366" class="Bound">A</a> <a id="413" class="Symbol">_</a>
+  <a id="417" href="Relation.Binary.Equivalence.PropHIT.html#386" class="Function">prop-equiv</a> <a id="428" class="Symbol">.</a><a id="429" href="Relation.Binary.html#6742" class="Field Operator">Equivalence._≋_</a> <a id="445" class="Symbol">=</a> <a id="447" href="Relation.Binary.Equivalence.PropHIT.html#270" class="Function Operator">_≐_</a>
+  <a id="453" href="Relation.Binary.Equivalence.PropHIT.html#386" class="Function">prop-equiv</a> <a id="464" class="Symbol">.</a><a id="465" href="Relation.Binary.html#6768" class="Field">Equivalence.sym</a> <a id="481" class="Symbol">=</a> <a id="483" href="Cubical.Foundations.Id.html#703" class="Function">sym</a> <a id="487" href="HITs.PropositionalTruncation.Sugar.html#674" class="Function Operator">∥$∥_</a>
+  <a id="494" href="Relation.Binary.Equivalence.PropHIT.html#386" class="Function">prop-equiv</a> <a id="505" class="Symbol">.</a><a id="506" href="Relation.Binary.html#6804" class="Field">Equivalence.refl</a> <a id="523" class="Symbol">=</a> <a id="525" href="Cubical.HITs.PropositionalTruncation.Base.html#287" class="InductiveConstructor Operator">∣</a> <a id="527" href="Cubical.Foundations.Id.html#560" class="Function">refl</a> <a id="532" href="Cubical.HITs.PropositionalTruncation.Base.html#287" class="InductiveConstructor Operator">∣</a>
+  <a id="536" href="Relation.Binary.Equivalence.PropHIT.html#386" class="Function">prop-equiv</a> <a id="547" class="Symbol">.</a><a id="548" href="Relation.Binary.html#6830" class="Field">Equivalence.trans</a> <a id="566" href="Relation.Binary.Equivalence.PropHIT.html#566" class="Bound">x≐y</a> <a id="570" href="Relation.Binary.Equivalence.PropHIT.html#570" class="Bound">y≐z</a> <a id="574" class="Symbol">=</a> <a id="576" class="Symbol">⦇</a> <a id="578" href="Relation.Binary.Equivalence.PropHIT.html#566" class="Bound">x≐y</a> <a id="582" href="Cubical.Foundations.Id.html#737" class="Function Operator">;</a> <a id="584" href="Relation.Binary.Equivalence.PropHIT.html#570" class="Bound">y≐z</a> <a id="588" class="Symbol">⦈</a>
+
+  <a id="593" class="Keyword">module</a> <a id="600" href="Relation.Binary.Equivalence.PropHIT.html#600" class="Module">Reasoning</a> <a id="610" class="Symbol">=</a> <a id="612" href="Relation.Binary.Equivalence.Reasoning.html" class="Module">Relation.Binary.Equivalence.Reasoning</a> <a id="650" href="Relation.Binary.Equivalence.PropHIT.html#386" class="Function">prop-equiv</a>
+
+<a id="662" class="Comment">-- data ∙⊥ : Prop where</a>
+
+<a id="687" class="Comment">-- private</a>
+<a id="698" class="Comment">--   variable</a>
+<a id="712" class="Comment">--     x y z : A</a>
+
+<a id="730" class="Comment">-- rerel : ∙⊥ → ⊥</a>
+<a id="748" class="Comment">-- rerel ()</a>
+
+<a id="761" class="Comment">-- ∙refute : x ≐ y → (x ≡ y → ⊥) → ∙⊥</a>
+<a id="799" class="Comment">-- ∙refute ∣ x≡y ∣ x≢y with x≢y x≡y</a>
+<a id="835" class="Comment">-- ∙refute ∣ x≡y ∣ x≢y | ()</a>
+
+<a id="864" class="Comment">-- refute : x ≐ y → ¬ (¬ (x ≡ y))</a>
+<a id="898" class="Comment">-- refute x≐y x≢y = rerel (∙refute x≐y x≢y)</a>
+
+<a id="943" class="Comment">-- unsquash : Stable (x ≡ y) → x ≐ y → x ≡ y</a>
+<a id="988" class="Comment">-- unsquash st x≐y = st (refute x≐y)</a>
+
+<a id="1026" class="Comment">-- ∙refl : x ≐ x</a>
+<a id="1043" class="Comment">-- ∙refl = ∣ refl ∣</a>
+
+<a id="1064" class="Comment">-- ∙trans : x ≐ y → y ≐ z → x ≐ z</a>
+<a id="1098" class="Comment">-- ∙trans ∣ xy ∣ (∣_∣ yz) = ∣_∣ (xy ; yz)</a>
+
+<a id="1141" class="Comment">-- ∙sym : x ≐ y → y ≐ x</a>
+<a id="1165" class="Comment">-- ∙sym (∣_∣ p) = ∣_∣ (sym p)</a>
+
+<a id="1196" class="Comment">-- ∙cong : (f : A → B) → x ≐ y → f x ≐ f y</a>
+<a id="1239" class="Comment">-- ∙cong f ∣ x≡y ∣ = ∣ cong f x≡y ∣</a>
+
+
+<a id="1277" class="Comment">-- module Reasoning where</a>
+<a id="1303" class="Comment">--   infixr 2 ≐˘⟨⟩-syntax ≐⟨∙⟩-syntax</a>
+
+<a id="1342" class="Comment">--   ≐˘⟨⟩-syntax : ∀ (x : A) {y z} → y ≐ z → y ≐ x → x ≐ z</a>
+<a id="1401" class="Comment">--   ≐˘⟨⟩-syntax _ y≡z y≡x = ∙trans (∙sym y≡x) y≡z</a>
+
+<a id="1453" class="Comment">--   syntax ≐˘⟨⟩-syntax x y≡z y≡x = x ≐˘⟨ y≡x ⟩ y≡z</a>
+
+<a id="1506" class="Comment">--   ≐⟨∙⟩-syntax : ∀ (x : A) {y z} → y ≐ z → x ≐ y → x ≐ z</a>
+<a id="1565" class="Comment">--   ≐⟨∙⟩-syntax _ y≡z x≡y = ∙trans x≡y y≡z</a>
+
+<a id="1610" class="Comment">--   syntax ≐⟨∙⟩-syntax x y≡z x≡y = x ≐⟨ x≡y ⟩ y≡z</a>
+
+<a id="1662" class="Comment">--   _≐⟨⟩_ : ∀ (x : A) {y} → x ≐ y → x ≐ y</a>
+<a id="1705" class="Comment">--   _ ≐⟨⟩ x≡y = x≡y</a>
+
+<a id="1727" class="Comment">--   infix 2.5 _∎</a>
+<a id="1745" class="Comment">--   _∎ : ∀ {A : Type a} (x : A) → x ≐ x</a>
+<a id="1786" class="Comment">--   _∎ x = ∙refl</a>
+
+<a id="1805" class="Comment">--   infixr 2 ≡˘⟨⟩-syntax ≡⟨∙⟩-syntax</a>
+
+<a id="1844" class="Comment">--   ≡˘⟨⟩-syntax : ∀ (x : A) {y z} → y ≐ z → y ≡ x → x ≐ z</a>
+<a id="1903" class="Comment">--   ≡˘⟨⟩-syntax _ y≡z y≡x = ∙trans (∣_∣ (sym y≡x)) y≡z</a>
+
+<a id="1960" class="Comment">--   syntax ≡˘⟨⟩-syntax x y≡z y≡x = x ≡˘⟨ y≡x ⟩ y≡z</a>
+
+<a id="2013" class="Comment">--   ≡⟨∙⟩-syntax : ∀ (x : A) {y z} → y ≐ z → x ≡ y → x ≐ z</a>
+<a id="2072" class="Comment">--   ≡⟨∙⟩-syntax _ y≡z x≡y = ∙trans ∣ x≡y ∣ y≡z</a>
+
+<a id="2121" class="Comment">--   syntax ≡⟨∙⟩-syntax x y≡z x≡y = x ≡⟨ x≡y ⟩ y≡z</a>
+</pre></body></html>
