@@ -91,21 +91,31 @@ runState = ⟦ state-alg ⟧
 open FreeMonadSyntax
 
 fromState : (S → A × S) → State A
-fromState k = lift (getF k) >>= λ { (x , s) → lift (putF s x) }
-  -- s₁ ← get
-  -- let x , s₂ = k s₁
-  -- put s₂
-  -- return x
+fromState k = do
+  s₁ ← get
+  let x , s₂ = k s₁
+  put s₂
+  return x
 
-state-state : State A ⇔ (S → A × S)
-state-state .fun = runState
-state-state .inv = fromState
-state-state .rightInv b = refl
-state-state .leftInv = ⟦ lemma ⟧
+open import Path.Reasoning
+
+state-state : isSet A → State A ⇔ (S → A × S)
+state-state _ .fun = runState
+state-state _ .inv = fromState
+state-state _ .rightInv _ = refl
+state-state isSetA .leftInv xs = ⟦ lemma ⟧ xs isSetA
   where
-  lemma : Ψ[ xs ⦂ StateF ⋆ * / StateLaws ] ⇒ (fromState (runState xs) ≡ xs)
-  lemma .snd = prop-coh λ isSetA _ → trunc isSetA _ _ 
-  lemma .fst (liftF (getF k)) = {!!}
+  dup : S → S × S
+  dup x = x , x
+
+  lemma : Ψ StateF StateLaws (λ A xs → isSet A → fromState (runState xs) ≡ xs)
+  lemma .snd = {!!}
+
+
+  lemma .fst (liftF (getF k)) iss =
+    fromState (runState (lift (getF k))) ≡⟨ {!!} ⟩
+    lift (getF k) ∎
+
   lemma .fst (liftF (putF s k)) = {!!}
   lemma .fst (returnF x) = {!!}
   lemma .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) = {!!}
