@@ -125,7 +125,11 @@ state-state isSetA .leftInv xs = ⟦ lemma ⟧ xs
     return x ∎
 
   lemma .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) =
-    fromState (runState (xs >>= k)) ≡⟨ {!!} ⟩
+    fromState (runState (xs >>= k)) ≡⟨⟩
+    fromState (λ s → uncurry (runState ∘ k) (runState xs s)) ≡⟨⟩
+    (get >>= λ s₁ → let x , s₂ = uncurry (runState ∘ k) (runState xs s₁) in put s₂ >> return x) ≡⟨⟩
+    (get >>= λ s₁ → let x , s₂ = runState xs s₁ ; y , s₃ = runState (k x) s₂ in put s₃ >> return y) ≡⟨ {!!} ⟩
+    (fromState (runState xs) >>= (fromState ∘ runState ∘ k)) ≡⟨ cong₂ Free._>>=_ P⟨xs⟩ (funExt P⟨∘k⟩) ⟩
     (xs >>= k) ∎
 
 functorState : Functor ℓ ℓ
