@@ -108,7 +108,6 @@ state-state isSetA .leftInv xs = ⟦ lemma ⟧ xs
   lemma : Ψ[ xs ⦂ StateF ⋆ * / StateLaws ] ⇒ (fromState (runState xs) ≡ xs)
   lemma .snd = prop-coh λ _ → uip _ _
 
-
   lemma .fst (liftF (getF k)) =
     fromState (runState (lift (getF k))) ≡⟨ {!!} ⟩
     lift (getF k) ∎
@@ -116,9 +115,15 @@ state-state isSetA .leftInv xs = ⟦ lemma ⟧ xs
   lemma .fst (liftF (putF s k)) =
     fromState (runState (lift (putF s k))) ≡⟨ {!!} ⟩
     lift (putF s k) ∎
+
   lemma .fst (returnF x) =
-    fromState (runState (return x)) ≡⟨ {!!} ⟩
+    fromState (runState (return x)) ≡⟨⟩
+    fromState (λ s → x , s) ≡⟨⟩
+    (get >>= λ s → put s >> return x) ≡˘⟨ >>=-assoc get put (const (return x)) ⟩
+    ((get >>= put) >> return x) ≡⟨ cong (_>> return x) (quot (3 , _) tt) ⟩
+    (return tt >> return x) ≡⟨ >>=-idˡ (const (return x)) tt ⟩
     return x ∎
+
   lemma .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) =
     fromState (runState (xs >>= k)) ≡⟨ {!!} ⟩
     (xs >>= k) ∎
