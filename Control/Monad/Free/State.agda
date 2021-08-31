@@ -99,19 +99,19 @@ fromState k = do
 
 open import HITs.PropositionalTruncation
 open import Relation.Binary.Equivalence.PropHIT
-open Reasoning
+open import Path.Reasoning
 
 state-state : isSet A → State A ⇔ (S → A × S)
 state-state _ .fun = runState
 state-state _ .inv = fromState
 state-state _ .rightInv _ = refl
-state-state isSetA .leftInv xs = rec (trunc isSetA _ _) id (⟦ lemma ⟧ xs)
+state-state isSetA .leftInv xs = ⟦ lemma ⟧ xs
   where
   dup : S → S × S
   dup x = x , x
 
-  lemma : Ψ[ xs ⦂ StateF ⋆ * / StateLaws ] ⇒ (fromState (runState xs) ≐ xs)
-  lemma .snd = prop-coh λ _ _ → squash
+  lemma : Ψ[ xs ⦂ StateF ⋆ * / StateLaws ] ⇒ (fromState (runState xs) ≡ xs)
+  lemma .snd = prop-coh λ isSetT xs → trunc isSetT _ _
 
 
   lemma .fst (liftF (getF k)) =
