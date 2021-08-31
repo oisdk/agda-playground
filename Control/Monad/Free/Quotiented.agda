@@ -4,7 +4,9 @@ open import Prelude
 open import Data.List hiding (map)
 open import Data.Fin.Sigma
 open import Algebra
-open import Cubical.Foundations.HLevels using (isSetΠ)
+
+postulate
+  uip : isSet A
 
 --------------------------------------------------------------------------------
 -- Some functors
@@ -56,7 +58,6 @@ Quotiented : Theory F → (∀ {ν} → Syntax F ν → Syntax F ν → Type b) 
 Quotiented 𝒯 R =
       (i : Fin (length 𝒯)) → -- An index into the list of equations
       let Γ ↦ ν ⦂ 𝓉 = 𝒯 !! i in -- one of the equations in the list
-      isSet ν → -- I *think* this is needed
       (γ : Γ) → -- The environment, basically the needed things for the equation
       R (lhs (𝓉 γ)) (rhs (𝓉 γ))
 
@@ -71,18 +72,11 @@ mutual
     _>>=_  : (xs : Free F 𝒯 B) → (k : B → Free F 𝒯 A) → Free F 𝒯 A
 
   -- The quotients for the monad laws
-  -- Each of these also takes an isSet parameter: that's the only way I was able
-  -- to get it to work!
 
-    >>=-idˡ   : isSet A → (f : B → Free F 𝒯 A) (x : B) → (return x >>= f) ≡ f x
-    >>=-idʳ   : isSet A → (x : Free F 𝒯 A) → (x >>= return) ≡ x
-    >>=-assoc : isSet A →
-                (xs : Free F 𝒯 C) (f : C → Free F 𝒯 B) (g : B → Free F 𝒯 A) →
+    >>=-idˡ   :  (f : B → Free F 𝒯 A) (x : B) → (return x >>= f) ≡ f x
+    >>=-idʳ   :  (x : Free F 𝒯 A) → (x >>= return) ≡ x
+    >>=-assoc : (xs : Free F 𝒯 C) (f : C → Free F 𝒯 B) (g : B → Free F 𝒯 A) →
                 ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
-
-  -- Truncation: you wouldn't need this on a normal free monad, but I think it's
-  -- theoretically sound and necessary.
-    trunc : isSet A → isSet (Free F 𝒯 A)
 
   -- This is the quotient for the theory.
     quot : Quotiented 𝒯 (λ lhs rhs → ∣ lhs ∣↑ ≡ ∣ rhs ∣↑)
@@ -146,29 +140,26 @@ record Coherent {a p}
                 {P : ∀ T → Free F 𝒯 T → Type p}
                 (ψ : Alg F 𝒯 P) : Type (ℓsuc a ℓ⊔ p) where
   field
-    c-set : ∀ {T} → isSet T → ∀ xs → isSet (P T xs)
-
-    c->>=idˡ : ∀ (isb : isSet B) (f : A → Free F 𝒯 B) Pf x →
+    c->>=idˡ : ∀ (f : A → Free F 𝒯 B) Pf x →
       ψ (bindF (return x) (ψ (returnF x)) f Pf)
-        ≡[ i ≔ P _ (>>=-idˡ isb f x i) ]≡ Pf x
+        ≡[ i ≔ P _ (>>=-idˡ f x i) ]≡ Pf x
 
-    c->>=idʳ : ∀ (isa : isSet A) (x : Free F 𝒯 A) Px →
+    c->>=idʳ : ∀ (x : Free F 𝒯 A) Px →
       ψ (bindF x Px return (λ y → ψ (returnF y)))
-        ≡[ i ≔ P A (>>=-idʳ isa x i) ]≡ Px
+        ≡[ i ≔ P A (>>=-idʳ x i) ]≡ Px
 
-    c->>=assoc : ∀ (isa : isSet A)
+    c->>=assoc : ∀
       (xs : Free F 𝒯 C) Pxs
       (f : C → Free F 𝒯 B) Pf
       (g : B → Free F 𝒯 A) Pg →
       ψ (bindF (xs >>= f) (ψ (bindF xs Pxs f Pf)) g Pg)
-        ≡[ i ≔ P A (>>=-assoc isa xs f g i) ]≡
+        ≡[ i ≔ P A (>>=-assoc xs f g i) ]≡
           ψ (bindF xs Pxs (λ x → f x >>= g) λ x → ψ (bindF (f x) (Pf x) g Pg))
 
     c-quot : (i : Fin (length 𝒯)) →
              let Γ ↦ ν ⦂ 𝓉 = 𝒯 !! i in
-             (iss : isSet ν) →
              (γ : Γ) →
-             ⟦ ψ ⟧↑ (lhs (𝓉 γ)) ≡[ j ≔ P ν (quot i iss γ j) ]≡ ⟦ ψ ⟧↑ (rhs (𝓉 γ))
+             ⟦ ψ ⟧↑ (lhs (𝓉 γ)) ≡[ j ≔ P ν (quot i γ j) ]≡ ⟦ ψ ⟧↑ (rhs (𝓉 γ))
 open Coherent public
 
 -- A full dependent algebra
@@ -205,41 +196,32 @@ module _ (ψ : Ψ F 𝒯 P) where
   ⟦ return x ⟧ = ψ .fst (returnF x)
   ⟦ xs >>= k ⟧ = ψ .fst (bindF xs ⟦ xs ⟧ k (⟦_⟧ ∘ k))
 
-  ⟦ >>=-idˡ iss f k i ⟧ = ψ .snd .c->>=idˡ iss f (⟦_⟧ ∘ f) k i
-  ⟦ >>=-idʳ iss xs i ⟧ = ψ .snd .c->>=idʳ iss xs ⟦ xs ⟧ i
-  ⟦ >>=-assoc iss xs f g i ⟧ =
-    ψ .snd .c->>=assoc iss xs ⟦ xs ⟧ f (⟦_⟧ ∘ f) g (⟦_⟧ ∘ g) i
+  ⟦ >>=-idˡ f k i ⟧ = ψ .snd .c->>=idˡ f (⟦_⟧ ∘ f) k i
+  ⟦ >>=-idʳ xs i ⟧ = ψ .snd .c->>=idʳ xs ⟦ xs ⟧ i
+  ⟦ >>=-assoc xs f g i ⟧ =
+    ψ .snd .c->>=assoc xs ⟦ xs ⟧ f (⟦_⟧ ∘ f) g (⟦_⟧ ∘ g) i
 
-  ⟦ quot p iss e i ⟧ =
-      subst₂ (PathP (λ j → P _ (quot p iss e j)))
+  ⟦ quot p e i ⟧ =
+      subst₂ (PathP (λ j → P _ (quot p e j)))
               (undecorate _)
               (undecorate _)
-              (ψ .snd .c-quot p iss e) i
-
-  ⟦ trunc AIsSet xs ys p q i j ⟧ =
-    isOfHLevel→isOfHLevelDep 2
-      (ψ .snd .c-set AIsSet)
-      ⟦ xs ⟧ ⟦ ys ⟧
-      (cong ⟦_⟧ p) (cong ⟦_⟧ q)
-      (trunc AIsSet xs ys p q)
-      i j
+              (ψ .snd .c-quot p e) i
 
 -- For a proposition, use this to prove the algebra is coherent
-prop-coh : {alg : Alg F 𝒯 P} → (∀ {T} → isSet T → ∀ xs → isProp (P T xs)) → Coherent alg
-prop-coh P-isProp .c-set TIsSet xs = isProp→isSet (P-isProp TIsSet xs)
-prop-coh {P = P} P-isProp .c->>=idˡ iss f Pf x =
-  toPathP (P-isProp iss (f x) (transp (λ i → P _ (>>=-idˡ iss f x i)) i0 _) _)
-prop-coh {P = P} P-isProp .c->>=idʳ iss x Px =
-  toPathP (P-isProp iss x (transp (λ i → P _ (>>=-idʳ iss x i)) i0 _) _)
-prop-coh {P = P} P-isProp .c->>=assoc iss xs Pxs f Pf g Pg =
-  toPathP (P-isProp iss (xs >>= (λ x → f x >>= g)) (transp (λ i → P _ (>>=-assoc iss xs f g i)) i0 _) _)
-prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i iss e =
-  toPathP (P-isProp iss (∣ (𝒯 !! i) .eqn e .rhs ∣↑) (transp (λ j → P _ (quot i iss e j)) i0 _) _)
+prop-coh : {alg : Alg F 𝒯 P} → (∀ {T} → ∀ xs → isProp (P T xs)) → Coherent alg
+prop-coh {P = P} P-isProp .c->>=idˡ f Pf x =
+  toPathP (P-isProp (f x) (transp (λ i → P _ (>>=-idˡ f x i)) i0 _) _)
+prop-coh {P = P} P-isProp .c->>=idʳ x Px =
+  toPathP (P-isProp x (transp (λ i → P _ (>>=-idʳ x i)) i0 _) _)
+prop-coh {P = P} P-isProp .c->>=assoc xs Pxs f Pf g Pg =
+  toPathP (P-isProp (xs >>= (λ x → f x >>= g)) (transp (λ i → P _ (>>=-assoc xs f g i)) i0 _) _)
+prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i e =
+  toPathP (P-isProp (∣ (𝒯 !! i) .eqn e .rhs ∣↑) (transp (λ j → P _ (quot i e j)) i0 _) _)
 
 -- A more conventional catamorphism
 module _ {ℓ} (fun : Functor ℓ ℓ) where
   open Functor fun using (map; 𝐹)
-  module _ {B : Type ℓ} {𝒯 : Theory 𝐹} (BIsSet : isSet B) where
+  module _ {B : Type ℓ} {𝒯 : Theory 𝐹} where
     module _ (ϕ : 𝐹 B → B) where
       ϕ₁ : Alg 𝐹 𝒯 λ T _ → (T → B) → B
       ϕ₁ (liftF x) h = ϕ (map h x)
@@ -251,11 +233,10 @@ module _ {ℓ} (fun : Functor ℓ ℓ) where
 
       module _ (ϕ-coh : InTheory) where
         cata-coh : Coherent ϕ₁
-        cata-coh .c-set _ _ = isSetΠ λ _ → BIsSet
-        cata-coh .c->>=idˡ isb f Pf x = refl
-        cata-coh .c->>=idʳ isa x Px = refl
-        cata-coh .c->>=assoc isa xs Pxs f Pf g Pg = refl
-        cata-coh .c-quot i iss e j f = ϕ-coh i iss e f j
+        cata-coh .c->>=idˡ f Pf x = refl
+        cata-coh .c->>=idʳ x Px = refl
+        cata-coh .c->>=assoc xs Pxs f Pf g Pg = refl
+        cata-coh .c-quot i e j f = ϕ-coh i e f j
 
         cata-alg : Φ[ 𝐹 ⋆ A / 𝒯 ] ⇒ ((A → B) → B)
         cata-alg = ϕ₁ , cata-coh
