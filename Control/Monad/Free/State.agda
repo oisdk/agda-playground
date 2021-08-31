@@ -101,7 +101,6 @@ state-state _ .fun = runState
 state-state _ .inv = fromState
 state-state _ .rightInv _ = refl
 state-state isSetA .leftInv xs = ⟦ lemma ⟧ xs
-
   where
   dup : S → S × S
   dup x = x , x

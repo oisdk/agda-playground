@@ -25,6 +25,8 @@ data Syntax (F : Type a → Type a) (A : Type a) : Type (ℓsuc a) where
   lift   : (Fx : F A) → Syntax F A
   return : (x  : A) → Syntax F A
   _>>=_  : (xs : Syntax F B) → (k : B → Syntax F A) → Syntax F A
+--                        ^
+--                        This needs to be a set. So apparently, everything does
 
 module RawMonadSyntax where
   _>>_ : Syntax F A → Syntax F B → Syntax F B
@@ -110,9 +112,9 @@ data FreeF (F : Type a → Type a)
   liftF : (Fx : F A) → FreeF F 𝒯 P A
   returnF : (x : A) → FreeF F 𝒯 P A
   bindF : (xs : Free F 𝒯 B)
-          (P⟨xs⟩ : P _ xs)
+          (P⟨xs⟩ : P B xs)
           (k : B → Free F 𝒯 A)
-          (P⟨∘k⟩ : ∀ x → P _ (k x)) → FreeF F 𝒯 P A
+          (P⟨∘k⟩ : ∀ x → P A (k x)) → FreeF F 𝒯 P A
 
 -- There can also be a quotiented free functor (I think)
 
