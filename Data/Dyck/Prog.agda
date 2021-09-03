@@ -72,7 +72,7 @@ code→expr⊙ HALT        = snd
 code→expr⊙ (PUSH v is) = code→expr⊙ is ∘ push [ v ]
 code→expr⊙ (ADD    is) = code→expr⊙ is ∘ add
 
-code→expr : Code zero → Expr
+code→expr : Code 0 → Expr
 code→expr ds = code→expr⊙ ds tt
 
 --------------------------------------------------------------------------------
