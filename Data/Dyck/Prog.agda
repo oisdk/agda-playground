@@ -14,12 +14,11 @@ module Data.Dyck.Prog where
 
 open import Prelude
 open import Data.Nat using (_+_)
-open import Data.Vec.Iterated using (Vec; _∷_; []; foldlN; head)
 
 private variable n : ℕ
 
 --------------------------------------------------------------------------------
--- Language for Arithmetic Expressions
+-- We have 2 forms that we want to convert between: an AST and a flat code.
 --------------------------------------------------------------------------------
 
 data Expr : Type where
@@ -27,36 +26,56 @@ data Expr : Type where
   _⊕_ : Expr → Expr → Expr
 
 --------------------------------------------------------------------------------
--- Code for the virtual stack machine.
+-- We will need a stack (a snoc-list)
 --------------------------------------------------------------------------------
 
-mutual
-  -- A function from n arguments to m results
-  _⇨_ : ℕ → ℕ → Type
-  n ⇨ m = ∀ {i} → Code (m + i) → Code (n + i)
+Stack : Type → ℕ → Type
+Stack A zero    = ⊤
+Stack A (suc n) = Stack A n × A
 
-  data Code : ℕ → Type where
-    HALT : Code 1
-    PUSH : ℕ → 0 ⇨ 1
-    ADD  : 2 ⇨ 1
+infixl 5 _∷_
+pattern _∷_ xs x = xs , x
+
+--------------------------------------------------------------------------------
+-- We do the conversion with cayley forms of the dyck monoids
+--------------------------------------------------------------------------------
+
+⟨_⟩_↝_ : (ℕ → Type) → ℕ → ℕ → Type
+⟨ C ⟩ n ↝ m = ∀ {i} → C (n + i) → C (m + i)
+
+--------------------------------------------------------------------------------
+-- Operations on a stack machine
+--------------------------------------------------------------------------------
+
+push : Expr → ⟨ Stack Expr ⟩ 0 ↝ 1
+push v st = st ∷ v
+
+add : ⟨ Stack Expr ⟩ 2 ↝ 1
+add (st ∷ t₁ ∷ t₂) = st ∷ t₁ ⊕ t₂
+
+data Code : ℕ → Type where
+  HALT : Code 1
+  PUSH : ℕ → ⟨ Code ⟩ 1 ↝ 0
+  ADD  : ⟨ Code ⟩ 1 ↝ 2
 
 --------------------------------------------------------------------------------
 -- Conversion from a Code to a Expr (evaluation / execution)
 --------------------------------------------------------------------------------
 
-code→expr⊙ : Code n → Vec Expr n → Expr
-code→expr⊙ HALT        (v ∷ [])       = v
-code→expr⊙ (PUSH v is) st             = code→expr⊙ is ([ v ] ∷ st)
-code→expr⊙ (ADD    is) (t₁ ∷ t₂ ∷ st) = code→expr⊙ is (t₂ ⊕ t₁ ∷ st)
+--            Code n → ⟨ Stack Expr ⟩ n ↝ 1
+code→expr⊙ : Code n → Stack Expr n → Expr
+code→expr⊙ HALT        = snd
+code→expr⊙ (PUSH v is) = code→expr⊙ is ∘ push [ v ]
+code→expr⊙ (ADD    is) = code→expr⊙ is ∘ add
 
 code→expr : Code zero → Expr
-code→expr ds = code→expr⊙ ds []
+code→expr ds = code→expr⊙ ds tt
 
 --------------------------------------------------------------------------------
 -- Conversion from a Expr to a Code (compilation)
 --------------------------------------------------------------------------------
 
-expr→code⊙ : Expr → 0 ⇨ 1
+expr→code⊙ : Expr → ⟨ Code ⟩ 1 ↝ 0
 expr→code⊙ [ x ]     = PUSH x
 expr→code⊙ (xs ⊕ ys) = expr→code⊙ xs ∘ expr→code⊙ ys ∘ ADD
 
@@ -67,12 +86,25 @@ expr→code tr = expr→code⊙ tr HALT
 -- Proof of isomorphism
 --------------------------------------------------------------------------------
 
-expr→code→expr⊙ : {is : Code (1 + n)} {st : Vec Expr n} (e : Expr) →
-  code→expr⊙ (expr→code⊙ e is) st ≡ code→expr⊙ is (e ∷ st)
+foldr : ∀ {p} (P : ℕ → Type p) →
+          (∀ {n} → A → P n → P (suc n)) →
+          P zero →
+          Stack A n → P n
+foldr {n = zero} P f b _         = b
+foldr {n = suc n} P f b (xs ∷ x) = f x (foldr P f b xs)
+
+foldlN : ∀ {p} (P : ℕ → Type p) →
+          (∀ {n} → A → P (suc n) → P n) →
+          P n →
+          Stack A n → P zero
+foldlN P f b xs = foldr (λ n → P n → P zero) (λ x k xs → k (f x xs)) id xs b
+
+expr→code→expr⊙ : {is : Code (1 + n)} {st : Stack Expr n} (e : Expr) →
+  code→expr⊙ (expr→code⊙ e is) st ≡ code→expr⊙ is (st ∷ e)
 expr→code→expr⊙ [ x ]     = refl
 expr→code→expr⊙ (xs ⊕ ys) = expr→code→expr⊙ xs ; expr→code→expr⊙ ys
 
-code→expr→code⊙ : {st : Vec Expr n} (is : Code n) →
+code→expr→code⊙ : {st : Stack Expr n} (is : Code n) →
  expr→code (code→expr⊙ is st) ≡ foldlN Code (λ x xs → expr→code⊙ x xs) is st
 code→expr→code⊙  HALT       = refl
 code→expr→code⊙ (PUSH i is) = code→expr→code⊙ is
