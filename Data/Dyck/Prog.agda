@@ -66,13 +66,15 @@ add (st ∷ xs ∷ ys) =  st ∷ xs ⊕ ys
 push : ℕ → ⟨ Stack Expr ⟩ 0 ↝ 1
 push v st = st ∷ [ v ]
 
-interleaved mutual
+pop : Stack Expr 1 → Expr
+pop (tt ∷ e) = e
 
+interleaved mutual
   --            Code n → ⟨ Stack Expr ⟩ n ↝ 1
   code→expr⊙ : Code n → Stack Expr n → Expr
   expr→code⊙ : Expr → ⟨ Code ⟩ 1 ↝ 0
 
-  code→expr⊙ HALT (_ ∷ e) = e
+  code→expr⊙ HALT = pop
 
   expr→code⊙ [ x ]       =                 PUSH x
   code→expr⊙ (PUSH v is) = code→expr⊙ is ∘ push v
@@ -81,10 +83,10 @@ interleaved mutual
   code→expr⊙ (ADD is)  = code→expr⊙ is                 ∘ add
 
 code→expr : Code 0 → Expr
-code→expr ds = code→expr⊙ ds tt
-
 expr→code : Expr → Code 0
-expr→code tr = expr→code⊙ tr HALT
+
+code→expr ds = code→expr⊙ ds tt
+expr→code xs = expr→code⊙ xs HALT
 
 --------------------------------------------------------------------------------
 -- Proof of isomorphism
