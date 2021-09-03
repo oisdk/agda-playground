@@ -36,6 +36,13 @@ Stack A (suc n) = Stack A n × A
 infixl 5 _∷_
 pattern _∷_ xs x = xs , x
 
+foldl : ∀ (P : ℕ → Type) →
+          (∀ {n} → A → P (suc n) → P n) →
+          P n →
+          Stack A n → P zero
+foldl {n = zero} P f b xs = b
+foldl {n = suc n} P f b (xs ∷ x) = foldl P f (f x b) xs
+
 --------------------------------------------------------------------------------
 -- We do the conversion with cayley forms of the dyck monoids
 --------------------------------------------------------------------------------
@@ -86,26 +93,13 @@ expr→code tr = expr→code⊙ tr HALT
 -- Proof of isomorphism
 --------------------------------------------------------------------------------
 
-foldr : ∀ {p} (P : ℕ → Type p) →
-          (∀ {n} → A → P n → P (suc n)) →
-          P zero →
-          Stack A n → P n
-foldr {n = zero} P f b _         = b
-foldr {n = suc n} P f b (xs ∷ x) = f x (foldr P f b xs)
-
-foldlN : ∀ {p} (P : ℕ → Type p) →
-          (∀ {n} → A → P (suc n) → P n) →
-          P n →
-          Stack A n → P zero
-foldlN P f b xs = foldr (λ n → P n → P zero) (λ x k xs → k (f x xs)) id xs b
-
 expr→code→expr⊙ : {is : Code (1 + n)} {st : Stack Expr n} (e : Expr) →
   code→expr⊙ (expr→code⊙ e is) st ≡ code→expr⊙ is (st ∷ e)
 expr→code→expr⊙ [ x ]     = refl
 expr→code→expr⊙ (xs ⊕ ys) = expr→code→expr⊙ xs ; expr→code→expr⊙ ys
 
 code→expr→code⊙ : {st : Stack Expr n} (is : Code n) →
- expr→code (code→expr⊙ is st) ≡ foldlN Code (λ x xs → expr→code⊙ x xs) is st
+ expr→code (code→expr⊙ is st) ≡ foldl Code (λ x xs → expr→code⊙ x xs) is st
 code→expr→code⊙  HALT       = refl
 code→expr→code⊙ (PUSH i is) = code→expr→code⊙ is
 code→expr→code⊙ (ADD    is) = code→expr→code⊙ is
