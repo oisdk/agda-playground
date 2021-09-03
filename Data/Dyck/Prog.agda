@@ -26,6 +26,13 @@ data Expr : Type where
   _⊕_ : Expr → Expr → Expr
 
 --------------------------------------------------------------------------------
+-- We do the conversion with cayley forms of the dyck monoids
+--------------------------------------------------------------------------------
+
+⟨_⟩_↝_ : (ℕ → Type) → ℕ → ℕ → Type
+⟨ C ⟩ n ↝ m = ∀ {i} → C (n + i) → C (m + i)
+
+--------------------------------------------------------------------------------
 -- We will need a stack (a snoc-list)
 --------------------------------------------------------------------------------
 
@@ -36,19 +43,9 @@ Stack A (suc n) = Stack A n × A
 infixl 5 _∷_
 pattern _∷_ xs x = xs , x
 
-foldl : ∀ (P : ℕ → Type) →
-          (∀ {n} → A → P (suc n) → P n) →
-          P n →
-          Stack A n → P zero
-foldl {n = zero} P f b xs = b
-foldl {n = suc n} P f b (xs ∷ x) = foldl P f (f x b) xs
-
---------------------------------------------------------------------------------
--- We do the conversion with cayley forms of the dyck monoids
---------------------------------------------------------------------------------
-
-⟨_⟩_↝_ : (ℕ → Type) → ℕ → ℕ → Type
-⟨ C ⟩ n ↝ m = ∀ {i} → C (n + i) → C (m + i)
+foldl : (P : ℕ → Type) → (A → ⟨ P ⟩ 1 ↝ 0) → Stack A n → P n → P zero
+foldl {n = zero}  P f xs       = id
+foldl {n = suc n} P f (xs ∷ x) = foldl P f xs ∘ f x
 
 --------------------------------------------------------------------------------
 -- Operations on a stack machine
@@ -99,7 +96,7 @@ expr→code→expr⊙ [ x ]     = refl
 expr→code→expr⊙ (xs ⊕ ys) = expr→code→expr⊙ xs ; expr→code→expr⊙ ys
 
 code→expr→code⊙ : {st : Stack Expr n} (is : Code n) →
- expr→code (code→expr⊙ is st) ≡ foldl Code (λ x xs → expr→code⊙ x xs) is st
+ expr→code (code→expr⊙ is st) ≡ foldl Code expr→code⊙ st is
 code→expr→code⊙  HALT       = refl
 code→expr→code⊙ (PUSH i is) = code→expr→code⊙ is
 code→expr→code⊙ (ADD    is) = code→expr→code⊙ is
