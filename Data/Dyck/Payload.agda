@@ -14,59 +14,64 @@ private
 -- Binary trees: definition and associated functions
 --------------------------------------------------------------------------------
 
+infixl 6 _*_
 data Tree (A : Type a) : Type a where
   [_] : A → Tree A
   _*_ : Tree A → Tree A → Tree A
 
 --------------------------------------------------------------------------------
--- Programs: definition and associated functions
+-- Dyckrams: definition and associated functions
 --------------------------------------------------------------------------------
 
-data Prog (A : Type a) : ℕ → Type a where
-  halt : Prog A 1
-  push : A → Prog A (1 + n) → Prog A n
-  pull : Prog A (1 + n) → Prog A (2 + n)
+infixr 5 ⟨_!_ ⟩_
+data Dyck (A : Type a) : ℕ → Type a where
+  ⟩⋆   : Dyck A 1
+  ⟨_!_ : A → Dyck A (1 + n) → Dyck A n
+  ⟩_   : Dyck A (1 + n) → Dyck A (2 + n)
 
 --------------------------------------------------------------------------------
--- Conversion from a Prog to a Tree
+-- Conversion from a Dyck to a Tree
 --------------------------------------------------------------------------------
 
-prog→tree⊙ : Prog A n → Vec (Tree A) n → Tree A
-prog→tree⊙ halt        (v ∷ [])       = v
-prog→tree⊙ (push v is) st             = prog→tree⊙ is ([ v ] ∷ st)
-prog→tree⊙ (pull   is) (t₁ ∷ t₂ ∷ st) = prog→tree⊙ is (t₂ * t₁ ∷ st)
+dyck→tree⊙ : Dyck A n → Vec (Tree A) n → Tree A
+dyck→tree⊙ ⟩⋆         (v ∷ [])       = v
+dyck→tree⊙ (⟨ v ! is) st             = dyck→tree⊙ is ([ v ] ∷ st)
+dyck→tree⊙ (⟩     is) (t₁ ∷ t₂ ∷ st) = dyck→tree⊙ is (t₂ * t₁ ∷ st)
 
-prog→tree : Prog A zero → Tree A
-prog→tree ds = prog→tree⊙ ds []
+dyck→tree : Dyck A zero → Tree A
+dyck→tree ds = dyck→tree⊙ ds []
 
 --------------------------------------------------------------------------------
--- Conversion from a Tree to a Prog
+-- Conversion from a Tree to a Dyck
 --------------------------------------------------------------------------------
 
-tree→prog⊙ : Tree A → Prog A (suc n) → Prog A n
-tree→prog⊙ [ x ]     = push x
-tree→prog⊙ (xs * ys) = tree→prog⊙ xs ∘ tree→prog⊙ ys ∘ pull
+tree→dyck⊙ : Tree A → Dyck A (suc n) → Dyck A n
+tree→dyck⊙ [ x ]     = ⟨ x !_
+tree→dyck⊙ (xs * ys) = tree→dyck⊙ xs ∘ tree→dyck⊙ ys ∘ ⟩_
 
-tree→prog : Tree A → Prog A zero
-tree→prog tr = tree→prog⊙ tr halt
+tree→dyck : Tree A → Dyck A zero
+tree→dyck tr = tree→dyck⊙ tr ⟩⋆
 
 --------------------------------------------------------------------------------
 -- Proof of isomorphism
 --------------------------------------------------------------------------------
 
-tree→prog→tree⊙ :  {is : Prog A (1 + n)} {st : Vec (Tree A) n} (e : Tree A) →
-  prog→tree⊙ (tree→prog⊙ e is) st ≡ prog→tree⊙ is (e ∷ st)
-tree→prog→tree⊙ [ x ]     = refl
-tree→prog→tree⊙ (xs * ys) = tree→prog→tree⊙ xs ; tree→prog→tree⊙ ys
+tree→dyck→tree⊙ :  {is : Dyck A (1 + n)} {st : Vec (Tree A) n} (e : Tree A) →
+  dyck→tree⊙ (tree→dyck⊙ e is) st ≡ dyck→tree⊙ is (e ∷ st)
+tree→dyck→tree⊙ [ x ]     = refl
+tree→dyck→tree⊙ (xs * ys) = tree→dyck→tree⊙ xs ; tree→dyck→tree⊙ ys
 
-prog→tree→prog⊙ :  {st : Vec (Tree A) n} (is : Prog A n) →
- tree→prog (prog→tree⊙ is st) ≡ foldlN (Prog A) tree→prog⊙ is st
-prog→tree→prog⊙  halt       = refl
-prog→tree→prog⊙ (push i is) = prog→tree→prog⊙ is
-prog→tree→prog⊙ (pull   is) = prog→tree→prog⊙ is
+dyck→tree→dyck⊙ :  {st : Vec (Tree A) n} (is : Dyck A n) →
+ tree→dyck (dyck→tree⊙ is st) ≡ foldlN (Dyck A) tree→dyck⊙ is st
+dyck→tree→dyck⊙  ⟩⋆        = refl
+dyck→tree→dyck⊙ (⟨ v ! is) = dyck→tree→dyck⊙ is
+dyck→tree→dyck⊙ (⟩     is) = dyck→tree→dyck⊙ is
 
-prog-iso : Prog A zero ⇔ Tree A
-prog-iso .fun = prog→tree
-prog-iso .inv = tree→prog
-prog-iso .rightInv = tree→prog→tree⊙
-prog-iso .leftInv  = prog→tree→prog⊙
+dyck-iso : Dyck A zero ⇔ Tree A
+dyck-iso .fun = dyck→tree
+dyck-iso .inv = tree→dyck
+dyck-iso .rightInv = tree→dyck→tree⊙
+dyck-iso .leftInv  = dyck→tree→dyck⊙
+
+_ : tree→dyck (([ 1 ] * ([ 2 ] * [ 3 ])) * [ 4 ]) ≡ ⟨ 1 ! ⟨ 2 ! ⟨ 3 ! ⟩ ⟩ ⟨ 4 ! ⟩ ⟩⋆
+_ = refl
