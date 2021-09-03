@@ -33,6 +33,15 @@ data Expr : Type where
 ⟨ C ⟩ n ↝ m = ∀ {i} → C (n + i) → C (m + i)
 
 --------------------------------------------------------------------------------
+-- An encoding of an AST
+--------------------------------------------------------------------------------
+
+data Code : ℕ → Type where
+  HALT : Code 1
+  PUSH : ℕ → ⟨ Code ⟩ 1 ↝ 0
+  ADD  : ⟨ Code ⟩ 1 ↝ 2
+
+--------------------------------------------------------------------------------
 -- We will need a stack (a snoc-list)
 --------------------------------------------------------------------------------
 
@@ -48,40 +57,31 @@ foldl {n = zero}  P f xs       = id
 foldl {n = suc n} P f (xs ∷ x) = foldl P f xs ∘ f x
 
 --------------------------------------------------------------------------------
--- Operations on a stack machine
---------------------------------------------------------------------------------
-
-push : Expr → ⟨ Stack Expr ⟩ 0 ↝ 1
-push v st = st ∷ v
-
-add : ⟨ Stack Expr ⟩ 2 ↝ 1
-add (st ∷ t₁ ∷ t₂) = st ∷ t₁ ⊕ t₂
-
-data Code : ℕ → Type where
-  HALT : Code 1
-  PUSH : ℕ → ⟨ Code ⟩ 1 ↝ 0
-  ADD  : ⟨ Code ⟩ 1 ↝ 2
-
---------------------------------------------------------------------------------
 -- Conversion from a Code to a Expr (evaluation / execution)
 --------------------------------------------------------------------------------
 
---            Code n → ⟨ Stack Expr ⟩ n ↝ 1
-code→expr⊙ : Code n → Stack Expr n → Expr
-code→expr⊙ HALT        = snd
-code→expr⊙ (PUSH v is) = code→expr⊙ is ∘ push [ v ]
-code→expr⊙ (ADD    is) = code→expr⊙ is ∘ add
+add : ⟨ Stack Expr ⟩ 2 ↝ 1
+add (st ∷ xs ∷ ys) =  st ∷ xs ⊕ ys
+
+push : ℕ → ⟨ Stack Expr ⟩ 0 ↝ 1
+push v st = st ∷ [ v ]
+
+interleaved mutual
+
+  --            Code n → ⟨ Stack Expr ⟩ n ↝ 1
+  code→expr⊙ : Code n → Stack Expr n → Expr
+  expr→code⊙ : Expr → ⟨ Code ⟩ 1 ↝ 0
+
+  code→expr⊙ HALT (_ ∷ e) = e
+
+  expr→code⊙ [ x ]       =                 PUSH x
+  code→expr⊙ (PUSH v is) = code→expr⊙ is ∘ push v
+
+  expr→code⊙ (xs ⊕ ys) = expr→code⊙ xs ∘ expr→code⊙ ys ∘ ADD
+  code→expr⊙ (ADD is)  = code→expr⊙ is                 ∘ add
 
 code→expr : Code 0 → Expr
 code→expr ds = code→expr⊙ ds tt
-
---------------------------------------------------------------------------------
--- Conversion from a Expr to a Code (compilation)
---------------------------------------------------------------------------------
-
-expr→code⊙ : Expr → ⟨ Code ⟩ 1 ↝ 0
-expr→code⊙ [ x ]     = PUSH x
-expr→code⊙ (xs ⊕ ys) = expr→code⊙ xs ∘ expr→code⊙ ys ∘ ADD
 
 expr→code : Expr → Code 0
 expr→code tr = expr→code⊙ tr HALT
