@@ -69,23 +69,20 @@ push v st = st ∷ [ v ]
 pop : Stack Expr 1 → Expr
 pop (tt ∷ e) = e
 
-interleaved mutual
-  --            Code n → ⟨ Stack Expr ⟩ n ↝ 1
-  code→expr⊙ : Code n → Stack Expr n → Expr
-  expr→code⊙ : Expr → ⟨ Code ⟩ 1 ↝ 0
+--            Code n → ⟨ Stack Expr ⟩ n ↝ 1
+code→expr⊙ : Code n → Stack Expr n → Expr
+code→expr⊙ HALT        = pop
+code→expr⊙ (PUSH v is) = code→expr⊙ is ∘ push v
+code→expr⊙ (ADD is)    = code→expr⊙ is ∘ add
 
-  code→expr⊙ HALT = pop
-
-  expr→code⊙ [ x ]       =                 PUSH x
-  code→expr⊙ (PUSH v is) = code→expr⊙ is ∘ push v
-
-  expr→code⊙ (xs ⊕ ys) = expr→code⊙ xs ∘ expr→code⊙ ys ∘ ADD
-  code→expr⊙ (ADD is)  = code→expr⊙ is                 ∘ add
+expr→code⊙ : Expr → ⟨ Code ⟩ 1 ↝ 0
+expr→code⊙ [ x ]     = PUSH x
+expr→code⊙ (xs ⊕ ys) = expr→code⊙ xs ∘ expr→code⊙ ys ∘ ADD
 
 code→expr : Code 0 → Expr
-expr→code : Expr → Code 0
-
 code→expr ds = code→expr⊙ ds tt
+
+expr→code : Expr → Code 0
 expr→code xs = expr→code⊙ xs HALT
 
 --------------------------------------------------------------------------------
