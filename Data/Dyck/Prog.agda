@@ -39,7 +39,7 @@ data Expr : Type where
 data Code : ℕ → Type where
   HALT : Code 1
   PUSH : ℕ → ⟨ Code ⟩ 1 ↝ 0
-  ADD  : ⟨ Code ⟩ 1 ↝ 2
+  ADD  :     ⟨ Code ⟩ 1 ↝ 2
 
 --------------------------------------------------------------------------------
 -- We will need a stack (a snoc-list)
@@ -53,34 +53,27 @@ infixl 5 _∷_
 pattern _∷_ xs x = xs , x
 
 foldl : (P : ℕ → Type) → (A → ⟨ P ⟩ 1 ↝ 0) → Stack A n → P n → P zero
-foldl {n = zero}  P f xs       = id
+foldl {n = zero}  P f tt       = id
 foldl {n = suc n} P f (xs ∷ x) = foldl P f xs ∘ f x
 
+private variable st : Stack Expr n
+
 --------------------------------------------------------------------------------
--- Conversion from a Code to a Expr (evaluation / execution)
+-- Conversion to and from code
 --------------------------------------------------------------------------------
-
-add : ⟨ Stack Expr ⟩ 2 ↝ 1
-add (st ∷ xs ∷ ys) =  st ∷ xs ⊕ ys
-
-push : ℕ → ⟨ Stack Expr ⟩ 0 ↝ 1
-push v st = st ∷ [ v ]
-
-pop : Stack Expr 1 → Expr
-pop (tt ∷ e) = e
 
 --            Code n → ⟨ Stack Expr ⟩ n ↝ 1
 code→expr⊙ : Code n → Stack Expr n → Expr
-code→expr⊙ HALT        = pop
-code→expr⊙ (PUSH v is) = code→expr⊙ is ∘ push v
-code→expr⊙ (ADD is)    = code→expr⊙ is ∘ add
+code→expr⊙ HALT        (tt ∷ e)       = e
+code→expr⊙ (PUSH v is) st             = code→expr⊙ is (st ∷ [ v ])
+code→expr⊙ (ADD is)    (st ∷ xs ∷ ys) = code→expr⊙ is (st ∷ xs ⊕ ys)
+
+code→expr : Code 0 → Expr
+code→expr ds = code→expr⊙ ds tt
 
 expr→code⊙ : Expr → ⟨ Code ⟩ 1 ↝ 0
 expr→code⊙ [ x ]     = PUSH x
 expr→code⊙ (xs ⊕ ys) = expr→code⊙ xs ∘ expr→code⊙ ys ∘ ADD
-
-code→expr : Code 0 → Expr
-code→expr ds = code→expr⊙ ds tt
 
 expr→code : Expr → Code 0
 expr→code xs = expr→code⊙ xs HALT
@@ -89,12 +82,12 @@ expr→code xs = expr→code⊙ xs HALT
 -- Proof of isomorphism
 --------------------------------------------------------------------------------
 
-expr→code→expr⊙ : {is : Code (1 + n)} {st : Stack Expr n} (e : Expr) →
+expr→code→expr⊙ : {is : Code (1 + n)} (e : Expr) →
   code→expr⊙ (expr→code⊙ e is) st ≡ code→expr⊙ is (st ∷ e)
 expr→code→expr⊙ [ x ]     = refl
 expr→code→expr⊙ (xs ⊕ ys) = expr→code→expr⊙ xs ; expr→code→expr⊙ ys
 
-code→expr→code⊙ : {st : Stack Expr n} (is : Code n) →
+code→expr→code⊙ : (is : Code n) →
  expr→code (code→expr⊙ is st) ≡ foldl Code expr→code⊙ st is
 code→expr→code⊙  HALT       = refl
 code→expr→code⊙ (PUSH i is) = code→expr→code⊙ is
