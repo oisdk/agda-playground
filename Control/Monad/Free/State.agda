@@ -9,7 +9,6 @@ open import Data.Unit.UniversePolymorphic
 open import Algebra
 open import Data.List
 open import Data.List.Syntax
-open import Cubical.Foundations.HLevels using (isSetΠ; isSet×)
 
 data StateF (A : Type ℓ) : Type ℓ where
   getF : (k : S → A) → StateF A
@@ -68,22 +67,18 @@ get = lift (getF id)
 put : S → State ⊤
 put x = lift (putF x _)
 
-isSetState : isSet A → isSet (S → A × S)
-isSetState isSetA = isSetΠ λ _ → isSet× isSetA isSetS
-
 state-alg : Φ[ StateF ⋆ A / StateLaws ] ⇒ (S → A × S)
 state-alg .fst (liftF (getF k)) s = k s , s
 state-alg .fst (liftF (putF s₂ k)) s₁ = k , s₂
 state-alg .fst (returnF x) s = x , s
 state-alg .fst (bindF _ P⟨xs⟩ _ P⟨∘k⟩) s = uncurry P⟨∘k⟩ (P⟨xs⟩ s)
-state-alg .snd .c-set isSetT _ = isSetState isSetT
-state-alg .snd .c->>=idˡ isb f Pf x = refl
-state-alg .snd .c->>=idʳ isa x Px = refl
-state-alg .snd .c->>=assoc isa xs Pxs f Pf g Pg = refl
-state-alg .snd .c-quot (0 , p) iss γ = refl
-state-alg .snd .c-quot (1 , p) iss γ = refl
-state-alg .snd .c-quot (2 , p) iss γ = refl
-state-alg .snd .c-quot (3 , p) iss γ = refl
+state-alg .snd .c->>=idˡ f Pf x = refl
+state-alg .snd .c->>=idʳ x Px = refl
+state-alg .snd .c->>=assoc xs Pxs f Pf g Pg = refl
+state-alg .snd .c-quot (0 , p) γ = refl
+state-alg .snd .c-quot (1 , p) γ = refl
+state-alg .snd .c-quot (2 , p) γ = refl
+state-alg .snd .c-quot (3 , p) γ = refl
 
 runState : State A → S → A × S
 runState = ⟦ state-alg ⟧
@@ -111,16 +106,31 @@ state-state isSetA .leftInv xs = ⟦ lemma ⟧ xs
   dup x = x , x
 
   lemma : Ψ[ xs ⦂ StateF ⋆ * / StateLaws ] ⇒ (fromState (runState xs) ≡ xs)
-  lemma .snd = prop-coh λ isSetT xs → trunc isSetT _ _
-
+  lemma .snd = prop-coh λ _ → uip _ _
 
   lemma .fst (liftF (getF k)) =
     fromState (runState (lift (getF k))) ≡⟨ {!!} ⟩
     lift (getF k) ∎
 
-  lemma .fst (liftF (putF s k)) = {!!}
-  lemma .fst (returnF x) = {!!}
-  lemma .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) = {!!}
+  lemma .fst (liftF (putF s k)) =
+    fromState (runState (lift (putF s k))) ≡⟨ {!!} ⟩
+    lift (putF s k) ∎
+
+  lemma .fst (returnF x) =
+    fromState (runState (return x)) ≡⟨⟩
+    fromState (λ s → x , s) ≡⟨⟩
+    (get >>= λ s → put s >> return x) ≡˘⟨ >>=-assoc get put (const (return x)) ⟩
+    ((get >>= put) >> return x) ≡⟨ cong (_>> return x) (quot (3 , _) tt) ⟩
+    (return tt >> return x) ≡⟨ >>=-idˡ (const (return x)) tt ⟩
+    return x ∎
+
+  lemma .fst (bindF xs P⟨xs⟩ k P⟨∘k⟩) =
+    fromState (runState (xs >>= k)) ≡⟨⟩
+    fromState (λ s → uncurry (runState ∘ k) (runState xs s)) ≡⟨⟩
+    (get >>= λ s₁ → let x , s₂ = uncurry (runState ∘ k) (runState xs s₁) in put s₂ >> return x) ≡⟨⟩
+    (get >>= λ s₁ → let x , s₂ = runState xs s₁ ; y , s₃ = runState (k x) s₂ in put s₃ >> return y) ≡⟨ {!!} ⟩
+    (fromState (runState xs) >>= (fromState ∘ runState ∘ k)) ≡⟨ cong₂ Free._>>=_ P⟨xs⟩ (funExt P⟨∘k⟩) ⟩
+    (xs >>= k) ∎
 
 functorState : Functor ℓ ℓ
 functorState .Functor.𝐹 = StateF
@@ -131,27 +141,27 @@ functorState .Functor.map-id i (putF s k) = putF s k
 functorState .Functor.map-comp f g i (getF k) = getF (f ∘ g ∘ k)
 functorState .Functor.map-comp f g i (putF s k) = putF s (f (g k))
 
-runState′ : isSet A → State A → S → A × S
-runState′ isSetA = cata functorState (isSetState isSetA) _,_ ϕ ℒ
-  where
-  ϕ : StateF (S → A × S) → S → A × S
-  ϕ (getF k) s = k s s
-  ϕ (putF s₂ k) s₁ = k s₂
+-- runState′ : isSet A → State A → S → A × S
+-- runState′ isSetA = cata functorState (isSetState isSetA) _,_ ϕ ℒ
+--   where
+--   ϕ : StateF (S → A × S) → S → A × S
+--   ϕ (getF k) s = k s s
+--   ϕ (putF s₂ k) s₁ = k s₂
 
-  ℒ : InTheory functorState {𝒯 = StateLaws} (isSetState isSetA) ϕ
-  ℒ (0 , p) f iss e = refl
-  ℒ (1 , p) f iss e = refl
-  ℒ (2 , p) f iss e = refl
-  ℒ (3 , p) f iss e = refl
+--   ℒ : InTheory functorState {𝒯 = StateLaws} (isSetState isSetA) ϕ
+--   ℒ (0 , p) f iss e = refl
+--   ℒ (1 , p) f iss e = refl
+--   ℒ (2 , p) f iss e = refl
+--   ℒ (3 , p) f iss e = refl
 
--- open import Data.Nat using (_∸_)
+-- -- open import Data.Nat using (_∸_)
 
--- example : State ℕ ℕ
--- example = do
---   x ← get
---   put (suc x)
---   put x
---   return (x ∸ 1)
+-- -- example : State ℕ ℕ
+-- -- example = do
+-- --   x ← get
+-- --   put (suc x)
+-- --   put x
+-- --   return (x ∸ 1)
 
--- res : ℕ × ℕ
--- res = runState example 5
+-- -- res : ℕ × ℕ
+-- -- res = runState example 5
