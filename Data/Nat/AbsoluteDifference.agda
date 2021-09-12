@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Data.Nat.AbsoluteDifference where
 
 open import Data.Nat.Base
