@@ -27,5 +27,7 @@ is-just : Maybe A → Bool
 is-just = maybe false (const true)
 
 IsJust : Maybe A → Type
-IsJust nothing = ⊥
-IsJust (just _) = ⊤
+IsJust = T ∘ is-just
+
+fromJust : (x : Maybe A) → ⦃ IsJust x ⦄ → A
+fromJust (just x) = x

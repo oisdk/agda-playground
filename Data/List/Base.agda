@@ -7,10 +7,14 @@ open import Agda.Builtin.List using (List; _∷_; []) public
 open import Data.Nat.Base
 open import Function
 open import Strict
+open import Data.Maybe using (Maybe; just; nothing; maybe)
 
 foldr : (A → B → B) → B → List A → B
 foldr f b [] = b
 foldr f b (x ∷ xs) = f x (foldr f b xs)
+
+foldrMay : (A → A → A) → List A → Maybe A
+foldrMay f = foldr (λ x → just ∘ maybe x (f x)) nothing
 
 foldl : (B → A → B) → B → List A → B
 foldl f b [] = b

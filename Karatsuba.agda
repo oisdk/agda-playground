@@ -12,7 +12,7 @@ import Data.Nat as ℕ
 import Data.Nat.Properties as ℕ
 open import Literals.Number
 open import Data.List.Syntax
-open import Data.Maybe
+import Data.Maybe
 
 data Tree {a} (A : Type a) : Type a where
   ⌈⌉ : Tree A
@@ -56,14 +56,9 @@ mutual
   ⟨ n ⟩ _ ⊛ [] = []
   ⟨ n ⟩ (x ∷ []) ⊛ ys = map (x *_) ys
   ⟨ n ⟩ xs ⊛ (y ∷ []) = map (y *_) xs
-  ⟨ n ⟩ xs ⊛ ys = maybe [] out (treeFold (λ x y → ⟨ n ⟩′ x ◆ y) nothing (map just (pair xs ys)))
+  ⟨ n ⟩ xs@(_ ∷ _) ⊛ ys@(_ ∷ _) = treeFold1 ⟨ n ⟩_◆_ (pair xs ys) .out
 
-  ⟨_⟩′_◆_ : ℕ → Maybe (Parts ℤ) → Maybe (Parts ℤ) → Maybe (Parts ℤ)
-  ⟨ n ⟩′ xs ◆ nothing = xs
-  ⟨ n ⟩′ nothing ◆ ys = ys
-  ⟨ n ⟩′ just xs ◆ just ys = just (⟨ n ⟩ xs ◆ ys)
-
-  ⟨_⟩_◆_ : ℕ → (Parts ℤ) → (Parts ℤ) → Parts ℤ
+  ⟨_⟩_◆_ : ℕ → Parts ℤ → Parts ℤ → Parts ℤ
   (⟨ n ⟩ xs ◆ ys) .shift = xs .shift ℕ.+ ys .shift
   (⟨ n ⟩ xs ◆ ys) .lo = xs .lo ⊗ ys .lo
   (⟨ n ⟩ xs ◆ ys) .hi = xs .hi ⊗ ys .hi
@@ -80,5 +75,5 @@ xs ⊛ ys = ⟨ length xs ℕ.+ length ys ⟩ xs ⊛ ys
 e : List ℤ
 e = (⁺ 2 ∷ ⁺ 5 ∷ []) ⊛ (⁺ 1 ∷ ⁺ 1 ∷ [])
 
--- _ : e ≡ ⁺ 2 ∷ ⁺ 7 ∷ ⁺ 5 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ ⁻ 2 ∷ ⁻ 7 ∷ ⁻ 5 ∷ []
--- _ = refl
+_ : e ≡ ⁺ 2 ∷ ⁺ 7 ∷ ⁺ 5 ∷ []
+_ = refl

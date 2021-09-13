@@ -113,3 +113,21 @@ foldl′-foldl f z (x ∷ xs) = $!-≡ (λ y → foldl′ f y xs) (f z x) ; fol
 foldr′-foldr : (f : A → B → B) (z : B) (xs : List A) → foldr′ f z xs ≡ foldr f z xs
 foldr′-foldr f z [] = refl
 foldr′-foldr f z (x ∷ xs) = $!-≡ (f x) (foldr′ f z xs) ; cong (f x) (foldr′-foldr f z xs)
+
+is-empty : List A → Bool
+is-empty [] = true
+is-empty (_ ∷ _) = false
+
+NonEmpty : List A → Type
+NonEmpty = T ∘ not ∘ is-empty
+
+open import Data.Maybe.Properties
+
+foldrMay-nonEmpty : (f : A → A → A) (xs : List A) → NonEmpty xs → IsJust (foldrMay f xs)
+foldrMay-nonEmpty f (x ∷ xs) _ = tt
+
+foldr1 : (A → A → A) → (xs : List A) → ⦃ NonEmpty xs ⦄ → A
+foldr1 f xs ⦃ xsne ⦄ = fromJust (foldrMay f xs)
+ where instance _ = foldrMay-nonEmpty f xs xsne
+
+

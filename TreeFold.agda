@@ -45,6 +45,57 @@ module TreeFoldR (f : A → A → A) (z : A) where
   treeFoldHom : Associative f → ∀ xs → treeFold xs ≡ foldr f z xs
   treeFoldHom f-assoc = foldr-fusion fold &0 (∹-hom f-assoc)
 
+module TreeFold1 (f : A → A → A) where
+  open import Data.Maybe
+  open import Data.Maybe.Properties
+  open import Data.List.Properties
+
+  f? : Maybe A → Maybe A → Maybe A
+  f? nothing  = id
+  f? (just x) = just ∘ maybe x (f x)
+
+  open TreeFoldR f? nothing
+
+  treeFoldMay : List A → Maybe A
+  treeFoldMay = treeFold ∘ map just
+  
+  treeFoldMayHom : Associative f → ∀ xs → treeFoldMay xs ≡ foldrMay f xs
+  treeFoldMayHom f-assoc xs = treeFoldHom f?-assoc (map just xs) ; map-fusion f? nothing just xs
+    where
+    f?-assoc : Associative f?
+    f?-assoc nothing y z = refl
+    f?-assoc (just x) nothing z = refl
+    f?-assoc (just x) (just y) nothing = refl
+    f?-assoc (just x) (just y) (just z) = cong just (f-assoc x y z)
+
+  isJustSpine? : Spine (Maybe A) → Bool
+  isJustSpine? &0 = false
+  isJustSpine? (x ^ y & xs) = is-just x
+
+  IsJustSpine : Spine (Maybe A) → Type
+  IsJustSpine = T ∘ isJustSpine?
+
+  isJust-cons : ∀ x n xs → IsJustSpine (just x ^ n ∹ xs)
+  isJust-cons x n &0 = tt
+  isJust-cons x n (y ^ zero  & xs) = isJust-cons (maybe x (f x) y) (suc n) xs
+  isJust-cons x n (y ^ suc m & xs) = tt
+
+  isJust-spine : ∀ xs → NonEmpty xs → IsJustSpine (spine (map just xs))
+  isJust-spine (x ∷ xs) p = isJust-cons x 0 (spine (map just xs))
+
+  isJust-fold : ∀ xs → IsJustSpine xs → IsJust (fold xs)
+  isJust-fold (just _ ^ _ & _) _ = tt
+
+  isJust-treeFoldMay : ∀ xs → NonEmpty xs → IsJust (treeFoldMay xs)
+  isJust-treeFoldMay xs xsne = isJust-fold (spine (map just xs)) (isJust-spine xs xsne)
+
+  treeFold1 : (xs : List A) → ⦃ NonEmpty xs ⦄ → A
+  treeFold1 xs ⦃ xsne ⦄ = fromJust (treeFoldMay xs)
+    where instance _ = isJust-treeFoldMay xs xsne
+
+  -- treeFold1-hom : Associative f → ∀ xs → ⦃ xsne : NonEmpty xs ⦄ → treeFold1 xs ≡ foldr1 f xs
+  -- treeFold1-hom f-assoc xs ⦃ xsne ⦄ = {!!}
+open TreeFold1 using (treeFoldMay; treeFoldMayHom; treeFold1) public
 
 open TreeFoldR using (treeFold; treeFoldHom) public
 
