@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --postfix-projections #-}
+{-# OPTIONS --cubical --postfix-projections --safe #-}
 
 module Karatsuba where
 
@@ -9,8 +9,10 @@ open import Data.Integer
 open import Data.Integer.Literals
 open import Data.Nat.Literals
 import Data.Nat as ℕ
+import Data.Nat.Properties as ℕ
 open import Literals.Number
 open import Data.List.Syntax
+open import Data.Maybe
 
 data Tree {a} (A : Type a) : Type a where
   ⌈⌉ : Tree A
@@ -46,6 +48,7 @@ pair [] ys = map (λ y → parts 1 ⌈⌉ ⌈ y ⌉ []) ys
 pair xs [] = map (λ x → parts 1 ⌈ x ⌉ ⌈⌉ []) xs
 pair (x ∷ xs) (y ∷ ys) = parts 1 ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
 
+-- The first parameter in these functions is just used for termination checking.
 mutual
   infixl 7 ⟨_⟩_⊛_
   ⟨_⟩_⊛_ : ℕ → List ℤ → List ℤ → List ℤ
@@ -53,24 +56,29 @@ mutual
   ⟨ n ⟩ _ ⊛ [] = []
   ⟨ n ⟩ (x ∷ []) ⊛ ys = map (x *_) ys
   ⟨ n ⟩ xs ⊛ (y ∷ []) = map (y *_) xs
-  ⟨ n ⟩ xs ⊛ ys = treeFold ⟨ n ⟩_◆_ (parts 0 ⌈⌉ ⌈⌉ []) (pair xs ys) .out
+  ⟨ n ⟩ xs ⊛ ys = maybe [] out (treeFold (λ x y → ⟨ n ⟩′ x ◆ y) nothing (map just (pair xs ys)))
 
-  ⟨_⟩_◆_ : ℕ → Parts ℤ → Parts ℤ → Parts ℤ
+  ⟨_⟩′_◆_ : ℕ → Maybe (Parts ℤ) → Maybe (Parts ℤ) → Maybe (Parts ℤ)
+  ⟨ n ⟩′ xs ◆ nothing = xs
+  ⟨ n ⟩′ nothing ◆ ys = ys
+  ⟨ n ⟩′ just xs ◆ just ys = just (⟨ n ⟩ xs ◆ ys)
+
+  ⟨_⟩_◆_ : ℕ → (Parts ℤ) → (Parts ℤ) → Parts ℤ
   (⟨ n ⟩ xs ◆ ys) .shift = xs .shift ℕ.+ ys .shift
   (⟨ n ⟩ xs ◆ ys) .lo = xs .lo ⊗ ys .lo
   (⟨ n ⟩ xs ◆ ys) .hi = xs .hi ⊗ ys .hi
   (⟨ zero  ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = []
-  (⟨ suc t ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = (replicate (⁺ 0) (2 ℕ.* m) ++ z2) ⊕ (replicate (⁺ 0) m ++ z1) ⊕ z0
+  (⟨ suc t ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = (replicate (⁺ 0) (2 ℕ.* m) ++ z2) ⊕ (replicate (⁺ 0) (n ℕ.⊔ m) ++ z1) ⊕ z0
     where
     z1 : List ℤ
-    z1 = ⟨ t ⟩ (⌊ x1 ⌋ ⊕ ⌊ x0 ⌋) ⊛ (⌊ y1 ⌋ ⊕ ⌊ y0 ⌋) ⊕ map negate z2 ⊕ map negate z0
+    z1 = ⟨ t ⟩ (⌊ x1 ⌋ ⊕ ⌊ x0 ⌋) ⊛ (⌊ y1 ⌋ ⊕ ⌊ y0 ⌋) ⊕ (map negate z2 ⊕ map negate z0)
 
 _⊛_ : List ℤ → List ℤ → List ℤ
 xs ⊛ ys = ⟨ length xs ℕ.+ length ys ⟩ xs ⊛ ys
 
 
--- e : List ℤ
--- e = (⁺ 2 ∷ ⁺ 5 ∷ []) ⊛ (⁺ 1 ∷ ⁺ 1 ∷ [])
+e : List ℤ
+e = (⁺ 2 ∷ ⁺ 5 ∷ []) ⊛ (⁺ 1 ∷ ⁺ 1 ∷ [])
 
--- _ : e ≡ ⁺ 2 ∷ ⁺ 7 ∷ ⁺ 5 ∷ ⁺ 0 ∷ []
+-- _ : e ≡ ⁺ 2 ∷ ⁺ 7 ∷ ⁺ 5 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ ⁻ 2 ∷ ⁻ 7 ∷ ⁻ 5 ∷ []
 -- _ = refl
