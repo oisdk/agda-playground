@@ -14,26 +14,24 @@ open import Literals.Number
 open import Data.List.Syntax
 import Data.Maybe
 
-data Tree {a} (A : Type a) : Type a where
-  ⌈⌉ : Tree A
-  ⌈_⌉ : A → Tree A
-  _⊗_ : Tree A → Tree A → Tree A
+Diff : Type
+Diff = List ℤ → List ℤ
 
-⌊_⌋ : Tree A → List A
-⌊ xs ⌋ = ⌊ xs ⌋∷ []
-  where
-  infixr 5 ⌊_⌋∷_
-  ⌊_⌋∷_ : Tree A → List A → List A
-  ⌊ ⌈⌉ ⌋∷ ks = ks
-  ⌊ ⌈ x ⌉ ⌋∷ ks = x ∷ ks
-  ⌊ ls ⊗ rs ⌋∷ ks = ⌊ ls ⌋∷ ⌊ rs ⌋∷ ks
+⌈⌉ : Diff
+⌈⌉ = id
+
+⌈_⌉ : ℤ → Diff
+⌈_⌉ = _∷_
+
+⌊_⌋ : Diff → List ℤ
+⌊ xs ⌋ = xs []
 
 record Parts {a} (A : Type a) : Type a where
   constructor parts
   field
     shift : ℕ
-    lo : Tree A
-    hi : Tree A
+    lo : Diff
+    hi : Diff
     out : List A
 open Parts
 
@@ -45,7 +43,7 @@ _⊕_ : List ℤ → List ℤ → List ℤ
 
 pair : List ℤ → List ℤ → List (Parts ℤ)
 pair [] ys = map (λ y → parts 1 ⌈⌉ ⌈ y ⌉ []) ys
-pair xs [] = map (λ x → parts 1 ⌈ x ⌉ ⌈⌉ []) xs
+pair xs@(_ ∷ _) [] = map (λ x → parts 1 ⌈ x ⌉ ⌈⌉ []) xs
 pair (x ∷ xs) (y ∷ ys) = parts 1 ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
 
 -- The first parameter in these functions is just used for termination checking.
@@ -53,20 +51,20 @@ mutual
   infixl 7 ⟨_⟩_⊛_
   ⟨_⟩_⊛_ : ℕ → List ℤ → List ℤ → List ℤ
   ⟨ n ⟩ [] ⊛ _ = []
-  ⟨ n ⟩ _ ⊛ [] = []
-  ⟨ n ⟩ (x ∷ []) ⊛ ys = map (x *_) ys
-  ⟨ n ⟩ xs ⊛ (y ∷ []) = map (y *_) xs
-  ⟨ n ⟩ xs@(_ ∷ _) ⊛ ys@(_ ∷ _) = treeFold1 ⟨ n ⟩_◆_ (pair xs ys) .out
+  ⟨ n ⟩ (_ ∷ _) ⊛ [] = []
+  ⟨ n ⟩ (x ∷ []) ⊛ ys@(_ ∷ _) = map (x *_) ys
+  ⟨ n ⟩ xs@(_ ∷ _ ∷ _) ⊛ (y ∷ []) = map (y *_) xs
+  ⟨ n ⟩ xs@(_ ∷ _ ∷ _) ⊛ ys@(_ ∷ _ ∷ _) = treeFold1 ⟨ n ⟩_◆_ (pair xs ys) .out
 
   ⟨_⟩_◆_ : ℕ → Parts ℤ → Parts ℤ → Parts ℤ
   (⟨ n ⟩ xs ◆ ys) .shift = xs .shift ℕ.+ ys .shift
-  (⟨ n ⟩ xs ◆ ys) .lo = xs .lo ⊗ ys .lo
-  (⟨ n ⟩ xs ◆ ys) .hi = xs .hi ⊗ ys .hi
-  (⟨ zero  ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = []
-  (⟨ suc t ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = (replicate (⁺ 0) (2 ℕ.* m) ++ z2) ⊕ (replicate (⁺ 0) (n ℕ.⊔ m) ++ z1) ⊕ z0
+  (⟨ n ⟩ xs ◆ ys) .lo = xs .lo ∘ ys .lo
+  (⟨ n ⟩ xs ◆ ys) .hi = xs .hi ∘ ys .hi
+  (⟨ zero  ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = [] -- should not happen
+  (⟨ suc t ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = (replicate (⁺ 0) (2 ℕ.* m) ++ z2) ⊕ (replicate (⁺ 0) m ++ z1) ⊕ z0
     where
     z1 : List ℤ
-    z1 = ⟨ t ⟩ (⌊ x1 ⌋ ⊕ ⌊ x0 ⌋) ⊛ (⌊ y1 ⌋ ⊕ ⌊ y0 ⌋) ⊕ (map negate z2 ⊕ map negate z0)
+    z1 = ⟨ t ⟩ (⌊ x0 ⌋ ⊕ ⌊ x1 ⌋) ⊛ (⌊ y0 ⌋ ⊕ ⌊ y1 ⌋) ⊕ (map negate z0 ⊕ map negate z2)
 
 _⊛_ : List ℤ → List ℤ → List ℤ
 xs ⊛ ys = ⟨ length xs ℕ.+ length ys ⟩ xs ⊛ ys
