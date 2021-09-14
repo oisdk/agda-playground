@@ -49,10 +49,12 @@ _⟨_⟩_ : A → (A → B → C) → B → C
 x ⟨ f ⟩ y = f x y
 {-# INLINE _⟨_⟩_ #-}
 
-infixl 0 _∋_
-_∋_ : (A : Type a) → A → A
-A ∋ x = x
-{-# INLINE _∋_ #-}
+infixl 0 the
+the : (A : Type a) → A → A
+the _ x = x
+{-# INLINE the #-}
+
+syntax the A x = x ⦂ A
 
 infix 0 case_of_
 case_of_ : A → (A → B) → B

@@ -41,5 +41,5 @@ module _ {a b} {A : Type a} {B : Type b} where
 open import Data.List using (_⋯_)
 open import Data.List.Syntax
 
-_ : zip (1 ⋯ 5) (11 ⋯ 15) ≡ [ (1 , 11) , (2 , 12) , (3 , 13) , (4 , 14) , (5 , 15) ]
+_ : zip (1 ⋯ 5) (11 ⋯ 15) ≡ [ 5 ][ (1 , 11) , (2 , 12) , (3 , 13) , (4 , 14) , (5 , 15) ]
 _ = refl

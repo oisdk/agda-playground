@@ -11,7 +11,6 @@ open import Data.Nat.Literals
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕ
 open import Literals.Number
-
 open import Data.List.Syntax
 
 Diff : Type
@@ -30,21 +29,20 @@ record Parts {a} (A : Type a) : Type a where
   constructor parts
   field
     shift : ℕ
-    lo : Diff
-    hi : Diff
+    lo hi : Diff
     out : List A
 open Parts
 
 infixl 6 _⊕_
 _⊕_ : List ℤ → List ℤ → List ℤ
-[] ⊕ ys = ys
-(x ∷ xs) ⊕ [] = x ∷ xs
+[]       ⊕ ys       = ys
+(x ∷ xs) ⊕ []       = x ∷ xs
 (x ∷ xs) ⊕ (y ∷ ys) = (x + y) ∷ (xs ⊕ ys)
 
 pair : List ℤ → List ℤ → List (Parts ℤ)
-pair [] ys = map (λ y → parts 1 ⌈⌉ ⌈ y ⌉ []) ys
+pair []         ys = map (λ y → parts 1 ⌈⌉ ⌈ y ⌉ []) ys
 pair xs@(_ ∷ _) [] = map (λ x → parts 1 ⌈ x ⌉ ⌈⌉ []) xs
-pair (x ∷ xs) (y ∷ ys) = parts 1 ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
+pair (x ∷ xs)   (y ∷ ys) = parts 1 ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
 
 pad : ℕ → Diff
 pad zero    = ⌈⌉
@@ -73,8 +71,5 @@ mutual
 _⊛_ : List ℤ → List ℤ → List ℤ
 xs ⊛ ys = ⟨ length xs ℕ.+ length ys ⟩ xs ⊛ ys
 
-e : List ℤ
-e = [ 2 , 5 ] ⊛ [ 1 , 1 ]
-
-_ : e ≡ [ 2 , 7 , 5 ]
+_ : [ 2 , 5 ] ⊛ [ 1 , 1 ] ≡ [ 2 , 7 , 5 ]
 _ = refl
