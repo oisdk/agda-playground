@@ -64,9 +64,9 @@ mutual
   (⟨ _     ⟩ xs           ◆ ys          ) .lo  = xs .lo ∘ ys .lo
   (⟨ _     ⟩ xs           ◆ ys          ) .hi  = xs .hi ∘ ys .hi
   (⟨ zero  ⟩ _            ◆ _           ) .out = [] -- should not happen
-  (⟨ suc t ⟩ k p x₀ y₀ z₀ ◆ k _ x₁ y₁ z₂) .out = p (p z₂ ⊕ z₁) ⊕ z₀
+  (⟨ suc t ⟩ k p x₀ y₀ z₀ ◆ k _ x₁ y₁ z₂) .out = p (p z₂ ⊕ z₁ ⊝ (z₀ ⊕ z₂)) ⊕ z₀
     where
-    z₁ = ⟨ t ⟩ (⌊ x₀ ⌋ ⊕ ⌊ x₁ ⌋) ⊛ (⌊ y₀ ⌋ ⊕ ⌊ y₁ ⌋) ⊝ (z₀ ⊕ z₂)
+    z₁ = ⟨ t ⟩ (⌊ x₀ ⌋ ⊕ ⌊ x₁ ⌋) ⊛ (⌊ y₀ ⌋ ⊕ ⌊ y₁ ⌋)
 
 _⊛_ : List ℤ → List ℤ → List ℤ
 xs ⊛ ys = ⟨ length xs ℕ.+ length ys ⟩ xs ⊛ ys
