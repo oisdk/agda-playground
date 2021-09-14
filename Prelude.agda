@@ -12,7 +12,7 @@ open import Data.Nat public
 open import Data.Bool public
   using (Bool; true; false; bool; if_then_else_; T; _and_; _or_; not; bool′)
 open import Data.Maybe public
-  using (Maybe; just; nothing)
+  using (Maybe; just; nothing; maybe)
 open import HITs.PropositionalTruncation public
   using (∥_∥; ∣_∣)
 open import Function.Surjective public

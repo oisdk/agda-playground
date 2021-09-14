@@ -3,16 +3,18 @@
 module Karatsuba where
 
 open import Prelude
+
 open import Data.List
-open import TreeFold
-open import Data.Integer
-open import Data.Integer.Literals
-open import Data.Nat.Literals
-import Data.Nat as ℕ
-import Data.Nat.Properties as ℕ
-open import Literals.Number
 open import Data.List.Syntax
-open import Data.Maybe using (maybe)
+
+open import TreeFold
+
+open import Data.Integer
+
+import Data.Nat as ℕ
+
+open import Literals.Number
+open import Data.Integer.Literals
 
 Diff : Type a → Type a
 Diff A = List A → List A
@@ -29,8 +31,7 @@ Diff A = List A → List A
 record K (A : Type a) : Type a where
   constructor k
   field
-    shift : ℕ → ℕ
-    lo hi : Diff A
+    pz lo hi : Diff A
     out : List A
 open K
 
@@ -41,9 +42,9 @@ xs       ⊕ []       = xs
 (x ∷ xs) ⊕ (y ∷ ys) = (x + y) ∷ (xs ⊕ ys)
 
 pair : List ℤ → List ℤ → List (K ℤ)
-pair []         ys       = map (λ y → k suc ⌈⌉ ⌈ y ⌉ []) ys
-pair xs         []       = map (λ x → k suc ⌈ x ⌉ ⌈⌉ []) xs
-pair (x ∷ xs)   (y ∷ ys) = k suc ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
+pair []       ys       = map (λ y → k ⌈ 0 ⌉ ⌈⌉ ⌈ y ⌉ []) ys
+pair xs       []       = map (λ x → k ⌈ 0 ⌉ ⌈ x ⌉ ⌈⌉ []) xs
+pair (x ∷ xs) (y ∷ ys) = k ⌈ 0 ⌉ ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
 
 pad : ℕ → Diff ℤ 
 pad zero    = ⌈⌉
@@ -60,14 +61,14 @@ mutual
   ⟨ n ⟩ xs       ⊛ ys       = maybe [] out (treeFoldMay ⟨ n ⟩_◆_ (pair xs ys))
 
   ⟨_⟩_◆_ : ℕ → K ℤ → K ℤ → K ℤ
-  (⟨ _     ⟩ xs           ◆ ys          ) .shift = xs .shift ∘ ys .shift
-  (⟨ _     ⟩ xs           ◆ ys          ) .lo    = xs .lo ∘ ys .lo
-  (⟨ _     ⟩ xs           ◆ ys          ) .hi    = xs .hi ∘ ys .hi
-  (⟨ zero  ⟩ k m x0 y0 z0 ◆ k n x1 y1 z2) .out   = [] -- should not happen
-  (⟨ suc t ⟩ k m x0 y0 z0 ◆ k n x1 y1 z2) .out   = let m′ = m 0 in pad m′ (pad m′ z2 ⊕ z1) ⊕ z0
+  (⟨ _     ⟩ xs           ◆ ys          ) .pz  = xs .pz ∘ ys .pz
+  (⟨ _     ⟩ xs           ◆ ys          ) .lo  = xs .lo ∘ ys .lo
+  (⟨ _     ⟩ xs           ◆ ys          ) .hi  = xs .hi ∘ ys .hi
+  (⟨ zero  ⟩ _            ◆ _           ) .out = [] -- should not happen
+  (⟨ suc t ⟩ k p x₀ y₀ z₀ ◆ k _ x₁ y₁ z₂) .out = p (p z₂ ⊕ z₁) ⊕ z₀
     where
-    z1 : List ℤ
-    z1 = ⟨ t ⟩ (⌊ x0 ⌋ ⊕ ⌊ x1 ⌋) ⊛ (⌊ y0 ⌋ ⊕ ⌊ y1 ⌋) ⊕ (map negate z0 ⊕ map negate z2)
+    z₁ = ⟨ t ⟩ (⌊ x₀ ⌋ ⊕ ⌊ x₁ ⌋) ⊛ (⌊ y₀ ⌋ ⊕ ⌊ y₁ ⌋) ⊕
+              (map negate z₀ ⊕ map negate z₂)
 
 _⊛_ : List ℤ → List ℤ → List ℤ
 xs ⊛ ys = ⟨ length xs ℕ.+ length ys ⟩ xs ⊛ ys
