@@ -106,6 +106,15 @@ module _ (mon : Monoid b) where
     foldl-foldr-monoid : (xs : List A) → foldMapL xs ≡ foldr (_∙_ ∘ f) ε xs
     foldl-foldr-monoid = foldr-universal _ (_∙_ ∘ f) ε refl λ x xs → sym (foldMapLStep x xs)
 
+module _ (A : Type a) where
+  listMonoid : Monoid a
+  listMonoid .Monoid.𝑆 = List A
+  listMonoid .Monoid._∙_ = _++_
+  listMonoid .Monoid.ε = []
+  listMonoid .Monoid.assoc = ++-assoc
+  listMonoid .Monoid.ε∙ _ = refl
+  listMonoid .Monoid.∙ε = ++-idʳ
+
 foldl′-foldl : (f : B → A → B) (z : B) (xs : List A) → foldl′ f z xs ≡ foldl f z xs
 foldl′-foldl f z [] = refl
 foldl′-foldl f z (x ∷ xs) = $!-≡ (λ y → foldl′ f y xs) (f z x) ; foldl′-foldl f (f z x) xs 
