@@ -12,6 +12,7 @@ import Data.Nat as ℕ
 import Data.Nat.Properties as ℕ
 open import Literals.Number
 open import Data.List.Syntax
+open import Data.Maybe using (maybe)
 
 Diff : Type a → Type a
 Diff A = List A → List A
@@ -28,7 +29,7 @@ Diff A = List A → List A
 record K (A : Type a) : Type a where
   constructor k
   field
-    shift : ℕ
+    shift : ℕ → ℕ
     lo hi : Diff A
     out : List A
 open K
@@ -36,13 +37,13 @@ open K
 infixl 6 _⊕_
 _⊕_ : List ℤ → List ℤ → List ℤ
 []       ⊕ ys       = ys
-(x ∷ xs) ⊕ []       = x ∷ xs
+xs       ⊕ []       = xs
 (x ∷ xs) ⊕ (y ∷ ys) = (x + y) ∷ (xs ⊕ ys)
 
 pair : List ℤ → List ℤ → List (K ℤ)
-pair []         ys       = map (λ y → k 1 ⌈⌉ ⌈ y ⌉ []) ys
-pair xs@(_ ∷ _) []       = map (λ x → k 1 ⌈ x ⌉ ⌈⌉ []) xs
-pair (x ∷ xs)   (y ∷ ys) = k 1 ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
+pair []         ys       = map (λ y → k suc ⌈⌉ ⌈ y ⌉ []) ys
+pair xs         []       = map (λ x → k suc ⌈ x ⌉ ⌈⌉ []) xs
+pair (x ∷ xs)   (y ∷ ys) = k suc ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
 
 pad : ℕ → Diff ℤ 
 pad zero    = ⌈⌉
@@ -52,18 +53,18 @@ pad (suc n) = ⌈ 0 ⌉ ∘ pad n
 mutual
   infixl 7 ⟨_⟩_⊛_
   ⟨_⟩_⊛_ : ℕ → List ℤ → List ℤ → List ℤ
-  ⟨ n ⟩ []             ⊛ _              = []
-  ⟨ n ⟩    (_ ∷ _)     ⊛ []             = []
-  ⟨ n ⟩    (x ∷ [])    ⊛ ys@(_ ∷ _)     = map (x *_) ys
-  ⟨ n ⟩ xs@(_ ∷ _ ∷ _) ⊛    (y ∷ [])    = map (y *_) xs
-  ⟨ n ⟩ xs@(_ ∷ _ ∷ _) ⊛ ys@(_ ∷ _ ∷ _) = treeFold1 ⟨ n ⟩_◆_ (pair xs ys) .out
+  ⟨ n ⟩ []       ⊛ _        = []
+  ⟨ n ⟩ _        ⊛ []       = []
+  ⟨ n ⟩ (x ∷ []) ⊛ ys       = map (x *_) ys
+  ⟨ n ⟩ xs       ⊛ (y ∷ []) = map (y *_) xs
+  ⟨ n ⟩ xs       ⊛ ys       = maybe [] out (treeFoldMay ⟨ n ⟩_◆_ (pair xs ys))
 
   ⟨_⟩_◆_ : ℕ → K ℤ → K ℤ → K ℤ
-  (⟨ _     ⟩ xs           ◆ ys          ) .shift = xs .shift ℕ.+ ys .shift
+  (⟨ _     ⟩ xs           ◆ ys          ) .shift = xs .shift ∘ ys .shift
   (⟨ _     ⟩ xs           ◆ ys          ) .lo    = xs .lo ∘ ys .lo
   (⟨ _     ⟩ xs           ◆ ys          ) .hi    = xs .hi ∘ ys .hi
   (⟨ zero  ⟩ k m x0 y0 z0 ◆ k n x1 y1 z2) .out   = [] -- should not happen
-  (⟨ suc t ⟩ k m x0 y0 z0 ◆ k n x1 y1 z2) .out   = pad m (pad m z2 ⊕ z1) ⊕ z0
+  (⟨ suc t ⟩ k m x0 y0 z0 ◆ k n x1 y1 z2) .out   = let m′ = m 0 in pad m′ (pad m′ z2 ⊕ z1) ⊕ z0
     where
     z1 : List ℤ
     z1 = ⟨ t ⟩ (⌊ x0 ⌋ ⊕ ⌊ x1 ⌋) ⊛ (⌊ y0 ⌋ ⊕ ⌊ y1 ⌋) ⊕ (map negate z0 ⊕ map negate z2)
