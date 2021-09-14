@@ -40,8 +40,8 @@ _⊕_ : List ℤ → List ℤ → List ℤ
 (x ∷ xs) ⊕ (y ∷ ys) = (x + y) ∷ (xs ⊕ ys)
 
 pair : List ℤ → List ℤ → List (Parts ℤ)
-pair []         ys = map (λ y → parts 1 ⌈⌉ ⌈ y ⌉ []) ys
-pair xs@(_ ∷ _) [] = map (λ x → parts 1 ⌈ x ⌉ ⌈⌉ []) xs
+pair []         ys       = map (λ y → parts 1 ⌈⌉ ⌈ y ⌉ []) ys
+pair xs@(_ ∷ _) []       = map (λ x → parts 1 ⌈ x ⌉ ⌈⌉ []) xs
 pair (x ∷ xs)   (y ∷ ys) = parts 1 ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
 
 pad : ℕ → Diff
@@ -52,10 +52,10 @@ pad (suc n) = ⌈ 0 ⌉ ∘ pad n
 mutual
   infixl 7 ⟨_⟩_⊛_
   ⟨_⟩_⊛_ : ℕ → List ℤ → List ℤ → List ℤ
-  ⟨ n ⟩ [] ⊛ _ = []
-  ⟨ n ⟩ (_ ∷ _) ⊛ [] = []
-  ⟨ n ⟩ (x ∷ []) ⊛ ys@(_ ∷ _) = map (x *_) ys
-  ⟨ n ⟩ xs@(_ ∷ _ ∷ _) ⊛ (y ∷ []) = map (y *_) xs
+  ⟨ n ⟩ []             ⊛ _              = []
+  ⟨ n ⟩    (_ ∷ _)     ⊛ []             = []
+  ⟨ n ⟩    (x ∷ [])    ⊛ ys@(_ ∷ _)     = map (x *_) ys
+  ⟨ n ⟩ xs@(_ ∷ _ ∷ _) ⊛    (y ∷ [])    = map (y *_) xs
   ⟨ n ⟩ xs@(_ ∷ _ ∷ _) ⊛ ys@(_ ∷ _ ∷ _) = treeFold1 ⟨ n ⟩_◆_ (pair xs ys) .out
 
   ⟨_⟩_◆_ : ℕ → Parts ℤ → Parts ℤ → Parts ℤ
