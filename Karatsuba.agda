@@ -11,8 +11,8 @@ open import Data.Nat.Literals
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕ
 open import Literals.Number
+
 open import Data.List.Syntax
-import Data.Maybe
 
 Diff : Type
 Diff = List ℤ → List ℤ
@@ -73,9 +73,8 @@ mutual
 _⊛_ : List ℤ → List ℤ → List ℤ
 xs ⊛ ys = ⟨ length xs ℕ.+ length ys ⟩ xs ⊛ ys
 
-
 e : List ℤ
-e = (⁺ 2 ∷ ⁺ 5 ∷ []) ⊛ (⁺ 1 ∷ ⁺ 1 ∷ [])
+e = [ 2 , 5 ] ⊛ [ 1 , 1 ]
 
-_ : e ≡ ⁺ 2 ∷ ⁺ 7 ∷ ⁺ 5 ∷ []
+_ : e ≡ [ 2 , 7 , 5 ]
 _ = refl
