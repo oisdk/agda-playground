@@ -41,10 +41,10 @@ _⊕_ : List ℤ → List ℤ → List ℤ
 xs       ⊕ []       = xs
 (x ∷ xs) ⊕ (y ∷ ys) = (x + y) ∷ (xs ⊕ ys)
 
-_⊙_ : List ℤ → List ℤ → List (K ℤ)
-[]       ⊙ ys       = map (λ y → k ⌈ 0 ⌉ ⌈⌉ ⌈ y ⌉ []) ys
-xs       ⊙ []       = map (λ x → k ⌈ 0 ⌉ ⌈ x ⌉ ⌈⌉ []) xs
-(x ∷ xs) ⊙ (y ∷ ys) = k ⌈ 0 ⌉ ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ xs ⊙ ys
+_⍟_ : List ℤ → List ℤ → List (K ℤ)
+[]       ⍟ ys       = map (λ y → k ⌈ 0 ⌉ ⌈⌉ ⌈ y ⌉ []) ys
+xs       ⍟ []       = map (λ x → k ⌈ 0 ⌉ ⌈ x ⌉ ⌈⌉ []) xs
+(x ∷ xs) ⍟ (y ∷ ys) = k ⌈ 0 ⌉ ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ xs ⍟ ys
 
 _⊝_ : List ℤ → List ℤ → List ℤ
 xs ⊝ ys = xs ⊕ map negate ys
@@ -57,7 +57,7 @@ mutual
   ⟨ n ⟩ _        ⊛ []       = []
   ⟨ n ⟩ (x ∷ []) ⊛ ys       = map (x *_) ys
   ⟨ n ⟩ xs       ⊛ (y ∷ []) = map (y *_) xs
-  ⟨ n ⟩ xs       ⊛ ys       = maybe [] out (treeFoldMay ⟨ n ⟩_◆_ (xs ⊙ ys))
+  ⟨ n ⟩ xs       ⊛ ys       = maybe [] out (treeFoldMay ⟨ n ⟩_◆_ (xs ⍟ ys))
 
   ⟨_⟩_◆_ : ℕ → K ℤ → K ℤ → K ℤ
   (⟨ _     ⟩ xs           ◆ ys          ) .sh  = xs .sh ∘ ys .sh
