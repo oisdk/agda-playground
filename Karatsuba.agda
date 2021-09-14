@@ -46,6 +46,10 @@ pair [] ys = map (λ y → parts 1 ⌈⌉ ⌈ y ⌉ []) ys
 pair xs@(_ ∷ _) [] = map (λ x → parts 1 ⌈ x ⌉ ⌈⌉ []) xs
 pair (x ∷ xs) (y ∷ ys) = parts 1 ⌈ x ⌉ ⌈ y ⌉ [ x * y ] ∷ pair xs ys
 
+pad : ℕ → Diff
+pad zero    = ⌈⌉
+pad (suc n) = ⌈ 0 ⌉ ∘ pad n
+
 -- The first parameter in these functions is just used for termination checking.
 mutual
   infixl 7 ⟨_⟩_⊛_
@@ -61,7 +65,7 @@ mutual
   (⟨ n ⟩ xs ◆ ys) .lo = xs .lo ∘ ys .lo
   (⟨ n ⟩ xs ◆ ys) .hi = xs .hi ∘ ys .hi
   (⟨ zero  ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = [] -- should not happen
-  (⟨ suc t ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = (replicate (⁺ 0) (2 ℕ.* m) ++ z2) ⊕ (replicate (⁺ 0) m ++ z1) ⊕ z0
+  (⟨ suc t ⟩ parts m x0 y0 z0 ◆ parts n x1 y1 z2) .out = pad m (pad m z2 ⊕ z1) ⊕ z0
     where
     z1 : List ℤ
     z1 = ⟨ t ⟩ (⌊ x0 ⌋ ⊕ ⌊ x1 ⌋) ⊛ (⌊ y0 ⌋ ⊕ ⌊ y1 ⌋) ⊕ (map negate z0 ⊕ map negate z2)
