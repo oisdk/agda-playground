@@ -152,6 +152,95 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
   total⇒isSet : isSet 𝑆
   total⇒isSet = Discrete→isSet _≟_
 
+  data _≲_ (x y : 𝑆) : Type (ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
+    <[_] : (x<y : x < y) → x ≲ y
+    ≤[_] : (x≤y : x ≤ y) → x ≲ y
+    ≡[_] : (x≡y : x ≡ y) → x ≲ y
+
+  Ordℓ : ∀ {x y} → x ≲ y → Level
+  Ordℓ <[ _ ] = ℓ₂
+  Ordℓ ≤[ _ ] = ℓ₃
+  Ordℓ ≡[ _ ] = ℓ₁
+
+  TheOrd : ∀ {x y} → (x≲y : x ≲ y) → Type (Ordℓ x≲y)
+  TheOrd {x} {y} <[ _ ] = x < y
+  TheOrd {x} {y} ≤[ _ ] = x ≤ y
+  TheOrd {x} {y} ≡[ _ ] = x ≡ y
+
+  ≲[_] : ∀ {x y} → (x≲y : x ≲ y) → TheOrd x≲y
+  ≲[ <[ x<y ] ] = x<y
+  ≲[ ≤[ x≤y ] ] = x≤y
+  ≲[ ≡[ x≡y ] ] = x≡y
+
+  ≱[_] : ∀ {x y} → x ≱ y → x ≲ y
+  ≱[ x≱y ] = <[ ≰⇒> x≱y ]
+
+  ≯[_] : ∀ {x y} → x ≯ y → x ≲ y
+  ≯[ x≯y ] = ≤[ ≮⇒≥ x≯y ]
+
+  infixr 2 _≲;_
+
+  _≲;_ : ∀ {x y z} → x ≲ y → y ≲ z → x ≲ z
+  <[ x≲y ] ≲; <[ y≲z ] = <[ <-trans x≲y y≲z ]
+  <[ x≲y ] ≲; ≡[ y≲z ] = <[ subst (_ <_) y≲z x≲y ]
+  ≡[ x≲y ] ≲; <[ y≲z ] = <[ subst (_< _) (≡.sym x≲y) y≲z ]
+  ≡[ x≲y ] ≲; ≡[ y≲z ] = ≡[ x≲y ; y≲z ]
+  ≡[ x≲y ] ≲; ≤[ y≲z ] = ≤[ subst (_≤ _) (≡.sym x≲y) y≲z ]
+  ≤[ x≲y ] ≲; ≤[ y≲z ] = ≤[ ≤-trans x≲y y≲z ]
+  ≤[ x≲y ] ≲; ≡[ y≲z ] = ≤[ subst (_ ≤_) y≲z x≲y ]
+  ≤[ x≲y ] ≲; <[ y≲z ] = ≱[ (λ z≤x → <⇒≱ y≲z (≤-trans z≤x x≲y)) ]
+  <[ x≲y ] ≲; ≤[ y≲z ] = ≱[ (λ z≤x → <⇒≱ x≲y (≤-trans y≲z z≤x)) ]
+
+  module Reasoning where
+
+    infixr 2 ≤⟨∙⟩-syntax <⟨∙⟩-syntax ≡⟨∙⟩-syntax ≡˘⟨∙⟩-syntax _≡⟨⟩_ ≱⟨∙⟩-syntax ≯⟨∙⟩-syntax
+
+    ≤⟨∙⟩-syntax : ∀ (x : 𝑆) {y z} → y ≲ z → x ≤ y → x ≲ z
+    ≤⟨∙⟩-syntax _ y≲z x≤y = ≤[ x≤y ] ≲; y≲z
+
+    syntax ≤⟨∙⟩-syntax x y≲z x≤y = x ≤⟨ x≤y ⟩ y≲z
+
+    ≱⟨∙⟩-syntax : ∀ (x : 𝑆) {y z} → y ≲ z → x ≱ y → x ≲ z
+    ≱⟨∙⟩-syntax _ y≲z x≱y = ≱[ x≱y ] ≲; y≲z
+
+    syntax ≱⟨∙⟩-syntax x y≲z x≱y = x ≱⟨ x≱y ⟩ y≲z
+
+    <⟨∙⟩-syntax : ∀ (x : 𝑆) {y z} → y ≲ z → x < y → x ≲ z
+    <⟨∙⟩-syntax _ y≲z x<y = <[ x<y ] ≲; y≲z
+
+    syntax <⟨∙⟩-syntax x y≲z x<y = x <⟨ x<y ⟩ y≲z
+
+    ≯⟨∙⟩-syntax : ∀ (x : 𝑆) {y z} → y ≲ z → x ≯ y → x ≲ z
+    ≯⟨∙⟩-syntax _ y≲z x≯y = ≯[ x≯y ] ≲; y≲z
+
+    syntax ≯⟨∙⟩-syntax x y≲z x≯y = x ≯⟨ x≯y ⟩ y≲z
+
+    ≡⟨∙⟩-syntax : ∀ (x : 𝑆) {y z} → y ≲ z → x ≡ y → x ≲ z
+    ≡⟨∙⟩-syntax _ y≲z x≡y = ≡[ x≡y ] ≲; y≲z
+
+    syntax ≡⟨∙⟩-syntax x y≲z x≡y = x ≡⟨ x≡y ⟩ y≲z
+
+    ≡˘⟨∙⟩-syntax : ∀ (x : 𝑆) {y z} → y ≲ z → y ≡ x → x ≲ z
+    ≡˘⟨∙⟩-syntax _ y≲z y≡x = ≡[ ≡.sym y≡x ] ≲; y≲z
+
+    syntax ≡˘⟨∙⟩-syntax x y≲z y≡x = x ≡˘⟨ y≡x ⟩ y≲z
+
+    _≡⟨⟩_ : ∀ (x : 𝑆) {y} → x ≲ y → x ≲ y
+    _ ≡⟨⟩ x≲y = x≲y
+
+    infix 2.5 _∎
+    _∎ : ∀ x → x ≲ x
+    x ∎ = ≡[ ≡.refl ]
+
+    infixr 2 begin_
+    begin_ = ≲[_]
+
+    _ : ∀ w x y z → w < x → x ≡ y → y ≤ z → w < z
+    _ = λ w x y z w<x x≡y y≤z → begin
+      w <⟨ w<x ⟩
+      x ≡⟨ x≡y ⟩
+      y ≤⟨ y≤z ⟩
+      z ∎
 
 module FromPartialOrder {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (po : PartialOrder 𝑆 ℓ₂) (_≤|≥_ : Total (PartialOrder._≤_ po)) where
   open PartialOrder po
@@ -227,3 +316,4 @@ record Equivalence {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ �
   ; refl = ≡.refl
   ; trans = _;_
   }
+
