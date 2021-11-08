@@ -1,0 +1,119 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Codata.Heap</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--allow-unsolved-metas</a> <a id="36" class="Symbol">#-}</a>
+
+<a id="41" class="Keyword">open</a> <a id="46" class="Keyword">import</a> <a id="53" href="Prelude.html" class="Module">Prelude</a>
+<a id="61" class="Keyword">open</a> <a id="66" class="Keyword">import</a> <a id="73" href="Algebra.html" class="Module">Algebra</a>
+<a id="81" class="Keyword">open</a> <a id="86" class="Keyword">import</a> <a id="93" href="Algebra.Monus.html" class="Module">Algebra.Monus</a>
+
+<a id="108" class="Keyword">module</a> <a id="115" href="Codata.Heap.html" class="Module">Codata.Heap</a>
+  <a id="129" class="Symbol">{</a><a id="130" href="Codata.Heap.html#130" class="Bound">ℓ</a><a id="131" class="Symbol">}</a>
+  <a id="135" class="Symbol">(</a><a id="136" href="Codata.Heap.html#136" class="Bound">mon</a> <a id="140" class="Symbol">:</a> <a id="142" href="Algebra.Monus.html#10165" class="Record">CTMAPOM</a> <a id="150" href="Codata.Heap.html#130" class="Bound">ℓ</a><a id="151" class="Symbol">)</a>
+  <a id="155" class="Keyword">where</a>
+
+<a id="162" class="Keyword">open</a> <a id="167" href="Algebra.Monus.html#10165" class="Module">CTMAPOM</a> <a id="175" href="Codata.Heap.html#136" class="Bound">mon</a>
+
+<a id="180" class="Keyword">open</a> <a id="185" class="Keyword">import</a> <a id="192" href="Data.List.html" class="Module">Data.List</a>
+
+<a id="203" class="Keyword">private</a> <a id="211" class="Keyword">variable</a> <a id="220" href="Codata.Heap.html#220" class="Generalizable">i</a> <a id="222" href="Codata.Heap.html#222" class="Generalizable">j</a> <a id="224" class="Symbol">:</a> <a id="226" href="Algebra.html#1401" class="Function">𝑆</a>
+
+<a id="229" class="Keyword">data</a> <a id="Heap′"></a><a id="234" href="Codata.Heap.html#234" class="Datatype">Heap′</a> <a id="240" class="Symbol">{</a><a id="241" href="Codata.Heap.html#241" class="Bound">a</a><a id="242" class="Symbol">}</a> <a id="244" class="Symbol">(</a><a id="245" href="Codata.Heap.html#245" class="Bound">i</a> <a id="247" class="Symbol">:</a> <a id="249" href="Algebra.html#1401" class="Function">𝑆</a><a id="250" class="Symbol">)</a> <a id="252" class="Symbol">(</a><a id="253" href="Codata.Heap.html#253" class="Bound">A</a> <a id="255" class="Symbol">:</a> <a id="257" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="262" href="Codata.Heap.html#241" class="Bound">a</a><a id="263" class="Symbol">)</a>  <a id="266" class="Symbol">:</a> <a id="268" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="273" class="Symbol">(</a><a id="274" href="Codata.Heap.html#241" class="Bound">a</a> <a id="276" href="Agda.Primitive.html#810" class="Primitive Operator">ℓ⊔</a> <a id="279" href="Codata.Heap.html#130" class="Bound">ℓ</a><a id="280" class="Symbol">)</a> <a id="282" class="Keyword">where</a>
+  <a id="Heap′.heap"></a><a id="290" href="Codata.Heap.html#290" class="InductiveConstructor">heap</a> <a id="295" class="Symbol">:</a> <a id="297" href="Codata.Heap.html#253" class="Bound">A</a> <a id="299" class="Symbol">→</a> <a id="301" class="Symbol">∀</a> <a id="303" href="Codata.Heap.html#303" class="Bound">w</a> <a id="305" class="Symbol">→</a> <a id="307" class="Comment">-- Segment size</a>
+          <a id="333" class="Symbol">(</a>  <a id="336" class="Symbol">(</a><a id="337" href="Codata.Heap.html#337" class="Bound">w&lt;i</a> <a id="341" class="Symbol">:</a> <a id="343" href="Codata.Heap.html#303" class="Bound">w</a> <a id="345" href="Relation.Binary.html#1847" class="Function Operator">&lt;</a> <a id="347" href="Codata.Heap.html#245" class="Bound">i</a><a id="348" class="Symbol">)</a> <a id="350" class="Symbol">→</a> 
+             <a id="366" href="Agda.Builtin.List.html#148" class="Datatype">List</a> <a id="371" class="Symbol">(</a><a id="372" href="Codata.Heap.html#234" class="Datatype">Heap′</a> <a id="378" class="Symbol">(</a><a id="379" href="Codata.Heap.html#245" class="Bound">i</a> <a id="381" href="Algebra.Monus.html#4570" class="Function Operator">∸</a> <a id="383" href="Codata.Heap.html#303" class="Bound">w</a><a id="384" class="Symbol">)</a> <a id="386" href="Codata.Heap.html#253" class="Bound">A</a><a id="387" class="Symbol">)</a>
+             <a id="402" class="Symbol">)</a> <a id="404" class="Symbol">→</a>
+          <a id="416" href="Codata.Heap.html#234" class="Datatype">Heap′</a> <a id="422" href="Codata.Heap.html#245" class="Bound">i</a> <a id="424" href="Codata.Heap.html#253" class="Bound">A</a>
+
+<a id="Heap"></a><a id="427" href="Codata.Heap.html#427" class="Function">Heap</a> <a id="432" class="Symbol">:</a> <a id="434" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="439" href="Level.html#239" class="Generalizable">a</a> <a id="441" class="Symbol">→</a> <a id="443" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="448" class="Symbol">(</a><a id="449" href="Level.html#239" class="Generalizable">a</a> <a id="451" href="Agda.Primitive.html#810" class="Primitive Operator">ℓ⊔</a> <a id="454" href="Codata.Heap.html#130" class="Bound">ℓ</a><a id="455" class="Symbol">)</a>
+<a id="457" href="Codata.Heap.html#427" class="Function">Heap</a> <a id="462" href="Codata.Heap.html#462" class="Bound">A</a> <a id="464" class="Symbol">=</a> <a id="466" class="Symbol">∀</a> <a id="468" class="Symbol">{</a><a id="469" href="Codata.Heap.html#469" class="Bound">i</a><a id="470" class="Symbol">}</a> <a id="472" class="Symbol">→</a> <a id="474" href="Codata.Heap.html#234" class="Datatype">Heap′</a> <a id="480" href="Codata.Heap.html#469" class="Bound">i</a> <a id="482" href="Codata.Heap.html#462" class="Bound">A</a>
+
+<a id="extract"></a><a id="485" href="Codata.Heap.html#485" class="Function">extract</a> <a id="493" class="Symbol">:</a> <a id="495" href="Codata.Heap.html#234" class="Datatype">Heap′</a> <a id="501" href="Codata.Heap.html#220" class="Generalizable">i</a> <a id="503" href="Level.html#255" class="Generalizable">A</a> <a id="505" class="Symbol">→</a> <a id="507" href="Level.html#255" class="Generalizable">A</a>
+<a id="509" href="Codata.Heap.html#485" class="Function">extract</a> <a id="517" class="Symbol">(</a><a id="518" href="Codata.Heap.html#290" class="InductiveConstructor">heap</a> <a id="523" href="Codata.Heap.html#523" class="Bound">x</a> <a id="525" class="Symbol">_</a> <a id="527" class="Symbol">_)</a> <a id="530" class="Symbol">=</a> <a id="532" href="Codata.Heap.html#523" class="Bound">x</a>
+
+<a id="duplicate"></a><a id="535" href="Codata.Heap.html#535" class="Function">duplicate</a> <a id="545" class="Symbol">:</a> <a id="547" href="Codata.Heap.html#234" class="Datatype">Heap′</a> <a id="553" class="Symbol">(</a><a id="554" href="Codata.Heap.html#220" class="Generalizable">i</a> <a id="556" href="Algebra.html#1421" class="Function Operator">∙</a> <a id="558" href="Codata.Heap.html#222" class="Generalizable">j</a><a id="559" class="Symbol">)</a> <a id="561" href="Level.html#255" class="Generalizable">A</a> <a id="563" class="Symbol">→</a> <a id="565" href="Codata.Heap.html#234" class="Datatype">Heap′</a> <a id="571" href="Codata.Heap.html#220" class="Generalizable">i</a> <a id="573" class="Symbol">(</a><a id="574" href="Codata.Heap.html#234" class="Datatype">Heap′</a> <a id="580" href="Codata.Heap.html#222" class="Generalizable">j</a> <a id="582" href="Level.html#255" class="Generalizable">A</a><a id="583" class="Symbol">)</a>
+<a id="585" href="Codata.Heap.html#535" class="Function">duplicate</a> <a id="595" href="Codata.Heap.html#595" class="Bound">h</a><a id="596" class="Symbol">@(</a><a id="598" href="Codata.Heap.html#290" class="InductiveConstructor">heap</a> <a id="603" href="Codata.Heap.html#603" class="Bound">x</a> <a id="605" href="Codata.Heap.html#605" class="Bound">w</a> <a id="607" href="Codata.Heap.html#607" class="Bound">xs</a><a id="609" class="Symbol">)</a> <a id="611" class="Symbol">=</a> <a id="613" href="Codata.Heap.html#290" class="InductiveConstructor">heap</a> <a id="618" class="Hole">{!!}</a> <a id="623" href="Codata.Heap.html#605" class="Bound">w</a> <a id="625" class="Symbol">λ</a> <a id="627" href="Codata.Heap.html#627" class="Bound">p</a> <a id="629" class="Symbol">→</a> <a id="631" class="Keyword">let</a> <a id="635" href="Codata.Heap.html#635" class="Bound">q</a> <a id="637" class="Symbol">=</a> <a id="639" href="Data.List.Base.html#1042" class="Function">map</a> <a id="643" href="Codata.Heap.html#535" class="UnsolvedMeta Function">duplicate</a> <a id="653" class="Symbol">(</a><a id="654" href="Cubical.Foundations.Prelude.html#7588" class="Function">subst</a> <a id="660" class="Symbol">(</a><a id="661" href="Agda.Builtin.List.html#148" class="Datatype">List</a> <a id="666" href="Function.html#292" class="Function Operator">∘′</a> <a id="669" href="Function.html#369" class="Function">flip</a> <a id="674" href="Codata.Heap.html#234" class="Datatype">Heap′</a> <a id="680" class="Symbol">_)</a> <a id="683" class="Hole">{!!}</a> <a id="688" class="Symbol">(</a><a id="689" href="Codata.Heap.html#607" class="Bound">xs</a> <a id="692" class="Symbol">(</a><a id="693" class="Hole">{!!}</a><a id="697" class="Symbol">)))</a> <a id="701" class="Keyword">in</a> <a id="704" class="Hole">{!!}</a>
+
+<a id="710" class="Comment">-- --------------------------------------------------------------------------------</a>
+<a id="794" class="Comment">-- -- Empty colists</a>
+<a id="814" class="Comment">-- --------------------------------------------------------------------------------</a>
+
+<a id="899" class="Comment">-- -- To terminate computation you use all the fuel, making an empty list.</a>
+<a id="974" class="Comment">-- -- (I&#39;m not sure how principled this is: semantically I don&#39;t know if I like</a>
+<a id="1054" class="Comment">-- -- that the size of a segment can depend on the supplied size parameter).</a>
+<a id="1131" class="Comment">-- empty : Heap A</a>
+<a id="1149" class="Comment">-- empty {i = i} = i ◃ λ i&lt;i → ⊥-elim (irrefl i&lt;i)</a>
+
+<a id="1201" class="Comment">-- -- --------------------------------------------------------------------------------</a>
+<a id="1288" class="Comment">-- -- -- Finite derived colists</a>
+<a id="1320" class="Comment">-- -- --------------------------------------------------------------------------------</a>
+
+<a id="1408" class="Comment">-- -- -- singleton</a>
+<a id="1427" class="Comment">-- -- pure : A → Heap A</a>
+<a id="1451" class="Comment">-- -- pure x = x ∹ empty</a>
+
+<a id="1477" class="Comment">-- -- replicate : ℕ → A → Heap A</a>
+<a id="1510" class="Comment">-- -- replicate zero    x = empty</a>
+<a id="1544" class="Comment">-- -- replicate (suc n) x = x ∹ replicate n x</a>
+
+<a id="1591" class="Comment">-- -- --------------------------------------------------------------------------------</a>
+<a id="1678" class="Comment">-- -- -- Infinite colists</a>
+<a id="1704" class="Comment">-- -- --------------------------------------------------------------------------------</a>
+
+<a id="1792" class="Comment">-- -- -- This unfold function produces an infinite list; it needs every size segment</a>
+<a id="1877" class="Comment">-- -- -- be non empty so that each step uses some fuel. This is what provides the</a>
+<a id="1959" class="Comment">-- -- -- termination argument.</a>
+
+<a id="1991" class="Comment">-- -- module _</a>
+<a id="2006" class="Comment">-- --     (B : 𝑆 → Type b) -- The seed type</a>
+<a id="2050" class="Comment">-- --     (ϕ : ∀ {i} → -- At depth i</a>
+<a id="2087" class="Comment">-- --            B i → -- With this seed</a>
+<a id="2128" class="Comment">-- --            ∃ w × -- Produce a segment of size w</a>
+<a id="2182" class="Comment">-- --            (w ≢ ε) × -- w can&#39;t be ε, so that we use some of the fuel to prove</a>
+<a id="2267" class="Comment">-- --                      -- termination</a>
+<a id="2309" class="Comment">-- --            ((w&lt;i : w &lt; i) → A × B (i ∸ w)) -- And produce the cons constructor.</a>
+<a id="2395" class="Comment">-- --            )</a>
+<a id="2414" class="Comment">-- --     -- ^ The step function</a>
+<a id="2447" class="Comment">-- --     where</a>
+<a id="2463" class="Comment">-- --     unfold′ : Acc _&lt;_ i → B i → Heap′ A i</a>
+<a id="2511" class="Comment">-- --     unfold′ a = uncurry _◃_</a>
+<a id="2545" class="Comment">-- --               ∘ map₂</a>
+<a id="2572" class="Comment">-- --                 (λ { (w≢ε , xs′) w&lt;i →</a>
+<a id="2617" class="Comment">-- --                        map₂ (case a of</a>
+<a id="2662" class="Comment">-- --                               λ { (acc wf) →</a>
+<a id="2713" class="Comment">-- --                                     unfold′ (wf _ (∸‿&lt;-&lt; _ _ w&lt;i w≢ε)) })</a>
+<a id="2793" class="Comment">-- --                             (xs′ w&lt;i) })</a>
+<a id="2840" class="Comment">-- --               ∘ ϕ</a>
+
+<a id="2865" class="Comment">-- -- unfold : (fdc : WellFounded _&lt;_)</a>
+<a id="2904" class="Comment">-- --          (B : 𝑆 → Type b)</a>
+<a id="2936" class="Comment">-- --          (ϕ : ∀ {i} → B i → ∃ w × (w ≢ ε) × ((w&lt;i : w &lt; i) → A × B (i ∸ w))) →</a>
+<a id="3021" class="Comment">-- --          (∀ {i} → B i) → Heap A</a>
+<a id="3059" class="Comment">-- -- unfold fdc B ϕ xs {i} = unfold′ B ϕ (fdc i) xs</a>
+
+<a id="3113" class="Comment">-- -- -- Here&#39;s a simple example using the unfold function: this produces infinitely</a>
+<a id="3198" class="Comment">-- -- -- repeated values, with segment size s.</a>
+<a id="3245" class="Comment">-- -- repeat : (fdc : WellFounded _&lt;_) (s : 𝑆) (s≢ε : s ≢ ε) (x : A) → Heap A</a>
+<a id="3323" class="Comment">-- -- repeat fdc s s≢ε x = unfold fdc (const ⊤) (λ _ → s , s≢ε , const (x , tt)) tt</a>
+
+<a id="3408" class="Comment">-- -- --------------------------------------------------------------------------------</a>
+<a id="3495" class="Comment">-- -- -- Manipulating colists</a>
+<a id="3525" class="Comment">-- -- --------------------------------------------------------------------------------</a>
+
+<a id="3613" class="Comment">-- -- -- One important thing to note about the Heap type: it is inductive!</a>
+<a id="3688" class="Comment">-- -- -- Although it does technically represent &quot;coinduction&quot;, the constructors and</a>
+<a id="3772" class="Comment">-- -- -- type itself are inductive as far as Agda can see. For that reason functions</a>
+<a id="3857" class="Comment">-- -- -- like map pass the termination checker with no extra ceremony.</a>
+<a id="3928" class="Comment">-- -- map : (A → B) → Heap′ A i → Heap′ B i</a>
+<a id="3972" class="Comment">-- -- map f (w ◃ xs) = w ◃ λ w&lt;i → case xs w&lt;i of λ { (y , ys) → f y , map f ys }</a>
+
+<a id="4055" class="Comment">-- -- -- You can extract a finite prefix of the colist.</a>
+<a id="4111" class="Comment">-- -- open import Data.List using (List; _∷_; [])</a>
+
+<a id="4162" class="Comment">-- -- take′ : ∀ i → Heap′ A i → List A</a>
+<a id="4201" class="Comment">-- -- take′ i (w ◃ xs) with w &lt;? i</a>
+<a id="4236" class="Comment">-- -- ... | no _ = []</a>
+<a id="4258" class="Comment">-- -- ... | yes w&lt;i with xs w&lt;i</a>
+<a id="4290" class="Comment">-- -- ... | y , ys = y ∷ take′ _ ys</a>
+
+<a id="4327" class="Comment">-- -- take : 𝑆 → Heap A → List A</a>
+<a id="4360" class="Comment">-- -- take x xs = take′ x xs</a>
+</pre></body></html>
