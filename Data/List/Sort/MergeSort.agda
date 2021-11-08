@@ -43,7 +43,7 @@ merge-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs)
 ... | _ | _ | r | no x≰y | no y≰z rewrite y≤?z rewrite x≤?y =
   cong (z ∷_) r ;
   cong (bool′ _ _)
-    (sym (from-reflects false (x ≤? z) (<⇒≱ (<-trans (≰⇒> y≰z) (≰⇒> x≰y)))))
+    (sym (from-reflects false (x ≤? z) (<⇒≱ ≲[ ≱[ y≰z ] ≲; ≱[ x≰y ] ])))
 ... | _ | r | _ | no  x≰y | yes y≤z rewrite y≤?z rewrite x≤?y = cong (y ∷_) r
 ... | r | _ | _ | yes x≤y | yes y≤z rewrite y≤?z rewrite x≤?y =
   cong (bool′ _ _)
