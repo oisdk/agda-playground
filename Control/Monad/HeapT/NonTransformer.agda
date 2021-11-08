@@ -41,9 +41,9 @@ open Root public
 Heap : Type ℓ → Type ℓ
 Heap A = Branch A
 
-infixr 5 _++_
-_++_ : 𝐹 w (Branch A) → 𝐹 ε (Branch A) → 𝐹 w (Branch A)
-xs ++ ys =
+-- infixr 5 _++_
+-- _++_ : 𝐹 w (Branch A) → 𝐹 ε (Branch A) → 𝐹 w (Branch A)
+-- xs ++ ys =
   -- xs >>=ε λ  {  []       → ys
   --            ;  (x ∷ xs) → pure (x ∷ xs ++ ys) }
 
