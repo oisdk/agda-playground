@@ -10,6 +10,10 @@ data Bool : Type where
   false : Bool
   true  : Bool
 
+and : Bool → Bool → Bool
+and true true = true
+and _    _    = false
+
 -- _,not! : Bool → Bool
 -- false ,not! = true
 -- true  ,not! = false
