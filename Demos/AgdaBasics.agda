@@ -22,11 +22,11 @@ and _    _    = false
 -- false ∧ y = false
 -- true  ∧ y = y
 
--- infixr 1 if_then_else_
--- if_then_else_ : Bool → A → A → A
--- if false then true-path else false-path = false-path
--- if true  then true-path else false-path = true-path
+infixr 1 if_then_else_
+if_then_else_ : Bool → A → A → A
+if false then true-path else false-path = false-path
+if true  then true-path else false-path = true-path
 
--- natOrString : (x : Bool) → if x then ℕ else String
--- natOrString true  = 4
--- natOrString false = "false"
+stringOrNat : (x : Bool) → if x then String else ℕ
+stringOrNat true  = "it was a true!"
+stringOrNat false = 42
