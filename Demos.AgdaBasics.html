@@ -23,12 +23,12 @@
 <a id="344" class="Comment">-- false ∧ y = false</a>
 <a id="365" class="Comment">-- true  ∧ y = y</a>
 
-<a id="383" class="Comment">-- infixr 1 if_then_else_</a>
-<a id="409" class="Comment">-- if_then_else_ : Bool → A → A → A</a>
-<a id="445" class="Comment">-- if false then true-path else false-path = false-path</a>
-<a id="501" class="Comment">-- if true  then true-path else false-path = true-path</a>
+<a id="383" class="Keyword">infixr</a> <a id="390" class="Number">1</a> <a id="392" href="Demos.AgdaBasics.html#406" class="Function Operator">if_then_else_</a>
+<a id="if_then_else_"></a><a id="406" href="Demos.AgdaBasics.html#406" class="Function Operator">if_then_else_</a> <a id="420" class="Symbol">:</a> <a id="422" href="Demos.AgdaBasics.html#128" class="Datatype">Bool</a> <a id="427" class="Symbol">→</a> <a id="429" href="Level.html#255" class="Generalizable">A</a> <a id="431" class="Symbol">→</a> <a id="433" href="Level.html#255" class="Generalizable">A</a> <a id="435" class="Symbol">→</a> <a id="437" href="Level.html#255" class="Generalizable">A</a>
+<a id="439" href="Demos.AgdaBasics.html#406" class="Function Operator">if</a> <a id="442" href="Demos.AgdaBasics.html#148" class="InductiveConstructor">false</a> <a id="448" href="Demos.AgdaBasics.html#406" class="Function Operator">then</a> <a id="453" href="Demos.AgdaBasics.html#453" class="Bound">true-path</a> <a id="463" href="Demos.AgdaBasics.html#406" class="Function Operator">else</a> <a id="468" href="Demos.AgdaBasics.html#468" class="Bound">false-path</a> <a id="479" class="Symbol">=</a> <a id="481" href="Demos.AgdaBasics.html#468" class="Bound">false-path</a>
+<a id="492" href="Demos.AgdaBasics.html#406" class="Function Operator">if</a> <a id="495" href="Demos.AgdaBasics.html#163" class="InductiveConstructor">true</a>  <a id="501" href="Demos.AgdaBasics.html#406" class="Function Operator">then</a> <a id="506" href="Demos.AgdaBasics.html#506" class="Bound">true-path</a> <a id="516" href="Demos.AgdaBasics.html#406" class="Function Operator">else</a> <a id="521" href="Demos.AgdaBasics.html#521" class="Bound">false-path</a> <a id="532" class="Symbol">=</a> <a id="534" href="Demos.AgdaBasics.html#506" class="Bound">true-path</a>
 
-<a id="557" class="Comment">-- natOrString : (x : Bool) → if x then ℕ else String</a>
-<a id="611" class="Comment">-- natOrString true  = 4</a>
-<a id="636" class="Comment">-- natOrString false = &quot;false&quot;</a>
+<a id="stringOrNat"></a><a id="545" href="Demos.AgdaBasics.html#545" class="Function">stringOrNat</a> <a id="557" class="Symbol">:</a> <a id="559" class="Symbol">(</a><a id="560" href="Demos.AgdaBasics.html#560" class="Bound">x</a> <a id="562" class="Symbol">:</a> <a id="564" href="Demos.AgdaBasics.html#128" class="Datatype">Bool</a><a id="568" class="Symbol">)</a> <a id="570" class="Symbol">→</a> <a id="572" href="Demos.AgdaBasics.html#406" class="Function Operator">if</a> <a id="575" href="Demos.AgdaBasics.html#560" class="Bound">x</a> <a id="577" href="Demos.AgdaBasics.html#406" class="Function Operator">then</a> <a id="582" href="Agda.Builtin.String.html#336" class="Postulate">String</a> <a id="589" href="Demos.AgdaBasics.html#406" class="Function Operator">else</a> <a id="594" href="Agda.Builtin.Nat.html#192" class="Datatype">ℕ</a>
+<a id="596" href="Demos.AgdaBasics.html#545" class="Function">stringOrNat</a> <a id="608" href="Demos.AgdaBasics.html#163" class="InductiveConstructor">true</a>  <a id="614" class="Symbol">=</a> <a id="616" class="String">&quot;it was a true!&quot;</a>
+<a id="633" href="Demos.AgdaBasics.html#545" class="Function">stringOrNat</a> <a id="645" href="Demos.AgdaBasics.html#148" class="InductiveConstructor">false</a> <a id="651" class="Symbol">=</a> <a id="653" class="Number">42</a>
 </pre></body></html>
