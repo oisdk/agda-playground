@@ -11,20 +11,24 @@
   <a id="Bool.false"></a><a id="148" href="Demos.AgdaBasics.html#148" class="InductiveConstructor">false</a> <a id="154" class="Symbol">:</a> <a id="156" href="Demos.AgdaBasics.html#128" class="Datatype">Bool</a>
   <a id="Bool.true"></a><a id="163" href="Demos.AgdaBasics.html#163" class="InductiveConstructor">true</a>  <a id="169" class="Symbol">:</a> <a id="171" href="Demos.AgdaBasics.html#128" class="Datatype">Bool</a>
 
-<a id="177" class="Comment">-- _,not! : Bool → Bool</a>
-<a id="201" class="Comment">-- false ,not! = true</a>
-<a id="223" class="Comment">-- true  ,not! = false</a>
+<a id="and"></a><a id="177" href="Demos.AgdaBasics.html#177" class="Function">and</a> <a id="181" class="Symbol">:</a> <a id="183" href="Demos.AgdaBasics.html#128" class="Datatype">Bool</a> <a id="188" class="Symbol">→</a> <a id="190" href="Demos.AgdaBasics.html#128" class="Datatype">Bool</a> <a id="195" class="Symbol">→</a> <a id="197" href="Demos.AgdaBasics.html#128" class="Datatype">Bool</a>
+<a id="202" href="Demos.AgdaBasics.html#177" class="Function">and</a> <a id="206" href="Demos.AgdaBasics.html#163" class="InductiveConstructor">true</a> <a id="211" href="Demos.AgdaBasics.html#163" class="InductiveConstructor">true</a> <a id="216" class="Symbol">=</a> <a id="218" href="Demos.AgdaBasics.html#163" class="InductiveConstructor">true</a>
+<a id="223" href="Demos.AgdaBasics.html#177" class="CatchallClause Function">and</a><a id="226" class="CatchallClause"> </a><a id="227" class="CatchallClause Symbol">_</a><a id="228" class="CatchallClause">    </a><a id="232" class="CatchallClause Symbol">_</a>    <a id="237" class="Symbol">=</a> <a id="239" href="Demos.AgdaBasics.html#148" class="InductiveConstructor">false</a>
 
-<a id="247" class="Comment">-- _∧_ : Bool → Bool → Bool</a>
-<a id="275" class="Comment">-- false ∧ y = false</a>
-<a id="296" class="Comment">-- true  ∧ y = y</a>
+<a id="246" class="Comment">-- _,not! : Bool → Bool</a>
+<a id="270" class="Comment">-- false ,not! = true</a>
+<a id="292" class="Comment">-- true  ,not! = false</a>
 
-<a id="314" class="Comment">-- infixr 1 if_then_else_</a>
-<a id="340" class="Comment">-- if_then_else_ : Bool → A → A → A</a>
-<a id="376" class="Comment">-- if false then true-path else false-path = false-path</a>
-<a id="432" class="Comment">-- if true  then true-path else false-path = true-path</a>
+<a id="316" class="Comment">-- _∧_ : Bool → Bool → Bool</a>
+<a id="344" class="Comment">-- false ∧ y = false</a>
+<a id="365" class="Comment">-- true  ∧ y = y</a>
 
-<a id="488" class="Comment">-- natOrString : (x : Bool) → if x then ℕ else String</a>
-<a id="542" class="Comment">-- natOrString true  = 4</a>
-<a id="567" class="Comment">-- natOrString false = &quot;false&quot;</a>
+<a id="383" class="Comment">-- infixr 1 if_then_else_</a>
+<a id="409" class="Comment">-- if_then_else_ : Bool → A → A → A</a>
+<a id="445" class="Comment">-- if false then true-path else false-path = false-path</a>
+<a id="501" class="Comment">-- if true  then true-path else false-path = true-path</a>
+
+<a id="557" class="Comment">-- natOrString : (x : Bool) → if x then ℕ else String</a>
+<a id="611" class="Comment">-- natOrString true  = 4</a>
+<a id="636" class="Comment">-- natOrString false = &quot;false&quot;</a>
 </pre></body></html>
