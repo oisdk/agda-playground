@@ -373,3 +373,36 @@ record GradedMonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ�
 
   _>>=ε_ : ∀ {x} → 𝐹 x A → (A → 𝐹 ε B) → 𝐹 x B
   xs >>=ε f = xs >>=[ ∙ε _ ] f
+
+record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
+  open Monoid monoid
+  field
+    𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₃
+    extract : 𝐹 ε A → A
+    _=>>_ : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
+
+  proven-cobind : ∀ {x y z} → 𝐹 z A → (𝐹 y A → B) → z ≡ x ∙ y → 𝐹 x B
+  proven-cobind xs k prf = subst (flip 𝐹 _) prf xs =>> k
+
+  syntax proven-cobind xs f prf = xs =>>[ prf ] f
+
+  _=<=_ : ∀ {x y} → (𝐹 x B → C) → (𝐹 y A → B) → 𝐹 (x ∙ y) A → C
+  (g =<= f) x = g (x =>> f)
+
+  _=>=_ : ∀ {x y} → (𝐹 y A → B) → (𝐹 x B → C) → 𝐹 (x ∙ y) A → C
+  f =>= g = g =<= f
+
+
+  field
+    =>>-idʳ : ∀ {s} (f : 𝐹 s A → B) → (f =>= extract) ≡[ i ≔ (𝐹 (ε∙ s i) A → B) ]≡ f
+    =>>-idˡ : ∀ {s} {B : Type ℓ₂} (f : 𝐹 s A → B) → (extract =>= f) ≡[ i ≔ (𝐹 (∙ε s i) A → B) ]≡ f
+    =>>-assoc :
+      ∀ {D : Type ℓ₂}
+      {x y z} →
+      (f : 𝐹 x A → B)
+      (g : 𝐹 y B → C)
+      (h : 𝐹 z C → D) →
+      (f =>= (g =>= h)) ≡[ i ≔ (𝐹 (assoc z y x i) A → D) ]≡ ((f =>= g) =>= h)
+
+  map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
+  map f xs = xs =>>[ sym (∙ε _) ] (f ∘ extract)
