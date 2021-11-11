@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe --postfix-projections #-}
+{-# OPTIONS --allow-unsolved-metas #-}
 
 module Data.Binary.Skew where
 
