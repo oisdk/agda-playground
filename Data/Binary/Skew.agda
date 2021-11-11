@@ -40,8 +40,14 @@ infixr 5 1𝕓∷_ 1𝕓⋯_∷_
 ⟦ x ∷ xs ⇓⟧′ = ⟦ x ∷ ⟦ xs ⇓⟧′ ⇓⟧^
 
 ⟦_⇓⟧ : 𝔹 → ℕ
-⟦ [] ⇓⟧ = zero
+⟦ [] ⇓⟧     = zero
 ⟦ x ∷ xs ⇓⟧ = let a = 1𝕓⋯ x ∷ 1 in a + ⟦ xs ⇓⟧′ a
+
+-- open import Testers
+
+-- _ : testIsoℕ (⟦_⇑⟧ iff ⟦_⇓⟧) 100
+-- _ = refl
+
 
 open import Path.Reasoning
 import Data.Nat.Properties as ℕ
