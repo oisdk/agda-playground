@@ -20,13 +20,13 @@ data Heap (A : Type s) : Type s where
   _◃_ : (w : 𝑆) → (xs : 𝐹 w (A × List (Heap A))) → Heap A
 
 extend : (Heap A → B) → Heap A → Heap B
-extend f (w ◃ xs) = w ◃ (xs =>>[ sym (∙ε w) ] (λ ys → f (ε ◃ ys) , Lmap (extend f) (snd (extract ys))))
+extend f (w ◃ xs) = w ◃ (xs =>>[ ∙ε w ] (λ ys → f (ε ◃ ys) , Lmap (extend f) (snd (extract ys))))
 
 module _ (2-monoid : ∀ {A B w} → 𝐹 w A → 𝐹 w B → 𝐹 w (A × B)) where
   _∪_ : Heap A → Heap A → Heap A
   (xw ◃ xs) ∪ (yw ◃ ys) with xw ≤|≥ yw
-  ... | inl (k , p) = xw ◃ map (λ { (y , (x , xs)) → x , (k ◃ y) ∷ xs }) (2-monoid (ys =>>[ p ] id) xs)
-  ... | inr (k , p) = yw ◃ map (λ { (x , (y , ys)) → y , (k ◃ x) ∷ ys }) (2-monoid (xs =>>[ p ] id) ys)
+  ... | inl (k , p) = xw ◃ map (λ { (y , (x , xs)) → x , (k ◃ y) ∷ xs }) (2-monoid (ys =>>[ sym p ] id) xs)
+  ... | inr (k , p) = yw ◃ map (λ { (x , (y , ys)) → y , (k ◃ x) ∷ ys }) (2-monoid (xs =>>[ sym p ] id) ys)
 
 -- mutual
 --   record Heap (A : Type a) : Type (s ℓ⊔ a) where

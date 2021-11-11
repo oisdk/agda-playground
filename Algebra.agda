@@ -348,6 +348,13 @@ record GradedMonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ�
     pure  : A → 𝐹 ε A
     _>>=_ : ∀ {x y} → 𝐹 x A → (A → 𝐹 y B) → 𝐹 (x ∙ y) B
 
+  _<=<_ : ∀ {x y} → (B → 𝐹 y C) → (A → 𝐹 x B) → A → 𝐹 (x ∙ y) C
+  (g <=< f) x = f x >>= g
+
+  _>=>_ : ∀ {x y} → (A → 𝐹 x B) → (B → 𝐹 y C) → A → 𝐹 (x ∙ y) C
+  (f >=> g) x = f x >>= g
+
+  field
     >>=-idˡ : ∀ {s} (f : A → 𝐹 s B) → (x : A) → (pure x >>= f) ≡[ i ≔ 𝐹 (ε∙ s i) B ]≡ (f x)
     >>=-idʳ : ∀ {s} (x : 𝐹 s A) → (x >>= pure) ≡[ i ≔ 𝐹 (∙ε s i) A ]≡ x
     >>=-assoc : ∀ {x y z} (xs : 𝐹 x A) (f : A → 𝐹 y B) (g : B → 𝐹 z C) → ((xs >>= f) >>= g) ≡[ i ≔ 𝐹 (assoc x y z i) C ]≡ (xs >>= (λ x → f x >>= g))
@@ -381,8 +388,8 @@ record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ
     extract : 𝐹 ε A → A
     _=>>_ : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
 
-  proven-cobind : ∀ {x y z} → 𝐹 z A → (𝐹 y A → B) → z ≡ x ∙ y → 𝐹 x B
-  proven-cobind xs k prf = subst (flip 𝐹 _) prf xs =>> k
+  proven-cobind : ∀ {x y z} → 𝐹 z A → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 x B
+  proven-cobind xs k prf = subst (flip 𝐹 _) (sym prf) xs =>> k
 
   syntax proven-cobind xs f prf = xs =>>[ prf ] f
 
@@ -404,5 +411,19 @@ record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ
       (h : 𝐹 z C → D) →
       (f =>= (g =>= h)) ≡[ i ≔ (𝐹 (assoc z y x i) A → D) ]≡ ((f =>= g) =>= h)
 
+  infixr 1 codo-syntax
+  codo-syntax : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
+  codo-syntax = _=>>_
+
+  syntax codo-syntax xs (λ x → r) = x ↢ xs ; r
+
+  infixr 1 proven-codo-syntax
+  proven-codo-syntax : ∀ {x y z} → 𝐹 z A → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 x B
+  proven-codo-syntax = proven-cobind
+
+  syntax proven-codo-syntax xs (λ x → r) prf = x ↢ xs [ prf ]; r
+
   map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
-  map f xs = xs =>>[ sym (∙ε _) ] (f ∘ extract)
+  map f xs =
+    x ↢ xs [ ∙ε _ ];
+    f (extract x)
