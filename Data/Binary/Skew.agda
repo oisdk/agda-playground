@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 module Data.Binary.Skew where
 
 open import Prelude
@@ -75,9 +73,9 @@ inc-suc (x₁ ∷ suc x₂ ∷ xs) = cong suc (cong ((1𝕓⋯ x₁ ∷ 1) +_) (
 𝔹-rightInv zero = refl
 𝔹-rightInv (suc x) = inc-suc ⟦ x ⇑⟧ ; cong suc (𝔹-rightInv x)
 
-𝔹-leftInv : ∀ x → ⟦ ⟦ x ⇓⟧ ⇑⟧ ≡ x
-𝔹-leftInv [] = refl
-𝔹-leftInv (x ∷ xs) = {!!}
+-- 𝔹-leftInv : ∀ x → ⟦ ⟦ x ⇓⟧ ⇑⟧ ≡ x
+-- 𝔹-leftInv [] = refl
+-- 𝔹-leftInv (x ∷ xs) = {!!}
 
 -- 𝔹⇔ℕ : 𝔹 ⇔ ℕ
 -- 𝔹⇔ℕ .fun = ⟦_⇓⟧
