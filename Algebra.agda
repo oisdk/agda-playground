@@ -145,6 +145,22 @@ record NearSemiring ℓ : Type (ℓsuc ℓ) where
     0* : Zeroˡ _*_ 0#
     ⟨+⟩* : _*_ Distributesˡ _+_
 
+  +-monoid : Monoid ℓ
+  +-monoid .Monoid.𝑆 = 𝑅
+  +-monoid .Monoid._∙_ = _+_
+  +-monoid .Monoid.ε = 0#
+  +-monoid .Monoid.assoc = +-assoc
+  +-monoid .Monoid.ε∙ = 0+
+  +-monoid .Monoid.∙ε = +0
+
+  *-monoid : Monoid ℓ
+  *-monoid .Monoid.𝑆 = 𝑅
+  *-monoid .Monoid._∙_ = _*_
+  *-monoid .Monoid.ε = 1#
+  *-monoid .Monoid.assoc = *-assoc
+  *-monoid .Monoid.ε∙ = 1*
+  *-monoid .Monoid.∙ε = *1
+
 record Semiring ℓ : Type (ℓsuc ℓ) where
   field
     nearSemiring : NearSemiring ℓ
@@ -427,3 +443,13 @@ record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ
   map f xs =
     x ↢ xs [ ∙ε _ ];
     f (extract x)
+
+record SGradedComonad {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
+  open Semiring semiring
+  field
+    gradedComonad : GradedComonad +-monoid ℓ₂ ℓ₃
+  open GradedComonad gradedComonad
+  field
+    pure  : ∀ {x} → 𝐹 x A
+    _<*>_ : ∀ {x} → 𝐹 x (A → B) → 𝐹 x A → 𝐹 x B
+    separate : ∀ {x y} → 𝐹 (x + y) A → 𝐹 x A × 𝐹 y A
