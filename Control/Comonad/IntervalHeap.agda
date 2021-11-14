@@ -6,7 +6,6 @@ open import Relation.Binary
 open import WellFounded
 open import Algebra.Monus
 open import Data.Maybe
-open import Data.List renaming (map to Lmap)
 
 module Control.Comonad.IntervalHeap {s}
   (mon : TMAPOM s)
@@ -21,7 +20,7 @@ Weighted C A = ∃ w × C w A
 
 private variable u v w : 𝑆
 
-module _ (functor : Functor s s) where
+module OnFunctor (functor : Functor s s) where
   open Functor functor renaming (map to fmap)
 
   record Cofree⁺ (w : 𝑆) (A : Type s) : Type s where
@@ -44,7 +43,36 @@ module _ (functor : Functor s s) where
   iterT : (𝑊 ε A → 𝐹 (Weighted 𝑊 A)) → 𝑊 ε A → Cofree A
   iterT = traceT extract
 
+module AsHeap (_<*>_ : ∀ {w A B} → 𝑊 w (A → B) → 𝑊 w A → 𝑊 w B) where
+  open import Data.List.Properties using (listFunctor)
+  open import Data.List using (List; _∷_; [])
+  open OnFunctor listFunctor
+  Heap : Type s → Type s
+  Heap = Weighted Cofree⁺ 
 
+  _∪_ : Heap A → Heap A → Heap A
+  (xʷ , xs) ∪ (yʷ , ys) with xʷ ≤|≥ yʷ
+  ... | inl (k , y≡x∙k) = xʷ , ⟪ (step ys =>>[ sym y≡x∙k ] λ { y (x , xs) → x , ((k , ⟪ y ⟫) ∷ xs)}) <*> step xs ⟫
+  ... | inr (k , x≡y∙k) = yʷ , ⟪ (step xs =>>[ sym x≡y∙k ] λ { x (y , ys) → y , ((k , ⟪ x ⟫) ∷ ys)}) <*> step ys ⟫
+
+  merge⁺ : Heap A → List (Heap A) → Heap A
+  merge⁺ x [] = x
+  merge⁺ x₁ (x₂ ∷ []) = x₁ ∪ x₂
+  merge⁺ x₁ (x₂ ∷ x₃ ∷ xs) = (x₁ ∪ x₂) ∪ merge⁺ x₃ xs
+
+  merge : List (Heap A) → Maybe (Heap A)
+  merge [] = nothing
+  merge (x ∷ xs) = just (merge⁺ x xs)
+
+  
+  open import Data.Maybe.Properties using (maybeFunctor)
+  open import Data.Maybe using (mapMaybe)
+
+  module L = OnFunctor maybeFunctor
+
+  search : Cofree⁺ w A → L.Cofree⁺ w A
+  search = L.⟪_⟫ ∘ map (map₂ (mapMaybe (map₂ search) ∘ merge)) ∘ step
+  
 
 
 -- data Heap (A : Type s) : Type s where

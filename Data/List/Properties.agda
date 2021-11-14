@@ -115,6 +115,12 @@ module _ (A : Type a) where
   listMonoid .Monoid.ε∙ _ = refl
   listMonoid .Monoid.∙ε = ++-idʳ
 
+listFunctor : Functor a a
+listFunctor .Functor.𝐹 = List
+listFunctor .Functor.map = map
+listFunctor .Functor.map-id = funExt (sym ∘ foldr-id)
+listFunctor .Functor.map-comp f g = funExt λ xs → sym (map-fusion _ _ _ xs)
+
 foldl′-foldl : (f : B → A → B) (z : B) (xs : List A) → foldl′ f z xs ≡ foldl f z xs
 foldl′-foldl f z [] = refl
 foldl′-foldl f z (x ∷ xs) = $!-≡ (λ y → foldl′ f y xs) (f z x) ; foldl′-foldl f (f z x) xs 

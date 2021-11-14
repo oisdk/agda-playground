@@ -31,3 +31,11 @@ IsJust = T ∘ is-just
 
 fromJust : (x : Maybe A) → ⦃ IsJust x ⦄ → A
 fromJust (just x) = x
+
+open import Algebra 
+
+maybeFunctor : Functor a a
+maybeFunctor .Functor.𝐹 = Maybe
+maybeFunctor .Functor.map = mapMaybe
+maybeFunctor .Functor.map-id = funExt λ { nothing → refl ; (just x) → refl }
+maybeFunctor .Functor.map-comp f g = funExt λ { nothing → refl ; (just x) → refl }
