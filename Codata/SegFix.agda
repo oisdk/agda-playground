@@ -19,7 +19,6 @@ module _ {s : 𝑆} where
 -- mutual
 --   Fix′ : 𝑆 → Type ℓ
 --   Fix′ i = ∃ w × FixF w i
-
 --   FixF : 𝑆 → 𝑆 → Type ℓ
 --   FixF w i = 𝐹 w (FixF′ w i)
 
@@ -30,12 +29,19 @@ Fix : 𝑆 → Type ℓ
 Fix w = 𝐹 w (∀ {i} → Fix′ i)
 
 module _
-    (B : 𝑆 → Type ℓ) -- The seed type
-    (ϕ : ∀ {i} → -- At depth i
-           B i → -- With this seed
-           ∃ w × (w ≢ ε) × ((w≤i : w ≤ i) → 𝐹 w (B (fst w≤i)))
-           )
+    (B : Type ℓ) -- The seed type
+    (ϕ : B → ∃ w × (w ≢ ε) × (𝐹 w B))
     where
     mutual
-      unfold′ : ∀ {i} → Acc _≺_ i → B i → Fix′ i
-      unfold′ a = uncurry _◃_ ∘ map₂ (λ { {u} (w≢ε , r) w≤i → fmap (case a of λ { (acc wf) → unfold′ (wf _ (u , snd w≤i ; comm _ _  , w≢ε))  }) (r w≤i)} ) ∘ ϕ
+      unfold′ : ∀ {i} → Acc _≺_ i → B → Fix′ i
+      unfold′ a = uncurry _◃_ ∘ map₂ (λ { {u} (w≢ε , r) (_ , i≡u∙k) → fmap (case a of λ { (acc wf) → unfold′ (wf _ (u , i≡u∙k ; comm _ _  , w≢ε))  }) r} ) ∘ ϕ
+
+
+module _
+  (wellFounded : WellFounded _≺_)
+  (B : 𝑆 → Type ℓ)
+  (ϕ : ∀ {w} → B w → 𝐹 w (∃ v × (v ≢ ε) × B v))
+  where
+
+  unfold : ∀ {w} → B w → Fix w
+  unfold = fmap (λ r {i} → unfold′ _ (map₂ (map₂ ϕ)) {i = i} (wellFounded i) r ) ∘ ϕ
