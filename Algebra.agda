@@ -240,6 +240,12 @@ record Functor ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
     map-id : map (id {ℓ₁} {A}) ≡ id
     map-comp : (f : B → C) → (g : A → B) → map (f ∘ g) ≡ map f ∘ map g
 
+record IsFunctor {ℓ₁ ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
+  field
+    map : (A → B) → 𝐹 A → 𝐹 B
+    map-id : map (id {ℓ₁} {A}) ≡ id
+    map-comp : (f : B → C) → (g : A → B) → map (f ∘ g) ≡ map f ∘ map g
+
 record Applicative ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   field
     functor : Functor ℓ₁ ℓ₂
