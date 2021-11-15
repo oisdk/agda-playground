@@ -453,3 +453,23 @@ record SGradedComonad {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ ℓ₃ : Type
     pure  : ∀ {x} → 𝐹 x A
     _<*>_ : ∀ {x} → 𝐹 x (A → B) → 𝐹 x A → 𝐹 x B
     separate : ∀ {x y} → 𝐹 (x + y) A → 𝐹 x A × 𝐹 y A
+
+record MatchedPair {ℓ₁ ℓ₂} (R : Monoid ℓ₁) (E : Monoid ℓ₂) : Type (ℓ₁ ℓ⊔ ℓ₂) where
+  open Monoid R using ()    renaming (𝑆 to 𝑅; _∙_ to _*_; ε to r1)
+  open Monoid E using (_∙_) renaming (𝑆 to 𝐸; ε to e1)
+
+  field
+    ι : 𝑅 → 𝐸 → 𝑅
+    κ : 𝑅 → 𝐸 → 𝐸
+
+    law1 : ∀ x → ι x e1 ≡ x
+    law2 : ∀ x → ι r1 x ≡ r1
+    law3 : ∀ x → κ r1 x ≡ x
+    law4 : ∀ x → κ x e1 ≡ e1
+
+    law5 : ∀ x y z → ι x (y ∙ z) ≡ ι (ι x y) z
+    law6 : ∀ x y z → ι (x * y) z ≡ ι x (κ y z) * ι y z
+    law7 : ∀ x y z → κ (x * y) z ≡ κ x (κ y z)
+    law8 : ∀ x y z → κ x (y ∙ z) ≡ κ x y ∙ κ (ι x y) z
+
+  
