@@ -1,4 +1,4 @@
-{-# OPTIONS --no-positivity-check #-}
+{-# OPTIONS --no-positivity-check --allow-unsolved-metas #-}
 
 open import Algebra
 open import Prelude
@@ -17,24 +17,40 @@ open TMAPOM mon
 open GradedComonad comon renaming (𝐹 to 𝑊; map to cmap)
 open Functor functor renaming (map to fmap)
 
-private variable i j k u v w : 𝑆
+CofreeF : Type s → 𝑆 → Type s → Type s
+CofreeF A w B = 𝑊 w (A × 𝐹 B)
 
--- hide the w here: the top level should reveal it, everything below should look
--- like Codata.Segments
-data Cofree⁺′ (A : Type s) (w : 𝑆) (i : 𝑆) : Type s where
-  cofree : ((w<i : w < i) → 𝑊 w (A × 𝐹 (∃ j × Cofree⁺′ A j (i ∸ w)))) → Cofree⁺′ A w i
+functorCofreeF : ∀ {w} → IsFunctor (CofreeF A w)
+functorCofreeF .IsFunctor.map f = cmap (map₂ (fmap f))
+functorCofreeF .IsFunctor.map-id = {!!}
+functorCofreeF .IsFunctor.map-comp = {!!}
+
+module _ {A : Type s} where
+  open import Codata.SegFix commutativeMonoid (CofreeF A) (functorCofreeF {A = A}) public using (Fix; unfold)
 
 Cofree⁺ : Type s → 𝑆 → Type s
-Cofree⁺ A w = ∀ {i} → Cofree⁺′ A w i
-
-Cofree′ : Type s → 𝑆 → Type s
-Cofree′ A = Cofree⁺′ A ε
+Cofree⁺ A = Fix {A = A}
 
 Cofree : Type s → Type s
 Cofree A = Cofree⁺ A ε
 
--- extend : (∀ {i} → Cofree′ A i → B) → Cofree⁺′ A w j → Cofree⁺′ B w j
--- extend f (cofree x) = cofree (λ p → x p =>>[ ∙ε _ ] (λ ys → f (cofree {!λ p′ → subst (𝑊 ε) ys!}) , {!!}))
+private variable u v w : 𝑆
+
+traceT-alg : (𝑊 ε A → B) → (𝑊 ε A → 𝐹 (∃ v × (v ≢ ε) × 𝑊 v A)) → 𝑊 w A → CofreeF B w (∃ v × (v ≢ ε) × 𝑊 v A)
+traceT-alg f c r = r =>>[ ∙ε _ ] λ rs → f rs , c rs
+
+module _ (wf : WellFounded _≺_) where
+
+  traceT : (𝑊 ε A → B) → (𝑊 ε A → 𝐹 (∃ v × (v ≢ ε) × 𝑊 v A)) → 𝑊 w A → Cofree⁺ B w
+  traceT f c = unfold wf (flip 𝑊 _) (traceT-alg f c)
+
+
+--   extend-alg : (Cofree A → B) → Cofree⁺ A w → CofreeF B w (∃ v × (v ≢ ε) × Cofree⁺ A v)
+--   extend-alg {w = w} f xs = xs =>>[ ∙ε _ ] (λ ys → f ys , fmap (λ k → fst (k {i = w}) , {!!} , cmap {!!} (snd (k {i = w}))) (snd (extract ys)))
+
+--   extend : (Cofree A → B) → Cofree⁺ A w → Cofree⁺ B w
+--   extend f = unfold wf (Cofree⁺ _) (extend-alg f)
+
 
 -- Weighted : (𝑆 → Type a → Type b) → Type a → Type (s ℓ⊔ b)
 -- Weighted C A = ∃ w × C w A
@@ -57,8 +73,6 @@ Cofree A = Cofree⁺ A ε
 --   extract′ : Cofree A → A
 --   extract′ = fst ∘ extract ∘ step
 
---   traceT : (𝑊 ε A → B) → (𝑊 ε A → 𝐹 (Weighted 𝑊 A)) → 𝑊 w A → Cofree⁺ w B
---   traceT f c r .step = r =>>[ ∙ε _ ] λ rs → f rs , fmap (map₂ (traceT f c)) (c rs)
 
 --   iterT : (𝑊 ε A → 𝐹 (Weighted 𝑊 A)) → 𝑊 ε A → Cofree A
 --   iterT = traceT extract
