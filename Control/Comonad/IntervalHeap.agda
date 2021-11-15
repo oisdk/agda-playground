@@ -13,7 +13,7 @@ module Control.Comonad.IntervalHeap {s}
   where
 
 open TMAPOM mon
-open GradedComonad comon renaming (𝐹 to 𝑊)
+open GradedComonad comon renaming (𝐹 to 𝑊; map to cmap)
 
 Weighted : (𝑆 → Type a → Type b) → Type a → Type (s ℓ⊔ b)
 Weighted C A = ∃ w × C w A
@@ -43,6 +43,9 @@ module OnFunctor (functor : Functor s s) where
   iterT : (𝑊 ε A → 𝐹 (Weighted 𝑊 A)) → 𝑊 ε A → Cofree A
   iterT = traceT extract
 
+  ana : (𝐺 : 𝑆 → Type s) → (∀ {w} → 𝐺 w → 𝑊 w (A × 𝐹 (∃ u × 𝐺 u))) → 𝐺 w → Cofree⁺ w A
+  ana 𝐺 alg x .step = cmap (map₂ (fmap (map₂ (ana 𝐺 alg)))) (alg x)
+
 module AsHeap (_<*>_ : ∀ {w A B} → 𝑊 w (A → B) → 𝑊 w A → 𝑊 w B) where
   open import Data.List.Properties using (listFunctor)
   open import Data.List using (List; _∷_; [])
@@ -71,10 +74,8 @@ module AsHeap (_<*>_ : ∀ {w A B} → 𝑊 w (A → B) → 𝑊 w A → 𝑊 w 
   module L = OnFunctor maybeFunctor
 
   search : Cofree⁺ w A → L.Cofree⁺ w A
-  search = L.⟪_⟫ ∘ map (map₂ (mapMaybe (map₂ search) ∘ merge)) ∘ step
+  search = L.ana (flip Cofree⁺ _) (cmap (map₂ merge) ∘ step)
   
-
-
 -- data Heap (A : Type s) : Type s where
 --   _◃_ : (w : 𝑆) → (xs : 𝐹 w (A × List (Heap A))) → Heap A
 
