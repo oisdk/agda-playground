@@ -1,194 +1,208 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="utf-8"><title>Control.Comonad.Stepped</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--no-positivity-check</a> <a id="35" class="Symbol">#-}</a>
+<html><head><meta charset="utf-8"><title>Control.Comonad.Stepped</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--no-positivity-check</a> <a id="35" class="Pragma">--allow-unsolved-metas</a> <a id="58" class="Symbol">#-}</a>
 
-<a id="40" class="Keyword">open</a> <a id="45" class="Keyword">import</a> <a id="52" href="Algebra.html" class="Module">Algebra</a>
-<a id="60" class="Keyword">open</a> <a id="65" class="Keyword">import</a> <a id="72" href="Prelude.html" class="Module">Prelude</a>
-<a id="80" class="Keyword">open</a> <a id="85" class="Keyword">import</a> <a id="92" href="Relation.Binary.html" class="Module">Relation.Binary</a>
-<a id="108" class="Keyword">open</a> <a id="113" class="Keyword">import</a> <a id="120" href="WellFounded.html" class="Module">WellFounded</a>
-<a id="132" class="Keyword">open</a> <a id="137" class="Keyword">import</a> <a id="144" href="Algebra.Monus.html" class="Module">Algebra.Monus</a>
-<a id="158" class="Keyword">open</a> <a id="163" class="Keyword">import</a> <a id="170" href="Data.Maybe.html" class="Module">Data.Maybe</a>
+<a id="63" class="Keyword">open</a> <a id="68" class="Keyword">import</a> <a id="75" href="Algebra.html" class="Module">Algebra</a>
+<a id="83" class="Keyword">open</a> <a id="88" class="Keyword">import</a> <a id="95" href="Prelude.html" class="Module">Prelude</a>
+<a id="103" class="Keyword">open</a> <a id="108" class="Keyword">import</a> <a id="115" href="Relation.Binary.html" class="Module">Relation.Binary</a>
+<a id="131" class="Keyword">open</a> <a id="136" class="Keyword">import</a> <a id="143" href="WellFounded.html" class="Module">WellFounded</a>
+<a id="155" class="Keyword">open</a> <a id="160" class="Keyword">import</a> <a id="167" href="Algebra.Monus.html" class="Module">Algebra.Monus</a>
+<a id="181" class="Keyword">open</a> <a id="186" class="Keyword">import</a> <a id="193" href="Data.Maybe.html" class="Module">Data.Maybe</a>
 
-<a id="182" class="Keyword">module</a> <a id="189" href="Control.Comonad.Stepped.html" class="Module">Control.Comonad.Stepped</a> <a id="213" class="Symbol">{</a><a id="214" href="Control.Comonad.Stepped.html#214" class="Bound">s</a><a id="215" class="Symbol">}</a>
-  <a id="219" class="Symbol">(</a><a id="220" href="Control.Comonad.Stepped.html#220" class="Bound">mon</a> <a id="224" class="Symbol">:</a> <a id="226" href="Algebra.Monus.html#4805" class="Record">TMAPOM</a> <a id="233" href="Control.Comonad.Stepped.html#214" class="Bound">s</a><a id="234" class="Symbol">)</a>
-  <a id="238" class="Symbol">(</a><a id="239" href="Control.Comonad.Stepped.html#239" class="Bound">comon</a> <a id="245" class="Symbol">:</a> <a id="247" href="Algebra.html#11269" class="Record">GradedComonad</a> <a id="261" class="Symbol">(</a><a id="262" href="Algebra.html#2843" class="Function">TMAPOM.monoid</a> <a id="276" href="Control.Comonad.Stepped.html#220" class="Bound">mon</a><a id="279" class="Symbol">)</a> <a id="281" href="Control.Comonad.Stepped.html#214" class="Bound">s</a> <a id="283" href="Control.Comonad.Stepped.html#214" class="Bound">s</a><a id="284" class="Symbol">)</a>
-  <a id="288" class="Symbol">(</a><a id="289" href="Control.Comonad.Stepped.html#289" class="Bound">functor</a> <a id="297" class="Symbol">:</a> <a id="299" href="Algebra.html#5756" class="Record">Functor</a> <a id="307" href="Control.Comonad.Stepped.html#214" class="Bound">s</a> <a id="309" href="Control.Comonad.Stepped.html#214" class="Bound">s</a><a id="310" class="Symbol">)</a>
-  <a id="314" class="Keyword">where</a>
+<a id="205" class="Keyword">module</a> <a id="212" href="Control.Comonad.Stepped.html" class="Module">Control.Comonad.Stepped</a> <a id="236" class="Symbol">{</a><a id="237" href="Control.Comonad.Stepped.html#237" class="Bound">s</a><a id="238" class="Symbol">}</a>
+  <a id="242" class="Symbol">(</a><a id="243" href="Control.Comonad.Stepped.html#243" class="Bound">mon</a> <a id="247" class="Symbol">:</a> <a id="249" href="Algebra.Monus.html#4805" class="Record">TMAPOM</a> <a id="256" href="Control.Comonad.Stepped.html#237" class="Bound">s</a><a id="257" class="Symbol">)</a>
+  <a id="261" class="Symbol">(</a><a id="262" href="Control.Comonad.Stepped.html#262" class="Bound">comon</a> <a id="268" class="Symbol">:</a> <a id="270" href="Algebra.html#11269" class="Record">GradedComonad</a> <a id="284" class="Symbol">(</a><a id="285" href="Algebra.html#2843" class="Function">TMAPOM.monoid</a> <a id="299" href="Control.Comonad.Stepped.html#243" class="Bound">mon</a><a id="302" class="Symbol">)</a> <a id="304" href="Control.Comonad.Stepped.html#237" class="Bound">s</a> <a id="306" href="Control.Comonad.Stepped.html#237" class="Bound">s</a><a id="307" class="Symbol">)</a>
+  <a id="311" class="Symbol">(</a><a id="312" href="Control.Comonad.Stepped.html#312" class="Bound">functor</a> <a id="320" class="Symbol">:</a> <a id="322" href="Algebra.html#5756" class="Record">Functor</a> <a id="330" href="Control.Comonad.Stepped.html#237" class="Bound">s</a> <a id="332" href="Control.Comonad.Stepped.html#237" class="Bound">s</a><a id="333" class="Symbol">)</a>
+  <a id="337" class="Keyword">where</a>
 
-<a id="321" class="Keyword">open</a> <a id="326" href="Algebra.Monus.html#4805" class="Module">TMAPOM</a> <a id="333" href="Control.Comonad.Stepped.html#220" class="Bound">mon</a>
-<a id="337" class="Keyword">open</a> <a id="342" href="Algebra.html#11269" class="Module">GradedComonad</a> <a id="356" href="Control.Comonad.Stepped.html#239" class="Bound">comon</a> <a id="362" class="Keyword">renaming</a> <a id="371" class="Symbol">(</a><a id="372" href="Algebra.html#11385" class="Field">𝐹</a> <a id="374" class="Symbol">to</a> <a id="377" class="Field">𝑊</a><a id="378" class="Symbol">;</a> <a id="380" href="Algebra.html#12614" class="Function">map</a> <a id="384" class="Symbol">to</a> <a id="387" class="Function">cmap</a><a id="391" class="Symbol">)</a>
-<a id="393" class="Keyword">open</a> <a id="398" href="Algebra.html#5756" class="Module">Functor</a> <a id="406" href="Control.Comonad.Stepped.html#289" class="Bound">functor</a> <a id="414" class="Keyword">renaming</a> <a id="423" class="Symbol">(</a><a id="424" href="Algebra.html#5841" class="Field">map</a> <a id="428" class="Symbol">to</a> <a id="431" class="Field">fmap</a><a id="435" class="Symbol">)</a>
+<a id="344" class="Keyword">open</a> <a id="349" href="Algebra.Monus.html#4805" class="Module">TMAPOM</a> <a id="356" href="Control.Comonad.Stepped.html#243" class="Bound">mon</a>
+<a id="360" class="Keyword">open</a> <a id="365" href="Algebra.html#11269" class="Module">GradedComonad</a> <a id="379" href="Control.Comonad.Stepped.html#262" class="Bound">comon</a> <a id="385" class="Keyword">renaming</a> <a id="394" class="Symbol">(</a><a id="395" href="Algebra.html#11385" class="Field">𝐹</a> <a id="397" class="Symbol">to</a> <a id="400" class="Field">𝑊</a><a id="401" class="Symbol">;</a> <a id="403" href="Algebra.html#12614" class="Function">map</a> <a id="407" class="Symbol">to</a> <a id="410" class="Function">cmap</a><a id="414" class="Symbol">)</a>
+<a id="416" class="Keyword">open</a> <a id="421" href="Algebra.html#5756" class="Module">Functor</a> <a id="429" href="Control.Comonad.Stepped.html#312" class="Bound">functor</a> <a id="437" class="Keyword">renaming</a> <a id="446" class="Symbol">(</a><a id="447" href="Algebra.html#5841" class="Field">map</a> <a id="451" class="Symbol">to</a> <a id="454" class="Field">fmap</a><a id="458" class="Symbol">)</a>
 
-<a id="438" class="Keyword">private</a> <a id="446" class="Keyword">variable</a> <a id="455" href="Control.Comonad.Stepped.html#455" class="Generalizable">i</a> <a id="457" href="Control.Comonad.Stepped.html#457" class="Generalizable">j</a> <a id="459" href="Control.Comonad.Stepped.html#459" class="Generalizable">k</a> <a id="461" href="Control.Comonad.Stepped.html#461" class="Generalizable">u</a> <a id="463" href="Control.Comonad.Stepped.html#463" class="Generalizable">v</a> <a id="465" href="Control.Comonad.Stepped.html#465" class="Generalizable">w</a> <a id="467" class="Symbol">:</a> <a id="469" href="Algebra.html#1401" class="Function">𝑆</a>
+<a id="CofreeF"></a><a id="461" href="Control.Comonad.Stepped.html#461" class="Function">CofreeF</a> <a id="469" class="Symbol">:</a> <a id="471" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="476" href="Control.Comonad.Stepped.html#237" class="Bound">s</a> <a id="478" class="Symbol">→</a> <a id="480" href="Algebra.html#1401" class="Function">𝑆</a> <a id="482" class="Symbol">→</a> <a id="484" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="489" href="Control.Comonad.Stepped.html#237" class="Bound">s</a> <a id="491" class="Symbol">→</a> <a id="493" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="498" href="Control.Comonad.Stepped.html#237" class="Bound">s</a>
+<a id="500" href="Control.Comonad.Stepped.html#461" class="Function">CofreeF</a> <a id="508" href="Control.Comonad.Stepped.html#508" class="Bound">A</a> <a id="510" href="Control.Comonad.Stepped.html#510" class="Bound">w</a> <a id="512" href="Control.Comonad.Stepped.html#512" class="Bound">B</a> <a id="514" class="Symbol">=</a> <a id="516" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="518" href="Control.Comonad.Stepped.html#510" class="Bound">w</a> <a id="520" class="Symbol">(</a><a id="521" href="Control.Comonad.Stepped.html#508" class="Bound">A</a> <a id="523" href="Data.Sigma.Base.html#455" class="Function Operator">×</a> <a id="525" href="Algebra.html#5813" class="Field">𝐹</a> <a id="527" href="Control.Comonad.Stepped.html#512" class="Bound">B</a><a id="528" class="Symbol">)</a>
 
-<a id="472" class="Comment">-- hide the w here: the top level should reveal it, everything below should look</a>
-<a id="553" class="Comment">-- like Codata.Segments</a>
-<a id="577" class="Keyword">data</a> <a id="Cofree⁺′"></a><a id="582" href="Control.Comonad.Stepped.html#582" class="Datatype">Cofree⁺′</a> <a id="591" class="Symbol">(</a><a id="592" href="Control.Comonad.Stepped.html#592" class="Bound">A</a> <a id="594" class="Symbol">:</a> <a id="596" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="601" href="Control.Comonad.Stepped.html#214" class="Bound">s</a><a id="602" class="Symbol">)</a> <a id="604" class="Symbol">(</a><a id="605" href="Control.Comonad.Stepped.html#605" class="Bound">w</a> <a id="607" class="Symbol">:</a> <a id="609" href="Algebra.html#1401" class="Function">𝑆</a><a id="610" class="Symbol">)</a> <a id="612" class="Symbol">(</a><a id="613" href="Control.Comonad.Stepped.html#613" class="Bound">i</a> <a id="615" class="Symbol">:</a> <a id="617" href="Algebra.html#1401" class="Function">𝑆</a><a id="618" class="Symbol">)</a> <a id="620" class="Symbol">:</a> <a id="622" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="627" href="Control.Comonad.Stepped.html#214" class="Bound">s</a> <a id="629" class="Keyword">where</a>
-  <a id="Cofree⁺′.cofree"></a><a id="637" href="Control.Comonad.Stepped.html#637" class="InductiveConstructor">cofree</a> <a id="644" class="Symbol">:</a> <a id="646" class="Symbol">((</a><a id="648" href="Control.Comonad.Stepped.html#648" class="Bound">w&lt;i</a> <a id="652" class="Symbol">:</a> <a id="654" href="Control.Comonad.Stepped.html#605" class="Bound">w</a> <a id="656" href="Relation.Binary.html#1847" class="Function Operator">&lt;</a> <a id="658" href="Control.Comonad.Stepped.html#613" class="Bound">i</a><a id="659" class="Symbol">)</a> <a id="661" class="Symbol">→</a> <a id="663" href="Control.Comonad.Stepped.html#377" class="Function">𝑊</a> <a id="665" href="Control.Comonad.Stepped.html#605" class="Bound">w</a> <a id="667" class="Symbol">(</a><a id="668" href="Control.Comonad.Stepped.html#592" class="Bound">A</a> <a id="670" href="Data.Sigma.Base.html#455" class="Function Operator">×</a> <a id="672" href="Algebra.html#5813" class="Field">𝐹</a> <a id="674" class="Symbol">(</a><a id="675" href="Data.Sigma.Base.html#173" class="Function">∃</a> <a id="677" href="Control.Comonad.Stepped.html#677" class="Bound">j</a> <a id="679" href="Data.Sigma.Base.html#173" class="Function">×</a> <a id="681" href="Control.Comonad.Stepped.html#582" class="Datatype">Cofree⁺′</a> <a id="690" href="Control.Comonad.Stepped.html#592" class="Bound">A</a> <a id="692" href="Control.Comonad.Stepped.html#677" class="Bound">j</a> <a id="694" class="Symbol">(</a><a id="695" href="Control.Comonad.Stepped.html#613" class="Bound">i</a> <a id="697" href="Algebra.Monus.html#4570" class="Function Operator">∸</a> <a id="699" href="Control.Comonad.Stepped.html#605" class="Bound">w</a><a id="700" class="Symbol">))))</a> <a id="705" class="Symbol">→</a> <a id="707" href="Control.Comonad.Stepped.html#582" class="Datatype">Cofree⁺′</a> <a id="716" href="Control.Comonad.Stepped.html#592" class="Bound">A</a> <a id="718" href="Control.Comonad.Stepped.html#605" class="Bound">w</a> <a id="720" href="Control.Comonad.Stepped.html#613" class="Bound">i</a>
+<a id="functorCofreeF"></a><a id="531" href="Control.Comonad.Stepped.html#531" class="Function">functorCofreeF</a> <a id="546" class="Symbol">:</a> <a id="548" class="Symbol">∀</a> <a id="550" class="Symbol">{</a><a id="551" href="Control.Comonad.Stepped.html#551" class="Bound">w</a><a id="552" class="Symbol">}</a> <a id="554" class="Symbol">→</a> <a id="556" href="Algebra.html#5982" class="Record">IsFunctor</a> <a id="566" class="Symbol">(</a><a id="567" href="Control.Comonad.Stepped.html#461" class="Function">CofreeF</a> <a id="575" href="Level.html#255" class="Generalizable">A</a> <a id="577" href="Control.Comonad.Stepped.html#551" class="Bound">w</a><a id="578" class="Symbol">)</a>
+<a id="580" href="Control.Comonad.Stepped.html#531" class="Function">functorCofreeF</a> <a id="595" class="Symbol">.</a><a id="596" href="Algebra.html#6065" class="Field">IsFunctor.map</a> <a id="610" href="Control.Comonad.Stepped.html#610" class="Bound">f</a> <a id="612" class="Symbol">=</a> <a id="614" href="Control.Comonad.Stepped.html#410" class="Function">cmap</a> <a id="619" class="Symbol">(</a><a id="620" href="Data.Sigma.Base.html#1309" class="Function">map₂</a> <a id="625" class="Symbol">(</a><a id="626" href="Control.Comonad.Stepped.html#454" class="Field">fmap</a> <a id="631" href="Control.Comonad.Stepped.html#610" class="Bound">f</a><a id="632" class="Symbol">))</a>
+<a id="635" href="Control.Comonad.Stepped.html#531" class="Function">functorCofreeF</a> <a id="650" class="Symbol">.</a><a id="651" href="Algebra.html#6095" class="Field">IsFunctor.map-id</a> <a id="668" class="Symbol">=</a> <a id="670" class="Hole">{!!}</a>
+<a id="675" href="Control.Comonad.Stepped.html#531" class="Function">functorCofreeF</a> <a id="690" class="Symbol">.</a><a id="691" href="Algebra.html#6131" class="Field">IsFunctor.map-comp</a> <a id="710" class="Symbol">=</a> <a id="712" class="Hole">{!!}</a>
 
-<a id="Cofree⁺"></a><a id="723" href="Control.Comonad.Stepped.html#723" class="Function">Cofree⁺</a> <a id="731" class="Symbol">:</a> <a id="733" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="738" href="Control.Comonad.Stepped.html#214" class="Bound">s</a> <a id="740" class="Symbol">→</a> <a id="742" href="Algebra.html#1401" class="Function">𝑆</a> <a id="744" class="Symbol">→</a> <a id="746" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="751" href="Control.Comonad.Stepped.html#214" class="Bound">s</a>
-<a id="753" href="Control.Comonad.Stepped.html#723" class="Function">Cofree⁺</a> <a id="761" href="Control.Comonad.Stepped.html#761" class="Bound">A</a> <a id="763" href="Control.Comonad.Stepped.html#763" class="Bound">w</a> <a id="765" class="Symbol">=</a> <a id="767" class="Symbol">∀</a> <a id="769" class="Symbol">{</a><a id="770" href="Control.Comonad.Stepped.html#770" class="Bound">i</a><a id="771" class="Symbol">}</a> <a id="773" class="Symbol">→</a> <a id="775" href="Control.Comonad.Stepped.html#582" class="Datatype">Cofree⁺′</a> <a id="784" href="Control.Comonad.Stepped.html#761" class="Bound">A</a> <a id="786" href="Control.Comonad.Stepped.html#763" class="Bound">w</a> <a id="788" href="Control.Comonad.Stepped.html#770" class="Bound">i</a>
+<a id="718" class="Keyword">module</a> <a id="725" href="Control.Comonad.Stepped.html#725" class="Module">_</a> <a id="727" class="Symbol">{</a><a id="728" href="Control.Comonad.Stepped.html#728" class="Bound">A</a> <a id="730" class="Symbol">:</a> <a id="732" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="737" href="Control.Comonad.Stepped.html#237" class="Bound">s</a><a id="738" class="Symbol">}</a> <a id="740" class="Keyword">where</a>
+  <a id="748" class="Keyword">open</a> <a id="753" class="Keyword">import</a> <a id="760" href="Codata.SegFix.html" class="Module">Codata.SegFix</a> <a id="774" href="Algebra.Monus.html#1708" class="Function">commutativeMonoid</a> <a id="792" class="Symbol">(</a><a id="793" href="Control.Comonad.Stepped.html#461" class="Function">CofreeF</a> <a id="801" href="Control.Comonad.Stepped.html#728" class="Bound">A</a><a id="802" class="Symbol">)</a> <a id="804" class="Symbol">(</a><a id="805" href="Control.Comonad.Stepped.html#531" class="Function">functorCofreeF</a> <a id="820" class="Symbol">{</a><a id="821" class="Argument">A</a> <a id="823" class="Symbol">=</a> <a id="825" href="Control.Comonad.Stepped.html#728" class="Bound">A</a><a id="826" class="Symbol">})</a> <a id="829" class="Keyword">public</a> <a id="836" class="Keyword">using</a> <a id="842" class="Symbol">(</a><a id="843" href="Codata.SegFix.html#539" class="Function">Fix</a><a id="846" class="Symbol">;</a> <a id="848" href="Codata.SegFix.html#983" class="Function">unfold</a><a id="854" class="Symbol">)</a>
 
-<a id="Cofree′"></a><a id="791" href="Control.Comonad.Stepped.html#791" class="Function">Cofree′</a> <a id="799" class="Symbol">:</a> <a id="801" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="806" href="Control.Comonad.Stepped.html#214" class="Bound">s</a> <a id="808" class="Symbol">→</a> <a id="810" href="Algebra.html#1401" class="Function">𝑆</a> <a id="812" class="Symbol">→</a> <a id="814" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="819" href="Control.Comonad.Stepped.html#214" class="Bound">s</a>
-<a id="821" href="Control.Comonad.Stepped.html#791" class="Function">Cofree′</a> <a id="829" href="Control.Comonad.Stepped.html#829" class="Bound">A</a> <a id="831" class="Symbol">=</a> <a id="833" href="Control.Comonad.Stepped.html#582" class="Datatype">Cofree⁺′</a> <a id="842" href="Control.Comonad.Stepped.html#829" class="Bound">A</a> <a id="844" href="Algebra.html#1444" class="Function">ε</a>
+<a id="Cofree⁺"></a><a id="857" href="Control.Comonad.Stepped.html#857" class="Function">Cofree⁺</a> <a id="865" class="Symbol">:</a> <a id="867" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="872" href="Control.Comonad.Stepped.html#237" class="Bound">s</a> <a id="874" class="Symbol">→</a> <a id="876" href="Algebra.html#1401" class="Function">𝑆</a> <a id="878" class="Symbol">→</a> <a id="880" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="885" href="Control.Comonad.Stepped.html#237" class="Bound">s</a>
+<a id="887" href="Control.Comonad.Stepped.html#857" class="Function">Cofree⁺</a> <a id="895" href="Control.Comonad.Stepped.html#895" class="Bound">A</a> <a id="897" class="Symbol">=</a> <a id="899" href="Codata.SegFix.html#539" class="Function">Fix</a> <a id="903" class="Symbol">{</a><a id="904" class="Argument">A</a> <a id="906" class="Symbol">=</a> <a id="908" href="Control.Comonad.Stepped.html#895" class="Bound">A</a><a id="909" class="Symbol">}</a>
 
-<a id="Cofree"></a><a id="847" href="Control.Comonad.Stepped.html#847" class="Function">Cofree</a> <a id="854" class="Symbol">:</a> <a id="856" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="861" href="Control.Comonad.Stepped.html#214" class="Bound">s</a> <a id="863" class="Symbol">→</a> <a id="865" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="870" href="Control.Comonad.Stepped.html#214" class="Bound">s</a>
-<a id="872" href="Control.Comonad.Stepped.html#847" class="Function">Cofree</a> <a id="879" href="Control.Comonad.Stepped.html#879" class="Bound">A</a> <a id="881" class="Symbol">=</a> <a id="883" href="Control.Comonad.Stepped.html#723" class="Function">Cofree⁺</a> <a id="891" href="Control.Comonad.Stepped.html#879" class="Bound">A</a> <a id="893" href="Algebra.html#1444" class="Function">ε</a>
+<a id="Cofree"></a><a id="912" href="Control.Comonad.Stepped.html#912" class="Function">Cofree</a> <a id="919" class="Symbol">:</a> <a id="921" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="926" href="Control.Comonad.Stepped.html#237" class="Bound">s</a> <a id="928" class="Symbol">→</a> <a id="930" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="935" href="Control.Comonad.Stepped.html#237" class="Bound">s</a>
+<a id="937" href="Control.Comonad.Stepped.html#912" class="Function">Cofree</a> <a id="944" href="Control.Comonad.Stepped.html#944" class="Bound">A</a> <a id="946" class="Symbol">=</a> <a id="948" href="Control.Comonad.Stepped.html#857" class="Function">Cofree⁺</a> <a id="956" href="Control.Comonad.Stepped.html#944" class="Bound">A</a> <a id="958" href="Algebra.html#1444" class="Function">ε</a>
 
-<a id="896" class="Comment">-- extend : (∀ {i} → Cofree′ A i → B) → Cofree⁺′ A w j → Cofree⁺′ B w j</a>
-<a id="968" class="Comment">-- extend f (cofree x) = cofree (λ p → x p =&gt;&gt;[ ∙ε _ ] (λ ys → f (cofree {!λ p′ → subst (𝑊 ε) ys!}) , {!!}))</a>
+<a id="961" class="Keyword">private</a> <a id="969" class="Keyword">variable</a> <a id="978" href="Control.Comonad.Stepped.html#978" class="Generalizable">u</a> <a id="980" href="Control.Comonad.Stepped.html#980" class="Generalizable">v</a> <a id="982" href="Control.Comonad.Stepped.html#982" class="Generalizable">w</a> <a id="984" class="Symbol">:</a> <a id="986" href="Algebra.html#1401" class="Function">𝑆</a>
 
-<a id="1078" class="Comment">-- Weighted : (𝑆 → Type a → Type b) → Type a → Type (s ℓ⊔ b)</a>
-<a id="1139" class="Comment">-- Weighted C A = ∃ w × C w A</a>
+<a id="traceT-alg"></a><a id="989" href="Control.Comonad.Stepped.html#989" class="Function">traceT-alg</a> <a id="1000" class="Symbol">:</a> <a id="1002" class="Symbol">(</a><a id="1003" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1005" href="Algebra.html#1444" class="Function">ε</a> <a id="1007" href="Level.html#255" class="Generalizable">A</a> <a id="1009" class="Symbol">→</a> <a id="1011" href="Level.html#269" class="Generalizable">B</a><a id="1012" class="Symbol">)</a> <a id="1014" class="Symbol">→</a> <a id="1016" class="Symbol">(</a><a id="1017" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1019" href="Algebra.html#1444" class="Function">ε</a> <a id="1021" href="Level.html#255" class="Generalizable">A</a> <a id="1023" class="Symbol">→</a> <a id="1025" href="Algebra.html#5813" class="Field">𝐹</a> <a id="1027" class="Symbol">(</a><a id="1028" href="Data.Sigma.Base.html#173" class="Function">∃</a> <a id="1030" href="Control.Comonad.Stepped.html#1030" class="Bound">v</a> <a id="1032" href="Data.Sigma.Base.html#173" class="Function">×</a> <a id="1034" class="Symbol">(</a><a id="1035" href="Control.Comonad.Stepped.html#1030" class="Bound">v</a> <a id="1037" href="Path.html#524" class="Function Operator">≢</a> <a id="1039" href="Algebra.html#1444" class="Function">ε</a><a id="1040" class="Symbol">)</a> <a id="1042" href="Data.Sigma.Base.html#455" class="Function Operator">×</a> <a id="1044" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1046" href="Control.Comonad.Stepped.html#1030" class="Bound">v</a> <a id="1048" href="Level.html#255" class="Generalizable">A</a><a id="1049" class="Symbol">))</a> <a id="1052" class="Symbol">→</a> <a id="1054" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1056" href="Control.Comonad.Stepped.html#982" class="Generalizable">w</a> <a id="1058" href="Level.html#255" class="Generalizable">A</a> <a id="1060" class="Symbol">→</a> <a id="1062" href="Control.Comonad.Stepped.html#461" class="Function">CofreeF</a> <a id="1070" href="Level.html#269" class="Generalizable">B</a> <a id="1072" href="Control.Comonad.Stepped.html#982" class="Generalizable">w</a> <a id="1074" class="Symbol">(</a><a id="1075" href="Data.Sigma.Base.html#173" class="Function">∃</a> <a id="1077" href="Control.Comonad.Stepped.html#1077" class="Bound">v</a> <a id="1079" href="Data.Sigma.Base.html#173" class="Function">×</a> <a id="1081" class="Symbol">(</a><a id="1082" href="Control.Comonad.Stepped.html#1077" class="Bound">v</a> <a id="1084" href="Path.html#524" class="Function Operator">≢</a> <a id="1086" href="Algebra.html#1444" class="Function">ε</a><a id="1087" class="Symbol">)</a> <a id="1089" href="Data.Sigma.Base.html#455" class="Function Operator">×</a> <a id="1091" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1093" href="Control.Comonad.Stepped.html#1077" class="Bound">v</a> <a id="1095" href="Level.html#255" class="Generalizable">A</a><a id="1096" class="Symbol">)</a>
+<a id="1098" href="Control.Comonad.Stepped.html#989" class="Function">traceT-alg</a> <a id="1109" href="Control.Comonad.Stepped.html#1109" class="Bound">f</a> <a id="1111" href="Control.Comonad.Stepped.html#1111" class="Bound">c</a> <a id="1113" href="Control.Comonad.Stepped.html#1113" class="Bound">r</a> <a id="1115" class="Symbol">=</a> <a id="1117" href="Control.Comonad.Stepped.html#1113" class="Bound">r</a> <a id="1119" href="Algebra.html#11494" class="Function">=&gt;&gt;[</a> <a id="1124" href="Algebra.html#1537" class="Function">∙ε</a> <a id="1127" class="Symbol">_</a> <a id="1129" href="Algebra.html#11494" class="Function">]</a> <a id="1131" class="Symbol">λ</a> <a id="1133" href="Control.Comonad.Stepped.html#1133" class="Bound">rs</a> <a id="1136" class="Symbol">→</a> <a id="1138" href="Control.Comonad.Stepped.html#1109" class="Bound">f</a> <a id="1140" href="Control.Comonad.Stepped.html#1133" class="Bound">rs</a> <a id="1143" href="Agda.Builtin.Sigma.html#236" class="InductiveConstructor Operator">,</a> <a id="1145" href="Control.Comonad.Stepped.html#1111" class="Bound">c</a> <a id="1147" href="Control.Comonad.Stepped.html#1133" class="Bound">rs</a>
+
+<a id="1151" class="Keyword">module</a> <a id="1158" href="Control.Comonad.Stepped.html#1158" class="Module">_</a> <a id="1160" class="Symbol">(</a><a id="1161" href="Control.Comonad.Stepped.html#1161" class="Bound">wf</a> <a id="1164" class="Symbol">:</a> <a id="1166" href="WellFounded.html#383" class="Function">WellFounded</a> <a id="1178" href="Algebra.Monus.html#2464" class="Function Operator">_≺_</a><a id="1181" class="Symbol">)</a> <a id="1183" class="Keyword">where</a>
+
+  <a id="1192" href="Control.Comonad.Stepped.html#1192" class="Function">traceT</a> <a id="1199" class="Symbol">:</a> <a id="1201" class="Symbol">(</a><a id="1202" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1204" href="Algebra.html#1444" class="Function">ε</a> <a id="1206" href="Level.html#255" class="Generalizable">A</a> <a id="1208" class="Symbol">→</a> <a id="1210" href="Level.html#269" class="Generalizable">B</a><a id="1211" class="Symbol">)</a> <a id="1213" class="Symbol">→</a> <a id="1215" class="Symbol">(</a><a id="1216" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1218" href="Algebra.html#1444" class="Function">ε</a> <a id="1220" href="Level.html#255" class="Generalizable">A</a> <a id="1222" class="Symbol">→</a> <a id="1224" href="Algebra.html#5813" class="Field">𝐹</a> <a id="1226" class="Symbol">(</a><a id="1227" href="Data.Sigma.Base.html#173" class="Function">∃</a> <a id="1229" href="Control.Comonad.Stepped.html#1229" class="Bound">v</a> <a id="1231" href="Data.Sigma.Base.html#173" class="Function">×</a> <a id="1233" class="Symbol">(</a><a id="1234" href="Control.Comonad.Stepped.html#1229" class="Bound">v</a> <a id="1236" href="Path.html#524" class="Function Operator">≢</a> <a id="1238" href="Algebra.html#1444" class="Function">ε</a><a id="1239" class="Symbol">)</a> <a id="1241" href="Data.Sigma.Base.html#455" class="Function Operator">×</a> <a id="1243" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1245" href="Control.Comonad.Stepped.html#1229" class="Bound">v</a> <a id="1247" href="Level.html#255" class="Generalizable">A</a><a id="1248" class="Symbol">))</a> <a id="1251" class="Symbol">→</a> <a id="1253" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1255" href="Control.Comonad.Stepped.html#982" class="Generalizable">w</a> <a id="1257" href="Level.html#255" class="Generalizable">A</a> <a id="1259" class="Symbol">→</a> <a id="1261" href="Control.Comonad.Stepped.html#857" class="Function">Cofree⁺</a> <a id="1269" href="Level.html#269" class="Generalizable">B</a> <a id="1271" href="Control.Comonad.Stepped.html#982" class="Generalizable">w</a>
+  <a id="1275" href="Control.Comonad.Stepped.html#1192" class="Function">traceT</a> <a id="1282" href="Control.Comonad.Stepped.html#1282" class="Bound">f</a> <a id="1284" href="Control.Comonad.Stepped.html#1284" class="Bound">c</a> <a id="1286" class="Symbol">=</a> <a id="1288" href="Codata.SegFix.html#983" class="Function">unfold</a> <a id="1295" href="Control.Comonad.Stepped.html#1161" class="Bound">wf</a> <a id="1298" class="Symbol">(</a><a id="1299" href="Function.html#369" class="Function">flip</a> <a id="1304" href="Control.Comonad.Stepped.html#400" class="Function">𝑊</a> <a id="1306" class="Symbol">_)</a> <a id="1309" class="Symbol">(</a><a id="1310" href="Control.Comonad.Stepped.html#989" class="Function">traceT-alg</a> <a id="1321" href="Control.Comonad.Stepped.html#1282" class="Bound">f</a> <a id="1323" href="Control.Comonad.Stepped.html#1284" class="Bound">c</a><a id="1324" class="Symbol">)</a>
 
 
-<a id="1171" class="Comment">-- module OnFunctor (functor : Functor s s) where</a>
-<a id="1221" class="Comment">--   open Functor functor renaming (map to fmap)</a>
+<a id="1328" class="Comment">--   extend-alg : (Cofree A → B) → Cofree⁺ A w → CofreeF B w (∃ v × (v ≢ ε) × Cofree⁺ A v)</a>
+<a id="1419" class="Comment">--   extend-alg {w = w} f xs = xs =&gt;&gt;[ ∙ε _ ] (λ ys → f ys , fmap (λ k → fst (k {i = w}) , {!!} , cmap {!!} (snd (k {i = w}))) (snd (extract ys)))</a>
 
-<a id="1271" class="Comment">--   record Cofree⁺ (w : 𝑆) (A : Type s) : Type s where</a>
-<a id="1327" class="Comment">--     constructor ⟪_⟫</a>
-<a id="1350" class="Comment">--     field step : 𝑊 w (A × 𝐹 (Weighted Cofree⁺ A))</a>
-<a id="1403" class="Comment">--   open Cofree⁺ public</a>
+<a id="1567" class="Comment">--   extend : (Cofree A → B) → Cofree⁺ A w → Cofree⁺ B w</a>
+<a id="1624" class="Comment">--   extend f = unfold wf (Cofree⁺ _) (extend-alg f)</a>
 
-<a id="1429" class="Comment">--   Cofree : Type s → Type s</a>
-<a id="1459" class="Comment">--   Cofree = Cofree⁺ ε</a>
 
-<a id="1484" class="Comment">--   extend : (Cofree A → B) → Cofree⁺ w A → Cofree⁺ w B</a>
-<a id="1541" class="Comment">--   extend f x .step = x .step =&gt;&gt;[ ∙ε _ ] λ ys → f ⟪ ys ⟫ , fmap (map₂ (extend f)) (snd (extract ys)) </a>
+<a id="1679" class="Comment">-- Weighted : (𝑆 → Type a → Type b) → Type a → Type (s ℓ⊔ b)</a>
+<a id="1740" class="Comment">-- Weighted C A = ∃ w × C w A</a>
 
-<a id="1647" class="Comment">--   extract′ : Cofree A → A</a>
-<a id="1676" class="Comment">--   extract′ = fst ∘ extract ∘ step</a>
 
-<a id="1714" class="Comment">--   traceT : (𝑊 ε A → B) → (𝑊 ε A → 𝐹 (Weighted 𝑊 A)) → 𝑊 w A → Cofree⁺ w B</a>
-<a id="1791" class="Comment">--   traceT f c r .step = r =&gt;&gt;[ ∙ε _ ] λ rs → f rs , fmap (map₂ (traceT f c)) (c rs)</a>
+<a id="1772" class="Comment">-- module OnFunctor (functor : Functor s s) where</a>
+<a id="1822" class="Comment">--   open Functor functor renaming (map to fmap)</a>
 
-<a id="1878" class="Comment">--   iterT : (𝑊 ε A → 𝐹 (Weighted 𝑊 A)) → 𝑊 ε A → Cofree A</a>
-<a id="1937" class="Comment">--   iterT = traceT extract</a>
+<a id="1872" class="Comment">--   record Cofree⁺ (w : 𝑆) (A : Type s) : Type s where</a>
+<a id="1928" class="Comment">--     constructor ⟪_⟫</a>
+<a id="1951" class="Comment">--     field step : 𝑊 w (A × 𝐹 (Weighted Cofree⁺ A))</a>
+<a id="2004" class="Comment">--   open Cofree⁺ public</a>
 
-<a id="1966" class="Comment">-- module AsHeap (_&lt;*&gt;_ : ∀ {w A B} → 𝑊 w (A → B) → 𝑊 w A → 𝑊 w B) where</a>
-<a id="2039" class="Comment">--   open import Data.List.Properties using (listFunctor)</a>
-<a id="2097" class="Comment">--   open import Data.List using (List; _∷_; [])</a>
-<a id="2146" class="Comment">--   open OnFunctor listFunctor</a>
-<a id="2178" class="Comment">--   Heap : Type s → Type s</a>
-<a id="2206" class="Comment">--   Heap = Weighted Cofree⁺ </a>
+<a id="2030" class="Comment">--   Cofree : Type s → Type s</a>
+<a id="2060" class="Comment">--   Cofree = Cofree⁺ ε</a>
 
-<a id="2237" class="Comment">--   _∪_ : Heap A → Heap A → Heap A</a>
-<a id="2273" class="Comment">--   (xʷ , xs) ∪ (yʷ , ys) with xʷ ≤|≥ yʷ</a>
-<a id="2315" class="Comment">--   ... | inl (k , y≡x∙k) = xʷ , ⟪ (step ys =&gt;&gt;[ sym y≡x∙k ] λ { y (x , xs) → x , ((k , ⟪ y ⟫) ∷ xs)}) &lt;*&gt; step xs ⟫</a>
-<a id="2433" class="Comment">--   ... | inr (k , x≡y∙k) = yʷ , ⟪ (step xs =&gt;&gt;[ sym x≡y∙k ] λ { x (y , ys) → y , ((k , ⟪ x ⟫) ∷ ys)}) &lt;*&gt; step ys ⟫</a>
+<a id="2085" class="Comment">--   extend : (Cofree A → B) → Cofree⁺ w A → Cofree⁺ w B</a>
+<a id="2142" class="Comment">--   extend f x .step = x .step =&gt;&gt;[ ∙ε _ ] λ ys → f ⟪ ys ⟫ , fmap (map₂ (extend f)) (snd (extract ys)) </a>
 
-<a id="2552" class="Comment">--   merge⁺ : Heap A → List (Heap A) → Heap A</a>
-<a id="2598" class="Comment">--   merge⁺ x [] = x</a>
-<a id="2619" class="Comment">--   merge⁺ x₁ (x₂ ∷ []) = x₁ ∪ x₂</a>
-<a id="2654" class="Comment">--   merge⁺ x₁ (x₂ ∷ x₃ ∷ xs) = (x₁ ∪ x₂) ∪ merge⁺ x₃ xs</a>
+<a id="2248" class="Comment">--   extract′ : Cofree A → A</a>
+<a id="2277" class="Comment">--   extract′ = fst ∘ extract ∘ step</a>
 
-<a id="2712" class="Comment">--   merge : List (Heap A) → Maybe (Heap A)</a>
-<a id="2756" class="Comment">--   merge [] = nothing</a>
-<a id="2780" class="Comment">--   merge (x ∷ xs) = just (merge⁺ x xs)</a>
+
+<a id="2316" class="Comment">--   iterT : (𝑊 ε A → 𝐹 (Weighted 𝑊 A)) → 𝑊 ε A → Cofree A</a>
+<a id="2375" class="Comment">--   iterT = traceT extract</a>
+
+<a id="2404" class="Comment">-- module AsHeap (_&lt;*&gt;_ : ∀ {w A B} → 𝑊 w (A → B) → 𝑊 w A → 𝑊 w B) where</a>
+<a id="2477" class="Comment">--   open import Data.List.Properties using (listFunctor)</a>
+<a id="2535" class="Comment">--   open import Data.List using (List; _∷_; [])</a>
+<a id="2584" class="Comment">--   open OnFunctor listFunctor</a>
+<a id="2616" class="Comment">--   Heap : Type s → Type s</a>
+<a id="2644" class="Comment">--   Heap = Weighted Cofree⁺ </a>
+
+<a id="2675" class="Comment">--   _∪_ : Heap A → Heap A → Heap A</a>
+<a id="2711" class="Comment">--   (xʷ , xs) ∪ (yʷ , ys) with xʷ ≤|≥ yʷ</a>
+<a id="2753" class="Comment">--   ... | inl (k , y≡x∙k) = xʷ , ⟪ (step ys =&gt;&gt;[ sym y≡x∙k ] λ { y (x , xs) → x , ((k , ⟪ y ⟫) ∷ xs)}) &lt;*&gt; step xs ⟫</a>
+<a id="2871" class="Comment">--   ... | inr (k , x≡y∙k) = yʷ , ⟪ (step xs =&gt;&gt;[ sym x≡y∙k ] λ { x (y , ys) → y , ((k , ⟪ x ⟫) ∷ ys)}) &lt;*&gt; step ys ⟫</a>
+
+<a id="2990" class="Comment">--   merge⁺ : Heap A → List (Heap A) → Heap A</a>
+<a id="3036" class="Comment">--   merge⁺ x [] = x</a>
+<a id="3057" class="Comment">--   merge⁺ x₁ (x₂ ∷ []) = x₁ ∪ x₂</a>
+<a id="3092" class="Comment">--   merge⁺ x₁ (x₂ ∷ x₃ ∷ xs) = (x₁ ∪ x₂) ∪ merge⁺ x₃ xs</a>
+
+<a id="3150" class="Comment">--   merge : List (Heap A) → Maybe (Heap A)</a>
+<a id="3194" class="Comment">--   merge [] = nothing</a>
+<a id="3218" class="Comment">--   merge (x ∷ xs) = just (merge⁺ x xs)</a>
 
   
-<a id="2825" class="Comment">--   open import Data.Maybe.Properties using (maybeFunctor)</a>
-<a id="2885" class="Comment">--   open import Data.Maybe using (mapMaybe)</a>
+<a id="3263" class="Comment">--   open import Data.Maybe.Properties using (maybeFunctor)</a>
+<a id="3323" class="Comment">--   open import Data.Maybe using (mapMaybe)</a>
 
-<a id="2931" class="Comment">--   module L = OnFunctor maybeFunctor</a>
+<a id="3369" class="Comment">--   module L = OnFunctor maybeFunctor</a>
 
-<a id="2971" class="Comment">--   search : Cofree⁺ w A → L.Cofree⁺ w A</a>
-<a id="3013" class="Comment">--   search = L.⟪_⟫ ∘ map (map₂ (mapMaybe (map₂ search) ∘ merge)) ∘ step</a>
+<a id="3409" class="Comment">--   search : Cofree⁺ w A → L.Cofree⁺ w A</a>
+<a id="3451" class="Comment">--   search = L.⟪_⟫ ∘ map (map₂ (mapMaybe (map₂ search) ∘ merge)) ∘ step</a>
   
 
 
-<a id="3091" class="Comment">-- -- data Heap (A : Type s) : Type s where</a>
-<a id="3135" class="Comment">-- --   _◃_ : (w : 𝑆) → (xs : 𝐹 w (A × List (Heap A))) → Heap A</a>
+<a id="3529" class="Comment">-- -- data Heap (A : Type s) : Type s where</a>
+<a id="3573" class="Comment">-- --   _◃_ : (w : 𝑆) → (xs : 𝐹 w (A × List (Heap A))) → Heap A</a>
 
-<a id="3200" class="Comment">-- -- extend : (Heap A → B) → Heap A → Heap B</a>
-<a id="3246" class="Comment">-- -- extend f (w ◃ xs) = w ◃ (xs =&gt;&gt;[ ∙ε w ] (λ ys → f (ε ◃ ys) , Lmap (extend f) (snd (extract ys))))</a>
+<a id="3638" class="Comment">-- -- extend : (Heap A → B) → Heap A → Heap B</a>
+<a id="3684" class="Comment">-- -- extend f (w ◃ xs) = w ◃ (xs =&gt;&gt;[ ∙ε w ] (λ ys → f (ε ◃ ys) , Lmap (extend f) (snd (extract ys))))</a>
 
-<a id="3351" class="Comment">-- -- module _ (2-monoid : ∀ {A B w} → 𝐹 w A → 𝐹 w B → 𝐹 w (A × B)) where</a>
-<a id="3425" class="Comment">-- --   _∪_ : Heap A → Heap A → Heap A</a>
-<a id="3464" class="Comment">-- --   (xw ◃ xs) ∪ (yw ◃ ys) with xw ≤|≥ yw</a>
-<a id="3509" class="Comment">-- --   ... | inl (k , p) = xw ◃ map (λ { (y , (x , xs)) → x , (k ◃ y) ∷ xs }) (2-monoid (ys =&gt;&gt;[ sym p ] id) xs)</a>
-<a id="3623" class="Comment">-- --   ... | inr (k , p) = yw ◃ map (λ { (x , (y , ys)) → y , (k ◃ x) ∷ ys }) (2-monoid (xs =&gt;&gt;[ sym p ] id) ys)</a>
+<a id="3789" class="Comment">-- -- module _ (2-monoid : ∀ {A B w} → 𝐹 w A → 𝐹 w B → 𝐹 w (A × B)) where</a>
+<a id="3863" class="Comment">-- --   _∪_ : Heap A → Heap A → Heap A</a>
+<a id="3902" class="Comment">-- --   (xw ◃ xs) ∪ (yw ◃ ys) with xw ≤|≥ yw</a>
+<a id="3947" class="Comment">-- --   ... | inl (k , p) = xw ◃ map (λ { (y , (x , xs)) → x , (k ◃ y) ∷ xs }) (2-monoid (ys =&gt;&gt;[ sym p ] id) xs)</a>
+<a id="4061" class="Comment">-- --   ... | inr (k , p) = yw ◃ map (λ { (x , (y , ys)) → y , (k ◃ x) ∷ ys }) (2-monoid (xs =&gt;&gt;[ sym p ] id) ys)</a>
 
-<a id="3738" class="Comment">-- -- -- mutual</a>
-<a id="3754" class="Comment">-- -- --   record Heap (A : Type a) : Type (s ℓ⊔ a) where</a>
-<a id="3812" class="Comment">-- -- --     inductive; constructor _◃_</a>
-<a id="3852" class="Comment">-- -- --     field</a>
-<a id="3871" class="Comment">-- -- --       hd : A</a>
-<a id="3893" class="Comment">-- -- --       tl : Next A</a>
+<a id="4176" class="Comment">-- -- -- mutual</a>
+<a id="4192" class="Comment">-- -- --   record Heap (A : Type a) : Type (s ℓ⊔ a) where</a>
+<a id="4250" class="Comment">-- -- --     inductive; constructor _◃_</a>
+<a id="4290" class="Comment">-- -- --     field</a>
+<a id="4309" class="Comment">-- -- --       hd : A</a>
+<a id="4331" class="Comment">-- -- --       tl : Next A</a>
 
-<a id="3921" class="Comment">-- -- --   record Next {a} (A : Type a) : Type (s ℓ⊔ a) where</a>
-<a id="3983" class="Comment">-- -- --     coinductive; constructor ⟪_⟫</a>
-<a id="4025" class="Comment">-- -- --     field next : Span A</a>
+<a id="4359" class="Comment">-- -- --   record Next {a} (A : Type a) : Type (s ℓ⊔ a) where</a>
+<a id="4421" class="Comment">-- -- --     coinductive; constructor ⟪_⟫</a>
+<a id="4463" class="Comment">-- -- --     field next : Span A</a>
 
-<a id="4059" class="Comment">-- -- --   data Span {a} (A : Type a) : Type (s ℓ⊔ a) where</a>
-<a id="4119" class="Comment">-- -- --     [] : Span A</a>
-<a id="4144" class="Comment">-- -- --     until : (s : 𝑆) → (s≢ε : s ≢ ε) → (xs : Heap A) → Span A</a>
-<a id="4214" class="Comment">-- -- -- open Heap public</a>
-<a id="4240" class="Comment">-- -- -- open Next public</a>
+<a id="4497" class="Comment">-- -- --   data Span {a} (A : Type a) : Type (s ℓ⊔ a) where</a>
+<a id="4557" class="Comment">-- -- --     [] : Span A</a>
+<a id="4582" class="Comment">-- -- --     until : (s : 𝑆) → (s≢ε : s ≢ ε) → (xs : Heap A) → Span A</a>
+<a id="4652" class="Comment">-- -- -- open Heap public</a>
+<a id="4678" class="Comment">-- -- -- open Next public</a>
 
-<a id="4267" class="Comment">-- -- -- State : Type a → Type _</a>
-<a id="4300" class="Comment">-- -- -- State A = 𝑆 → A × 𝑆</a>
+<a id="4705" class="Comment">-- -- -- State : Type a → Type _</a>
+<a id="4738" class="Comment">-- -- -- State A = 𝑆 → A × 𝑆</a>
 
-<a id="4330" class="Comment">-- -- -- pop′ : (s : 𝑆) → Acc _&lt;_ s → Heap A → A × 𝑆</a>
-<a id="4383" class="Comment">-- -- -- pop′ s₂ a xs with xs .tl .next</a>
-<a id="4423" class="Comment">-- -- -- pop′ s₂ a xs | [] = xs .hd , ε</a>
-<a id="4463" class="Comment">-- -- -- pop′ s₂ a xs | until s₁ s₁≢ε ys with s₁ ≤? s₂</a>
-<a id="4518" class="Comment">-- -- -- pop′ s₂ a xs | until s₁ s₁≢ε ys | no s₁≰s₂ = xs .hd , fst (&lt;⇒≤ s₁≰s₂)</a>
-<a id="4597" class="Comment">-- -- -- pop′ s₂ (acc wf) xs | until s₁ s₁≢ε ys | yes (k₁ , s₂≡s₁∙k₁) = pop′ k₁ (wf k₁ lemma) ys</a>
-<a id="4694" class="Comment">-- -- --   where</a>
-<a id="4711" class="Comment">-- -- --   lemma : k₁ &lt; s₂</a>
-<a id="4738" class="Comment">-- -- --   lemma (k₂ , k₁≡s₂∙k₂) = s₁≢ε (zeroSumFree s₁ k₂ (sym (cancel k₁ _ _ p)))</a>
-<a id="4822" class="Comment">-- -- --     where</a>
-<a id="4841" class="Comment">-- -- --     p : k₁ ∙ ε ≡ k₁ ∙ (s₁ ∙ k₂)</a>
-<a id="4882" class="Comment">-- -- --     p = ∙ε k₁ ; k₁≡s₂∙k₂ ; cong (_∙ k₂) s₂≡s₁∙k₁ ; cong (_∙ k₂) (comm s₁ k₁) ; assoc k₁ s₁ k₂</a>
+<a id="4768" class="Comment">-- -- -- pop′ : (s : 𝑆) → Acc _&lt;_ s → Heap A → A × 𝑆</a>
+<a id="4821" class="Comment">-- -- -- pop′ s₂ a xs with xs .tl .next</a>
+<a id="4861" class="Comment">-- -- -- pop′ s₂ a xs | [] = xs .hd , ε</a>
+<a id="4901" class="Comment">-- -- -- pop′ s₂ a xs | until s₁ s₁≢ε ys with s₁ ≤? s₂</a>
+<a id="4956" class="Comment">-- -- -- pop′ s₂ a xs | until s₁ s₁≢ε ys | no s₁≰s₂ = xs .hd , fst (&lt;⇒≤ s₁≰s₂)</a>
+<a id="5035" class="Comment">-- -- -- pop′ s₂ (acc wf) xs | until s₁ s₁≢ε ys | yes (k₁ , s₂≡s₁∙k₁) = pop′ k₁ (wf k₁ lemma) ys</a>
+<a id="5132" class="Comment">-- -- --   where</a>
+<a id="5149" class="Comment">-- -- --   lemma : k₁ &lt; s₂</a>
+<a id="5176" class="Comment">-- -- --   lemma (k₂ , k₁≡s₂∙k₂) = s₁≢ε (zeroSumFree s₁ k₂ (sym (cancel k₁ _ _ p)))</a>
+<a id="5260" class="Comment">-- -- --     where</a>
+<a id="5279" class="Comment">-- -- --     p : k₁ ∙ ε ≡ k₁ ∙ (s₁ ∙ k₂)</a>
+<a id="5320" class="Comment">-- -- --     p = ∙ε k₁ ; k₁≡s₂∙k₂ ; cong (_∙ k₂) s₂≡s₁∙k₁ ; cong (_∙ k₂) (comm s₁ k₁) ; assoc k₁ s₁ k₂</a>
 
-<a id="4986" class="Comment">-- -- -- pop : Heap A → State A</a>
-<a id="5018" class="Comment">-- -- -- pop xs s = pop′ s (wf s) xs</a>
+<a id="5424" class="Comment">-- -- -- pop : Heap A → State A</a>
+<a id="5456" class="Comment">-- -- -- pop xs s = pop′ s (wf s) xs</a>
 
-<a id="5056" class="Comment">-- -- -- mutual</a>
-<a id="5072" class="Comment">-- -- --   stepFrom : State A → (s : 𝑆) → Dec (s ≡ ε) → Span A</a>
-<a id="5135" class="Comment">-- -- --   stepFrom f s (yes p) = []</a>
-<a id="5172" class="Comment">-- -- --   stepFrom f s (no ¬p) = until s ¬p (tabulate (f ∘ (s ∙_)))</a>
+<a id="5494" class="Comment">-- -- -- mutual</a>
+<a id="5510" class="Comment">-- -- --   stepFrom : State A → (s : 𝑆) → Dec (s ≡ ε) → Span A</a>
+<a id="5573" class="Comment">-- -- --   stepFrom f s (yes p) = []</a>
+<a id="5610" class="Comment">-- -- --   stepFrom f s (no ¬p) = until s ¬p (tabulate (f ∘ (s ∙_)))</a>
 
-<a id="5242" class="Comment">-- -- --   tabulate : State A → Heap A</a>
-<a id="5281" class="Comment">-- -- --   tabulate f =</a>
-<a id="5305" class="Comment">-- -- --     let x , s = f ε</a>
-<a id="5334" class="Comment">-- -- --     in x ◃ λ where .next → stepFrom f s (s ≟ ε)</a>
+<a id="5680" class="Comment">-- -- --   tabulate : State A → Heap A</a>
+<a id="5719" class="Comment">-- -- --   tabulate f =</a>
+<a id="5743" class="Comment">-- -- --     let x , s = f ε</a>
+<a id="5772" class="Comment">-- -- --     in x ◃ λ where .next → stepFrom f s (s ≟ ε)</a>
 
-<a id="5392" class="Comment">-- -- -- pop-ε : (xs : Heap A) (a : Acc _&lt;_ ε) → pop′ ε a xs .fst ≡ xs .hd</a>
-<a id="5467" class="Comment">-- -- -- pop-ε xs _ with xs .tl .next</a>
-<a id="5505" class="Comment">-- -- -- pop-ε xs _ | [] = refl</a>
-<a id="5537" class="Comment">-- -- -- pop-ε xs _ | until s s≢ε ys with s ≤? ε</a>
-<a id="5586" class="Comment">-- -- -- pop-ε xs _ | until s s≢ε ys | no  s≰ε = refl</a>
-<a id="5640" class="Comment">-- -- -- pop-ε xs _ | until s s≢ε ys | yes s≤ε = ⊥-elim (s≢ε (antisym s≤ε (positive s)))</a>
+<a id="5830" class="Comment">-- -- -- pop-ε : (xs : Heap A) (a : Acc _&lt;_ ε) → pop′ ε a xs .fst ≡ xs .hd</a>
+<a id="5905" class="Comment">-- -- -- pop-ε xs _ with xs .tl .next</a>
+<a id="5943" class="Comment">-- -- -- pop-ε xs _ | [] = refl</a>
+<a id="5975" class="Comment">-- -- -- pop-ε xs _ | until s s≢ε ys with s ≤? ε</a>
+<a id="6024" class="Comment">-- -- -- pop-ε xs _ | until s s≢ε ys | no  s≰ε = refl</a>
+<a id="6078" class="Comment">-- -- -- pop-ε xs _ | until s s≢ε ys | yes s≤ε = ⊥-elim (s≢ε (antisym s≤ε (positive s)))</a>
 
-<a id="5730" class="Comment">-- -- -- -- slide : Heap A → Heap A</a>
-<a id="5766" class="Comment">-- -- -- -- slide xs with xs .tl .next</a>
-<a id="5805" class="Comment">-- -- -- -- slide xs | [] = xs</a>
-<a id="5836" class="Comment">-- -- -- -- slide xs | [] = []</a>
+<a id="6168" class="Comment">-- -- -- -- slide : Heap A → Heap A</a>
+<a id="6204" class="Comment">-- -- -- -- slide xs with xs .tl .next</a>
+<a id="6243" class="Comment">-- -- -- -- slide xs | [] = xs</a>
+<a id="6274" class="Comment">-- -- -- -- slide xs | [] = []</a>
 
-<a id="5868" class="Comment">-- -- -- -- pop-tl : ∀ (x : A) s₁ (s₁≢ε : s₁ ≢ ε) xs s₂ → pop (x ◃ ⟪ until s₁ s₁≢ε xs ⟫) (s₁ ∙ s₂) ≡ pop xs s₂</a>
-<a id="5979" class="Comment">-- -- -- -- pop-tl x s₁ s₁≢ε xs s₂ with s₁ ≤? (s₁ ∙ s₂)</a>
-<a id="6035" class="Comment">-- -- -- -- pop-tl x s₁ s₁≢ε xs s₂ | no  s₁≰s₁∙s₂ = ⊥-elim (s₁≰s₁∙s₂ (s₂ , refl))</a>
-<a id="6117" class="Comment">-- -- -- -- pop-tl x s₁ s₁≢ε xs s₂ | yes (k , s₁≤s₁∙s₂) =</a>
-<a id="6175" class="Comment">-- -- -- --   let p = cancel s₁ s₂ k s₁≤s₁∙s₂</a>
-<a id="6221" class="Comment">-- -- -- --   in {!!} ; cong (λ w → pop′ s₂ w xs) (isPropAcc {!!} (wf s₂))</a>
+<a id="6306" class="Comment">-- -- -- -- pop-tl : ∀ (x : A) s₁ (s₁≢ε : s₁ ≢ ε) xs s₂ → pop (x ◃ ⟪ until s₁ s₁≢ε xs ⟫) (s₁ ∙ s₂) ≡ pop xs s₂</a>
+<a id="6417" class="Comment">-- -- -- -- pop-tl x s₁ s₁≢ε xs s₂ with s₁ ≤? (s₁ ∙ s₂)</a>
+<a id="6473" class="Comment">-- -- -- -- pop-tl x s₁ s₁≢ε xs s₂ | no  s₁≰s₁∙s₂ = ⊥-elim (s₁≰s₁∙s₂ (s₂ , refl))</a>
+<a id="6555" class="Comment">-- -- -- -- pop-tl x s₁ s₁≢ε xs s₂ | yes (k , s₁≤s₁∙s₂) =</a>
+<a id="6613" class="Comment">-- -- -- --   let p = cancel s₁ s₂ k s₁≤s₁∙s₂</a>
+<a id="6659" class="Comment">-- -- -- --   in {!!} ; cong (λ w → pop′ s₂ w xs) (isPropAcc {!!} (wf s₂))</a>
 
-<a id="6297" class="Comment">-- -- -- -- seg-leftInv′ : (x : Heap A) → tabulate (pop x) ≡ x</a>
-<a id="6360" class="Comment">-- -- -- -- seg-leftInv′ x = {!!}</a>
+<a id="6735" class="Comment">-- -- -- -- seg-leftInv′ : (x : Heap A) → tabulate (pop x) ≡ x</a>
+<a id="6798" class="Comment">-- -- -- -- seg-leftInv′ x = {!!}</a>
 
-<a id="6395" class="Comment">-- -- -- -- mutual</a>
-<a id="6414" class="Comment">-- -- -- --   seg-leftInv′ : (xs : Heap A) → stepFrom (pop xs) (pop xs ε .snd) (pop xs ε .snd ≟ ε) ≡ xs .tl .next</a>
-<a id="6528" class="Comment">-- -- -- --   seg-leftInv′ (x ◃ xs) with pop (x ◃ xs) ε .snd ≟ ε</a>
-<a id="6593" class="Comment">-- -- -- --   seg-leftInv′ (x ◃ xs) | yes s≡ε = {!!}</a>
-<a id="6646" class="Comment">-- -- -- --   seg-leftInv′ (x ◃ xs) | no  s≢ε = {!!}</a>
+<a id="6833" class="Comment">-- -- -- -- mutual</a>
+<a id="6852" class="Comment">-- -- -- --   seg-leftInv′ : (xs : Heap A) → stepFrom (pop xs) (pop xs ε .snd) (pop xs ε .snd ≟ ε) ≡ xs .tl .next</a>
+<a id="6966" class="Comment">-- -- -- --   seg-leftInv′ (x ◃ xs) with pop (x ◃ xs) ε .snd ≟ ε</a>
+<a id="7031" class="Comment">-- -- -- --   seg-leftInv′ (x ◃ xs) | yes s≡ε = {!!}</a>
+<a id="7084" class="Comment">-- -- -- --   seg-leftInv′ (x ◃ xs) | no  s≢ε = {!!}</a>
 
-<a id="6700" class="Comment">-- -- -- --   seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x</a>
-<a id="6764" class="Comment">-- -- -- --   seg-leftInv (x ◃ xs) i .hd = pop-ε (x ◃ xs) (wf ε) i</a>
-<a id="6831" class="Comment">-- -- -- --   seg-leftInv (x ◃ xs) i .tl .next = seg-leftInv′ (x ◃ xs) i</a>
+<a id="7138" class="Comment">-- -- -- --   seg-leftInv : (x : Heap A) → tabulate (pop x) ≡ x</a>
+<a id="7202" class="Comment">-- -- -- --   seg-leftInv (x ◃ xs) i .hd = pop-ε (x ◃ xs) (wf ε) i</a>
+<a id="7269" class="Comment">-- -- -- --   seg-leftInv (x ◃ xs) i .tl .next = seg-leftInv′ (x ◃ xs) i</a>
 
-<a id="6905" class="Comment">-- -- -- -- state-iso : Heap A ⇔ State A</a>
-<a id="6946" class="Comment">-- -- -- -- state-iso .fun = pop</a>
-<a id="6979" class="Comment">-- -- -- -- state-iso .inv = tabulate</a>
-<a id="7017" class="Comment">-- -- -- -- state-iso .rightInv = {!!}</a>
-<a id="7056" class="Comment">-- -- -- -- state-iso .leftInv  = {!!}</a>
+<a id="7343" class="Comment">-- -- -- -- state-iso : Heap A ⇔ State A</a>
+<a id="7384" class="Comment">-- -- -- -- state-iso .fun = pop</a>
+<a id="7417" class="Comment">-- -- -- -- state-iso .inv = tabulate</a>
+<a id="7455" class="Comment">-- -- -- -- state-iso .rightInv = {!!}</a>
+<a id="7494" class="Comment">-- -- -- -- state-iso .leftInv  = {!!}</a>
 </pre></body></html>
