@@ -15,29 +15,36 @@ open POM (algebraic-pom mon)
 module _ {s : 𝑆} where
   open IsFunctor (functor {s = s}) public renaming (map to fmap)
 
+private variable i j k : 𝑆
+
 mutual
-  data Fix″ (w : 𝑆) (i : 𝑆) : Type ℓ where
-    coacc : ((w≤i : w ≤ i) → 𝐹 w (Fix′ (fst w≤i))) → Fix″ w i
+  data Fix″ (i : 𝑆) (j : 𝑆) : Type ℓ where
+    coacc : ((i≤j : i ≤ j) → 𝐹 i (Fix′ (fst i≤j))) → Fix″ i j
 
   Fix′ : 𝑆 → Type ℓ
-  Fix′ i = ∃ w × Fix″ w i
+  Fix′ i = ∃ j × Fix″ j i
 
 Fix : 𝑆 → Type ℓ
-Fix w = 𝐹 w (∀ {i} → Fix′ i)
+Fix i = 𝐹 i (∀ {j} → Fix′ j)
 
 module _
     (B : Type ℓ)
-    (ϕ : B → ∃ w × (w ≢ ε) × (𝐹 w B))
+    (ϕ : B → ∃ i × (i ≢ ε) × 𝐹 i B)
     where
-    unfold′ : ∀ {i} → Acc _≺_ i → B → Fix′ i
-    unfold′ a = map₂ coacc ∘ map₂ (λ { {u} (w≢ε , r) (_ , i≡u∙k) → fmap (case a of λ { (acc wf) → unfold′ (wf _ (u , i≡u∙k ; comm _ _  , w≢ε))  }) r}) ∘ ϕ
+    mutual
+      unfold′ : Acc _≺_ i → B → Fix′ i
+      unfold′ a = map₂ (coacc ∘ unfold″ a) ∘ ϕ
 
+      unfold″ : Acc _≺_ i → (j ≢ ε) × 𝐹 j B → (j≤i : j ≤ i) → 𝐹 j (Fix′ (fst j≤i))
+      unfold″ a (j≢ε , r) (k , i≡j∙k) = fmap (unfold‴ a (_ , i≡j∙k ; comm _ k , j≢ε)) r
+
+      unfold‴ : Acc _≺_ i → j ≺ i → B → Fix′ j
+      unfold‴ (acc wf) j≺i = unfold′ (wf _ j≺i)
 
 module _
   (wellFounded : WellFounded _≺_)
   (B : 𝑆 → Type ℓ)
   (ϕ : ∀ {w} → B w → 𝐹 w (∃ v × (v ≢ ε) × B v))
   where
-
   unfold : ∀ {w} → B w → Fix w
   unfold = fmap (λ r {i} → unfold′ _ (map₂ (map₂ ϕ)) (wellFounded _) r) ∘ ϕ
