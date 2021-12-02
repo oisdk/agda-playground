@@ -23,6 +23,13 @@ infixr 5 _∈_ _∈!_ _∉_
 _∈_ : A → List A → Type _
 x ∈ xs = ◇ (_≡ x) xs
 
+delete : (xs : List A) → Fin (length xs) → List A
+delete (x ∷ xs) f0     = xs
+delete (x ∷ xs) (fs i) = x ∷ delete xs i
+
+∈-remove : ∀ {x : A} {xs} → (x∈xs : x ∈ xs) → List A
+∈-remove {xs = xs} = delete xs ∘ fst
+
 _∉_ : {A : Type a} → A → List A → Type a
 x ∉ xs = ¬ (x ∈ xs)
 
