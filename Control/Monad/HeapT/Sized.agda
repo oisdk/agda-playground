@@ -42,28 +42,28 @@ infixr 5 _++_
 _++_ : 𝐹 w (Branch A i) → 𝐹 ε (Branch A i) → 𝐹 w (Branch A i)
 xs ++ ys =
   xs >>=ε λ  {  []       → ys
-             ;  (x ∷ xs) → pure (x ∷ xs ++ ys) }
+             ;  (x ∷ xs) → return (x ∷ xs ++ ys) }
 
 infixr 1 _>>=ᴺ_ _>>=ᴴ_
 mutual
   _>>=ᴺ_ : Node A i → (A → Heap B) → 𝐹 ε (Branch B i)
   ⌊ x ⌋  >>=ᴺ f = f x
-  ⌈ w ⋊ s ⌉  >>=ᴺ f = pure (⌈ w ⋊ (λ w<i → s w<i >>=ᴴ f) ⌉ ∷ pure [])
+  ⌈ w ⋊ s ⌉  >>=ᴺ f = return (⌈ w ⋊ (λ w<i → s w<i >>=ᴴ f) ⌉ ∷ return [])
 
   _>>=ᴴ_ : 𝐹 w (Branch A i) → (A → Heap B) → 𝐹 w (Branch B i)
   xs >>=ᴴ f =
-    xs >>=ε λ  {  []        → pure []
+    xs >>=ε λ  {  []        → return []
                ;  (x ∷ xs)  → (x >>=ᴺ f) ++ (xs >>=ᴴ f) }
 
-pureᴴ : A → Heap A
-pureᴴ x = pure (⌊ x ⌋ ∷ pure [])
+returnᴴ : A → Heap A
+returnᴴ x = return (⌊ x ⌋ ∷ return [])
 
 liftᴴ : 𝐹 w A → Heap A
-liftᴴ xs = pure (⌈ _ ⋊ const (map (λ x → ⌊ x ⌋ ∷ pure []) xs) ⌉ ∷ pure [])
+liftᴴ xs = return (⌈ _ ⋊ const (map (λ x → ⌊ x ⌋ ∷ return []) xs) ⌉ ∷ return [])
 
 flatten : 𝐹 w (Branch A i) → 𝐹 w (List A × List (Root′ A i))
 flatten xs =
-  xs >>=ε λ  {  []            → pure ([] , [])
+  xs >>=ε λ  {  []            → return ([] , [])
              ;  (⌊ x ⌋ ∷ xs)  → map (map₁ (x ∷_)) (flatten xs)
              ;  (⌈ x ⌉ ∷ xs)  → map (map₂ (x ∷_)) (flatten xs) }
 

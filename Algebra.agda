@@ -367,7 +367,7 @@ record GradedMonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ�
   open Monoid monoid
   field
     𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₃
-    pure  : A → 𝐹 ε A
+    return  : A → 𝐹 ε A
     _>>=_ : ∀ {x y} → 𝐹 x A → (A → 𝐹 y B) → 𝐹 (x ∙ y) B
 
   _<=<_ : ∀ {x y} → (B → 𝐹 y C) → (A → 𝐹 x B) → A → 𝐹 (x ∙ y) C
@@ -377,8 +377,8 @@ record GradedMonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ�
   (f >=> g) x = f x >>= g
 
   field
-    >>=-idˡ : ∀ {s} (f : A → 𝐹 s B) → (x : A) → (pure x >>= f) ≡[ i ≔ 𝐹 (ε∙ s i) B ]≡ (f x)
-    >>=-idʳ : ∀ {s} (x : 𝐹 s A) → (x >>= pure) ≡[ i ≔ 𝐹 (∙ε s i) A ]≡ x
+    >>=-idˡ : ∀ {s} (f : A → 𝐹 s B) → (x : A) → (return x >>= f) ≡[ i ≔ 𝐹 (ε∙ s i) B ]≡ (f x)
+    >>=-idʳ : ∀ {s} (x : 𝐹 s A) → (x >>= return) ≡[ i ≔ 𝐹 (∙ε s i) A ]≡ x
     >>=-assoc : ∀ {x y z} (xs : 𝐹 x A) (f : A → 𝐹 y B) (g : B → 𝐹 z C) → ((xs >>= f) >>= g) ≡[ i ≔ 𝐹 (assoc x y z i) C ]≡ (xs >>= (λ x → f x >>= g))
 
   infixr 0 proven-bind
@@ -395,7 +395,7 @@ record GradedMonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ�
   syntax proven-do xs (λ x → e) proof = x ← xs [ proof ] e
 
   map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
-  map f xs = xs >>=[ ∙ε _ ] (pure ∘ f)
+  map f xs = xs >>=[ ∙ε _ ] (return ∘ f)
 
   _<*>_ : ∀ {x y} → 𝐹 x (A → B) → 𝐹 y A → 𝐹 (x ∙ y) B
   fs <*> xs = fs >>= flip map xs

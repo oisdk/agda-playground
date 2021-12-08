@@ -47,28 +47,28 @@ infixr 5 _++_
 _++_ : 𝐹 w (Branch A) → 𝐹 ε (Branch A) → 𝐹 w (Branch A)
 xs ++ ys =
   xs >>=ε λ  {  []       → ys
-             ;  (x ∷ xs) → pure (x ∷ xs ++ ys) }
+             ;  (x ∷ xs) → return (x ∷ xs ++ ys) }
 
 infixr 1 _>>=ᴺ_ _>>=ᴴ_
 mutual
   _>>=ᴺ_ : Node A → (A → Heap B) → Heap B
   ⌊ x ⌋  >>=ᴺ f = f x
-  ⌈ x ⌉  >>=ᴺ f = pure (⌈ weight x ⋊ (step x >>=ᴴ f) ⌉ ∷ pure [])
+  ⌈ x ⌉  >>=ᴺ f = return (⌈ weight x ⋊ (step x >>=ᴴ f) ⌉ ∷ return [])
 
   _>>=ᴴ_ : 𝐹 w (Branch A) → (A → Heap B) → 𝐹 w (Branch B)
   xs >>=ᴴ f =
-    xs >>=ε λ  {  []        → pure []
+    xs >>=ε λ  {  []        → return []
                ;  (x ∷ xs)  → (x >>=ᴺ f) ++ (xs >>=ᴴ f) }
 
-pureᴴ : A → Heap A
-pureᴴ x = pure (⌊ x ⌋ ∷ pure [])
+returnᴴ : A → Heap A
+returnᴴ x = return (⌊ x ⌋ ∷ return [])
 
 liftᴴ : 𝐹 w A → Heap A
-liftᴴ xs = pure (⌈ _ ⋊ map (λ x → ⌊ x ⌋ ∷ pure []) xs ⌉ ∷ pure [])
+liftᴴ xs = return (⌈ _ ⋊ map (λ x → ⌊ x ⌋ ∷ return []) xs ⌉ ∷ return [])
 
 flatten : 𝐹 w (Branch A) → 𝐹 w (List A × List (Root A))
 flatten xs =
-  xs >>=ε λ  {  []            → pure ([] , [])
+  xs >>=ε λ  {  []            → return ([] , [])
              ;  (⌊ x ⌋ ∷ xs)  → map (map₁ (x ∷_)) (flatten xs)
              ;  (⌈ x ⌉ ∷ xs)  → map (map₂ (x ∷_)) (flatten xs) }
 
