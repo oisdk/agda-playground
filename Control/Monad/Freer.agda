@@ -14,49 +14,69 @@ open import Container
 Distributes : (Type a → Type a) → (Type a → Type a) → Type _
 Distributes F G = ∀ {A} → F (G A) → G (F A)
 
-data Freer {ℓ₁ ℓ₂ ℓ₃} (A : Type ℓ₁) : List (Container ℓ₂ ℓ₃) → Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
-  pure : A → Freer A []
-  call : ∀ {f fs} → ⟦ f ⟧ (Freer A fs) → Freer A (f ∷ fs)
-
+Freer : ∀ {ℓ₂ ℓ₃} → List (Container ℓ₂ ℓ₃) → Type (ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) → Type (ℓsuc (ℓ₂ ℓ⊔ ℓ₃))
+Freer {ℓ₂ = ℓ₂} {ℓ₃ = ℓ₃} fs A = foldr ⟦_⟧ A fs
 
 module _ {ℓ₂ ℓ₃} where
   private
     variable f g : Container ℓ₂ ℓ₃
     variable fs gs : List (Container ℓ₂ ℓ₃)
 
-  bind : Freer A fs → (A → Freer B gs) → Freer B (fs ++ gs)
-  bind (pure x) k = k x
-  bind (call xs) k = call (cmap (flip bind k) xs)
+  bind : Freer fs A → (A → Freer gs B) → Freer (fs ++ gs) B
+  bind {fs = []} xs k = k xs
+  bind {fs = f ∷ fs} xs k = cmap (flip (bind {fs = fs}) k) xs
 
-  extend : Freer A (fs ++ gs) → (Freer A gs → B) → Freer B fs
-  extend {fs = []}     x k = pure (k x)
-  extend {fs = f ∷ fs} (call xs) k = call (cmap (flip extend k) xs)
+  join : Freer fs (Freer gs A) → Freer (fs ++ gs) A
+  join {fs = []} = id
+  join {fs = f ∷ fs} = cmap (join {fs = fs})
 
-  module _ (mon : Monad (ℓ₂ ℓ⊔ ℓ₃) (ℓ₂ ℓ⊔ ℓ₃)) where
+  extend : Freer (fs ++ gs) A → (Freer gs A → B) → Freer fs B
+  extend {fs = []}     x  k = (k x)
+  extend {fs = f ∷ fs} xs k = cmap (flip (extend {fs = fs}) k) xs
+
+  module _ (mon : Monad (ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) (ℓsuc (ℓ₂ ℓ⊔ ℓ₃))) where
     open import Data.Fin.Properties using (_<_)
     open Monad mon
 
-    -- handle : {A : Type (ℓ₂ ℓ⊔ ℓ₃)} → (i : Fin (length fs)) →
-    --          (⟦ fs ! i ⟧ ⇒ 𝐹) →
-    --          (∀ j → j < i → Distributes ⟦ fs ! j ⟧ 𝐹) →
-    --          Freer A fs →
-    --          𝐹 (Freer A (delete fs i))
-    -- handle {fs = f ∷ fs} nothing  h d (call xs) = h xs
-    -- handle {fs = f ∷ fs} (just i) h d (call xs) = (d nothing tt (cmap (handle i h λ j p → d (just j) p) xs)) >>= (return ∘ call)
+    mmap : (A → B) → 𝐹 A → 𝐹 B
+    mmap f xs = xs >>= return ∘ f
 
---   module _ {ℓ₁} where
---     gradedMonad : GradedMonad (listMonoid (Type ℓ₂ → Type ℓ₃)) ℓ₁ _
---     gradedMonad .GradedMonad.𝐹 = flip Freer
---     gradedMonad .GradedMonad.pure = pure
---     gradedMonad .GradedMonad._>>=_ = bind
---     gradedMonad .GradedMonad.>>=-idˡ f x = refl
---     gradedMonad .GradedMonad.>>=-idʳ x = {!!}
---     gradedMonad .GradedMonad.>>=-assoc = {!!}
+    handle : {A : Type (ℓsuc (ℓ₂ ℓ⊔ ℓ₃))} → (i : Fin (length fs)) →
+             (⟦ fs ! i ⟧ ⇒ 𝐹) →
+             (∀ j → j < i → Distributes ⟦ fs ! j ⟧ 𝐹) →
+             Freer fs A →
+             𝐹 (Freer (delete fs i) A)
+    handle {fs = f ∷ fs} nothing  h d xs = h xs
+    handle {fs = f ∷ fs} (just i) h d xs = d nothing tt (cmap (handle {fs = fs} i h (d ∘ just)) xs)
 
---     gradedComonad : GradedComonad (listMonoid (Type ℓ₂ → Type ℓ₃)) ℓ₁ _
---     gradedComonad .GradedComonad.𝐹 = flip Freer
---     gradedComonad .GradedComonad.extract (pure x) = x
---     gradedComonad .GradedComonad._=>>_ = extend
---     gradedComonad .GradedComonad.=>>-idʳ f = refl
---     gradedComonad .GradedComonad.=>>-idˡ f = {!!}
---     gradedComonad .GradedComonad.=>>-assoc = {!!}
+    handle″ : {A : Type (ℓsuc (ℓ₂ ℓ⊔ ℓ₃))} →
+              (∀ j → Distributes 𝐹 ⟦ fs ! j ⟧) →
+              𝐹 (Freer fs A) →
+              Freer fs (𝐹 A)
+    handle″ {fs = []}     d xs = xs
+    handle″ {fs = f ∷ fs} d xs = cmap (handle″ {fs = fs} (d ∘ just)) (d f0 xs)
+
+    handle′ : {A : Type (ℓsuc (ℓ₂ ℓ⊔ ℓ₃))} → (i : Fin (length fs)) →
+              (⟦ fs ! i ⟧ ⇒ 𝐹) →
+              (∀ j → i < j → Distributes 𝐹 ⟦ fs ! j ⟧) →
+              Freer fs A →
+              Freer (delete fs i) (𝐹 A)
+    handle′ {fs = f ∷ fs} (just i) h d xs = cmap (handle′ {fs = fs} i h (d ∘ just)) xs
+    handle′ {fs = f ∷ fs} nothing  h d xs = handle″ {fs = fs} (λ j → d (just j) tt) (h xs)
+
+  -- module _ {ℓ₁} where
+  --   gradedMonad : GradedMonad (listMonoid (Container ℓ₂ ℓ₃)) ℓ₁ _
+  --   gradedMonad .GradedMonad.𝐹 = flip Freer
+  --   gradedMonad .GradedMonad.return = lift
+  --   gradedMonad .GradedMonad._>>=_ = bind
+  --   gradedMonad .GradedMonad.>>=-idˡ f x = refl
+  --   gradedMonad .GradedMonad.>>=-idʳ x = {!!}
+  --   gradedMonad .GradedMonad.>>=-assoc = {!!}
+
+-- --     gradedComonad : GradedComonad (listMonoid (Type ℓ₂ → Type ℓ₃)) ℓ₁ _
+-- --     gradedComonad .GradedComonad.𝐹 = flip Freer
+-- --     gradedComonad .GradedComonad.extract (pure x) = x
+-- --     gradedComonad .GradedComonad._=>>_ = extend
+-- --     gradedComonad .GradedComonad.=>>-idʳ f = refl
+-- --     gradedComonad .GradedComonad.=>>-idˡ f = {!!}
+-- --     gradedComonad .GradedComonad.=>>-assoc = {!!}
