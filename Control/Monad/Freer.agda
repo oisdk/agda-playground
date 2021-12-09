@@ -10,6 +10,10 @@ open import Algebra
 open import Data.Fin hiding (fs)
 open import Container
 
+
+Distributes : (Type a → Type a) → (Type a → Type a) → Type _
+Distributes F G = ∀ {A} → F (G A) → G (F A)
+
 data Freer {ℓ₁ ℓ₂ ℓ₃} (A : Type ℓ₁) : List (Container ℓ₂ ℓ₃) → Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
   pure : A → Freer A []
   call : ∀ {f fs} → ⟦ f ⟧ (Freer A fs) → Freer A (f ∷ fs)
@@ -28,12 +32,17 @@ module _ {ℓ₂ ℓ₃} where
   extend {fs = []}     x k = pure (k x)
   extend {fs = f ∷ fs} (call xs) k = call (cmap (flip extend k) xs)
 
-  module _ (mon : Monad _ _) where
+  module _ (mon : Monad (ℓ₂ ℓ⊔ ℓ₃) (ℓ₂ ℓ⊔ ℓ₃)) where
+    open import Data.Fin.Properties using (_<_)
     open Monad mon
 
-    handle : (i : Fin (length fs)) → (⟦ fs ! i ⟧ ⇒ 𝐹) → Freer A fs → 𝐹 (Freer A (delete fs i))
-    handle {fs = f ∷ fs} nothing  h (call xs) = h xs
-    handle {fs = f ∷ fs} (just i) h (call xs) = {!!}
+    -- handle : {A : Type (ℓ₂ ℓ⊔ ℓ₃)} → (i : Fin (length fs)) →
+    --          (⟦ fs ! i ⟧ ⇒ 𝐹) →
+    --          (∀ j → j < i → Distributes ⟦ fs ! j ⟧ 𝐹) →
+    --          Freer A fs →
+    --          𝐹 (Freer A (delete fs i))
+    -- handle {fs = f ∷ fs} nothing  h d (call xs) = h xs
+    -- handle {fs = f ∷ fs} (just i) h d (call xs) = (d nothing tt (cmap (handle i h λ j p → d (just j) p) xs)) >>= (return ∘ call)
 
 --   module _ {ℓ₁} where
 --     gradedMonad : GradedMonad (listMonoid (Type ℓ₂ → Type ℓ₃)) ℓ₁ _

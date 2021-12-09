@@ -66,3 +66,9 @@ isSetFin = Discrete→isSet discreteFin
 FinFromℕ : (n m : ℕ) → T (n <ᵇ m) → Fin m
 FinFromℕ zero (suc m) p = f0
 FinFromℕ (suc n) (suc m) p = fs (FinFromℕ n m p)
+
+_<ᴮ_ : Fin n → Fin m → Bool
+n <ᴮ m = FinToℕ n <ᵇ FinToℕ m
+
+_<_ : Fin n → Fin m → Type
+n < m = T (n <ᴮ m)
