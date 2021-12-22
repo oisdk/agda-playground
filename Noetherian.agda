@@ -32,3 +32,15 @@ module _ {ℓ} (mon : TMAPOM ℓ) where
 
   return : A → Within ε A
   return x _ = x
+
+open import Function.Surjective
+open import Function.Injective
+
+_≺_ : Type → Type → Type
+A ≺ B = ¬ (B ↣ A)
+
+proof : ⊤ ≺ Bool
+proof (f , inj) = subst (bool ⊥ ⊤)  (inj true false refl) tt
+
+-- cmb′ : Acc _≺_ A → Acc _≺_ B → Acc _≺_ (A ⊎ B)
+-- cmb′ {A} {B} (acc a) (acc b) = acc {!!}
