@@ -17,6 +17,25 @@ open import Control.Monad.Weighted.Definition rng
 open import Control.Monad.Weighted.Eliminators rng
 open import Control.Monad.Weighted.Functor rng
 open import Control.Monad.Weighted.Functor.TypeDef
+open import Function
+open import Data.Lift
+open import HITs.PropositionalTruncation
+open import Data.Sum
+
+-- member-at : {A : Type a} → 𝑅 → A →  Weighted A → Type (a ℓ⊔ ℓ)
+-- member-at {a = a} {A = A} w x xs = fst (⟦ alg x ⟧ xs w)
+--   where
+--   alg : A → Ψ[ xs ⦂ A ] (𝑅 → hProp (a ℓ⊔ ℓ))
+--   alg x .fst [] w = Lift (ℓ ℓ⊔ a) (w ≡ 0#) , {!!}
+--   alg x .fst (q ◃ y ∷ xs ⟨ P⟨xs⟩ ⟩) w =
+--     ∥ ((x ≡ y) × ∃ p × (w ≡ p + q) × fst (P⟨xs⟩ p)) ⊎ ((x ≢ y) × fst (P⟨xs⟩ w)) ∥ , squash
+--   alg x .snd .c-set = {!!}
+--   alg x .snd .c-dup p q y xs ψ⟨xs⟩ = funExt λ w → {!!}
+--   alg x .snd .c-com p y q z xs ψ⟨xs⟩ = funExt λ w → {!!}
+--   alg x .snd .c-del y xs ψ⟨xs⟩ = funExt λ w → {!!}
+
+
+
 
 \end{code}
 %<*expect-alg>

@@ -75,6 +75,16 @@ module AsHeap (_<*>_ : ∀ {w A B} → 𝑊 w (A → B) → 𝑊 w A → 𝑊 w 
 
   search : Cofree⁺ w A → L.Cofree⁺ w A
   search = L.ana (flip Cofree⁺ _) (cmap (map₂ merge) ∘ step)
+
+  data Tree {a} (A : Type a) : Type a where
+    [_] : A → Tree A
+    _*_ : Tree A → Tree A → Tree A
+
+  List⁺ : Type → Type
+  List⁺ A = A × List A
+
+  huffman′ : Heap A → Tree A
+  huffman′ = {!!}
   
 -- data Heap (A : Type s) : Type s where
 --   _◃_ : (w : 𝑆) → (xs : 𝐹 w (A × List (Heap A))) → Heap A
