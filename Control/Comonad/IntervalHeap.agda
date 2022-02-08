@@ -1,4 +1,4 @@
-{-# OPTIONS --no-positivity-check --no-termination-check #-}
+{-# OPTIONS --no-positivity-check --no-termination-check --allow-unsolved-metas #-}
 
 open import Algebra
 open import Prelude
