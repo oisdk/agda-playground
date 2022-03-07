@@ -32,10 +32,10 @@ unsquash st x≐y = st (refute x≐y)
 ∙refl = ∣ refl ∣
 
 ∙trans : x ≐ y → y ≐ z → x ≐ z
-∙trans ∣ xy ∣ (∣_∣ yz) = ∣_∣ (xy ; yz)
+∙trans ∣ xy ∣ ∣ yz ∣ = ∣ xy ; yz ∣
 
 ∙sym : x ≐ y → y ≐ x
-∙sym (∣_∣ p) = ∣_∣ (sym p)
+∙sym ∣ p ∣ = ∣ sym p ∣
 
 ∙cong : (f : A → B) → x ≐ y → f x ≐ f y
 ∙cong f ∣ x≡y ∣ = ∣ cong f x≡y ∣
@@ -64,7 +64,7 @@ module Reasoning where
   infixr 2 ≡˘⟨⟩-syntax ≡⟨∙⟩-syntax
 
   ≡˘⟨⟩-syntax : ∀ (x : A) {y z} → y ≐ z → y ≡ x → x ≐ z
-  ≡˘⟨⟩-syntax _ y≡z y≡x = ∙trans (∣_∣ (sym y≡x)) y≡z
+  ≡˘⟨⟩-syntax _ y≡z y≡x = ∙trans ∣ sym y≡x ∣ y≡z
 
   syntax ≡˘⟨⟩-syntax x y≡z y≡x = x ≡˘⟨ y≡x ⟩ y≡z
 
