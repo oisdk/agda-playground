@@ -32,8 +32,9 @@ smap-comp f g = ⟦ alg f g ⟧
   alg f g .fst ∅ = refl
   alg f g .fst (x ∷ xs ⟨ P⟨xs⟩ ⟩) i = f (g x) ∷ P⟨xs⟩ i
 
-module _ {a} where
-  functorSet : Functor {a} 𝒦
-  functorSet .Functor.map = smap
-  functorSet .Functor.map-id = smap-id
-  functorSet .Functor.map-comp = smap-comp
+-- module _ {a} where
+--   functorSet : Functor a a
+--   functorSet .Functor.𝐹 = 𝒦
+--   functorSet .Functor.map = smap
+--   functorSet .Functor.map-id = funExt smap-id
+--   functorSet .Functor.map-comp = funExt smap-comp
