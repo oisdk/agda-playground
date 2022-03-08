@@ -44,14 +44,15 @@ module  _ {a : Level} where
     _∈_ : A → 𝒦 A → Type a
     x ∈ xs = fst (⟦ ∈-alg x ⟧ xs)
 
-    -- module _ (_≟_ : Discrete A) where
+    module _ (_≟_ : Discrete A) where
 
-    --   open import Relation.Nullary.Decidable.Logic
+      open import Relation.Nullary.Decidable.Logic
+      open import Relation.Nullary.Decidable.Properties
 
-    --   ∈?-alg : (x : A) → Ψ[ xs ⦂ 𝒦 A ] ↦ Dec (x ∈ xs)
-    --   ∈?-alg x .fst ∅ = no λ ()
-    --   ∈?-alg x .fst (y ∷ xs ⟨ x∈?xs ⟩) = disj (∣_∣ ∘ inl) (∣_∣ ∘ inr) {!!} (x ≟ y) x∈?xs
-    --   ∈?-alg x .snd = {!!}
+      ∈?-alg : (x : A) → Ψ[ xs ⦂ 𝒦 A ] ↦ Dec (x ∈ xs)
+      ∈?-alg x .fst ∅ = no λ ()
+      ∈?-alg x .fst (y ∷ xs ⟨ x∈?xs ⟩) = disj (∣_∣ ∘ inl) (∣_∣ ∘ inr) (λ x≢y x∉xs → rec (λ ()) (either x≢y x∉xs) ) (x ≟ y) x∈?xs
+      ∈?-alg x .snd = prop-coh λ xs → isPropDec (snd (⟦ ∈-alg x ⟧ xs))
 
-    --   _∈?_ : ∀ x xs → Dec (x ∈ xs)
-    --   _∈?_ = {!!}
+      _∈?_ : ∀ x xs → Dec (x ∈ xs)
+      _∈?_ x = ⟦ ∈?-alg x ⟧
