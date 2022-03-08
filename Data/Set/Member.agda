@@ -46,9 +46,11 @@ module  _ {a : Level} where
 
     -- module _ (_≟_ : Discrete A) where
 
+    --   open import Relation.Nullary.Decidable.Logic
+
     --   ∈?-alg : (x : A) → Ψ[ xs ⦂ 𝒦 A ] ↦ Dec (x ∈ xs)
     --   ∈?-alg x .fst ∅ = no λ ()
-    --   ∈?-alg x .fst (y ∷ xs ⟨ P⟨xs⟩ ⟩) = {!!}
+    --   ∈?-alg x .fst (y ∷ xs ⟨ x∈?xs ⟩) = disj (∣_∣ ∘ inl) (∣_∣ ∘ inr) {!!} (x ≟ y) x∈?xs
     --   ∈?-alg x .snd = {!!}
 
     --   _∈?_ : ∀ x xs → Dec (x ∈ xs)
