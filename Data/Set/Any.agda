@@ -64,3 +64,5 @@ module _ (P? : ∀ x → Dec (P x)) where
   ... | no ¬Px = rec (λ ()) (either ¬Px ¬◇xs) ◇xs
   ¬◇-remove-alg .snd = prop-coh λ _ → isPropΠ λ _ ()
 
+  ¬◇-remove : ∀ xs → ¬ (_◇_ (remove xs))
+  ¬◇-remove = ⟦ ¬◇-remove-alg ⟧
