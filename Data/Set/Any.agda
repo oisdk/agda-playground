@@ -58,7 +58,9 @@ module _ (P? : ∀ x → Dec (P x)) where
   remove : 𝒦 A → 𝒦 A
   remove = ⟦ remove-alg ⟧
 
-  ¬◇-remove-alg : Ψ[ xs ⦂ 𝒦 A ] ↦ ¬ (_◇_ (remove xs))
-  ¬◇-remove-alg = {!!}
-  -- ¬◇-remove : ∀ xs → ¬ (_◇_ (remove xs))
+  ¬◇-remove-alg : Ψ[ xs ⦂ 𝒦 A ] ↦ (¬ (_◇_ (remove xs)))
+  ¬◇-remove-alg .fst (x ∷ xs ⟨ ¬◇xs ⟩) ◇xs with P? x
+  ... | yes Px = ¬◇xs ◇xs
+  ... | no ¬Px = rec (λ ()) (either ¬Px ¬◇xs) ◇xs
+  ¬◇-remove-alg .snd = prop-coh λ _ → isPropΠ λ _ ()
 
