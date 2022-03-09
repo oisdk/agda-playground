@@ -8,6 +8,7 @@ open import Data.Set.Eliminators
 open import Data.Set.Member
 
 module _ (Univ : Type) ([_] : Univ → Type → Type) (_≟_ : Discrete Univ) where
+  open WithDecEq _≟_
 
   private
     variable
@@ -32,8 +33,8 @@ module _ (Univ : Type) ([_] : Univ → Type → Type) (_≟_ : Discrete Univ) wh
 
     module _ (traverse : ∀ {F A B} → (A → 𝐹 B) → [ F ] A → 𝐹 ([ F ] B)) where
       module _ (E : Univ) where
-        interp : (∀ {X} → [ E ] X → 𝐹 X) → Free Fs A → 𝐹 (Free (remove E (_≟_ E) Fs) A)
+        interp : ([ E ] ⇒ 𝐹) → Free Fs A → 𝐹 (Free (Fs \\ E) A)
         interp ψ (ret x) = return (ret x)
         interp ψ (op {F = F} x) with E ≟ F
-        ... | no  E≢F = mmap op (traverse (interp ψ) x)
+        ... | no  _   = mmap op (traverse (interp ψ) x)
         ... | yes E≡F = traverse (interp ψ) x >>= subst (λ G → [ G ] _ → 𝐹 _) E≡F ψ 

@@ -11,4 +11,12 @@ open import HITs.PropositionalTruncation.Sugar
 module _ {a} {A : Type a} (x : A) where
   open import Data.Set.Any (x ≡_)
     public
-    renaming (_◇_ to _∈_; ◇? to ∈?)
+    renaming (_◇_ to _∈_)
+
+module WithDecEq (_≟_ : Discrete A) where
+
+  _\\_ : 𝒦 A → A → 𝒦 A
+  xs \\ x = remove x (_≟_ x) xs
+
+  _∈?_ : ∀ (x : A) xs → Dec (x ∈ xs)
+  _∈?_ x = ◇? x (_≟_ x)
