@@ -41,8 +41,11 @@ module  _ {a : Level} where
     ∈-alg x .snd .c-com y z xs (x∈xs , _) = Σ≡Prop (λ _ → isPropIsProp) (isoToPath (memb-com (x ≡ y) (x ≡ z) x∈xs))
     ∈-alg x .snd .c-dup y   xs (x∈xs , _) = Σ≡Prop (λ _ → isPropIsProp) (isoToPath (memb-dup (x ≡ y) x∈xs))
 
+    infixr 5 _∈_
     _∈_ : A → 𝒦 A → Type a
     x ∈ xs = fst (⟦ ∈-alg x ⟧ xs)
+
+    open import Cubical.Foundations.Everything using (isPropΠ)
 
     module _ (_≟_ : Discrete A) where
 
@@ -51,8 +54,18 @@ module  _ {a : Level} where
 
       ∈?-alg : (x : A) → Ψ[ xs ⦂ 𝒦 A ] ↦ Dec (x ∈ xs)
       ∈?-alg x .fst ∅ = no λ ()
-      ∈?-alg x .fst (y ∷ xs ⟨ x∈?xs ⟩) = disj (∣_∣ ∘ inl) (∣_∣ ∘ inr) (λ x≢y x∉xs → rec (λ ()) (either x≢y x∉xs) ) (x ≟ y) x∈?xs
+      ∈?-alg x .fst (y ∷ xs ⟨ x∈?xs ⟩) = disj (∣_∣ ∘ inl) (∣_∣ ∘ inr) (λ x≢y x∉xs → rec (λ ()) (either x≢y x∉xs)) (x ≟ y) x∈?xs
       ∈?-alg x .snd = prop-coh λ xs → isPropDec (snd (⟦ ∈-alg x ⟧ xs))
 
+      infixr 5 _∈?_
       _∈?_ : ∀ x xs → Dec (x ∈ xs)
       _∈?_ x = ⟦ ∈?-alg x ⟧
+
+    ∈-≡-to : ∀ x xs → x ∈ xs → xs ≡ x ∷ xs
+    ∈-≡-to = λ x → ⟦ ∈-≡-alg x ⟧
+      where
+      ∈-≡-alg : ∀ x → Ψ[ xs ⦂ 𝒦 A ] ↦ (x ∈ xs → xs ≡ x ∷ xs)
+      ∈-≡-alg x .snd = prop-coh λ _ → isPropΠ λ _ → trunc _ _
+      ∈-≡-alg x .fst (y ∷ xs ⟨ k ⟩) = rec (trunc _ _) (either (λ x≡y → sym (dup y xs) ; cong (_∷ y ∷ xs) (sym x≡y) ) λ x∈xs → cong (y ∷_) (k x∈xs ) ; com y x xs)
+
+
