@@ -11,6 +11,7 @@ open import Data.Unit
 open import Data.Empty
 open import Data.Empty.Properties using (isProp⊥)
 open import Relation.Nullary.Discrete
+open import Relation.Nullary.Discrete.Properties
 open import Relation.Nullary.Decidable using (Dec; does; why)
 
 isPropT : ∀ x → isProp (T x)
@@ -30,3 +31,6 @@ discreteBool false false .why = refl
 discreteBool false true .why = false≢true
 discreteBool true false .why = true≢false
 discreteBool true true .why = refl
+
+isSetBool : isSet Bool
+isSetBool = Discrete→isSet discreteBool
