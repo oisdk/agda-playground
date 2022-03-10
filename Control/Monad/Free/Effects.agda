@@ -1,5 +1,3 @@
-{-# OPTIONS --no-positivity-check --cubical --without-K #-}
-
 module Control.Monad.Free.Effects where
 
 open import Prelude
