@@ -25,17 +25,35 @@ open import Data.Nat.DivMod
 open import Agda.Builtin.Nat using (div-helper)
 import Data.Nat.Properties as ℕ
 
--- Bear in mind the following two functions will not compute
--- as currently subst (with --cubical) doesn't work on GADTs.
---
--- We could write the functions without using subst.
+
+private module ComputingSubstOnℕ where
+  infix 4 _≡ℕ_
+  _≡ℕ_ : ℕ → ℕ → Type
+  n ≡ℕ m = T (n ℕ.≡ᴮ m)
+
+  substℕ : ∀ (P : ℕ → Type) {n m} → n ≡ℕ m → P n → P m
+  substℕ P {zero}  {zero } p = id
+  substℕ P {suc n} {suc m} p = substℕ (P ∘ suc) p
+
+  +0ℕ : ∀ n → n + zero ≡ℕ n
+  +0ℕ zero = tt
+  +0ℕ (suc n) = +0ℕ n
+
+  +sucℕ : ∀ n m → n + suc m ≡ℕ suc (n + m)
+  +sucℕ zero zero = tt
+  +sucℕ zero (suc n) = +sucℕ zero n
+  +sucℕ (suc n) m = +sucℕ n m
+
+open ComputingSubstOnℕ
+
 div2≤ : ∀ n → n ÷ 2 ≤ n
-div2≤ n = subst (n ÷ 2 ≤_) (ℕ.+-idʳ n) (go zero n)
+div2≤ n = substℕ (n ÷ 2 ≤_) (+0ℕ n) (go zero n)
   where
   go : ∀ k n → div-helper k 1 n 1 ≤ n + k
   go k zero = n≤n
   go k (suc zero) = n≤s n≤n
-  go k (suc (suc n)) = n≤s (subst (div-helper (suc k) 1 n 1 ≤_) (ℕ.+-suc n k) (go (suc k) n))
+  go k (suc (suc n)) = n≤s (substℕ (div-helper (suc k) 1 n 1 ≤_) (+sucℕ n k) (go (suc k) n))
+
 
 s≤s : ∀ {n m} → n ≤ m → suc n ≤ suc m
 s≤s n≤n = n≤n
