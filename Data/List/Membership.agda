@@ -16,7 +16,6 @@ open import Data.Maybe.Properties using (just-inj)
 module _ {a} {A : Type a} {x : A} where
   open Exists (_≡ x)
     using (push; pull; push!; pull!; here!; _◇++_; _++◇_)
-    renaming (◇? to _∈?_)
     public
 
 infixr 5 _∈_ _∈!_ _∉_
@@ -52,9 +51,12 @@ open import Function.Injective
 at : ∀ {xs : List A} (n : Fin (length xs)) → (xs ! n) ∈ xs
 at n = n , refl
 
-module _ {a} {A : Set a} (_≟_ : Discrete A) where
+module WithDecEq {a} {A : Set a} (_≟_ : Discrete A) where
   isSet⟨A⟩ : isSet A
   isSet⟨A⟩ = Discrete→isSet _≟_
+
+  _∈?_ : ∀ (x : A) xs → Dec (x ∈ xs)
+  _∈?_ x xs = Exists.◇? (_≡ x) (_≟ x) xs
 
   infixl 6 _\\_
   _\\_ : List A → A → List A
