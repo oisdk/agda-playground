@@ -15,7 +15,7 @@ _<_ : ℕ → ℕ → Type
 n < m = suc n ≤ m
 
 ≤-wellFounded : WellFounded _<_
-≤-wellFounded x = acc (go x)
+≤-wellFounded = acc ∘ go
   where
   go : ∀ n m → m < n → Acc _<_ m
   go (suc n) .n n≤n = acc (go n)

@@ -38,8 +38,7 @@ open import Data.Bool
 --   else 2ᵇ ⟦ n ÷ 2 ⇑⟧″
 
 -- The "principled" version (which uses well-founded recursion) is
--- incredibly slow. (and the following doesn't even compute, because of
--- cubical)
+-- incredibly slow.
 
 open import Data.Nat.WellFounded
 open import WellFounded
@@ -54,7 +53,7 @@ open import WellFounded
     then 1ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))
     else 2ᵇ go (n ÷ 2) (wf (n ÷ 2) (s≤s (div2≤ n)))
 
--- open import Path
+open import Path
 
--- _ : ⟦ 3 ⇑⟧‴ ≡ 1ᵇ 1ᵇ 0ᵇ
--- _ = refl
+_ : ⟦ 30 ⇑⟧‴ ≡ ⟦ 30 ⇑⟧
+_ = refl
