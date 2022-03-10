@@ -27,7 +27,35 @@ infixr 5 _◇_
 _◇_ : 𝒦 A → Type p
 _◇_ = fst ∘ ⟦ ◇-alg ⟧
 
+◇-isProp : ∀ xs → isProp (_◇_ xs)
+◇-isProp = snd ∘ ⟦ ◇-alg ⟧
+
 open import Cubical.Foundations.Everything using (isPropΠ)
+
+
+open import Data.Set.Union
+
+
+◇-∪-alg : ∀ ys → Ψ[ xs ⦂ 𝒦 A ] ↦ (_◇_ xs → _◇_ (xs ∪ ys))
+◇-∪-alg ys .fst (_ ∷ _ ⟨ k ⟩) ◇xs = mapʳ k ∥$∥ ◇xs
+◇-∪-alg ys .snd = prop-coh λ xs → isPropΠ λ _ → ◇-isProp (xs ∪ ys)
+
+◇-∪ : ∀ xs ys → _◇_ xs → _◇_ (xs ∪ ys)
+◇-∪ xs ys = ⟦ ◇-∪-alg ys ⟧ xs
+
+¬◇-tail : ∀ x xs → (¬ (_◇_ (x ∷ xs)) → ¬ (_◇_ xs))
+¬◇-tail x xs ¬◇x∷xs ◇xs = ¬◇x∷xs ∣ inr ◇xs ∣
+
+◇⁻-∪-alg : ∀ ys → Ψ[ xs ⦂ 𝒦 A ] ↦ (¬ (_◇_ xs) → _◇_ (xs ∪ ys) → _◇_ ys) 
+◇⁻-∪-alg ys .fst ∅ ¬◇xs = id
+◇⁻-∪-alg ys .fst (x ∷ xs ⟨ k ⟩) ¬◇xs = rec (◇-isProp ys) (either (⊥-elim ∘ ¬◇xs ∘ ∣_∣ ∘ inl) (k (¬◇-tail x xs ¬◇xs)))
+◇⁻-∪-alg ys .snd = prop-coh λ _ → isPropΠ λ _ → isPropΠ λ _ → ◇-isProp ys 
+
+◇⁻-∪ : ∀ xs ys → ¬ (_◇_ xs) → _◇_ (xs ∪ ys) → _◇_ ys
+◇⁻-∪ xs ys = ⟦ ◇⁻-∪-alg ys ⟧ xs
+
+◇⁻-∪ˡ : ∀ xs ys → ¬ (_◇_ xs) → _◇_ (ys ∪ xs) → _◇_ ys
+◇⁻-∪ˡ xs ys ¬p p = ◇⁻-∪ xs ys ¬p (subst _◇_ (∪-com ys xs) p)
 
 module _ (P? : ∀ x → Dec (P x)) where
 
@@ -37,7 +65,7 @@ module _ (P? : ∀ x → Dec (P x)) where
   ◇?-alg : Ψ[ xs ⦂ 𝒦 A ] ↦ Dec (_◇_ xs)
   ◇?-alg .fst ∅ = no λ ()
   ◇?-alg .fst (x ∷ xs ⟨ x◇?xs ⟩) = disj (∣_∣ ∘ inl) (∣_∣ ∘ inr) (λ x≢y x∉xs → rec (λ ()) (either x≢y x∉xs)) (P? x) x◇?xs
-  ◇?-alg .snd = prop-coh λ xs → isPropDec (snd (⟦ ◇-alg ⟧ xs))
+  ◇?-alg .snd = prop-coh λ xs → isPropDec (◇-isProp xs)
 
   ◇? : ∀ xs → Dec (_◇_ xs)
   ◇? = ⟦ ◇?-alg ⟧
