@@ -30,7 +30,7 @@ false and y = false
 true  and y = y
 
 infixr 0 if_then_else_
-if_then_else_ : ∀ {a} {A : Set a} → Bool → A → A → A
+if_then_else_ : ∀ {a} {A : Type a} → Bool → A → A → A
 if p then x else y = bool y x p
 {-# INLINE if_then_else_ #-}
 

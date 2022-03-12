@@ -309,7 +309,7 @@ record Equivalence {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ �
     refl  : ∀ {x} → x ≋ x
     trans : ∀ {x y z} → x ≋ y → y ≋ z → x ≋ z
 
-≡-equivalence : ∀ {a} {A : Set a} → Equivalence A a
+≡-equivalence : ∀ {a} {A : Type a} → Equivalence A a
 ≡-equivalence = record
   { _≋_ = _≡_
   ; sym = ≡.sym

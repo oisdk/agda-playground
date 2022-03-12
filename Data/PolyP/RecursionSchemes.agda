@@ -152,7 +152,7 @@ map-id F x =
 ---------------------------------------------------------------------------------
 module Categorical (F : Functor (suc n)) (As : Params n) where
   infix 4 _≗_
-  _≗_ : (A → B) → (A → B) → Set _
+  _≗_ : (A → B) → (A → B) → Type _
   f ≗ g = ∀ x → f x ≡ g x
   {-# INLINE _≗_ #-}
 

@@ -1,8 +1,9 @@
 {-# OPTIONS --cubical --safe #-}
 
 open import Relation.Binary
+open import Level
 
-module Relation.Binary.Equivalence.Reasoning {a} {𝑆 : Set a} {b} (equivalence : Equivalence 𝑆 b) where
+module Relation.Binary.Equivalence.Reasoning {a} {𝑆 : Type a} {b} (equivalence : Equivalence 𝑆 b) where
 
 open Equivalence equivalence
 open import Function

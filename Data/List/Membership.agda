@@ -51,7 +51,7 @@ open import Function.Injective
 at : ∀ {xs : List A} (n : Fin (length xs)) → (xs ! n) ∈ xs
 at n = n , refl
 
-module WithDecEq {a} {A : Set a} (_≟_ : Discrete A) where
+module WithDecEq {a} {A : Type a} (_≟_ : Discrete A) where
   isSet⟨A⟩ : isSet A
   isSet⟨A⟩ = Discrete→isSet _≟_
 

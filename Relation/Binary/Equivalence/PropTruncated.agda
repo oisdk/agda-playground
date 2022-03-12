@@ -2,6 +2,7 @@
 
 module Relation.Binary.Equivalence.PropTruncated where
 
+open import Agda.Primitive using (Prop)
 open import Prelude
 open import Relation.Nullary.Stable
 
