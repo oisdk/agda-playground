@@ -410,11 +410,14 @@ record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ : Type (ℓ₁ ℓ
     extract : 𝐹 ε A → A
     extend  : ∀ {x y} → (𝐹 y A → B) → 𝐹 (x ∙ y) A → 𝐹 x B
 
+  extend[_] : ∀ {x y z} → x ∙ y ≡ z → (𝐹 y A → B) → 𝐹 z A → 𝐹 x B
+  extend[ p ] k = subst (λ w → (𝐹 w _ → _)) p (extend k)
+
   _=>>_ : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
   _=>>_ = flip extend
 
   proven-cobind : ∀ {x y z} → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 z A → 𝐹 x B
-  proven-cobind k prf = subst (λ zs → 𝐹 zs _ → _) prf (extend k)
+  proven-cobind k prf = extend[ prf ] k
 
   syntax proven-cobind f prf xs = xs =>>[ prf ] f
 
@@ -432,6 +435,7 @@ record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ : Type (ℓ₁ ℓ
           PathP (λ i → 𝐹 (assoc x y z i) A → D) ((f =<= g) =<= h) (f =<= (g =<= h))
 
   {-# INLINE proven-cobind #-}
+  {-# INLINE extend[_] #-}
 
   infixr 1 codo-syntax
   codo-syntax : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
@@ -446,16 +450,28 @@ record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ : Type (ℓ₁ ℓ
   syntax proven-codo-syntax xs (λ x → r) prf = x ↢ xs [ prf ]; r
 
   map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
-  map f = proven-cobind (f ∘′ extract) (∙ε _)
+  map f = extend[ ∙ε _ ] (f ∘′ extract)
   {-# INLINE map #-}
 
-  -- open import Cubical.Foundations.Prelude using (fromPathP)
+  open import Cubical.Foundations.Prelude using (fromPathP; transportRefl; substRefl)
 
-  -- map-id : ∀ {x} → (xs : 𝐹 x A) → map id xs ≡ xs
-  -- map-id xs = cong (_$ xs) (fromPathP (=>>-idʳ id))
+  map-id : ∀ {x} → (xs : 𝐹 x A) → map id xs ≡ xs
+  map-id xs = cong (_$ xs) (fromPathP (=>>-idʳ id))
+
+  extract-extend : ∀ {x} (xs : 𝐹 x A) → extract (extend[ ε∙ x ] id xs) ≡ xs
+  extract-extend {A = A} {x = x} xs =
+    cong extract (J (λ y p → (xs : 𝐹 y A) → extend[ p ] id xs ≡ extend id (subst (flip 𝐹 A) (sym p) xs)) (λ xs → cong (_$ xs) (transportRefl (extend id))  ; cong (extend id) (sym (transportRefl xs))) (ε∙ x) xs ) ;
+    sym (transportRefl _) ;
+    cong (_$ xs) (fromPathP (=>>-idˡ {x = x} id))
+
+  open import Path.Reasoning
 
   -- map-comp : ∀ {x} (g : B → C) (f : A → B) → map {x = x} g ∘ map f ≡ map {x = x} (g ∘ f)
-  -- map-comp g f = let p = =>>-assoc extract (g ∘′ extract) (f ∘′ extract) in {!!}
+  -- map-comp {x = x} g f = funExt λ xs →
+  --   map g (map f xs) ≡⟨⟩
+  --   extend[ ∙ε x ] (g ∘ extract) (extend[ ∙ε x ] (f ∘ extract) xs) ≡⟨ {!!} ⟩
+  --   extend[ ∙ε x ] (g ∘ f ∘ extract) xs ≡⟨⟩
+  --   map (g ∘ f) xs ∎
 
 record SGradedComonad {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
   open Semiring semiring
