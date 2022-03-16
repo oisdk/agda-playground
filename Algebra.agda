@@ -403,35 +403,35 @@ record GradedMonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ�
   _>>=ε_ : ∀ {x} → 𝐹 x A → (A → 𝐹 ε B) → 𝐹 x B
   xs >>=ε f = xs >>=[ ∙ε _ ] f
 
-record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
+record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   open Monoid monoid
   field
-    𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₃
+    𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₂
     extract : 𝐹 ε A → A
-    _=>>_ : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
+    extend  : ∀ {x y} → (𝐹 y A → B) → 𝐹 (x ∙ y) A → 𝐹 x B
 
-  proven-cobind : ∀ {x y z} → 𝐹 z A → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 x B
-  proven-cobind xs k prf = subst (flip 𝐹 _) (sym prf) xs =>> k
+  _=>>_ : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
+  _=>>_ = flip extend
+
+  proven-cobind : ∀ {x y z} → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 z A → 𝐹 x B
+  proven-cobind k prf = subst (λ zs → 𝐹 zs _ → 𝐹 _ _) prf (extend k)
 
   syntax proven-cobind xs f prf = xs =>>[ prf ] f
 
   _=<=_ : ∀ {x y} → (𝐹 x B → C) → (𝐹 y A → B) → 𝐹 (x ∙ y) A → C
-  (g =<= f) x = g (x =>> f)
+  (g =<= f) x = g (extend f x)
 
   _=>=_ : ∀ {x y} → (𝐹 y A → B) → (𝐹 x B → C) → 𝐹 (x ∙ y) A → C
-  f =>= g = g =<= f
+  _=>=_ = flip _=<=_
 
 
   field
-    =>>-idʳ : ∀ {s} (f : 𝐹 s A → B) → (f =>= extract) ≡[ i ≔ (𝐹 (ε∙ s i) A → B) ]≡ f
-    =>>-idˡ : ∀ {s} {B : Type ℓ₂} (f : 𝐹 s A → B) → (extract =>= f) ≡[ i ≔ (𝐹 (∙ε s i) A → B) ]≡ f
-    =>>-assoc :
-      ∀ {D : Type ℓ₂}
-      {x y z} →
-      (f : 𝐹 x A → B)
-      (g : 𝐹 y B → C)
-      (h : 𝐹 z C → D) →
-      (f =>= (g =>= h)) ≡[ i ≔ (𝐹 (assoc z y x i) A → D) ]≡ ((f =>= g) =>= h)
+    =>>-idˡ : ∀ {x} {B : Type ℓ₂} → (f : 𝐹 x A → B) → PathP (λ i → 𝐹 (ε∙ x i) A → B) (extract =<= f) f
+    =>>-idʳ : ∀ {x} {B : Type ℓ₂} → (f : 𝐹 x A → B) → PathP (λ i → 𝐹 (∙ε x i) A → B) (f =<= extract) f
+    =>>-assoc : ∀ {x y z} {D : Type ℓ₂} → (f : 𝐹 x C → D) (g : 𝐹 y B → C) (h : 𝐹 z A → B) →
+          PathP (λ i → 𝐹 (assoc x y z i) A → D) ((f =<= g) =<= h) (f =<= (g =<= h))
+
+  {-# INLINE proven-cobind #-}
 
   infixr 1 codo-syntax
   codo-syntax : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
@@ -441,19 +441,26 @@ record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ
 
   infixr 1 proven-codo-syntax
   proven-codo-syntax : ∀ {x y z} → 𝐹 z A → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 x B
-  proven-codo-syntax = proven-cobind
+  proven-codo-syntax xs k p = proven-cobind k p xs
 
   syntax proven-codo-syntax xs (λ x → r) prf = x ↢ xs [ prf ]; r
 
   map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
-  map f xs =
-    x ↢ xs [ ∙ε _ ];
-    f (extract x)
+  map f = proven-cobind (f ∘′ extract) (∙ε _)
+  {-# INLINE map #-}
+
+  -- open import Cubical.Foundations.Prelude using (fromPathP)
+
+  -- map-id : ∀ {x} → (xs : 𝐹 x A) → map id xs ≡ xs
+  -- map-id xs = cong (_$ xs) (fromPathP (=>>-idʳ id))
+
+  -- map-comp : ∀ {x} (g : B → C) (f : A → B) → map {x = x} g ∘ map f ≡ map {x = x} (g ∘ f)
+  -- map-comp g f = let p = =>>-assoc extract (g ∘′ extract) (f ∘′ extract) in {!!}
 
 record SGradedComonad {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
   open Semiring semiring
   field
-    gradedComonad : GradedComonad +-monoid ℓ₂ ℓ₃
+    gradedComonad : GradedComonad +-monoid ℓ₂
   open GradedComonad gradedComonad
   field
     pure  : ∀ {x} → 𝐹 x A
