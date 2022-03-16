@@ -7,10 +7,10 @@ module Control.Comonad.Cofree
   where
 
 module Comonadic
-  {ℓ₁ ℓ₂ ℓ₃}
+  {ℓ₁ ℓ₂}
   (mon : Monoid ℓ₁)
-  (comon : GradedComonad mon ℓ₂ ℓ₃)
-  (functor : Functor (ℓ₁ ℓ⊔ ℓ₃) ℓ₂) where
+  (comon : GradedComonad mon ℓ₂)
+  (functor : Functor (ℓ₁ ℓ⊔ ℓ₂) ℓ₂) where
 
   open Monoid mon
   open GradedComonad comon renaming (𝐹 to 𝑊; map to cmap)
@@ -24,7 +24,7 @@ module Comonadic
       step : 𝐹 (∃ y × 𝑊 y (CofreeF A))
   open CofreeF public
 
-  Cofree : Type ℓ₂ → Type ℓ₃
+  Cofree : Type ℓ₂ → Type ℓ₂
   Cofree A = 𝑊 ε (CofreeF A)
 
   extract′ : Cofree A → A

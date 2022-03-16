@@ -414,9 +414,9 @@ record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ : Type (ℓ₁ ℓ
   _=>>_ = flip extend
 
   proven-cobind : ∀ {x y z} → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 z A → 𝐹 x B
-  proven-cobind k prf = subst (λ zs → 𝐹 zs _ → 𝐹 _ _) prf (extend k)
+  proven-cobind k prf = subst (λ zs → 𝐹 zs _ → _) prf (extend k)
 
-  syntax proven-cobind xs f prf = xs =>>[ prf ] f
+  syntax proven-cobind f prf xs = xs =>>[ prf ] f
 
   _=<=_ : ∀ {x y} → (𝐹 x B → C) → (𝐹 y A → B) → 𝐹 (x ∙ y) A → C
   (g =<= f) x = g (extend f x)

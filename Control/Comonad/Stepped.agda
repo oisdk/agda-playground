@@ -9,7 +9,7 @@ open import Data.Maybe
 
 module Control.Comonad.Stepped {s}
   (mon : TMAPOM s)
-  (comon : GradedComonad (TMAPOM.monoid mon) s s)
+  (comon : GradedComonad (TMAPOM.monoid mon) s )
   (functor : Functor s s)
   where
 

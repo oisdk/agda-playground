@@ -9,7 +9,7 @@ open import Data.Maybe
 
 module Control.Comonad.IntervalHeap {s}
   (mon : TMAPOM s)
-  (comon : GradedComonad (TMAPOM.monoid mon) s s)
+  (comon : GradedComonad (TMAPOM.monoid mon) s)
   where
 
 open TMAPOM mon
@@ -31,8 +31,8 @@ module OnFunctor (functor : Functor s s) where
   Cofree : Type s → Type s
   Cofree = Cofree⁺ ε
 
-  extend : (Cofree A → B) → Cofree⁺ w A → Cofree⁺ w B
-  extend f x .step = x .step =>>[ ∙ε _ ] λ ys → f ⟪ ys ⟫ , fmap (map₂ (extend f)) (snd (extract ys)) 
+  extend′ : (Cofree A → B) → Cofree⁺ w A → Cofree⁺ w B
+  extend′ f x .step = x .step =>>[ ∙ε _ ] λ ys → f ⟪ ys ⟫ , fmap (map₂ (extend′ f)) (snd (extract ys)) 
 
   extract′ : Cofree A → A
   extract′ = fst ∘ extract ∘ step
@@ -83,8 +83,8 @@ module AsHeap (_<*>_ : ∀ {w A B} → 𝑊 w (A → B) → 𝑊 w A → 𝑊 w 
   List⁺ : Type → Type
   List⁺ A = A × List A
 
-  huffman′ : Heap A → Tree A
-  huffman′ = {!!}
+  -- huffman′ : Heap A → Tree A
+  -- huffman′ = {!!}
   
 -- data Heap (A : Type s) : Type s where
 --   _◃_ : (w : 𝑆) → (xs : 𝐹 w (A × List (Heap A))) → Heap A
