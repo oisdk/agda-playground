@@ -15,6 +15,9 @@ Vec-Rel {n = suc n} R (x ∷ xs) (y ∷ ys) = R x y × Vec-Rel R xs ys
 
 private variable R : A → A → Type b
 
+-- I need rec2 here, which is in a newer version of cubical
+-- cons : {A : Type a} {R : A → A → Type b} → A / R → Vec A n / Vec-Rel R → Vec A (suc n) / Vec-Rel R
+-- cons x = rec squash/ {!rec!} {!!}
 
 trav : {A : Type a} {R : A → A → Type b} → Vec (A / R) n → Vec A n / Vec-Rel R
 trav {n = zero}  xs = [ [] ]

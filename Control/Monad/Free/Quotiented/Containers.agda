@@ -87,3 +87,11 @@ module _ {_~_ : ∀ {X} → Syntax  X → Syntax  X → Type} where
       where
         ϕ : Traversal′ Syntax (Free _~_ A) → Free _~_ A
         ϕ (n , xs , k) = rec squash/ ([_] ∘ sjoin ∘ k) {!!} (trav xs)
+
+open import Data.Fin
+
+FContainer : Type₁
+FContainer = ∃ Ops × (Ops → ℕ)
+
+⟦_⟧′ : FContainer → Type a → Type a
+⟦ Ops , Arity ⟧′ X = Σ[ Op ⦂ Ops ] × (Fin (Arity Op) → X)
