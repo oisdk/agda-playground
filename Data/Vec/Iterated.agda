@@ -31,6 +31,19 @@ mutual
 
 open Vec⁺ public
 
+_++_ : Vec A n → Vec A m → Vec A (n + m)
+_++_ {n = zero} []  = id
+_++_ {n = suc n} (x ∷ xs) ys = x ∷ (xs ++ ys)
+
+open import Data.Sigma
+
+split : Vec A (n + m) → Vec A n × Vec A m
+split {n = zero} xs .fst = []
+split {n = zero} xs .snd = xs
+split {n = suc n} xs .fst .head = xs .head
+split {n = suc n} xs .fst .tail = split (xs .tail) .fst
+split {n = suc n} xs .snd = split (xs .tail) .snd
+
 foldr : ∀ {p} (P : ℕ → Type p) →
           (∀ {n} → A → P n → P (suc n)) →
           P zero →

@@ -9,3 +9,4 @@ open import Cubical.HITs.SetQuotients
 --   ∣_∣ : A → A / R
 --   quot : (x y : A) → R x y → ∣ x ∣ ≡ ∣ y ∣
 --   trunc : isSet (A / R)
+
