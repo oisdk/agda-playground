@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical #-}
+{-# OPTIONS --cubical --guardedness #-}
 
 module HyperPositive where
 
@@ -43,3 +43,27 @@ open import Data.List.Syntax
 
 _ : zip (1 ⋯ 5) (11 ⋯ 15) ≡ [ 5 ][ (1 , 11) , (2 , 12) , (3 , 13) , (4 , 14) , (5 , 15) ]
 _ = refl
+
+open import Data.List
+
+record Tree (A : Type a) : Type a where
+  inductive; pattern; constructor _&_
+  field
+    root : A
+    children : List (Tree A)
+open Tree
+
+{-# NON_TERMINATING #-}
+loop : (A ↬ A) → A
+loop k = k .invoke loop
+
+{-# TERMINATING #-}
+bfe : Tree A → List A
+bfe t = f t d .invoke loop zero
+  where
+  f : Tree A → ((ℕ → List A) ↬ (ℕ → List A)) → ((ℕ → List A) ↬ (ℕ → List A))
+  f (x & xs) fw .invoke bw n = x ∷ fw .invoke (bw ∘ flip (foldr f) xs) (suc n)
+
+  d : ((ℕ → List A) ↬ (ℕ → List A))
+  d .invoke k zero    = []
+  d .invoke k (suc n) = k d n 
