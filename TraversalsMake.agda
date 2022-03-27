@@ -65,12 +65,11 @@ module _ {A B} (f g : A → F B) ⦃ _ : Applicative F ⦄ (comm : ∀ x → Com
     where
     open Traversed (traversed container)
 
-    distrib : (traverse f ⊛> traverse g) container ≡ ⦇ rebuild ((ap f ⊛> ap g) contents) ⦈
+    distrib : traverse f container *> traverse g container ≡ ⦇ rebuild (ap f contents *> ap g contents) ⦈
     distrib =
-      (traverse f ⊛> traverse g) container ≡⟨⟩
+      traverse f container *> traverse g container ≡⟨⟩
       ⦇ rebuild (ap f contents) ⦈ *> ⦇ rebuild (ap g contents) ⦈ ≡⟨ {!!} ⟩
-      ⦇ rebuild (ap f contents *> ap g contents) ⦈ ≡⟨⟩
-      ⦇ rebuild ((ap f ⊛> ap g) contents) ⦈ ∎
+      ⦇ rebuild (ap f contents *> ap g contents) ⦈ ∎
 
     go : ∀ n → (xs : Vec A n) → ap f xs *> ap g xs ≡ ap (f ⊛> g) xs
     go zero    []       =
