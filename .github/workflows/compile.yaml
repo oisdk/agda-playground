@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        cubical-ref: ["a60b0c6576fac0ba6e181cab75f9f9de2d167f87"]
+        cubical-ref: ["v0.3"]
         agda-ref: ["v2.6.2"]
         ghc-ver: ["9.0.1"]
         cabal-ver: ["3.4.0.0"]
