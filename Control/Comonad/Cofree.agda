@@ -10,7 +10,8 @@ module Comonadic
   {ℓ₁ ℓ₂}
   (mon : Monoid ℓ₁)
   (comon : GradedComonad mon ℓ₂)
-  (functor : Functor (ℓ₁ ℓ⊔ ℓ₂) ℓ₂) where
+  {𝐹 : Type (ℓ₁ ℓ⊔ ℓ₂) → Type ℓ₂}
+  (functor : Functor 𝐹) where
 
   open Monoid mon
   open GradedComonad comon renaming (𝐹 to 𝑊; map to cmap)
@@ -38,7 +39,8 @@ module Monadic
   {ℓ₁ ℓ₂ ℓ₃}
   (mon : Monoid ℓ₁)
   (monad : GradedMonad mon ℓ₂ ℓ₃)
-  (alternative : Alternative (ℓ₁ ℓ⊔ ℓ₃) ℓ₂) where
+  {𝐹 : Type (ℓ₁ ℓ⊔ ℓ₃) → Type ℓ₂}
+  (alternative : Alternative 𝐹) where
 
   open Monoid mon
   open GradedMonad monad renaming (𝐹 to 𝑀; map to mmap)

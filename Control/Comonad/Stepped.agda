@@ -10,7 +10,8 @@ open import Data.Maybe
 module Control.Comonad.Stepped {s}
   (mon : TMAPOM s)
   (comon : GradedComonad (TMAPOM.monoid mon) s )
-  (functor : Functor s s)
+  {𝐹 : Type s → Type s}
+  (functor : Functor 𝐹)
   where
 
 open TMAPOM mon
@@ -20,10 +21,10 @@ open Functor functor renaming (map to fmap)
 CofreeF : Type s → 𝑆 → Type s → Type s
 CofreeF A w B = 𝑊 w (A × 𝐹 B)
 
-functorCofreeF : ∀ {w} → IsFunctor (CofreeF A w)
-functorCofreeF .IsFunctor.map f = cmap (map₂ (fmap f))
-functorCofreeF .IsFunctor.map-id = {!!}
-functorCofreeF .IsFunctor.map-comp = {!!}
+functorCofreeF : ∀ {w} → Functor (CofreeF A w)
+functorCofreeF .Functor.map f = cmap (map₂ (fmap f))
+functorCofreeF .Functor.map-id = {!!}
+functorCofreeF .Functor.map-comp = {!!}
 
 module _ {A : Type s} where
   open import Codata.SegFix commutativeMonoid (CofreeF A) (functorCofreeF {A = A}) public using (Fix; unfold)

@@ -233,62 +233,95 @@ record StarSemiring ℓ : Type (ℓsuc ℓ) where
   _⁺ : 𝑅 → 𝑅
   x ⁺ = x * x ⋆
 
-record Functor ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field
-    𝐹   : Type ℓ₁ → Type ℓ₂
+module _ {ℓ₁ ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) where
+
+  record Functor : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
+    field
+      map : (A → B) → 𝐹 A → 𝐹 B
+      map-id : map (id {ℓ₁} {A}) ≡ id
+      map-comp : (f : B → C) → (g : A → B) → map (f ∘ g) ≡ map f ∘ map g
+
+  record Applicative : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
+    infixl 5 _<*>_
+    field
+      pure : A → 𝐹 A
+      _<*>_ : 𝐹 (A → B) → 𝐹 A → 𝐹 B
+
     map : (A → B) → 𝐹 A → 𝐹 B
-    map-id : map (id {ℓ₁} {A}) ≡ id
-    map-comp : (f : B → C) → (g : A → B) → map (f ∘ g) ≡ map f ∘ map g
-
-record IsFunctor {ℓ₁ ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
-  field
-    map : (A → B) → 𝐹 A → 𝐹 B
-    map-id : map (id {ℓ₁} {A}) ≡ id
-    map-comp : (f : B → C) → (g : A → B) → map (f ∘ g) ≡ map f ∘ map g
-
-record Applicative ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field
-    functor : Functor ℓ₁ ℓ₂
-  open Functor functor public
-  infixl 5 _<*>_
-  field
-    pure : A → 𝐹 A
-    _<*>_ : 𝐹 (A → B) → 𝐹 A → 𝐹 B
-    map-ap : (f : A → B) → map f ≡ pure f <*>_
-    pure-homo : (f : A → B) → (x : A) → map f (pure x) ≡ pure (f x)
-    <*>-interchange : (u : 𝐹 (A → B)) → (y : A) → u <*> pure y ≡ map (_$ y) u
-    <*>-comp : (u : 𝐹 (B → C)) → (v : 𝐹 (A → B)) → (w : 𝐹 A) → pure _∘′_ <*> u <*> v <*> w ≡ u <*> (v <*> w)
+    map f = _<*>_ (pure f)
+    field
+      pure-homo : (f : A → B) → (x : A) → pure f <*> (pure x) ≡ pure (f x)
+      <*>-interchange : (u : 𝐹 (A → B)) → (y : A) → u <*> pure y ≡ map (_$ y) u
+      <*>-comp : (u : 𝐹 (B → C)) → (v : 𝐹 (A → B)) → (w : 𝐹 A) → pure _∘′_ <*> u <*> v <*> w ≡ u <*> (v <*> w)
 
 
-record IsMonad {ℓ₁} {ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
-  infixl 1 _>>=_
-  field
-    _>>=_ : 𝐹 A → (A → 𝐹 B) → 𝐹 B
-    return : A → 𝐹 A
+  record Monad : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
+    infixl 1 _>>=_
+    field
+      _>>=_ : 𝐹 A → (A → 𝐹 B) → 𝐹 B
+      return : A → 𝐹 A
 
-    >>=-idˡ : (f : A → 𝐹 B) → (x : A) → (return x >>= f) ≡ f x
-    >>=-idʳ : (x : 𝐹 A) → (x >>= return) ≡ x
-    >>=-assoc : (xs : 𝐹 A) (f : A → 𝐹 B) (g : B → 𝐹 C) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
+      >>=-idˡ : (f : A → 𝐹 B) → (x : A) → (return x >>= f) ≡ f x
+      >>=-idʳ : (x : 𝐹 A) → (x >>= return) ≡ x
+      >>=-assoc : (xs : 𝐹 A) (f : A → 𝐹 B) (g : B → 𝐹 C) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
+
+--   record MonadHomomorphism_⟶_
+--           {ℓ₁ ℓ₂ ℓ₃}
+--           (from : Monad ℓ₁ ℓ₂)
+--           (to : Monad ℓ₁ ℓ₃) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
+--     module F = Monad from
+--     module T = Monad to
+
+--     field
+--       f : F.𝐹 A → T.𝐹 A
+--       >>=-homo : (xs : F.𝐹 A) (k : A → F.𝐹 B) → (f xs T.>>= (f ∘ k)) ≡ f (xs F.>>= k)
+--       return-homo : (x : A) → f (F.return x) ≡ T.return x
 
 
-record Monad ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field
-    𝐹 : Type ℓ₁ → Type ℓ₂
-    isMonad : IsMonad 𝐹
-  open IsMonad isMonad public
+  record Alternative : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
+    field
+      applicative : Applicative
+    open Applicative applicative public
+    field
+      0# : 𝐹 A
+      _<|>_ : 𝐹 A → 𝐹 A → 𝐹 A
+      <|>-idˡ : (x : 𝐹 A) → 0# <|> x ≡ x
+      <|>-idʳ : (x : 𝐹 A) → x <|> 0# ≡ x
+      0-annˡ : (x : 𝐹 A) → 0# <*> x ≡ 0# {B}
+      <|>-distrib : (x y : 𝐹 (A → B)) → (z : 𝐹 A) → (x <|> y) <*> z ≡ (x <*> z) <|> (y <*> z)
 
-record MonadHomomorphism_⟶_
-         {ℓ₁ ℓ₂ ℓ₃}
-         (from : Monad ℓ₁ ℓ₂)
-         (to : Monad ℓ₁ ℓ₃) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
-  module F = Monad from
-  module T = Monad to
+--   record MonadPlus ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
+--     field
+--       monad : Monad ℓ₁ ℓ₂
+--     open Monad monad public
+--     field
+--       0# : 𝐹 A
+--       _<|>_ : 𝐹 A → 𝐹 A → 𝐹 A
+--       <|>-idˡ : (x : 𝐹 A) → 0# <|> x ≡ x
+--       <|>-idʳ : (x : 𝐹 A) → x <|> 0# ≡ x
+--       0-annˡ : (x : A → 𝐹 B) → (0# >>= x) ≡ 0#
+--       <|>-distrib : (x y : 𝐹 A) → (z : A → 𝐹 B) → ((x <|> y) >>= z) ≡ (x >>= z) <|> (y >>= z)
 
-  field
-    f : F.𝐹 A → T.𝐹 A
-    >>=-homo : (xs : F.𝐹 A) (k : A → F.𝐹 B) → (f xs T.>>= (f ∘ k)) ≡ f (xs F.>>= k)
-    return-homo : (x : A) → f (F.return x) ≡ T.return x
+--   Endo : Type a → Type a
+--   Endo A = A → A
 
+--   endoMonoid : ∀ {a} → Type a → Monoid a
+--   endoMonoid A .Monoid.𝑆 = Endo A
+--   endoMonoid A .Monoid.ε x = x
+--   endoMonoid A .Monoid._∙_ f g x = f (g x)
+--   endoMonoid A .Monoid.assoc _ _ _ = refl
+--   endoMonoid A .Monoid.ε∙ _ = refl
+--   endoMonoid A .Monoid.∙ε _ = refl
+
+--   record Foldable ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
+--     field
+--       𝐹 : Type ℓ₁ → Type ℓ₂
+--     open Monoid ⦃ ... ⦄
+--     field
+--       foldMap : {A : Type ℓ₁} ⦃ _ : Monoid ℓ₁ ⦄ → (A → 𝑆) → 𝐹 A → 𝑆
+--     foldr : {A B : Type ℓ₁} → (A → B → B) → B → 𝐹 A → B
+--     foldr f b xs = foldMap ⦃ endoMonoid _ ⦄ f xs b
+--     
 record IsSetMonad {ℓ₁} {ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
   infixl 1 _>>=_
   field
@@ -308,9 +341,9 @@ record SetMonad ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   open IsSetMonad isSetMonad public
 
 record SetMonadHomomorphism_⟶_
-         {ℓ₁ ℓ₂ ℓ₃}
-         (from : SetMonad ℓ₁ ℓ₂)
-         (to : SetMonad ℓ₁ ℓ₃) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
+        {ℓ₁ ℓ₂ ℓ₃}
+        (from : SetMonad ℓ₁ ℓ₂)
+        (to : SetMonad ℓ₁ ℓ₃) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
   module F = SetMonad from
   module T = SetMonad to
 
@@ -318,50 +351,6 @@ record SetMonadHomomorphism_⟶_
     f : F.𝐹 A → T.𝐹 A
     >>=-homo : (xs : F.𝐹 A) (k : A → F.𝐹 B) → (f xs T.>>= (f ∘ k)) ≡ f (xs F.>>= k)
     return-homo : (x : A) → f (F.return x) ≡ T.return x
-
-record Alternative ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field
-    applicative : Applicative ℓ₁ ℓ₂
-  open Applicative applicative public
-  field
-    0# : 𝐹 A
-    _<|>_ : 𝐹 A → 𝐹 A → 𝐹 A
-    <|>-idˡ : (x : 𝐹 A) → 0# <|> x ≡ x
-    <|>-idʳ : (x : 𝐹 A) → x <|> 0# ≡ x
-    0-annˡ : (x : 𝐹 A) → 0# <*> x ≡ 0# {B}
-    <|>-distrib : (x y : 𝐹 (A → B)) → (z : 𝐹 A) → (x <|> y) <*> z ≡ (x <*> z) <|> (y <*> z)
-
-record MonadPlus ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field
-    monad : Monad ℓ₁ ℓ₂
-  open Monad monad public
-  field
-    0# : 𝐹 A
-    _<|>_ : 𝐹 A → 𝐹 A → 𝐹 A
-    <|>-idˡ : (x : 𝐹 A) → 0# <|> x ≡ x
-    <|>-idʳ : (x : 𝐹 A) → x <|> 0# ≡ x
-    0-annˡ : (x : A → 𝐹 B) → (0# >>= x) ≡ 0#
-    <|>-distrib : (x y : 𝐹 A) → (z : A → 𝐹 B) → ((x <|> y) >>= z) ≡ (x >>= z) <|> (y >>= z)
-
-Endo : Type a → Type a
-Endo A = A → A
-
-endoMonoid : ∀ {a} → Type a → Monoid a
-endoMonoid A .Monoid.𝑆 = Endo A
-endoMonoid A .Monoid.ε x = x
-endoMonoid A .Monoid._∙_ f g x = f (g x)
-endoMonoid A .Monoid.assoc _ _ _ = refl
-endoMonoid A .Monoid.ε∙ _ = refl
-endoMonoid A .Monoid.∙ε _ = refl
-
-record Foldable ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field
-    𝐹 : Type ℓ₁ → Type ℓ₂
-  open Monoid ⦃ ... ⦄
-  field
-    foldMap : {A : Type ℓ₁} ⦃ _ : Monoid ℓ₁ ⦄ → (A → 𝑆) → 𝐹 A → 𝑆
-  foldr : {A B : Type ℓ₁} → (A → B → B) → B → 𝐹 A → B
-  foldr f b xs = foldMap ⦃ endoMonoid _ ⦄ f xs b
 
 record GradedMonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
   open Monoid monoid
@@ -501,4 +490,4 @@ record MatchedPair {ℓ₁ ℓ₂} (R : Monoid ℓ₁) (E : Monoid ℓ₂) : Typ
     law7 : ∀ x y z → κ (x * y) z ≡ κ x (κ y z)
     law8 : ∀ x y z → κ x (y ∙ z) ≡ κ x y ∙ κ (ι x y) z
 
-  
+

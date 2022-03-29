@@ -34,8 +34,7 @@ fromJust (just x) = x
 
 open import Algebra 
 
-maybeFunctor : Functor a a
-maybeFunctor .Functor.𝐹 = Maybe
+maybeFunctor : Functor {ℓ₁ = a} Maybe
 maybeFunctor .Functor.map = mapMaybe
 maybeFunctor .Functor.map-id = funExt λ { nothing → refl ; (just x) → refl }
 maybeFunctor .Functor.map-comp f g = funExt λ { nothing → refl ; (just x) → refl }

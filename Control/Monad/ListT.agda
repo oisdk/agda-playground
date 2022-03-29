@@ -7,10 +7,10 @@ open import Container
 module Control.Monad.ListT
   {ℓ}
   (𝔽 : Container ℓ ℓ)
-  (is-mon : IsMonad {ℓ} ⟦ 𝔽 ⟧ )
+  (is-mon : Monad {ℓ} ⟦ 𝔽 ⟧ )
   where
 
-open IsMonad is-mon
+open Monad is-mon
 
 postulate
   cmap-return : (f : A → B) (x : ⟦ 𝔽 ⟧ A) →

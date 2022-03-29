@@ -39,7 +39,7 @@ module _ (Univ : Type) (univ : Univ → Container ℓzero ℓzero) (_≟_ : Disc
     extract : Free ∅ A → A
     extract = extract′ tt
 
-  module _ (mon : Monad ℓzero ℓzero) where
+  module _ {𝐹 : Type → Type} (mon : Monad 𝐹) where
     open Monad mon
 
     mmap : (A → B) → 𝐹 A → 𝐹 B

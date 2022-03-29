@@ -132,8 +132,7 @@ state-state isSetA .leftInv xs = ⟦ lemma ⟧ xs
     (fromState (runState xs) >>= (fromState ∘ runState ∘ k)) ≡⟨ cong₂ Free._>>=_ P⟨xs⟩ (funExt P⟨∘k⟩) ⟩
     (xs >>= k) ∎
 
-functorState : Functor ℓ ℓ
-functorState .Functor.𝐹 = StateF
+functorState : Functor StateF
 functorState .Functor.map f (getF k) = getF (f ∘ k)
 functorState .Functor.map f (putF s k) = putF s (f k)
 functorState .Functor.map-id i (getF k) = getF k

@@ -34,7 +34,7 @@ module _ {ℓ₂ ℓ₃} where
   extend {fs = []}     x  k = (k x)
   extend {fs = f ∷ fs} xs k = cmap (flip (extend {fs = fs}) k) xs
 
-  module _ (mon : Monad (ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) (ℓsuc (ℓ₂ ℓ⊔ ℓ₃))) where
+  module _ {𝐹 : Type (ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) → Type (ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) }(mon : Monad 𝐹) where
     open import Data.Fin.Properties using (_<_)
     open Monad mon
 

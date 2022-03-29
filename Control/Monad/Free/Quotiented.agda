@@ -221,8 +221,8 @@ prop-coh {𝒯 = 𝒯} {P = P} P-isProp .c-quot i e =
   toPathP (P-isProp (∣ (𝒯 !! i) .eqn e .rhs ∣↑) (transp (λ j → P _ (quot i e j)) i0 _) _)
 
 -- A more conventional catamorphism
-module _ {ℓ} (fun : Functor ℓ ℓ) where
-  open Functor fun using (map; 𝐹)
+module _ {ℓ} {𝐹 : Type ℓ → Type ℓ} (fun : Functor 𝐹) where
+  open Functor fun using (map)
   module _ {B : Type ℓ} {𝒯 : Theory 𝐹} where
     module _ (ϕ : 𝐹 B → B) where
       ϕ₁ : Alg 𝐹 𝒯 λ T _ → (T → B) → B

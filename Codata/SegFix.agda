@@ -8,12 +8,12 @@ module Codata.SegFix
   {ℓ}
   (mon : CommutativeMonoid ℓ)
   (𝐹 : CommutativeMonoid.𝑆 mon → Type ℓ → Type ℓ)
-  (functor : ∀ {s} → IsFunctor (𝐹 s))
+  (functor : ∀ {s} → Functor (𝐹 s))
   where
 
 open POM (algebraic-pom mon)
 module _ {s : 𝑆} where
-  open IsFunctor (functor {s = s}) public renaming (map to fmap)
+  open Functor (functor {s = s}) public renaming (map to fmap)
 
 private variable i j k : 𝑆
 

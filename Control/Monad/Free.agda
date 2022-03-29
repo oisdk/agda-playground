@@ -145,8 +145,8 @@ module _ {ℓ} (mon : SetMonad ℓ ℓ) where
 
 open import Cubical.Foundations.HLevels using (isSetΠ)
 
-module _ {ℓ} (fun : Functor ℓ ℓ) where
-  open Functor fun using (map; 𝐹)
+module _ {ℓ} {𝐹 : Type ℓ → Type ℓ} (fun : Functor 𝐹) where
+  open Functor fun using (map)
   module _ {B : Type ℓ} (BIsSet : isSet B) where
 
     cata-alg : (𝐹 B → B) → Ψ 𝐹 λ {T} _ → (T → B) → B

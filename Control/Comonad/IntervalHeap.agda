@@ -20,7 +20,7 @@ Weighted C A = ∃ w × C w A
 
 private variable u v w : 𝑆
 
-module OnFunctor (functor : Functor s s) where
+module OnFunctor {𝐹 : Type s → Type s} (functor : Functor 𝐹) where
   open Functor functor renaming (map to fmap)
 
   record Cofree⁺ (w : 𝑆) (A : Type s) : Type s where
