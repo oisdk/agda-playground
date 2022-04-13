@@ -265,18 +265,24 @@ module _ {ℓ₁ ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) where
       >>=-idʳ : (x : 𝐹 A) → (x >>= return) ≡ x
       >>=-assoc : (xs : 𝐹 A) (f : A → 𝐹 B) (g : B → 𝐹 C) → ((xs >>= f) >>= g) ≡ (xs >>= (λ x → f x >>= g))
 
---   record MonadHomomorphism_⟶_
---           {ℓ₁ ℓ₂ ℓ₃}
---           (from : Monad ℓ₁ ℓ₂)
---           (to : Monad ℓ₁ ℓ₃) : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
---     module F = Monad from
---     module T = Monad to
+    mmap : (A → B) → 𝐹 A → 𝐹 B
+    mmap f xs = xs >>= (return ∘ f)
 
---     field
---       f : F.𝐹 A → T.𝐹 A
---       >>=-homo : (xs : F.𝐹 A) (k : A → F.𝐹 B) → (f xs T.>>= (f ∘ k)) ≡ f (xs F.>>= k)
---       return-homo : (x : A) → f (F.return x) ≡ T.return x
+  record Comonad : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
+    field
+      extend : (𝐹 A → B) → 𝐹 A → 𝐹 B
+      extract : 𝐹 A → A
 
+    infixl 1 _=>>_
+    _=>>_ : 𝐹 A → (𝐹 A → B) → 𝐹 B
+    _=>>_ = flip extend
+
+    cmap : (A → B) → 𝐹 A → 𝐹 B
+    cmap f xs = xs =>> (f ∘ extract)
+
+    -- liftA2 : (A → B → C) → 𝐹 A → 𝐹 B → 𝐹 C
+    -- liftA2 f xs ys = xs =>> λ x → {!ys =>> λ y → {!!}!}
+    
 
   record Alternative : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
     field

@@ -6,8 +6,9 @@ open import Prelude
 
 infixr 2 _↬_
 {-# NO_POSITIVITY_CHECK #-}
+
 record _↬_ (A : Type a) (B : Type b) : Type (a ℓ⊔ b) where
-  constructor hyp; inductive
+  constructor Φ; inductive
   infixl 4 _·_
   field _·_ : (B ↬ A) → B
 open _↬_ public
@@ -41,26 +42,29 @@ mutual
   _▸_ : (B ↬ C) → (A → B) → A ↬ C
   h ▸ f · k = h · (f ◂ k)
 
-H : (A → B) → A ↬ B
-H f · k = f (k · H f)
+△ : (A → B) → A ↬ B
+△ f = f ◃ △ f
 
 k : A → B ↬ A
 k x · _ = x
+
+▽ : A ↬ B → A → B
+▽ h x = h · k x
 
 ana : (A → (A → B) → C) → A → B ↬ C
 ana ψ x · y = ψ x (λ z → y · ana ψ z)
 
 cata : (((A → B) → C) → A) → B ↬ C → A
-cata ϕ h = ϕ λ g → h · hyp (g ∘ cata ϕ)
+cata ϕ h = ϕ λ g → h · Φ (g ∘ cata ϕ)
 
 unroll : A ↬ B → (A ↬ B → A) → B
-unroll x f = x · hyp f
+unroll x f = x · Φ f
 
 roll : ((A ↬ B → A) → B) → A ↬ B
 roll f · k = f (k ·_)
 
 𝕊 : A ↬ (B → C) → A ↬ B → A ↬ C
-𝕊 = curry (ana λ { (i , j) fga → (i · hyp (fga ∘ (_, j))) (j · hyp (fga ∘ (i ,_))) })
+𝕊 = curry (ana λ { (i , j) fga → (i · Φ (fga ∘ (_, j))) (j · Φ (fga ∘ (i ,_))) })
 
 𝕄 : A ↬ A ↬ B → A ↬ B
-𝕄 h · k = h · hyp (λ x → k · 𝕄 x) · k
+𝕄 h · k = h · Φ (λ x → k · 𝕄 x) · k
