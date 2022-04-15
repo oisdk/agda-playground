@@ -38,9 +38,6 @@ module _ {ℓ₂ ℓ₃} where
     open import Data.Fin.Properties using (_<_)
     open Monad mon
 
-    mmap : (A → B) → 𝐹 A → 𝐹 B
-    mmap f xs = xs >>= return ∘ f
-
     handle : {A : Type (ℓsuc (ℓ₂ ℓ⊔ ℓ₃))} → (i : Fin (length fs)) →
              (⟦ fs ! i ⟧ ⇒ 𝐹) →
              (∀ j → j < i → Distributes ⟦ fs ! j ⟧ 𝐹) →
