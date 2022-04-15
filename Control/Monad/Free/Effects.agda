@@ -42,9 +42,6 @@ module _ (Univ : Type) (univ : Univ → Container ℓzero ℓzero) (_≟_ : Disc
   module _ {𝐹 : Type → Type} (mon : Monad 𝐹) where
     open Monad mon
 
-    mmap : (A → B) → 𝐹 A → 𝐹 B
-    mmap f xs = xs >>= return ∘′ f
-
     module _ (traverse : ∀ {F A B} → (A → 𝐹 B) → ⟦ F ⟧ A → 𝐹 (⟦ F ⟧ B)) where
       module _ (E : Univ) where
         interp : (⟦ E ⟧ ⇒ 𝐹) → Free Fs A → 𝐹 (Free (Fs \\ E) A)
