@@ -26,7 +26,7 @@ record _↬_ A B where
   inductive; constructor hyp
   infixl 4 _·_
   field _·_ : B ↬′ A → B
-open _↬_
+open _↬_ public
 
 infixr 9 _⊙_ _⊙′_ _⊙″_
 mutual
@@ -45,5 +45,15 @@ _◃_ : (A → B) → A ↬ B → A ↬ B
 k : A → B ↬ A
 k x · _ = x
 
--- △ : (A → B) → A ↬ B
--- △ f · k = f (k {!!})
+△ : (A → B) → A ↬ B
+△ f · k = f (k (return (△ f)))
+
+𝕀 : A ↬ A
+𝕀 · x = x (return 𝕀)
+
+▽ : A ↬ B → A → B
+▽ h x = h · λ _ → x
+
+
+-- run : A ↬ A → A
+-- run x = x · λ k → {!k !}

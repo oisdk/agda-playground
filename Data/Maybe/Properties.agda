@@ -38,3 +38,13 @@ maybeFunctor : Functor {ℓ₁ = a} Maybe
 maybeFunctor .Functor.map = mapMaybe
 maybeFunctor .Functor.map-id = funExt λ { nothing → refl ; (just x) → refl }
 maybeFunctor .Functor.map-comp f g = funExt λ { nothing → refl ; (just x) → refl }
+
+maybeMonad : Monad {ℓ₁ = a} Maybe
+(maybeMonad Monad.>>= nothing) y = nothing
+(maybeMonad Monad.>>= just x) y = y x
+maybeMonad .Monad.return = just
+maybeMonad .Monad.>>=-idˡ f x = refl
+maybeMonad .Monad.>>=-idʳ nothing = refl
+maybeMonad .Monad.>>=-idʳ (just x) = refl
+maybeMonad .Monad.>>=-assoc nothing f g = refl
+maybeMonad .Monad.>>=-assoc (just x) f g = refl
