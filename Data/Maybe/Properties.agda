@@ -5,9 +5,6 @@ module Data.Maybe.Properties where
 open import Data.Maybe.Base
 open import Prelude
 
-fromMaybe : A → Maybe A → A
-fromMaybe x = maybe x id
-
 just-inj : ∀ {x y : A} → just x ≡ just y → x ≡ y
 just-inj {x = x} = cong (fromMaybe x)
 

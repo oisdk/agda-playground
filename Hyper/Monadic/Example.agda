@@ -6,7 +6,8 @@ open import Prelude
 open import Data.Maybe
 open import Data.Maybe.Properties
 
-open import Hyper.Monadic {𝑀 = Maybe} (maybeMonad {a = ℓzero})
+module _ {a : Level} where
+  open import Hyper.Monadic {𝑀 = Maybe} (maybeMonad {a = a}) public
 
 open import Data.List
 infixr 6 _&_
@@ -19,8 +20,8 @@ record Tree (A : Type a) : Type a where
 
 open Tree
 
-exampleTree : Tree ℕ
-exampleTree
+tree : Tree ℕ
+tree
   =
     1 &
       ( 2 &
@@ -46,18 +47,14 @@ run⟨ b ⟩ x = x · maybe b run⟨ b ⟩
 𝔼 : A ↬ A
 𝔼 · k = k nothing
 
-𝕃 : A ↬′ A → A ↬ A
-𝕃 x · k = x (just (𝕃 k))
-
 𝔽 : Maybe (A ↬ A) → A ↬ A
-𝔽 = maybe 𝔼 id
+𝔽 = fromMaybe 𝔼
 
-module _ {A : Type} where
-  bfs : Tree A → List A
-  bfs t = run⟨ [] ⟩ (f t 𝔼)
-    where
-    f : Tree A → (List A ↬ List A) → (List A ↬ List A)
-    f (t & ts) fw · bw = t ∷ (fw · bw ∘ just ∘ flip (foldr f) ts ∘ 𝔽)
+bfs : Tree A → List A
+bfs t = run⟨ [] ⟩ (f t 𝔼)
+  where
+  f : Tree A → (List A ↬ List A) → (List A ↬ List A)
+  f (t & ts) fw · bw = t ∷ (fw · bw ∘ just ∘ flip (foldr f) ts ∘ 𝔽)
 
-_ : bfs exampleTree ≡ (1 ⋯ 12)
+_ : bfs tree ≡ (1 ⋯ 12)
 _ = refl
