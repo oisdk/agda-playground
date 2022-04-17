@@ -68,3 +68,26 @@ roll f · k = f (k ·_)
 
 𝕄 : A ↬ A ↬ B → A ↬ B
 𝕄 h · k = h · Φ (λ x → k · 𝕄 x) · k
+
+Producer : Type a → Type b → Type (a ℓ⊔ b)
+Producer A B = (A → B) ↬ B
+
+Consumer : Type a → Type b → Type (a ℓ⊔ b)
+Consumer A B = B ↬ (A → B)
+
+yield : A → Producer A B → Producer A B
+yield x prod · cons = (cons · prod) x
+
+await : (A → B → B) → Consumer A B → Consumer A B
+(await f cons · prod) x = f x (prod · cons)
+
+open import Data.List
+
+zipˡ : List A → Producer A (List (A × B))
+zipˡ = foldr yield (k [])
+
+zipʳ : List B → Consumer A (List (A × B))
+zipʳ = foldr (λ y → await (λ x xs → (x , y) ∷ xs)) (k λ _ → [])
+
+zipʰ : List A → List B → List (A × B)
+zipʰ xs ys = zipˡ xs · zipʳ ys
