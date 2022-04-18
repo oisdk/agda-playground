@@ -91,3 +91,27 @@ zipʳ = foldr (λ y → await (λ x xs → (x , y) ∷ xs)) (k λ _ → [])
 
 zipʰ : List A → List B → List (A × B)
 zipʰ xs ys = zipˡ xs · zipʳ ys
+
+open import Relation.Binary
+
+module Sorting {ℓ} {E : Type ℓ} (tot : TotalOrder E ℓzero ℓzero) where
+  open TotalOrder tot
+
+  nilˡ : Producer (Maybe E) (List E)
+  nilˡ · yk = (yk · nilˡ) nothing
+
+  mergeˡ : List E → Producer (Maybe E) (List E)
+  mergeˡ = foldr (yield ∘ just) nilˡ
+
+  nilʳ : Consumer (Maybe E) (List E)
+  (nilʳ · xs) nothing  = []
+  (nilʳ · xs) (just x) = x ∷ (xs · nilʳ)
+
+  merge¹ : E → Consumer (Maybe E) (List E) → Consumer (Maybe E) (List E)
+  (merge¹ y yk · xk) nothing  = y ∷ (xk · yk)
+  (merge¹ y yk · xk) (just x) with x ≤? y
+  ... | yes x≤y = x ∷ (xk · merge¹ y yk)
+  ... | no  x≰y = y ∷ (yk · xk) (just x)
+
+  mergeʳ : List E → Consumer (Maybe E) (List E)
+  mergeʳ = foldr merge¹ nilʳ
