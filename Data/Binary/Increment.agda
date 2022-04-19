@@ -3,7 +3,6 @@
 module Data.Binary.Increment where
 
 open import Data.Binary.Definition
-open import Strict
 
 inc : 𝔹 → 𝔹
 inc 0ᵇ      = 1ᵇ 0ᵇ
