@@ -10,6 +10,13 @@ open Monad mon
 _↬′_ : Type m → Type m → Type m
 record _↬_ (A : Type m) (B : Type m) : Type m
 
+{-# NO_POSITIVITY_CHECK #-}
+record _↬_ A B where
+  inductive; constructor hyp
+  infixl 4 _·_
+  field _·_ : B ↬′ A → B
+open _↬_ public
+
 A ↬′ B = 𝑀 (B ↬ A) → B
 
 pure : A → 𝑀 A
@@ -20,13 +27,6 @@ fs <*> xs = do
   f ← fs
   x ← xs
   pure (f x)
-
-{-# NO_POSITIVITY_CHECK #-}
-record _↬_ A B where
-  inductive; constructor hyp
-  infixl 4 _·_
-  field _·_ : B ↬′ A → B
-open _↬_ public
 
 infixr 9 _⊙_ _⊙′_ _⊙″_
 mutual

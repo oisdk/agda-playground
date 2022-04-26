@@ -50,11 +50,14 @@ run⟨ b ⟩ x = x · maybe b run⟨ b ⟩
 𝔽 : Maybe (A ↬ A) → A ↬ A
 𝔽 = fromMaybe 𝔼
 
+foldE : (A → B → B) → List A → B → B
+foldE f = flip (foldr f)
+
 bfs : Tree A → List A
 bfs t = run⟨ [] ⟩ (f t 𝔼)
   where
   f : Tree A → (List A ↬ List A) → (List A ↬ List A)
-  f (t & ts) fw · bw = t ∷ (fw · bw ∘ just ∘ flip (foldr f) ts ∘ 𝔽)
+  f (t & ts) fw · bw = t ∷ (fw · bw ∘ just ∘ foldE f ts ∘ 𝔽)
 
 _ : bfs tree ≡ (1 ⋯ 12)
 _ = refl
