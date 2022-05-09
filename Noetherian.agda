@@ -29,10 +29,11 @@ Graph : Type a → Type a
 Graph A = A → List A
 
 module _ {A : Type a} where
-  dfs : Decidable.Noetherian A → Graph A → Graph A
+  open Decidable
+
+  dfs : Noetherian A → Graph A → Graph A
   dfs n g x = go n x []
     where
-    open Decidable
 
     go : {seen : List A} → NoethFrom seen → A → List A → List A
     go nf x xs with nf x
