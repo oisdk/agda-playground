@@ -25,6 +25,21 @@ module Decidable where
   Noetherian : Type a → Type a
   Noetherian A = NoethFrom {A = A} []
 
+Graph : Type a → Type a
+Graph A = A → List A
+
+module _ {A : Type a} where
+  dfs : Decidable.Noetherian A → Graph A → Graph A
+  dfs n g x = go n x []
+    where
+    open Decidable
+
+    go : {seen : List A} → NoethFrom seen → A → List A → List A
+    go nf x xs with nf x
+    ... | done _           = xs
+    ... | more x∉seen step = x ∷ foldr (go step) xs (g x)
+
+
 -- open import WellFounded
 -- open NonDec
 

@@ -8,6 +8,7 @@ open import Agda.Primitive
            ; lzero to ℓzero
            ; lsuc  to ℓsuc
            ; Set to Type
+           ; Setω to Typeω
            )
   public
 
