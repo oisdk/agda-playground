@@ -1,47 +1,29 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --cubical --no-termination-check --no-positivity-check #-}
 
 module Hyper where
 
-open import Prelude hiding (⊥)
-open import Data.Empty.UniversePolymorphic
-open import Data.List using (List; _∷_; [])
-open import Data.Vec.Iterated
-open import Data.Nat using (_*_; _+_)
-open import Data.Nat.Properties using (Even; Odd)
+open import Prelude
 
+infixr 0 _↬_
+record _↬_ (A : Type a) (B : Type b) : Type (a ℓ⊔ b) where
+  inductive; constructor ⟪_⟫
+  infixl 2 _·_
+  field
+    _·_ : B ↬ A → B
+open _↬_
 
-private
-  variable n m : ℕ
+𝕀 : A ↬ A
+𝕀 · x = x · 𝕀
 
-infixr 4 _#_↬_
-_#_↬_ : ℕ → Type a → Type b → Type (a ℓ⊔ b)
-zero  # A ↬ B = ⊥
-suc n # A ↬ B = n # B ↬ A → B
+cata : (((C → A) → B) → C) → A ↬ B → C
+cata ϕ h = ϕ λ k → h · ⟪ k ∘ cata ϕ ⟫
 
-module _ {a b} {A : Type a} {B : Type b} where
-  yfld : Vec B n → 1 + (n * 2) # List (A × B) ↬ (A → List (A × B))
-  yfld =
-    foldr
-      (λ n → 1 + (n * 2) # List (A × B) ↬ (A → List (A × B)))
-      (λ y yk xk x → (x , y) ∷ xk yk)
-      (λ ())
+ana : (C → (C → A) → B) → C → A ↬ B
+ana ψ r · x = ψ r λ y → x · ana ψ y
 
-  xfld : Vec A n → (1 + n) * 2 # (A → List (A × B)) ↬ List (A × B)
-  xfld =
-    foldr
-      (λ n → (1 + n) * 2 # (A → List (A × B)) ↬ List (A × B))
-      (λ x xk yk → yk xk x)
-      (λ _ → [])
+_◂_ : (B → C) → A ↬ B → A ↬ C
+_◂_ f = ana λ h k → f (h · ⟪ k ⟫)
 
-  zip : Vec A n → Vec B n → List (A × B)
-  zip xs ys = xfld xs (yfld ys)
+_▸_ : (B ↬ C) → (A → B) → A ↬ C
+h ▸ f = ana (λ h k → h · ⟪ f ∘ k ⟫) h
 
-cata : Even n → (((C → A) → B) → C) → n # A ↬ B → C
-cata {n = suc (suc n)} e ϕ h = ϕ (λ g → h (g ∘ cata e ϕ))
-
-push : (A → B) → n # A ↬ B → 2 + n # A ↬ B
-push {n = suc n} f q k = f (k q)
-
-one : Odd n → n # A ↬ A
-one {n = suc zero} o ()
-one {n = suc (suc n)} o k = k (one o)

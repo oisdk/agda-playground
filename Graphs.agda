@@ -23,6 +23,16 @@ module _ (g : GraphOf A) where
   ids⊙ zero    r q wf | more _ a = r ∷ q a
   ids⊙ (suc n) r q wf | more _ a = foldr (ids⊙ n) q (g r) a
 
+  mutual
+    topoSort⊙′ : List A → (List A → ∀ {seen : List A} → NoethFrom seen → B) → List A → ∀ {seen : List A} → NoethFrom seen → B
+    topoSort⊙′ [] = id
+    topoSort⊙′ (x ∷ xs) b = topoSort⊙ x (topoSort⊙′ xs b)
+
+    topoSort⊙ : A → (List A → ∀ {seen : List A} → NoethFrom seen → B) → List A → ∀ {seen : List A} → NoethFrom seen → B
+    topoSort⊙ x k xs nf with nf x
+    topoSort⊙ x k xs nf | done _     = k xs nf
+    topoSort⊙ x k xs nf | more _ nf′ = topoSort⊙′ (g x) (k ∘ _∷_ x) xs nf′
+
 module _ (noeth : Noetherian A) where
   dfs : GraphOf A → GraphOf A
   dfs g x = dfs⊙ g noeth x []
@@ -32,3 +42,13 @@ module _ (noeth : Noetherian A) where
 
   bfs : GraphOf A → A → Stream (List A)
   bfs g = tabulate ∘ flip (ids g)
+
+
+-- type Graph a = a -> [a]
+
+-- topoSort :: Ord a => Graph a -> [a] -> [a]
+-- topoSort g = fst . foldr f ([], ∅)
+--   where
+--     f x (xs,s) 
+--       | x ∈ s = (xs,s)
+--       | x ∉ s = first (x:) (foldr f (xs, {x} ∪ s) (g x)) 

@@ -7,11 +7,14 @@ module Hyper.Comonadic {g} {𝐺 : Type g → Type g} (comon : Comonad 𝐺) whe
 
 open Comonad comon
 
+infixr 0 _↬_ _↬′_
 _↬′_ : Type g → Type g → Type g
+
 
 {-# NO_POSITIVITY_CHECK #-}
 record _↬_ (A : Type g) (B : Type g) : Type g where
   inductive
+  infixl 4 _·_
   field _·_ : 𝐺 (B ↬′ A) → B
 open _↬_
 
@@ -48,4 +51,3 @@ ana ψ r · k = ψ r (cmap (_∘ ana ψ) k)
 
 _◂_▸_ : ∀ {A′ B′} → (𝐺 B → B′) → A ↬ B → (𝐺 A′ → A) → A′ ↬ B′
 f ◂ h ▸ g = △ f ⊙ h ⊙ △ g
-
