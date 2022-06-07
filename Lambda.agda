@@ -134,3 +134,89 @@ data Value : Γ ⊢ `A → Type where
   V-ƛ    : {N : `A ∷ Γ ⊢ `B} → Value (ƛ N)
   V-zero : Value (`zero {Γ})
   V-suc  : ∀ {V : Γ ⊢ `ℕ} → Value V → Value (`suc V)
+
+
+variable
+  M N W L V : Γ ⊢ `A
+
+infix 2 _⟶_
+
+data _⟶_ : Γ ⊢ `A → Γ ⊢ `A → Type where
+  ξ-·₁ : L ⟶ M
+       → L · N ⟶ M · N
+
+  ξ-·₂ : Value V 
+       → M ⟶ N
+       ------------
+       → V · M ⟶ V · N
+
+  β-ƛ : Value  W
+      → (ƛ N) · W ⟶ N [ W ]
+
+  ξ-suc : M ⟶ N
+        → `suc M ⟶ `suc N
+
+  ξ-case : L ⟶ M
+         → case L V W ⟶ case M V W
+
+  β-zero : case `zero M N ⟶ M
+
+  β-suc : Value V
+        → case (`suc V) M N ⟶ N [ V ]
+
+  β-μ : μ N ⟶ N [ μ N ]
+
+infix  2 _—↠_
+infix  1 begin_
+infixr 2 _—→⟨_⟩_
+infix  3 _∎
+
+data _—↠_ {Γ A} : (Γ ⊢ A) → (Γ ⊢ A) → Type where
+
+  _∎ : (M : Γ ⊢ A)
+      ------
+    → M —↠ M
+
+  _—→⟨_⟩_ : (L : Γ ⊢ A) {M N : Γ ⊢ A}
+    → L ⟶ M
+    → M —↠ N
+      ------
+    → L —↠ N
+
+begin_ : ∀ {Γ A} {M N : Γ ⊢ A}
+  → M —↠ N
+    ------
+  → M —↠ N
+begin M—↠N = M—↠N
+
+_ : plus {[]} · two · two —↠ `suc `suc `suc `suc `zero
+_ =
+    plus · two · two
+  —→⟨ ξ-·₁ (ξ-·₁ β-μ) ⟩
+    (ƛ (ƛ case (# 1) (# 0) (`suc {!plus · {!!} · {!!}!}) )) · two · two
+  —→⟨ {!!} ⟩
+  -- —→⟨ ξ-·₁ (β-ƛ (V-suc (V-suc V-zero))) ⟩
+  --   (ƛ case two (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl))) · two
+  -- —→⟨ β-ƛ (V-suc (V-suc V-zero)) ⟩
+  --   case two two (`suc (plus · ` member 0 tt refl · two))
+  -- —→⟨ β-suc (V-suc V-zero) ⟩
+  --   `suc (plus · `suc `zero · two)
+  -- —→⟨ ξ-suc (ξ-·₁ (ξ-·₁ β-μ)) ⟩
+  --   `suc ((ƛ ƛ case (` member 1 tt refl) (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl)))
+  --     · `suc `zero · two)
+  -- —→⟨ ξ-suc (ξ-·₁ (β-ƛ (V-suc V-zero))) ⟩
+  --   `suc ((ƛ case (`suc `zero) (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl))) · two)
+  -- —→⟨ ξ-suc (β-ƛ (V-suc (V-suc V-zero))) ⟩
+  --   `suc (case (`suc `zero) (two) (`suc (plus · ` member 0 tt refl · two)))
+  -- —→⟨ ξ-suc (β-suc V-zero) ⟩
+  --   `suc (`suc (plus · `zero · two))
+  -- —→⟨ ξ-suc (ξ-suc (ξ-·₁ (ξ-·₁ β-μ))) ⟩
+  --   `suc (`suc ((ƛ ƛ case (` member 1 tt refl) (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl)))
+  --     · `zero · two))
+  -- —→⟨ ξ-suc (ξ-suc (ξ-·₁ (β-ƛ V-zero))) ⟩
+  --   `suc (`suc ((ƛ case `zero (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl))) · two))
+  -- —→⟨ ξ-suc (ξ-suc (β-ƛ (V-suc (V-suc V-zero)))) ⟩
+  --   `suc (`suc (case `zero (two) (`suc (plus · ` member 0 tt refl · two))))
+  -- —→⟨ ξ-suc (ξ-suc β-zero) ⟩
+   `suc (`suc (`suc (`suc `zero)))
+  ∎
