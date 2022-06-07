@@ -59,10 +59,21 @@ rev1 x xs = foldl f (x , []) xs
   f : A × List A → A → A × List A
   f (x , xs) y = y , x ∷ xs
 
--- uncons : Q A → Maybe (A × Q A)
--- uncons (x ∷ xs +- ys) = just (x , xs +- ys)
--- uncons ([] +- []) = nothing
--- uncons ([] +- y ∷ ys) = let z , zs = rev1 y ys in just (z , zs +- [])
--- uncons (quot x (y ∷ xs) ys i) = just (y , quot x xs ys i)
--- uncons (quot x [] [] i) = just (x , [] +- [])
--- uncons (quot x [] (y ∷ ys) i) = {!!}
+qid : Q A → Q A
+qid xs = toList xs +- []
+
+qid-is-id′ : (xs ys : List A) → (xs ++ reverse ys) +- [] ≡ xs +- ys
+qid-is-id′ xs []       = cong (_+- []) (++-idʳ _)
+qid-is-id′ xs (y ∷ ys) =
+  xs ++ reverse (y ∷ ys) +- [] ≡⟨ cong (λ e → xs ++ e +- []) (reverse-++ (y ∷ []) ys) ⟩
+  xs ++ (reverse ys ∷′ y) +- [] ≡˘⟨ cong (_+- []) (++-assoc xs (reverse ys) _) ⟩
+  (xs ++ reverse ys) ∷′ y +- [] ≡˘⟨ quot y (xs ++ reverse ys) [] ⟩
+  xs ++ reverse ys +- y ∷ [] ≡⟨ cong (flip snoc y) (qid-is-id′ xs ys) ⟩
+  xs +- y ∷ ys ∎
+
+-- qid-is-id : (xs : Q A) → qid xs ≡ xs
+-- qid-is-id (xs +- ys) = qid-is-id′ xs ys
+-- qid-is-id (quot x xs ys i) j = {!!}
+
+-- toList-inj : (xs ys : Q A) → toList xs ≡ toList ys → xs ≡ ys
+-- toList-inj xs ys p = sym (qid-is-id xs) ; cong (_+- []) p ; qid-is-id ys
