@@ -189,34 +189,34 @@ begin_ : ∀ {Γ A} {M N : Γ ⊢ A}
   → M —↠ N
 begin M—↠N = M—↠N
 
-_ : plus {[]} · two · two —↠ `suc `suc `suc `suc `zero
-_ =
-    plus · two · two
-  —→⟨ ξ-·₁ (ξ-·₁ β-μ) ⟩
-    (ƛ (ƛ case (# 1) (# 0) (`suc {!plus · {!!} · {!!}!}) )) · two · two
-  —→⟨ {!!} ⟩
-  -- —→⟨ ξ-·₁ (β-ƛ (V-suc (V-suc V-zero))) ⟩
-  --   (ƛ case two (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl))) · two
-  -- —→⟨ β-ƛ (V-suc (V-suc V-zero)) ⟩
-  --   case two two (`suc (plus · ` member 0 tt refl · two))
-  -- —→⟨ β-suc (V-suc V-zero) ⟩
-  --   `suc (plus · `suc `zero · two)
-  -- —→⟨ ξ-suc (ξ-·₁ (ξ-·₁ β-μ)) ⟩
-  --   `suc ((ƛ ƛ case (` member 1 tt refl) (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl)))
-  --     · `suc `zero · two)
-  -- —→⟨ ξ-suc (ξ-·₁ (β-ƛ (V-suc V-zero))) ⟩
-  --   `suc ((ƛ case (`suc `zero) (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl))) · two)
-  -- —→⟨ ξ-suc (β-ƛ (V-suc (V-suc V-zero))) ⟩
-  --   `suc (case (`suc `zero) (two) (`suc (plus · ` member 0 tt refl · two)))
-  -- —→⟨ ξ-suc (β-suc V-zero) ⟩
-  --   `suc (`suc (plus · `zero · two))
-  -- —→⟨ ξ-suc (ξ-suc (ξ-·₁ (ξ-·₁ β-μ))) ⟩
-  --   `suc (`suc ((ƛ ƛ case (` member 1 tt refl) (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl)))
-  --     · `zero · two))
-  -- —→⟨ ξ-suc (ξ-suc (ξ-·₁ (β-ƛ V-zero))) ⟩
-  --   `suc (`suc ((ƛ case `zero (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl))) · two))
-  -- —→⟨ ξ-suc (ξ-suc (β-ƛ (V-suc (V-suc V-zero)))) ⟩
-  --   `suc (`suc (case `zero (two) (`suc (plus · ` member 0 tt refl · two))))
-  -- —→⟨ ξ-suc (ξ-suc β-zero) ⟩
-   `suc (`suc (`suc (`suc `zero)))
-  ∎
+-- _ : plus {[]} · two · two —↠ `suc `suc `suc `suc `zero
+-- _ =
+--     plus · two · two
+--   —→⟨ ξ-·₁ (ξ-·₁ β-μ) ⟩
+--     (ƛ (ƛ case (# 1) (# 0) (`suc {!plus · {!!} · {!!}!}) )) · two · two
+--   —→⟨ {!!} ⟩
+--   -- —→⟨ ξ-·₁ (β-ƛ (V-suc (V-suc V-zero))) ⟩
+--   --   (ƛ case two (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl))) · two
+--   -- —→⟨ β-ƛ (V-suc (V-suc V-zero)) ⟩
+--   --   case two two (`suc (plus · ` member 0 tt refl · two))
+--   -- —→⟨ β-suc (V-suc V-zero) ⟩
+--   --   `suc (plus · `suc `zero · two)
+--   -- —→⟨ ξ-suc (ξ-·₁ (ξ-·₁ β-μ)) ⟩
+--   --   `suc ((ƛ ƛ case (` member 1 tt refl) (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl)))
+--   --     · `suc `zero · two)
+--   -- —→⟨ ξ-suc (ξ-·₁ (β-ƛ (V-suc V-zero))) ⟩
+--   --   `suc ((ƛ case (`suc `zero) (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl))) · two)
+--   -- —→⟨ ξ-suc (β-ƛ (V-suc (V-suc V-zero))) ⟩
+--   --   `suc (case (`suc `zero) (two) (`suc (plus · ` member 0 tt refl · two)))
+--   -- —→⟨ ξ-suc (β-suc V-zero) ⟩
+--   --   `suc (`suc (plus · `zero · two))
+--   -- —→⟨ ξ-suc (ξ-suc (ξ-·₁ (ξ-·₁ β-μ))) ⟩
+--   --   `suc (`suc ((ƛ ƛ case (` member 1 tt refl) (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl)))
+--   --     · `zero · two))
+--   -- —→⟨ ξ-suc (ξ-suc (ξ-·₁ (β-ƛ V-zero))) ⟩
+--   --   `suc (`suc ((ƛ case `zero (` member 0 tt refl) (`suc (plus · ` member 0 tt refl · ` member 1 tt refl))) · two))
+--   -- —→⟨ ξ-suc (ξ-suc (β-ƛ (V-suc (V-suc V-zero)))) ⟩
+--   --   `suc (`suc (case `zero (two) (`suc (plus · ` member 0 tt refl · two))))
+--   -- —→⟨ ξ-suc (ξ-suc β-zero) ⟩
+--    `suc (`suc (`suc (`suc `zero)))
+--   ∎
