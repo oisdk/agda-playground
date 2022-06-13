@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
-artefact="_build/2.6.2.1/agda/${1}i"
+version_string="$(agda --version)"
+version=${version_string#"Agda version "}
+artefact="_build/$version/agda/${1}i"
 [ -f "$artefact" ] && rm "$artefact"
 time agda "${1}"
