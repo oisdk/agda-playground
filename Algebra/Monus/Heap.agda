@@ -95,63 +95,96 @@ cond w =
 open import Data.List
 
 mutual
-  record Root (A : Type a) : Type a where
-    coinductive; constructor ⟪_⟫
-    field tree : List (Branch A)
+  Forest : Type a → Type a
+  Forest A = List (Branch A)
 
-  data Branch (A : Type a) : Type a where
-    leaf : A → Branch A
-    _[_]⋊_ : ∀ w → w ≢ ε → Root A → Branch A
-open Root
+  Branch : Type a → Type a
+  Branch A = A ⊎ Root A
 
-Heap′ : Type a → Type a
-Heap′ A = List (Branch A)
+  Root : Type a → Type a
+  Root A = Σ[ w ⦂ 𝑆 ] × Step A w
 
-inf : ∀ w → w ≢ ε → Root A
-inf w w≢ε .tree = (w [ w≢ε ]⋊ inf w w≢ε) ∷ []
+  record Deep (A : Type a) (w : 𝑆) : Type a where
+    coinductive; constructor deep
+    field
+      depth : w ≢ ε
+      force : Forest A
+
+  data Step (A : Type a) (w : 𝑆) : Type a where
+    fin : Forest A → Step A w
+    inf : Deep A w → Step A w
+
+open Deep public
+
+rinf : ∀ w → w ≢ ε → Forest A
+rinf w w≢ε = inr (w , inf λ where .depth → w≢ε ; .force → rinf w w≢ε) ∷ []
+
+map-forest : ∀ {w} → (Forest A → Forest B) → Deep A w → Deep B w
+map-forest f xs .depth = xs .depth
+map-forest f xs .force = f (xs .force)
+
+un-step : ∀ {w₁ w₂} → Step A w₁ → Step A w₂
+un-step (fin x) = fin x
+un-step (inf x) = fin (x .force)
+
+_◃_ : ∀ {w} → Root A → Step A w → Step A w
+x ◃ fin xs = fin (inr x ∷ xs)
+x ◃ inf xs = inf (map-forest (inr x ∷_) xs)
+
+_⋈_ : Root A → Root A → Root A
+(xʷ , xs) ⋈ (yʷ , ys) with xʷ ≤|≥ yʷ 
+... | inl (k , x≤y) = xʷ , ((k , un-step ys) ◃ xs)
+... | inr (k , y≤x) = yʷ , ((k , un-step xs) ◃ ys)
 
 mutual
-  restrict″ : ∀ w → Acc _≺_ w → Branch A → ⟅ A ⟆ → ⟅ A ⟆
-  restrict″ w wf (leaf x) xs = (ε , x) ∷ xs
-  restrict″ w wf (x [ x≢ε ]⋊ xc) xs with x ≤? w
-  restrict″ w wf (x [ x≢ε ]⋊ xc) xs | no  x≮w = xs
-  restrict″ w (acc wf) (x [ x≢ε ]⋊ xc) xs | yes (k , x≤w) =
-    cond x (restrict′ k (wf _ (x , x≤w ; comm _ _ , x≢ε)) (xc .tree)) ∪ xs
+  restrict‴ : 𝑆 → ∀ w → Acc _≺_ w → ∀ w′ → w′ ≤ w → w′ ≢ ε → Forest A → ⟅ A ⟆ → ⟅ A ⟆
+  restrict‴ aw w (acc wf) w′ (k , w′≤w) w′≢ε =
+    restrict′ (w′ ∙ aw) k (wf k (w′ , w′≤w ; comm _ _ , w′≢ε))
 
-  restrict′ : ∀ w → Acc _≺_ w → Heap′ A → ⟅ A ⟆
-  restrict′ w a = foldr (restrict″ w a) ⟅⟆
+  restrict″ : 𝑆 → ∀ w → Acc _≺_ w → Branch A → ⟅ A ⟆ → ⟅ A ⟆
+  restrict″ aw w wf (inl x) xs = (aw , x) ∷ xs
+  restrict″ aw w wf (inr (w′ , x)) xs with w′ ≤? w
+  restrict″ aw w wf (inr (w′ , x)) xs | no  w′≰w = xs
+  restrict″ aw w wf (inr (w′ , inf x)) xs | yes w′≤w = restrict‴ aw w wf w′ w′≤w (x .depth) (x .force) xs
+  restrict″ aw w wf (inr (w′ , fin x)) xs | yes w′≤w with w′ ≟ ε 
+  ... | yes w′≡ε = restrict′ aw w wf x xs
+  ... | no w′≢ε = restrict‴ aw w wf w′ w′≤w w′≢ε x xs
 
-restrict : 𝑆 → Heap′ A → ⟅ A ⟆
-restrict w = restrict′ w (≺-wf w)
+  restrict′ : 𝑆 → ∀ w → Acc _≺_ w → Forest A → ⟅ A ⟆ → ⟅ A ⟆
+  restrict′ aw w a [] zs = zs
+  restrict′ aw w a (x ∷ xs) zs = restrict″ aw w a x (restrict′ aw w a xs zs)
+
+restrict : 𝑆 → Forest A → ⟅ A ⟆
+restrict w x = restrict′ ε w (≺-wf w) x ⟅⟆
 
 open import HITs.SetQuotients
 
-UpTo : Heap′ A → Heap′ A → Type _
+UpTo : Forest A → Forest A → Type _
 UpTo xs ys = ∀ w → restrict w xs ≡ restrict w ys
 
 Heap : Type a → Type a
-Heap A = Heap′ A / UpTo
+Heap A = Forest A / UpTo
 
-open import Cubical.HITs.SetQuotients using (rec2)
+-- -- open import Cubical.HITs.SetQuotients using (rec2)
 
-++-lhs : (xs ys zs : Heap′ A) → UpTo xs ys → UpTo (xs ++ zs) (ys ++ zs)
-++-lhs xs ys zs r w = let p = r w in {!!}
+-- -- ++-lhs : (xs ys zs : Heap′ A) → UpTo xs ys → UpTo (xs ++ zs) (ys ++ zs)
+-- -- ++-lhs xs ys zs r w = let p = r w in {!!}
 
-++-rhs : (xs ys zs : Heap′ A) → UpTo ys zs → UpTo (xs ++ ys) (xs ++ zs)
-++-rhs xs ys zs r w = let p = r w in {!!}
+-- -- ++-rhs : (xs ys zs : Heap′ A) → UpTo ys zs → UpTo (xs ++ ys) (xs ++ zs)
+-- -- ++-rhs xs ys zs r w = let p = r w in {!!}
 
-_++H_ : Heap A → Heap A → Heap A
-_++H_ = rec2 squash/ (λ xs ys → [ xs ++ ys ]) (λ xs ys zs r → eq/ _ _ (++-lhs xs ys zs r)) λ xs ys zs r → eq/ _ _ (++-rhs xs ys zs r)
+-- -- _++H_ : Heap A → Heap A → Heap A
+-- -- _++H_ = rec2 squash/ (λ xs ys → [ xs ++ ys ]) (λ xs ys zs r → eq/ _ _ (++-lhs xs ys zs r)) λ xs ys zs r → eq/ _ _ (++-rhs xs ys zs r)
 
--- -- Heap′ : Type a → Type a
--- -- Heap′ A = List (A ×)
-
-
+-- -- -- -- Heap′ : Type a → Type a
+-- -- -- -- Heap′ A = List (A ×)
 
 
--- data Heap (A : Type a) : Type a where
---   [_]    : ⟅ Tree A (Heap A) ⟆ → Heap A
---   flat/  : (xs : ⟅ Tree A ⟅ Tree A (Heap A) ⟆ ⟆)
---          → [ (do x ← xs ; (ε , root x ◁ [ ⟅⟆ ]) ∷ rest x) ] ≡ [ map (map-rest [_]) xs ]
+
+
+-- -- -- data Heap (A : Type a) : Type a where
+-- -- --   [_]    : ⟅ Tree A (Heap A) ⟆ → Heap A
+-- -- --   flat/  : (xs : ⟅ Tree A ⟅ Tree A (Heap A) ⟆ ⟆)
+-- -- --          → [ (do x ← xs ; (ε , root x ◁ [ ⟅⟆ ]) ∷ rest x) ] ≡ [ map (map-rest [_]) xs ]
     
   
