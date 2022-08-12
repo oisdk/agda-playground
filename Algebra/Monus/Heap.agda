@@ -9,16 +9,6 @@ module Algebra.Monus.Heap (mon : TMAPOM ℓzero) (≺-wf : WellFounded (TMAPOM._
 
 open TMAPOM mon
 
--- open TotalOrder totalOrder hiding (_<ᵇ_)
-
-min-max : 𝑆 → 𝑆 → 𝑆 × 𝑆
-min-max x y = either′ (const (y , x)) (const (x , y)) (x ≤|≥ y)
-
-_⊔_ : 𝑆 → 𝑆 → 𝑆
-x ⊔ y = snd (min-max x y)
-
-_⊓_ : 𝑆 → 𝑆 → 𝑆
-x ⊓ y = fst (min-max x y)
 
 infixr 5 _∷_
 data ⟅_⟆ (A : Type a) : Type a where
@@ -69,13 +59,6 @@ module _ (f : 𝑆 → A → B → B)
 _∪_ : ⟅ A ⟆ → ⟅ A ⟆ → ⟅ A ⟆
 xs ∪ ys = rec-weight (λ w x xs → (w , x) ∷ xs) ys trunc com dup xs
 
-⊓-distrib : ∀ x y z → x ∙ (y ⊓ z) ≡ (x ∙ y) ⊓ (x ∙ z)
-⊓-distrib x y z with y ≤|≥ z | (x ∙ y) ≤|≥ (x ∙ z)
-... | inl y≤z | inl x∙y≤x∙z = refl
-... | inr y≥z | inl x∙y≤x∙z = antisym x∙y≤x∙z (≤-cong x y≥z)
-... | inl y≤z | inr x∙y≥x∙z = antisym x∙y≥x∙z (≤-cong x y≤z)
-... | inr y≥z | inr x∙y≥x∙z = refl
-
 
 cond : 𝑆 → ⟅ A ⟆ → ⟅ A ⟆
 cond w =
@@ -84,7 +67,7 @@ cond w =
     ⟅⟆
     trunc
     (λ w₁ x w₂ → com (w ∙ w₁) x (w ∙ w₂))
-    λ w₁ w₂ x Pxs → dup (w ∙ w₁) (w ∙ w₂) x Pxs ; cong (λ w′ → (w′ , x) ∷ Pxs) (sym (⊓-distrib w w₁ w₂))  
+    λ w₁ w₂ x Pxs → dup (w ∙ w₁) (w ∙ w₂) x Pxs ; cong (λ w′ → (w′ , x) ∷ Pxs) (sym (∙⟨⊓⟩ w w₁ w₂))  
 
 -- _>>=_ : ⟅ A ⟆ → (A → ⟅ B ⟆) → ⟅ B ⟆
 -- xs >>= k = rec-weight (λ w x xs → (cond w (k x)) ∪ xs) ⟅⟆ trunc {!!} {!!} xs

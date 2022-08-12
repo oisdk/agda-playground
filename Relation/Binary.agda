@@ -10,10 +10,11 @@ open import Inspect  using (inspect;〖_〗)
 open import HLevels   using (isSet)
 open import Path as ≡ hiding (sym; refl)
 
-open import Data.Bool            using (Bool; true; false; bool)
+open import Data.Bool            using (Bool; true; false; bool; bool′)
 open import Data.Bool.Properties using (false≢true)
 open import Data.Empty           using (⊥; ⊥-elim; ¬_)
 open import Data.Sum             using (either; inl; inr; _⊎_; is-l)
+open import Data.Sigma           using (_×_; _,_; fst; snd; map-Σ)
 
 open import Relation.Nullary.Decidable            using (Dec; yes; no; does)
 open import Relation.Nullary.Decidable.Properties using (Dec→Stable)
@@ -241,6 +242,67 @@ record TotalOrder {ℓ₁} (𝑆 : Type ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ
       x ≡⟨ x≡y ⟩
       y ≤⟨ y≤z ⟩
       z ∎
+
+  min-max : 𝑆 → 𝑆 → 𝑆 × 𝑆
+  min-max x y = bool′ (y , x) (x , y) (x <ᵇ y)
+
+  _⊔_ : 𝑆 → 𝑆 → 𝑆
+  x ⊔ y = snd (min-max x y)
+
+  _⊓_ : 𝑆 → 𝑆 → 𝑆
+  x ⊓ y = fst (min-max x y)
+
+  min-max-assoc : ∀ x y z → map-Σ (_⊓ z) (_⊔ z) (min-max x y) ≡ map-Σ (x ⊓_) (x ⊔_) (min-max y z)
+  min-max-assoc x y z with x <? y in xyp | y <? z in yzp
+  min-max-assoc x y z | yes x≤y | yes y≤z with x <? z
+  min-max-assoc x y z | yes x≤y | yes y≤z | yes x≤z rewrite xyp rewrite yzp = ≡.refl
+  min-max-assoc x y z | yes x≤y | yes y≤z | no  x≥z = ⊥-elim (x≥z (<-trans x≤y y≤z))
+  min-max-assoc x y z | no  x≥y | yes y≤z rewrite yzp rewrite xyp = ≡.refl
+  min-max-assoc x y z | yes x≤y | no  y≥z rewrite yzp rewrite xyp = ≡.refl
+  min-max-assoc x y z | no  x≥y | no  y≥z with x <? z
+  min-max-assoc x y z | no  x≥y | no  y≥z | no  x≥z rewrite yzp rewrite xyp = ≡.refl
+  min-max-assoc x y z | no  x≥y | no  y≥z | yes x≤z rewrite yzp rewrite xyp = cong (λ x → x , x) lemma
+    where
+    lemma : z ≡ x
+    lemma = antisym (≤-trans (≮⇒≥ y≥z) (≮⇒≥ x≥y)) (<⇒≤ x≤z)
+
+  ⊓-assoc : ∀ x y z → (x ⊓ y) ⊓ z ≡ x ⊓ (y ⊓ z)
+  ⊓-assoc x y z = cong fst (min-max-assoc x y z)
+
+  ⊔-assoc : ∀ x y z → (x ⊔ y) ⊔ z ≡ x ⊔ (y ⊔ z)
+  ⊔-assoc x y z = cong snd (min-max-assoc x y z)
+
+  min-max-comm : ∀ x y → min-max x y ≡ min-max y x
+  min-max-comm x y with x <? y | y <? x
+  ... | yes x<y | yes y<x = ⊥-elim (asym x<y y<x)
+  ... | no  x≮y | yes y<x = ≡.refl
+  ... | yes x<y | no  y≮x = ≡.refl
+  ... | no  x≮y | no  y≮x = cong₂ _,_ (conn y≮x x≮y) (conn x≮y y≮x)
+
+  ⊓-comm : ∀ x y → x ⊓ y ≡ y ⊓ x
+  ⊓-comm x y = cong fst (min-max-comm x y)
+
+  ⊔-comm : ∀ x y → x ⊔ y ≡ y ⊔ x
+  ⊔-comm x y = cong snd (min-max-comm x y)
+
+  min-max-idem : ∀ x → min-max x x ≡ (x , x)
+  min-max-idem x = bool {P = λ r → bool′ (x , x) (x , x) r ≡ (x , x)} ≡.refl ≡.refl (x <ᵇ x)
+
+  ⊓-idem : ∀ x → x ⊓ x ≡ x
+  ⊓-idem x = cong fst (min-max-idem x)
+
+  ⊔-idem : ∀ x → x ⊔ x ≡ x
+  ⊔-idem x = cong snd (min-max-idem x)
+
+  ≤⊔ : ∀ x y → x ≤ x ⊔ y
+  ≤⊔ x y with x <? y
+  ≤⊔ x y | yes x<y = <⇒≤ x<y
+  ≤⊔ x y | no  x≮y = refl
+
+  ⊓≤ : ∀ x y → x ⊓ y ≤ x
+  ⊓≤ x y with x <? y
+  ⊓≤ x y | yes x<y = refl
+  ⊓≤ x y | no  x≮y = ≮⇒≥ x≮y
 
 module FromPartialOrder {ℓ₁} {𝑆 : Type ℓ₁} {ℓ₂} (po : PartialOrder 𝑆 ℓ₂) (_≤|≥_ : Total (PartialOrder._≤_ po)) where
   open PartialOrder po

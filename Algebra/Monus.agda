@@ -77,6 +77,16 @@ record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
   totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
   open TotalOrder totalOrder public hiding (_≤|≥_; antisym) renaming (refl to ≤-refl)
 
+  ⟨⊓⟩∙ : _∙_ Distributesˡ _⊓_
+  ⟨⊓⟩∙ x y z with x <? y | (x ∙ z) <? (y ∙ z)
+  ... | yes x<y | yes xz<yz = refl
+  ... | no  x≮y | no  xz≮yz = refl
+  ... | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
+  ... | yes x<y | no  xz≮yz = antisym (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
+
+  ∙⟨⊓⟩ : _∙_ Distributesʳ _⊓_
+  ∙⟨⊓⟩ x y z = comm x (y ⊓ z) ; ⟨⊓⟩∙ y z x ; cong₂ _⊓_ (comm y x) (comm z x)
+
 -- Every commutative monoid generates a positively ordered monoid
 -- called the "algebraic" or "minimal" pom
 module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
@@ -416,8 +426,6 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
   2× : 𝑆 → 𝑆
   2× x = x ∙ x
 
-  open import Relation.Binary.Lattice totalOrder
-
   double-max : ∀ x y → 2× (x ⊔ y) ≡ x ⊔₂ y
   double-max x y with x ≤|≥ y | y ≤|≥ x
   double-max x y | inl x≤y | inl y≤x =
@@ -461,17 +469,7 @@ record CTMAPOM ℓ : Type (ℓsuc ℓ) where
 module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
   open TAPOM tapom
   open import Relation.Binary.Construct.UpperBound totalOrder
-  open import Relation.Binary.Lattice totalOrder
 
-  ⟨⊓⟩∙ : _∙_ Distributesˡ _⊓_
-  ⟨⊓⟩∙ x y z with x <? y | (x ∙ z) <? (y ∙ z)
-  ... | yes x<y | yes xz<yz = refl
-  ... | no  x≮y | no  xz≮yz = refl
-  ... | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
-  ... | yes x<y | no  xz≮yz = antisym (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
-
-  ∙⟨⊓⟩ : _∙_ Distributesʳ _⊓_
-  ∙⟨⊓⟩ x y z = comm x (y ⊓ z) ; ⟨⊓⟩∙ y z x ; cong₂ _⊓_ (comm y x) (comm z x)
 
   open UBSugar
 
