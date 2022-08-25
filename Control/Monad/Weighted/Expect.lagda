@@ -3,8 +3,9 @@
 
 open import Algebra
 open import HLevels
+open import Level
 
-module Control.Monad.Weighted.Expect {ℓ} (rng : Semiring ℓ) (cIsSet : isSet (Semiring.𝑅 rng)) where
+module Control.Monad.Weighted.Expect {ℓ} {𝑅 : Type ℓ} (rng : Semiring 𝑅) (cIsSet : isSet 𝑅) where
 
 open Semiring rng renaming (+-comm to +-com)
 

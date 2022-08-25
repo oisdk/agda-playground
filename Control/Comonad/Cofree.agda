@@ -7,14 +7,14 @@ module Control.Comonad.Cofree
   where
 
 module Comonadic
-  {ℓ₁ ℓ₂}
-  (mon : Monoid ℓ₁)
-  (comon : GradedComonad mon ℓ₂)
+  {ℓ₁ ℓ₂} {𝑆 : Type ℓ₁} {𝑊 : 𝑆 → Type ℓ₂ → Type ℓ₂}
+  (mon : Monoid 𝑆)
+  (comon : GradedComonad mon 𝑊)
   {𝐹 : Type (ℓ₁ ℓ⊔ ℓ₂) → Type ℓ₂}
   (functor : Functor 𝐹) where
 
   open Monoid mon
-  open GradedComonad comon renaming (𝐹 to 𝑊; map to cmap)
+  open GradedComonad comon renaming (map to cmap)
   open Functor functor renaming (map to fmap)
 
   record CofreeF (A : Type ℓ₂) : Type ℓ₂ where
@@ -36,14 +36,14 @@ module Comonadic
   extend′ k xs = xs =>>[ ∙ε _ ] (λ x → k x ◃ fmap (map₂ (extend′ k)) (step (extract x)))
 
 module Monadic
-  {ℓ₁ ℓ₂ ℓ₃}
-  (mon : Monoid ℓ₁)
-  (monad : GradedMonad mon ℓ₂ ℓ₃)
-  {𝐹 : Type (ℓ₁ ℓ⊔ ℓ₃) → Type ℓ₂}
+  {ℓ₁ ℓ₂} {𝑆 : Type ℓ₁} {𝑀 : 𝑆 → Type ℓ₂ → Type ℓ₂}
+  (mon : Monoid 𝑆)
+  (monad : GradedMonad mon 𝑀)
+  {𝐹 : Type (ℓ₁ ℓ⊔ ℓ₂) → Type ℓ₂}
   (alternative : Alternative 𝐹) where
 
   open Monoid mon
-  open GradedMonad monad renaming (𝐹 to 𝑀; map to mmap)
+  open GradedMonad monad renaming ( map to mmap)
   open Alternative alternative renaming (map to fmap)
 
   record CofreeF (A : Type ℓ₂) : Type ℓ₂ where
@@ -55,7 +55,7 @@ module Monadic
       step : 𝐹 (∃ y × 𝑀 y (CofreeF A))
   open CofreeF public
 
-  Cofree : Type ℓ₂ → Type ℓ₃
+  Cofree : Type ℓ₂ → Type ℓ₂
   Cofree A = 𝑀 ε (CofreeF A)
 
   return′ : A → Cofree A

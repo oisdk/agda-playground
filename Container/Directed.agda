@@ -3,7 +3,7 @@ module Container.Directed where
 open import Prelude
 open import Container
 
-record Directed {sℓ} {pℓ}  (𝒞 : Container sℓ pℓ) : Type (sℓ ℓ⊔ pℓ) where
+record Directed  (𝒞 : Container ) : Type where
   S = fst 𝒞
   P = snd 𝒞
   field
@@ -21,12 +21,12 @@ record Directed {sℓ} {pℓ}  (𝒞 : Container sℓ pℓ) : Type (sℓ ℓ⊔ 
 
 open Directed public
 
-DCont : ∀ s p → Type (ℓsuc (s ℓ⊔ p))
-DCont s p = Σ (Container s p) Directed
+DCont : Type₁
+DCont = Σ Container Directed
 
 open import Data.Fin
 
-NEList : Container ℓzero ℓzero
+NEList : Container
 NEList .fst = ℕ
 NEList .snd n = Fin (suc n)
 

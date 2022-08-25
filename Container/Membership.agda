@@ -2,7 +2,7 @@
 
 open import Container
 
-module Container.Membership {s p} (𝒞 : Container s p) where
+module Container.Membership (𝒞 : Container) where
 
 open import Prelude
 open import HLevels

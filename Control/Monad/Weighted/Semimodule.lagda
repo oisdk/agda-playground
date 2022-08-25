@@ -2,8 +2,9 @@
 {-# OPTIONS --cubical --safe #-}
 
 open import Algebra
+open import Level
 
-module Control.Monad.Weighted.Semimodule {ℓ} (rng : Semiring ℓ) where
+module Control.Monad.Weighted.Semimodule {ℓ} {𝑅 : Type ℓ} (rng : Semiring 𝑅) where
 
 open Semiring rng
 
@@ -17,8 +18,7 @@ open import Control.Monad.Weighted.Union rng
 open import Control.Monad.Weighted.Cond rng
 
 module _ {a} {A : Type a} where
-  semimodule : LeftSemimodule rng (ℓ ℓ⊔ a)
-  semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid.𝑆 = Weighted A
+  semimodule : LeftSemimodule rng (Weighted A)
   semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid._∙_ = _∪_
   semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid.ε = []
   semimodule .LeftSemimodule.semimodule .CommutativeMonoid.monoid .Monoid.assoc xs ys zs = sym (∪-assoc xs ys zs)

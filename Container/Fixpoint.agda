@@ -5,10 +5,10 @@ module Container.Fixpoint where
 open import Container
 open import Prelude
 
-data μ {s p} (C : Container s p) : Type (s ℓ⊔ p) where
+data μ (C : Container) : Type where
   sup : ⟦ C ⟧ (μ C) → μ C
 
-record ν {s p} (C : Container s p) : Type (s ℓ⊔ p) where
+record ν (C : Container ) : Type where
   coinductive
   field inf : ⟦ C ⟧ (ν C)
 open ν public

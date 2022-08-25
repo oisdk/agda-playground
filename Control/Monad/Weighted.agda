@@ -1,8 +1,9 @@
 {-# OPTIONS --cubical --safe #-}
 
 open import Algebra
+open import Level
 
-module Control.Monad.Weighted {ℓ} (rng : Semiring ℓ) where
+module Control.Monad.Weighted {ℓ} {𝑆 : Type ℓ} (rng : Semiring 𝑆) where
 
 open import Control.Monad.Weighted.Definition rng public
 open import Control.Monad.Weighted.Union      rng using (_∪_) public

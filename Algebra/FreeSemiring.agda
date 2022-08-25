@@ -21,8 +21,7 @@ data 𝑅 : Type where
   ⟨+⟩* : _*_ Distributesˡ _+_
   *⟨+⟩ : _*_ Distributesʳ _+_
 
-semiring𝑅 : Semiring ℓzero
-semiring𝑅 .Semiring.nearSemiring .NearSemiring.𝑅 = 𝑅
+semiring𝑅 : Semiring 𝑅
 semiring𝑅 .Semiring.nearSemiring .NearSemiring._+_ = _+_
 semiring𝑅 .Semiring.nearSemiring .NearSemiring._*_ = _*_
 semiring𝑅 .Semiring.nearSemiring .NearSemiring.1# = 1#

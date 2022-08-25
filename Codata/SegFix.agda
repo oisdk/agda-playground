@@ -5,13 +5,13 @@ open import Algebra.Monus
 open import Prelude
 
 module Codata.SegFix
-  {ℓ}
-  (mon : CommutativeMonoid ℓ)
-  (𝐹 : CommutativeMonoid.𝑆 mon → Type ℓ → Type ℓ)
+  {ℓ} {𝑆 : Type ℓ}
+  (mon : CommutativeMonoid 𝑆)
+  (𝐹 : 𝑆 → Type ℓ → Type ℓ)
   (functor : ∀ {s} → Functor (𝐹 s))
   where
 
-open POM (algebraic-pom mon)
+open POM (algebraic-pom 𝑆 mon)
 module _ {s : 𝑆} where
   open Functor (functor {s = s}) public renaming (map to fmap)
 

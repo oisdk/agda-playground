@@ -77,8 +77,7 @@ module _ {a} {A : Type a} where
   open Semilattice
   open CommutativeMonoid
   open Monoid
-  𝒦-semilattice : Semilattice a
-  𝒦-semilattice .commutativeMonoid .monoid .𝑆 = 𝒦 A
+  𝒦-semilattice : Semilattice (𝒦 A)
   𝒦-semilattice .commutativeMonoid .monoid ._∙_ = _∪_
   𝒦-semilattice .commutativeMonoid .monoid .ε = []
   𝒦-semilattice .commutativeMonoid .monoid .assoc = ∪-assoc

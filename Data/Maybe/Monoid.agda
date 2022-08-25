@@ -3,7 +3,7 @@
 open import Prelude
 open import Algebra
 
-module Data.Maybe.Monoid {ℓ} (sgr : Semigroup ℓ) where
+module Data.Maybe.Monoid {ℓ} {𝑆 : Type ℓ} (sgr : Semigroup 𝑆) where
 
 open import Data.Maybe
 
@@ -14,8 +14,7 @@ nothing «∙» y = y
 just x «∙» nothing = just x
 just x «∙» just y = just (x ∙ y)
 
-maybeMonoid : Monoid ℓ
-maybeMonoid .Monoid.𝑆 = Maybe 𝑆
+maybeMonoid : Monoid (Maybe 𝑆)
 maybeMonoid .Monoid._∙_ = _«∙»_
 maybeMonoid .Monoid.ε = nothing
 maybeMonoid .Monoid.assoc nothing y z = refl

@@ -1,7 +1,7 @@
 open import Prelude
 open import Algebra
 
-module Algebra.Construct.Cayley.OnSet {ℓ} (mon : Monoid ℓ) (sIsSet : isSet (Monoid.𝑆 mon)) where
+module Algebra.Construct.Cayley.OnSet {ℓ} {𝑆 : Type ℓ} (mon : Monoid 𝑆) (sIsSet : isSet 𝑆) where
 
 open Monoid mon
 
@@ -45,8 +45,7 @@ open import Cubical.Foundations.Everything using (isPropΠ)
 ⊙ⓔ : ∀ x → x ⊙ ⓔ ≡ x
 ⊙ⓔ _ = 𝒞≡ refl
 
-cayleyMonoid : Monoid ℓ
-Monoid.𝑆 cayleyMonoid = 𝒞
+cayleyMonoid : Monoid 𝒞
 Monoid._∙_ cayleyMonoid = _⊙_
 Monoid.ε cayleyMonoid = ⓔ
 Monoid.assoc cayleyMonoid = ⊙-assoc

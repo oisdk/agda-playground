@@ -3,8 +3,9 @@
 
 open import Algebra
 open import HLevels
+open import Level
 
-module Control.Monad.Weighted.Category {ℓ} (rng : Semiring ℓ) where
+module Control.Monad.Weighted.Category {ℓ} {𝑅 : Type ℓ} (rng : Semiring 𝑅) where
 
 open Semiring rng
 

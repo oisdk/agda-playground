@@ -43,162 +43,150 @@ Cancellativeˡ _⊗_ = ∀ c → Cancellableˡ _⊗_ c
 Cancellativeʳ : (A → B → C) → Type _
 Cancellativeʳ _⊗_ = ∀ c → Cancellableʳ _⊗_ c
 
-record  Semigroup ℓ : Type (ℓsuc ℓ) where
-  infixl 6 _∙_
-  field
-    𝑆      : Type ℓ
-    _∙_    : 𝑆 → 𝑆 → 𝑆
-    assoc  : ∀ x y z → (x ∙ y) ∙ z ≡ x ∙ (y ∙ z)
+module _ {ℓ} (𝑆 : Type ℓ) where
+  record  Semigroup : Type ℓ where
+    infixl 6 _∙_
+    field
+      _∙_    : 𝑆 → 𝑆 → 𝑆
+      assoc  : ∀ x y z → (x ∙ y) ∙ z ≡ x ∙ (y ∙ z)
 
-record  Monoid ℓ : Type (ℓsuc ℓ) where
-  infixl 6 _∙_
-  field
-    𝑆      : Type ℓ
-    _∙_    : 𝑆 → 𝑆 → 𝑆
-    ε      : 𝑆
-    assoc  : ∀ x y z → (x ∙ y) ∙ z ≡ x ∙ (y ∙ z)
-    ε∙     : ∀ x → ε ∙ x ≡ x
-    ∙ε     : ∀ x → x ∙ ε ≡ x
+  record  Monoid : Type ℓ where
+    infixl 6 _∙_
+    field
+      _∙_    : 𝑆 → 𝑆 → 𝑆
+      ε      : 𝑆
+      assoc  : ∀ x y z → (x ∙ y) ∙ z ≡ x ∙ (y ∙ z)
+      ε∙     : ∀ x → ε ∙ x ≡ x
+      ∙ε     : ∀ x → x ∙ ε ≡ x
 
-  semigroup : Semigroup ℓ
-  semigroup = record
-    { 𝑆 = 𝑆; _∙_ = _∙_; assoc = assoc }
+    semigroup : Semigroup
+    semigroup = record
+      { _∙_ = _∙_; assoc = assoc }
 
-record MonoidHomomorphism_⟶_
-         {ℓ₁ ℓ₂}
-         (from : Monoid ℓ₁)
-         (to : Monoid ℓ₂)
-       : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  open Monoid from
-  open Monoid to
-    renaming ( 𝑆 to 𝑅
-             ; _∙_ to _⊙_
-             ; ε to ⓔ
-             )
-  field
-    f : 𝑆 → 𝑅
-    ∙-homo : ∀ x y → f (x ∙ y) ≡ f x ⊙ f y
-    ε-homo : f ε ≡ ⓔ
 
-record Group ℓ : Type (ℓsuc ℓ) where
-  field
-    monoid : Monoid ℓ
-  open Monoid monoid public
-  field
-    -_ : 𝑆 → 𝑆
-    ∙⁻ : ∀ x → x ∙ - x ≡ ε
-    ⁻∙ : ∀ x → - x ∙ x ≡ ε
+  record Group : Type ℓ where
+    field
+      monoid : Monoid
+    open Monoid monoid public
+    field
+      -_ : 𝑆 → 𝑆
+      ∙⁻ : ∀ x → x ∙ - x ≡ ε
+      ⁻∙ : ∀ x → - x ∙ x ≡ ε
 
-  open import Path.Reasoning
+    open import Path.Reasoning
 
-  cancelˡ : Cancellativeˡ _∙_
-  cancelˡ x y z p =
-    y ≡˘⟨ ε∙ y ⟩
-    ε ∙ y ≡˘⟨ cong (_∙ y) (⁻∙ x) ⟩
-    (- x ∙ x) ∙ y ≡⟨ assoc (- x) x y ⟩
-    - x ∙ (x ∙ y) ≡⟨ cong (- x ∙_) p ⟩
-    - x ∙ (x ∙ z) ≡˘⟨ assoc (- x) x z ⟩
-    (- x ∙ x) ∙ z ≡⟨ cong (_∙ z) (⁻∙ x) ⟩
-    ε ∙ z ≡⟨ ε∙ z ⟩
-    z ∎
+    cancelˡ : Cancellativeˡ _∙_
+    cancelˡ x y z p =
+      y ≡˘⟨ ε∙ y ⟩
+      ε ∙ y ≡˘⟨ cong (_∙ y) (⁻∙ x) ⟩
+      (- x ∙ x) ∙ y ≡⟨ assoc (- x) x y ⟩
+      - x ∙ (x ∙ y) ≡⟨ cong (- x ∙_) p ⟩
+      - x ∙ (x ∙ z) ≡˘⟨ assoc (- x) x z ⟩
+      (- x ∙ x) ∙ z ≡⟨ cong (_∙ z) (⁻∙ x) ⟩
+      ε ∙ z ≡⟨ ε∙ z ⟩
+      z ∎
 
-  cancelʳ : Cancellativeʳ _∙_
-  cancelʳ x y z p =
-    y ≡˘⟨ ∙ε y ⟩
-    y ∙ ε ≡˘⟨ cong (y ∙_) (∙⁻ x) ⟩
-    y ∙ (x ∙ - x) ≡˘⟨ assoc y x (- x) ⟩
-    (y ∙ x) ∙ - x ≡⟨ cong (_∙ - x) p ⟩
-    (z ∙ x) ∙ - x ≡⟨ assoc z x (- x) ⟩
-    z ∙ (x ∙ - x) ≡⟨ cong (z ∙_) (∙⁻ x) ⟩
-    z ∙ ε ≡⟨ ∙ε z ⟩
-    z ∎
+    cancelʳ : Cancellativeʳ _∙_
+    cancelʳ x y z p =
+      y ≡˘⟨ ∙ε y ⟩
+      y ∙ ε ≡˘⟨ cong (y ∙_) (∙⁻ x) ⟩
+      y ∙ (x ∙ - x) ≡˘⟨ assoc y x (- x) ⟩
+      (y ∙ x) ∙ - x ≡⟨ cong (_∙ - x) p ⟩
+      (z ∙ x) ∙ - x ≡⟨ assoc z x (- x) ⟩
+      z ∙ (x ∙ - x) ≡⟨ cong (z ∙_) (∙⁻ x) ⟩
+      z ∙ ε ≡⟨ ∙ε z ⟩
+      z ∎
 
-record CommutativeMonoid ℓ : Type (ℓsuc ℓ) where
-  field
-    monoid : Monoid ℓ
-  open Monoid monoid public
-  field
-    comm : Commutative _∙_
+  record CommutativeMonoid : Type ℓ where
+    field
+      monoid : Monoid
+    open Monoid monoid public
+    field
+      comm : Commutative _∙_
 
-record Semilattice ℓ : Type (ℓsuc ℓ) where
-  field
-    commutativeMonoid : CommutativeMonoid ℓ
-  open CommutativeMonoid commutativeMonoid public
-  field
-    idem : Idempotent _∙_
+  record Semilattice : Type ℓ where
+    field
+      commutativeMonoid : CommutativeMonoid
+    open CommutativeMonoid commutativeMonoid public
+    field
+      idem : Idempotent _∙_
 
-record NearSemiring ℓ : Type (ℓsuc ℓ) where
-  infixl 6 _+_
-  infixl 7 _*_
-  field
-    𝑅 : Type ℓ
-    _+_ : 𝑅 → 𝑅 → 𝑅
-    _*_ : 𝑅 → 𝑅 → 𝑅
-    1# : 𝑅
-    0# : 𝑅
-    +-assoc : Associative _+_
-    *-assoc : Associative _*_
-    0+ : Identityˡ _+_ 0#
-    +0 : Identityʳ _+_ 0#
-    1* : Identityˡ _*_ 1#
-    *1 : Identityʳ _*_ 1#
-    0* : Zeroˡ _*_ 0#
-    ⟨+⟩* : _*_ Distributesˡ _+_
+  record NearSemiring : Type ℓ where
+    infixl 6 _+_
+    infixl 7 _*_
+    field
+      _+_ : 𝑆 → 𝑆 → 𝑆
+      _*_ : 𝑆 → 𝑆 → 𝑆
+      1# : 𝑆
+      0# : 𝑆
+      +-assoc : Associative _+_
+      *-assoc : Associative _*_
+      0+ : Identityˡ _+_ 0#
+      +0 : Identityʳ _+_ 0#
+      1* : Identityˡ _*_ 1#
+      *1 : Identityʳ _*_ 1#
+      0* : Zeroˡ _*_ 0#
+      ⟨+⟩* : _*_ Distributesˡ _+_
 
-  +-monoid : Monoid ℓ
-  +-monoid .Monoid.𝑆 = 𝑅
-  +-monoid .Monoid._∙_ = _+_
-  +-monoid .Monoid.ε = 0#
-  +-monoid .Monoid.assoc = +-assoc
-  +-monoid .Monoid.ε∙ = 0+
-  +-monoid .Monoid.∙ε = +0
+    +-monoid : Monoid
+    +-monoid .Monoid._∙_ = _+_
+    +-monoid .Monoid.ε = 0#
+    +-monoid .Monoid.assoc = +-assoc
+    +-monoid .Monoid.ε∙ = 0+
+    +-monoid .Monoid.∙ε = +0
 
-  *-monoid : Monoid ℓ
-  *-monoid .Monoid.𝑆 = 𝑅
-  *-monoid .Monoid._∙_ = _*_
-  *-monoid .Monoid.ε = 1#
-  *-monoid .Monoid.assoc = *-assoc
-  *-monoid .Monoid.ε∙ = 1*
-  *-monoid .Monoid.∙ε = *1
+    *-monoid : Monoid
+    *-monoid .Monoid._∙_ = _*_
+    *-monoid .Monoid.ε = 1#
+    *-monoid .Monoid.assoc = *-assoc
+    *-monoid .Monoid.ε∙ = 1*
+    *-monoid .Monoid.∙ε = *1
 
-record Semiring ℓ : Type (ℓsuc ℓ) where
-  field
-    nearSemiring : NearSemiring ℓ
-  open NearSemiring nearSemiring public
-  field
-    +-comm : Commutative _+_
-    *0 : Zeroʳ _*_ 0#
-    *⟨+⟩ : _*_ Distributesʳ _+_
+  record Semiring : Type ℓ where
+    field
+      nearSemiring : NearSemiring
+    open NearSemiring nearSemiring public
+    field
+      +-comm : Commutative _+_
+      *0 : Zeroʳ _*_ 0#
+      *⟨+⟩ : _*_ Distributesʳ _+_
 
-record IdempotentSemiring ℓ : Type (ℓsuc ℓ) where
-  field
-    semiring : Semiring ℓ
+  record IdempotentSemiring : Type ℓ where
+    field
+      semiring : Semiring
+    open Semiring semiring public
+    field
+      +-idem : Idempotent _+_
+
+  record CommutativeSemiring : Type ℓ where
+    field
+      semiring : Semiring
+    open Semiring semiring public
+    field
+      *-comm : Commutative _*_
+
+  record StarSemiring : Type ℓ where
+    field semiring : Semiring
+    open Semiring semiring public
+    field
+      _⋆ : 𝑆 → 𝑆
+      star-iterʳ : ∀ x → x ⋆ ≡ 1# + x * x ⋆
+      star-iterˡ : ∀ x → x ⋆ ≡ 1# + x ⋆ * x
+    _⁺ : 𝑆 → 𝑆
+    x ⁺ = x * x ⋆
+
+record LeftSemimodule {ℓ₁ ℓ₂} {𝑆 : Type ℓ₁} (semiring : Semiring 𝑆) (𝑉 : Type ℓ₂) : Type (ℓ₁ ℓ⊔ ℓ₂) where
   open Semiring semiring public
-  field
-    +-idem : Idempotent _+_
-
-
-record CommutativeSemiring ℓ : Type (ℓsuc ℓ) where
-  field
-    semiring : Semiring ℓ
-  open Semiring semiring public
-  field
-    *-comm : Commutative _*_
-
-record LeftSemimodule {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
-  open Semiring semiring public
-  field
-    semimodule : CommutativeMonoid ℓ₂
+  field semimodule : CommutativeMonoid 𝑉
   open CommutativeMonoid semimodule renaming (_∙_ to _∪_) public
-    renaming (𝑆 to 𝑉
-             ; assoc to ∪-assoc
+    renaming ( assoc to ∪-assoc
              ; ε∙ to ∅∪
              ; ∙ε to ∪∅
              ; ε to ∅
              )
   infixr 7 _⋊_
   field
-    _⋊_ : 𝑅 → 𝑉 → 𝑉
+    _⋊_ : 𝑆 → 𝑉 → 𝑉
     ⟨*⟩⋊ : ∀ x y z → (x * y) ⋊ z ≡ x ⋊ (y ⋊ z)
     ⟨+⟩⋊ : ∀ x y z → (x + y) ⋊ z ≡ (x ⋊ z) ∪ (y ⋊ z)
     ⋊⟨∪⟩ : _⋊_ Distributesʳ _∪_
@@ -206,11 +194,25 @@ record LeftSemimodule {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ : Type (ℓ�
     0⋊ : ∀ x → 0# ⋊ x ≡ ∅
     ⋊∅ : ∀ x → x ⋊ ∅ ≡ ∅
 
+record MonoidHomomorphism_⟶_
+        {ℓ₁ ℓ₂} {𝑆 : Type ℓ₁} {𝑇 : Type ℓ₂}
+        (from : Monoid 𝑆)
+        (to   : Monoid 𝑇)
+      : Type (ℓ₁ ℓ⊔ ℓ₂) where
+  open Monoid from
+  open Monoid to
+    renaming ( _∙_ to _⊙_
+             ; ε to ⓔ)
+  field
+    f : 𝑆 → 𝑇
+    ∙-homo : ∀ x y → f (x ∙ y) ≡ f x ⊙ f y
+    ε-homo : f ε ≡ ⓔ
+
 record SemimoduleHomomorphism[_]_⟶_
-         {ℓ₁ ℓ₂ ℓ₃}
-         (rng : Semiring ℓ₁)
-         (from : LeftSemimodule rng ℓ₂)
-         (to : LeftSemimodule rng ℓ₃) : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
+        {ℓ₁ ℓ₂ ℓ₃} {𝑆 : Type ℓ₁} {𝑉₁ : Type ℓ₂} {𝑉₂ : Type ℓ₃}
+        (rng : Semiring 𝑆)
+        (from : LeftSemimodule rng 𝑉₁)
+        (to : LeftSemimodule rng 𝑉₂) : Type (ℓ₁ ℓ⊔ ℓ₂ ℓ⊔ ℓ₃) where
 
   open Semiring rng
   open LeftSemimodule from using (_⋊_; monoid)
@@ -222,16 +224,6 @@ record SemimoduleHomomorphism[_]_⟶_
 
   field ⋊-homo : ∀ r x → f (r ⋊ x) ≡ r ⋊′ f x
 
-record StarSemiring ℓ : Type (ℓsuc ℓ) where
-  field
-    semiring : Semiring ℓ
-  open Semiring semiring public
-  field
-    _⋆ : 𝑅 → 𝑅
-    star-iterʳ : ∀ x → x ⋆ ≡ 1# + x * x ⋆
-    star-iterˡ : ∀ x → x ⋆ ≡ 1# + x ⋆ * x
-  _⁺ : 𝑅 → 𝑅
-  x ⁺ = x * x ⋆
 
 module _ {ℓ₁ ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) where
 
@@ -282,7 +274,7 @@ module _ {ℓ₁ ℓ₂} (𝐹 : Type ℓ₁ → Type ℓ₂) where
 
     -- liftA2 : (A → B → C) → 𝐹 A → 𝐹 B → 𝐹 C
     -- liftA2 f xs ys = xs =>> λ x → {!ys =>> λ y → {!!}!}
-    
+
 
   record Alternative : Type (ℓsuc ℓ₁ ℓ⊔ ℓ₂) where
     field
@@ -358,133 +350,130 @@ record SetMonadHomomorphism_⟶_
     >>=-homo : (xs : F.𝐹 A) (k : A → F.𝐹 B) → (f xs T.>>= (f ∘ k)) ≡ f (xs F.>>= k)
     return-homo : (x : A) → f (F.return x) ≡ T.return x
 
-record GradedMonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
+module _ {ℓ₁} {𝑆 : Type ℓ₁} (monoid : Monoid 𝑆) {ℓ₂} (𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₂) where
   open Monoid monoid
-  field
-    𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₃
-    return  : A → 𝐹 ε A
-    _>>=_ : ∀ {x y} → 𝐹 x A → (A → 𝐹 y B) → 𝐹 (x ∙ y) B
+  record GradedMonad : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
+    field
+      return  : A → 𝐹 ε A
+      _>>=_ : ∀ {x y} → 𝐹 x A → (A → 𝐹 y B) → 𝐹 (x ∙ y) B
 
-  _<=<_ : ∀ {x y} → (B → 𝐹 y C) → (A → 𝐹 x B) → A → 𝐹 (x ∙ y) C
-  (g <=< f) x = f x >>= g
+    _<=<_ : ∀ {x y} → (B → 𝐹 y C) → (A → 𝐹 x B) → A → 𝐹 (x ∙ y) C
+    (g <=< f) x = f x >>= g
 
-  _>=>_ : ∀ {x y} → (A → 𝐹 x B) → (B → 𝐹 y C) → A → 𝐹 (x ∙ y) C
-  (f >=> g) x = f x >>= g
+    _>=>_ : ∀ {x y} → (A → 𝐹 x B) → (B → 𝐹 y C) → A → 𝐹 (x ∙ y) C
+    (f >=> g) x = f x >>= g
 
-  field
-    >>=-idˡ : ∀ {s} (f : A → 𝐹 s B) → (x : A) → (return x >>= f) ≡[ i ≔ 𝐹 (ε∙ s i) B ]≡ (f x)
-    >>=-idʳ : ∀ {s} (x : 𝐹 s A) → (x >>= return) ≡[ i ≔ 𝐹 (∙ε s i) A ]≡ x
-    >>=-assoc : ∀ {x y z} (xs : 𝐹 x A) (f : A → 𝐹 y B) (g : B → 𝐹 z C) → ((xs >>= f) >>= g) ≡[ i ≔ 𝐹 (assoc x y z i) C ]≡ (xs >>= (λ x → f x >>= g))
+    field
+      >>=-idˡ : ∀ {s} (f : A → 𝐹 s B) → (x : A) → (return x >>= f) ≡[ i ≔ 𝐹 (ε∙ s i) B ]≡ (f x)
+      >>=-idʳ : ∀ {s} (x : 𝐹 s A) → (x >>= return) ≡[ i ≔ 𝐹 (∙ε s i) A ]≡ x
+      >>=-assoc : ∀ {x y z} (xs : 𝐹 x A) (f : A → 𝐹 y B) (g : B → 𝐹 z C) → ((xs >>= f) >>= g) ≡[ i ≔ 𝐹 (assoc x y z i) C ]≡ (xs >>= (λ x → f x >>= g))
 
-  infixr 0 proven-bind
+    infixr 0 proven-bind
 
-  proven-bind : ∀ {x y z} → 𝐹 x A → (A → 𝐹 y B) → (x ∙ y) ≡ z → 𝐹 z B
-  proven-bind xs f proof = subst (flip 𝐹 _) proof (xs >>= f)
+    proven-bind : ∀ {x y z} → 𝐹 x A → (A → 𝐹 y B) → (x ∙ y) ≡ z → 𝐹 z B
+    proven-bind xs f proof = subst (flip 𝐹 _) proof (xs >>= f)
 
-  syntax proven-bind xs f proof = xs >>=[ proof ] f
+    syntax proven-bind xs f proof = xs >>=[ proof ] f
 
-  infixr 0 proven-do
-  proven-do : ∀ {x y z} → 𝐹 x A → (A → 𝐹 y B) → (x ∙ y) ≡ z → 𝐹 z B
-  proven-do = proven-bind
+    infixr 0 proven-do
+    proven-do : ∀ {x y z} → 𝐹 x A → (A → 𝐹 y B) → (x ∙ y) ≡ z → 𝐹 z B
+    proven-do = proven-bind
 
-  syntax proven-do xs (λ x → e) proof = x ← xs [ proof ] e
+    syntax proven-do xs (λ x → e) proof = x ← xs [ proof ] e
 
-  map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
-  map f xs = xs >>=[ ∙ε _ ] (return ∘ f)
+    map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
+    map f xs = xs >>=[ ∙ε _ ] (return ∘ f)
 
-  _<*>_ : ∀ {x y} → 𝐹 x (A → B) → 𝐹 y A → 𝐹 (x ∙ y) B
-  fs <*> xs = fs >>= flip map xs
+    _<*>_ : ∀ {x y} → 𝐹 x (A → B) → 𝐹 y A → 𝐹 (x ∙ y) B
+    fs <*> xs = fs >>= flip map xs
 
-  _>>=ε_ : ∀ {x} → 𝐹 x A → (A → 𝐹 ε B) → 𝐹 x B
-  xs >>=ε f = xs >>=[ ∙ε _ ] f
+    _>>=ε_ : ∀ {x} → 𝐹 x A → (A → 𝐹 ε B) → 𝐹 x B
+    xs >>=ε f = xs >>=[ ∙ε _ ] f
 
-record GradedComonad {ℓ₁} (monoid : Monoid ℓ₁) ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
-  open Monoid monoid
-  field
-    𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₂
-    extract : 𝐹 ε A → A
-    extend  : ∀ {x y} → (𝐹 y A → B) → 𝐹 (x ∙ y) A → 𝐹 x B
+  record GradedComonad : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
+    field
+      extract : 𝐹 ε A → A
+      extend  : ∀ {x y} → (𝐹 y A → B) → 𝐹 (x ∙ y) A → 𝐹 x B
 
-  extend[_] : ∀ {x y z} → x ∙ y ≡ z → (𝐹 y A → B) → 𝐹 z A → 𝐹 x B
-  extend[ p ] k = subst (λ w → (𝐹 w _ → _)) p (extend k)
+    extend[_] : ∀ {x y z} → x ∙ y ≡ z → (𝐹 y A → B) → 𝐹 z A → 𝐹 x B
+    extend[ p ] k = subst (λ w → (𝐹 w _ → _)) p (extend k)
 
-  _=>>_ : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
-  _=>>_ = flip extend
+    _=>>_ : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
+    _=>>_ = flip extend
 
-  proven-cobind : ∀ {x y z} → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 z A → 𝐹 x B
-  proven-cobind k prf = extend[ prf ] k
+    proven-cobind : ∀ {x y z} → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 z A → 𝐹 x B
+    proven-cobind k prf = extend[ prf ] k
 
-  syntax proven-cobind f prf xs = xs =>>[ prf ] f
+    syntax proven-cobind f prf xs = xs =>>[ prf ] f
 
-  _=<=_ : ∀ {x y} → (𝐹 x B → C) → (𝐹 y A → B) → 𝐹 (x ∙ y) A → C
-  (g =<= f) x = g (extend f x)
+    _=<=_ : ∀ {x y} → (𝐹 x B → C) → (𝐹 y A → B) → 𝐹 (x ∙ y) A → C
+    (g =<= f) x = g (extend f x)
 
-  _=>=_ : ∀ {x y} → (𝐹 y A → B) → (𝐹 x B → C) → 𝐹 (x ∙ y) A → C
-  _=>=_ = flip _=<=_
+    _=>=_ : ∀ {x y} → (𝐹 y A → B) → (𝐹 x B → C) → 𝐹 (x ∙ y) A → C
+    _=>=_ = flip _=<=_
 
 
-  field
-    =>>-idˡ : ∀ {x} {B : Type ℓ₂} → (f : 𝐹 x A → B) → PathP (λ i → 𝐹 (ε∙ x i) A → B) (extract =<= f) f
-    =>>-idʳ : ∀ {x} {B : Type ℓ₂} → (f : 𝐹 x A → B) → PathP (λ i → 𝐹 (∙ε x i) A → B) (f =<= extract) f
-    =>>-assoc : ∀ {x y z} {D : Type ℓ₂} → (f : 𝐹 x C → D) (g : 𝐹 y B → C) (h : 𝐹 z A → B) →
-          PathP (λ i → 𝐹 (assoc x y z i) A → D) ((f =<= g) =<= h) (f =<= (g =<= h))
+    field
+      =>>-idˡ : ∀ {x} {B : Type ℓ₂} → (f : 𝐹 x A → B) → PathP (λ i → 𝐹 (ε∙ x i) A → B) (extract =<= f) f
+      =>>-idʳ : ∀ {x} {B : Type ℓ₂} → (f : 𝐹 x A → B) → PathP (λ i → 𝐹 (∙ε x i) A → B) (f =<= extract) f
+      =>>-assoc : ∀ {x y z} {D : Type ℓ₂} → (f : 𝐹 x C → D) (g : 𝐹 y B → C) (h : 𝐹 z A → B) →
+            PathP (λ i → 𝐹 (assoc x y z i) A → D) ((f =<= g) =<= h) (f =<= (g =<= h))
 
-  {-# INLINE proven-cobind #-}
-  {-# INLINE extend[_] #-}
+    {-# INLINE proven-cobind #-}
+    {-# INLINE extend[_] #-}
 
-  infixr 1 codo-syntax
-  codo-syntax : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
-  codo-syntax = _=>>_
+    infixr 1 codo-syntax
+    codo-syntax : ∀ {x y} → 𝐹 (x ∙ y) A → (𝐹 y A → B) → 𝐹 x B
+    codo-syntax = _=>>_
 
-  syntax codo-syntax xs (λ x → r) = x ↢ xs ; r
+    syntax codo-syntax xs (λ x → r) = x ↢ xs ; r
 
-  infixr 1 proven-codo-syntax
-  proven-codo-syntax : ∀ {x y z} → 𝐹 z A → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 x B
-  proven-codo-syntax xs k p = proven-cobind k p xs
+    infixr 1 proven-codo-syntax
+    proven-codo-syntax : ∀ {x y z} → 𝐹 z A → (𝐹 y A → B) → x ∙ y ≡ z → 𝐹 x B
+    proven-codo-syntax xs k p = proven-cobind k p xs
 
-  syntax proven-codo-syntax xs (λ x → r) prf = x ↢ xs [ prf ]; r
+    syntax proven-codo-syntax xs (λ x → r) prf = x ↢ xs [ prf ]; r
 
-  map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
-  map f = extend[ ∙ε _ ] (f ∘′ extract)
-  {-# INLINE map #-}
+    map : ∀ {x} → (A → B) → 𝐹 x A → 𝐹 x B
+    map f = extend[ ∙ε _ ] (f ∘′ extract)
+    {-# INLINE map #-}
 
-  open import Cubical.Foundations.Prelude using (fromPathP; transportRefl; substRefl)
+    open import Cubical.Foundations.Prelude using (fromPathP; transportRefl; substRefl)
 
-  map-id : ∀ {x} → (xs : 𝐹 x A) → map id xs ≡ xs
-  map-id xs = cong (_$ xs) (fromPathP (=>>-idʳ id))
+    map-id : ∀ {x} → (xs : 𝐹 x A) → map id xs ≡ xs
+    map-id xs = cong (_$ xs) (fromPathP (=>>-idʳ id))
 
-  extract-extend : ∀ {x} (xs : 𝐹 x A) → extract (extend[ ε∙ x ] id xs) ≡ xs
-  extract-extend {A = A} {x = x} xs =
-    cong extract (J (λ y p → (xs : 𝐹 y A) → extend[ p ] id xs ≡ extend id (subst (flip 𝐹 A) (sym p) xs)) (λ xs → cong (_$ xs) (transportRefl (extend id))  ; cong (extend id) (sym (transportRefl xs))) (ε∙ x) xs ) ;
-    sym (transportRefl _) ;
-    cong (_$ xs) (fromPathP (=>>-idˡ {x = x} id))
+    extract-extend : ∀ {x} (xs : 𝐹 x A) → extract (extend[ ε∙ x ] id xs) ≡ xs
+    extract-extend {A = A} {x = x} xs =
+      cong extract (J (λ y p → (xs : 𝐹 y A) → extend[ p ] id xs ≡ extend id (subst (flip 𝐹 A) (sym p) xs)) (λ xs → cong (_$ xs) (transportRefl (extend id))  ; cong (extend id) (sym (transportRefl xs))) (ε∙ x) xs ) ;
+      sym (transportRefl _) ;
+      cong (_$ xs) (fromPathP (=>>-idˡ {x = x} id))
 
-  open import Path.Reasoning
+    open import Path.Reasoning
 
-  -- map-comp : ∀ {x} (g : B → C) (f : A → B) → map {x = x} g ∘ map f ≡ map {x = x} (g ∘ f)
-  -- map-comp {x = x} g f = funExt λ xs →
-  --   map g (map f xs) ≡⟨⟩
-  --   extend[ ∙ε x ] (g ∘ extract) (extend[ ∙ε x ] (f ∘ extract) xs) ≡⟨ {!!} ⟩
-  --   extend[ ∙ε x ] (g ∘ f ∘ extract) xs ≡⟨⟩
-  --   map (g ∘ f) xs ∎
+    -- map-comp : ∀ {x} (g : B → C) (f : A → B) → map {x = x} g ∘ map f ≡ map {x = x} (g ∘ f)
+    -- map-comp {x = x} g f = funExt λ xs →
+    --   map g (map f xs) ≡⟨⟩
+    --   extend[ ∙ε x ] (g ∘ extract) (extend[ ∙ε x ] (f ∘ extract) xs) ≡⟨ {!!} ⟩
+    --   extend[ ∙ε x ] (g ∘ f ∘ extract) xs ≡⟨⟩
+    --   map (g ∘ f) xs ∎
 
-record SGradedComonad {ℓ₁} (semiring : Semiring ℓ₁) ℓ₂ ℓ₃ : Type (ℓ₁ ℓ⊔ ℓsuc (ℓ₂ ℓ⊔ ℓ₃)) where
+record SGradedComonad {ℓ₁ ℓ₂} {𝑆 : Type ℓ₁} (semiring : Semiring 𝑆) (𝐹 : 𝑆 → Type ℓ₂ → Type ℓ₂) : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
   open Semiring semiring
-  field
-    gradedComonad : GradedComonad +-monoid ℓ₂
+  field gradedComonad : GradedComonad *-monoid 𝐹
   open GradedComonad gradedComonad
   field
     pure  : ∀ {x} → 𝐹 x A
     _<*>_ : ∀ {x} → 𝐹 x (A → B) → 𝐹 x A → 𝐹 x B
     separate : ∀ {x y} → 𝐹 (x + y) A → 𝐹 x A × 𝐹 y A
 
-record MatchedPair {ℓ₁ ℓ₂} (R : Monoid ℓ₁) (E : Monoid ℓ₂) : Type (ℓ₁ ℓ⊔ ℓ₂) where
-  open Monoid R using ()    renaming (𝑆 to 𝑅; _∙_ to _*_; ε to r1)
-  open Monoid E using (_∙_) renaming (𝑆 to 𝐸; ε to e1)
+record MatchedPair {ℓ₁ ℓ₂} {𝑆 : Type ℓ₁} {𝐸 : Type ℓ₂} (R : Monoid 𝑆) (E : Monoid 𝐸) : Type (ℓ₁ ℓ⊔ ℓ₂) where
+  open Monoid R using ()    renaming (_∙_ to _*_; ε to r1)
+  open Monoid E using (_∙_) renaming (ε to e1)
 
   field
-    ι : 𝑅 → 𝐸 → 𝑅
-    κ : 𝑅 → 𝐸 → 𝐸
+    ι : 𝑆 → 𝐸 → 𝑆
+    κ : 𝑆 → 𝐸 → 𝐸
 
     law1 : ∀ x → ι x e1 ≡ x
     law2 : ∀ x → ι r1 x ≡ r1

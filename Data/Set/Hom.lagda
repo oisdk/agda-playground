@@ -3,7 +3,7 @@ open import Prelude
 open import Algebra
 open import Cubical.Foundations.Everything using (isSet)
 
-module Data.Set.Hom {ℓ} (latt : Semilattice ℓ) (sIsSet : isSet (Semilattice.𝑆 latt)) where
+module Data.Set.Hom {ℓ} {𝑆 : Type ℓ} (latt : Semilattice 𝑆) (sIsSet : isSet 𝑆) where
 
 
 open import Data.Set.Definition

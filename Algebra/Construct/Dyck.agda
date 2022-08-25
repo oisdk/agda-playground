@@ -166,13 +166,11 @@ rhs″ (suc xr) zero (suc yr) (suc zl) = cong (_- zl) (ℕ.+-suc xr yr) ;  rhs�
   rhs : left (left (xr ⟩-⟨ yl) + yr ⟩-⟨ zl) + zr ≡ left (xr ⟩-⟨ right (yr ⟩-⟨ zl) + yl) + (left (yr ⟩-⟨ zl) + zr)
   rhs = cong (_+ zr) (rhs′ xr yl yr zl) ; ℕ.+-assoc (left (xr ⟩-⟨ right (yr ⟩-⟨ zl) + yl)) (left (yr ⟩-⟨ zl)) zr
 
-semigroupBal : Semigroup _
-semigroupBal .Semigroup.𝑆 = Bal
+semigroupBal : Semigroup Bal
 semigroupBal .Semigroup._∙_ = _+⟨⟩+_
 semigroupBal .Semigroup.assoc = ⟨⟩-assoc
 
-monoidBal : Monoid _
-Monoid.𝑆 monoidBal = Bal
+monoidBal : Monoid Bal
 Monoid._∙_ monoidBal = _+⟨⟩+_
 Monoid.ε monoidBal = ⟨⟩
 Monoid.assoc monoidBal = ⟨⟩-assoc

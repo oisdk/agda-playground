@@ -5,7 +5,7 @@ open import Prelude
 open import HITs.PropositionalTruncation
 open import HITs.PropositionalTruncation.Sugar
 
-module Algebra.Construct.Cayley {a} (mon : Monoid a) where
+module Algebra.Construct.Cayley {a} {𝑆 : Type a} (mon : Monoid 𝑆) where
 
 open Monoid mon
 
@@ -49,8 +49,7 @@ _⊙_ : 𝒞 → 𝒞 → 𝒞
 ⊙ⓔ x i .fst y = x .fst y
 ⊙ⓔ x i .snd y = squash ((x ⊙ ⓔ) .snd y) (x .snd y) i
 
-cayleyMonoid : Monoid a
-Monoid.𝑆 cayleyMonoid = 𝒞
+cayleyMonoid : Monoid 𝒞
 Monoid._∙_ cayleyMonoid = _⊙_
 Monoid.ε cayleyMonoid = ⓔ
 Monoid.assoc cayleyMonoid = ⊙-assoc

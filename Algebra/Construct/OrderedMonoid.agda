@@ -1,8 +1,9 @@
 {-# OPTIONS --cubical --safe #-}
 
 open import Algebra
+open import Level
 
-module Algebra.Construct.OrderedMonoid {ℓ} (monoid : Monoid ℓ) where
+module Algebra.Construct.OrderedMonoid {ℓ} {𝑆 : Type ℓ} (monoid : Monoid 𝑆) where
 
 open import Prelude
 open import Relation.Binary

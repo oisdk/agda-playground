@@ -1,8 +1,9 @@
 \begin{code}
 {-# OPTIONS --cubical --safe #-}
 open import Algebra
+open import Level
 
-module Control.Monad.Weighted.Functor {ℓ} (rng : Semiring ℓ) where
+module Control.Monad.Weighted.Functor {ℓ} {𝑅 : Type ℓ} (rng : Semiring 𝑅) where
 
 open Semiring rng
 

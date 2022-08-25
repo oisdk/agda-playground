@@ -1,8 +1,9 @@
 {-# OPTIONS --cubical --safe #-}
 
 open import Algebra
+open import Level
 
-module Algebra.SemiringLiterals {r} (rng : Semiring r) where
+module Algebra.SemiringLiterals {r} {𝑅 : Type r} (rng : Semiring 𝑅) where
 
 open Semiring rng
 

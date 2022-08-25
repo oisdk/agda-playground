@@ -2,8 +2,9 @@
 {-# OPTIONS --cubical --safe --postfix-projections #-}
 
 open import Algebra
+open import Level
 
-module Control.Monad.Weighted.Union {ℓ} (rng : Semiring ℓ) where
+module Control.Monad.Weighted.Union {ℓ} {𝑅 : Type ℓ} (rng : Semiring 𝑅) where
 
 open Semiring rng
 

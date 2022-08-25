@@ -7,7 +7,7 @@ open import Data.Set.Union
 open import Data.Set.Empty
 open import Container renaming (⟦_⟧ to ⟦_⟧′)
 
-module _ (Univ : Type) (univ : Univ → Container ℓzero ℓzero) (_≟_ : Discrete Univ) where
+module _ (Univ : Type) (univ : Univ → Container) (_≟_ : Discrete Univ) where
   open WithDecEq _≟_
 
   ⟦_⟧ : Univ → Type → Type

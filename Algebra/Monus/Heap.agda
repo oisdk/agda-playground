@@ -5,7 +5,7 @@ open import Algebra.Monus
 open import Prelude
 open import Relation.Binary
 
-module Algebra.Monus.Heap (mon : TMAPOM ℓzero) (≺-wf : WellFounded (TMAPOM._≺_ mon)) where
+module Algebra.Monus.Heap {𝑆 : Type} (mon : TMAPOM 𝑆) (≺-wf : WellFounded (TMAPOM._≺_ mon)) where
 
 open TMAPOM mon
 

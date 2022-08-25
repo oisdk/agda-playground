@@ -4,7 +4,7 @@ open import Algebra
 open import Prelude
 open import Relation.Binary.Equivalence.PropTruncated
 
-module Algebra.Construct.Cayley.Propositional {a} (mon : Monoid a) where
+module Algebra.Construct.Cayley.Propositional {a} {𝑆 : Type a} (mon : Monoid 𝑆) where
 
 open Monoid mon
 
@@ -47,8 +47,7 @@ module _ where
 ⊙ⓔ : ∀ x → x ⊙ ⓔ ≡ x
 ⊙ⓔ x = refl
 
-cayleyMonoid : Monoid a
-Monoid.𝑆 cayleyMonoid = 𝒞
+cayleyMonoid : Monoid 𝒞
 Monoid._∙_ cayleyMonoid = _⊙_
 Monoid.ε cayleyMonoid = ⓔ
 Monoid.assoc cayleyMonoid = ⊙-assoc

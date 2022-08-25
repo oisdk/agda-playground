@@ -89,7 +89,7 @@ open import Function.Injective
 
 open import Algebra
 
-module _ (mon : Monoid b) where
+module _ {𝑆 : Type b} (mon : Monoid 𝑆) where
   open Monoid mon
 
   module _ (f : A → 𝑆) where
@@ -107,8 +107,7 @@ module _ (mon : Monoid b) where
     foldl-foldr-monoid = foldr-universal _ (_∙_ ∘ f) ε refl λ x xs → sym (foldMapLStep x xs)
 
 module _ (A : Type a) where
-  listMonoid : Monoid a
-  listMonoid .Monoid.𝑆 = List A
+  listMonoid : Monoid (List A) 
   listMonoid .Monoid._∙_ = _++_
   listMonoid .Monoid.ε = []
   listMonoid .Monoid.assoc = ++-assoc

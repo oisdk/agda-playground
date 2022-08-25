@@ -8,8 +8,8 @@ open import Data.Maybe
 open import Data.List using (List; _∷_; []; foldr)
 
 module Control.Monad.HeapT.NonTransformer
-  {ℓ}
-  (monoid : Monoid ℓ)
+  {ℓ} {𝑆 : Type ℓ}
+  (monoid : Monoid 𝑆)
   where
 
 open Monoid monoid

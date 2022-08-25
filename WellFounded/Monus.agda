@@ -3,7 +3,7 @@ module WellFounded.Monus where
 open import Prelude
 open import Algebra.Monus
 
-module _ {ℓ} (mon : TMAPOM ℓ) where
+module _ {ℓ} {𝑆 : Type ℓ} (mon : TMAPOM 𝑆) where
   open TMAPOM mon
 
   Within : 𝑆 → Type a → Type _

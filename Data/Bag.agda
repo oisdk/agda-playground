@@ -137,8 +137,7 @@ _∪_ = λ xs ys → [ ys ∪′ ]↓ xs
     (x ∷ ys) ∪ xs ≡⟨ ∪-cons x ys xs ⟩
     ys ∪ x ∷ xs ∎
 
-⟅⟆-commutative-monoid : ∀ {a} (A : Type a) → CommutativeMonoid _
-Monoid.𝑆 (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = ⟅ A ⟆
+⟅⟆-commutative-monoid : ∀ {a} (A : Type a) → CommutativeMonoid ⟅ A ⟆
 Monoid._∙_ (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = _∪_
 Monoid.ε (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = []
 Monoid.assoc (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = ∪-assoc
@@ -146,7 +145,7 @@ Monoid.ε∙ (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) _ = refl
 Monoid.∙ε (CommutativeMonoid.monoid (⟅⟆-commutative-monoid A)) = ∪-idʳ
 CommutativeMonoid.comm (⟅⟆-commutative-monoid A) = ∪-comm
 
-module _ {ℓ} (mon : CommutativeMonoid ℓ) (sIsSet : isSet (CommutativeMonoid.𝑆 mon)) where
+module _ {ℓ} {𝑆 : Type ℓ} (mon : CommutativeMonoid 𝑆) (sIsSet : isSet 𝑆) where
   open CommutativeMonoid mon
   ⟦_⟧ : (A → 𝑆) → ⟅ A ⟆ → 𝑆
   ⟦_⟧ = λ h → [ ⟦ h ⟧′ ]↓

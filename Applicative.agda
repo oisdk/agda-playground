@@ -5,7 +5,7 @@ module Applicative where
 open import Prelude
 open import Algebra
 
-module _ (mon : Monoid a) where
+module _ {𝑆 : Type a} (mon : Monoid 𝑆) where
   open Monoid mon
   constApplicative : Applicative {ℓ₁ = b} (const 𝑆)
   constApplicative .Applicative.pure _ = ε

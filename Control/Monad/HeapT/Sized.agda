@@ -8,9 +8,9 @@ open import Data.Maybe
 open import Data.List using (List; _∷_; []; foldr)
 
 module Control.Monad.HeapT.Sized
-  {ℓ}
-  (mon : CTMAPOM ℓ)
-  (gmon : GradedMonad (CTMAPOM.monoid mon) ℓ ℓ)
+  {ℓ} {𝑆 : Type ℓ} {𝐹 : 𝑆 → Type ℓ → Type ℓ}
+  (mon : CTMAPOM 𝑆)
+  (gmon : GradedMonad (CTMAPOM.monoid mon) 𝐹)
   where
 
 open CTMAPOM mon

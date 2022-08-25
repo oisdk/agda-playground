@@ -1,7 +1,7 @@
 open import Algebra
 open import Prelude
 
-module Algebra.IndexedMonoid {ℓ₁ ℓ₂} (mon : Monoid ℓ₁) (U : Monoid.𝑆 mon → Type ℓ₂) where
+module Algebra.IndexedMonoid {ℓ₁ ℓ₂} {𝑆 : Type ℓ₁} (mon : Monoid 𝑆) (U : 𝑆 → Type ℓ₂) where
 
 open Monoid mon
 

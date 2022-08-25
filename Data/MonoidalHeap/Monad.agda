@@ -3,8 +3,9 @@
 open import Algebra
 open import Relation.Binary
 open import Algebra.Monus
+open import Level
 
-module Data.MonoidalHeap.Monad {s} (monus : TMAPOM s) where
+module Data.MonoidalHeap.Monad {s} {𝑆 : Type s} (monus : TMAPOM 𝑆) where
 
 open TMAPOM monus
 

@@ -17,7 +17,7 @@ data 𝒦 (A : Type a) : Type a where
   ∪-identity : ∀ xs → xs ∪ ∅ ≡ xs
   trunc : isSet (𝒦 A)
 
-module _ (semiLattice : Semilattice b) where
+module _ {𝑆 : Type b} (semiLattice : Semilattice 𝑆) where
   open Semilattice semiLattice
   module _ (sIsSet : isSet 𝑆) (h : A → 𝑆) where
     μ : 𝒦 A → 𝑆
@@ -96,8 +96,7 @@ module _ {a} {A : Type a} where
   open Semilattice
   open CommutativeMonoid
   open Monoid
-  𝒦-semilattice : Semilattice a
-  𝒦-semilattice .commutativeMonoid .monoid .𝑆 = 𝒦 A
+  𝒦-semilattice : Semilattice (𝒦 A)
   𝒦-semilattice .commutativeMonoid .monoid ._∙_ = _∪_
   𝒦-semilattice .commutativeMonoid .monoid .ε = ∅
   𝒦-semilattice .commutativeMonoid .monoid .assoc = ∪-assoc

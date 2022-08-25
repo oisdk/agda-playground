@@ -2,13 +2,14 @@
 
 open import Algebra
 open import Algebra.Monus
+open import Level
 
-module Control.Monad.Weighted.Depth {ℓ} (mon : TMAPOM ℓ) where
+module Control.Monad.Weighted.Depth {ℓ} {𝑆 : Type ℓ} (mon : TMAPOM 𝑆) where
 
 open TMAPOM mon
 
 Rng : Semiring _
-Rng = viterbi tapom
+Rng = viterbi _ tapom
 
 
 open import Level

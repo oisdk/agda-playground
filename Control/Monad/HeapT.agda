@@ -8,9 +8,9 @@ open import Data.Maybe
 open import Data.List using (List; _∷_; []; foldr)
 
 module Control.Monad.HeapT
-  {ℓ}
-  (monoid : Monoid ℓ)
-  (gmon : GradedMonad monoid ℓ ℓ)
+  {ℓ} {𝑆 : Type ℓ} {𝐹 : 𝑆 → Type ℓ → Type ℓ}
+  (monoid : Monoid 𝑆)
+  (gmon : GradedMonad monoid 𝐹)
   where
 
 open Monoid monoid

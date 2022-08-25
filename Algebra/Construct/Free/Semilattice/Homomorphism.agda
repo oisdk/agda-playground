@@ -10,7 +10,7 @@ open import Algebra.Construct.Free.Semilattice.Definition
 open import Algebra.Construct.Free.Semilattice.Eliminators
 open import Algebra.Construct.Free.Semilattice.Union
 
-module _ {b} (semilattice : Semilattice b) where
+module _ {b} {𝑆 : Type b} (semilattice : Semilattice 𝑆) where
   open Semilattice semilattice
   module _ (sIsSet : isSet 𝑆) (h : A → 𝑆) where
     μ′ : A ↘ 𝑆

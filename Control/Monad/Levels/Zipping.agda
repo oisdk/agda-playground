@@ -64,8 +64,7 @@ zip-assoc : Levels-ψ[ xs ⦂ A ] (∀ ys zs → zip (zip xs ys) zs ≡ zip xs (
 open import Algebra
 
 module _ {a} {A : Type a} where
-  levels-cmon : CommutativeMonoid a
-  Monoid.𝑆 (CommutativeMonoid.monoid levels-cmon) = Levels A
+  levels-cmon : CommutativeMonoid (Levels A)
   Monoid._∙_ (CommutativeMonoid.monoid levels-cmon) = zip
   Monoid.ε (CommutativeMonoid.monoid levels-cmon) = []
   Monoid.assoc (CommutativeMonoid.monoid levels-cmon) = ∥ zip-assoc ∥⇓

@@ -34,524 +34,525 @@ open import Relation.Binary
 open import Path.Reasoning
 open import Function.Reasoning
 
+module _ {ℓ₁} (𝑆 : Type ℓ₁) where
 -- Positively ordered monoids.
 --
 -- These are monoids which have a preorder that respects the monoid operation
 -- in a straightforward way.
-record POM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field commutativeMonoid : CommutativeMonoid ℓ₁
-  open CommutativeMonoid commutativeMonoid public
-  field preorder : Preorder 𝑆 ℓ₂
-  open Preorder preorder public renaming (refl to ≤-refl)
-  field
-    positive : ∀ x → ε ≤ x
-    ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
+  record POM ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
+    field commutativeMonoid : CommutativeMonoid 𝑆
+    open CommutativeMonoid commutativeMonoid public
+    field preorder : Preorder 𝑆 ℓ₂
+    open Preorder preorder public renaming (refl to ≤-refl)
+    field
+      positive : ∀ x → ε ≤ x
+      ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
 
-  x≤x∙y : ∀ {x y} → x ≤ x ∙ y
-  x≤x∙y {x} {y} = subst (_≤ x ∙ y) (∙ε x) (≤-cong x (positive y))
+    x≤x∙y : ∀ {x y} → x ≤ x ∙ y
+    x≤x∙y {x} {y} = subst (_≤ x ∙ y) (∙ε x) (≤-cong x (positive y))
 
-  ≤-congʳ : ∀ x {y z} → y ≤ z → y ∙ x ≤ z ∙ x
-  ≤-congʳ x {y} {z} p = subst₂ _≤_ (comm x y) (comm x z) (≤-cong x p)
+    ≤-congʳ : ∀ x {y z} → y ≤ z → y ∙ x ≤ z ∙ x
+    ≤-congʳ x {y} {z} p = subst₂ _≤_ (comm x y) (comm x z) (≤-cong x p)
 
-  alg-≤-trans : ∀ {x y z k₁ k₂} → y ≡ x ∙ k₁ → z ≡ y ∙ k₂ → z ≡ x ∙ (k₁ ∙ k₂)
-  alg-≤-trans {x} {y} {z} {k₁} {k₂} y≡x∙k₁ z≡y∙k₂ =
-    z             ≡⟨ z≡y∙k₂ ⟩
-    y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
-    (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
-    x ∙ (k₁ ∙ k₂) ∎
-
-  infix 4 _≺_
-  _≺_ : 𝑆 → 𝑆 → Type _
-  x ≺ y = ∃ k × (y ≡ x ∙ k) × (k ≢ ε)
-
--- Total Antisymmetric POM
-record TAPOM ℓ₁ ℓ₂ : Type (ℓsuc (ℓ₁ ℓ⊔ ℓ₂)) where
-  field pom : POM ℓ₁ ℓ₂
-  open POM pom public using (preorder; _≤_; ≤-cong; ≤-congʳ; x≤x∙y; commutativeMonoid; positive)
-  open CommutativeMonoid commutativeMonoid public
-  field
-    _≤|≥_   : Total _≤_
-    antisym : Antisymmetric _≤_
-
-  totalOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
-  totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
-  open TotalOrder totalOrder public hiding (_≤|≥_; antisym) renaming (refl to ≤-refl)
-
-  ⟨⊓⟩∙ : _∙_ Distributesˡ _⊓_
-  ⟨⊓⟩∙ x y z with x <? y | (x ∙ z) <? (y ∙ z)
-  ... | yes x<y | yes xz<yz = refl
-  ... | no  x≮y | no  xz≮yz = refl
-  ... | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
-  ... | yes x<y | no  xz≮yz = antisym (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
-
-  ∙⟨⊓⟩ : _∙_ Distributesʳ _⊓_
-  ∙⟨⊓⟩ x y z = comm x (y ⊓ z) ; ⟨⊓⟩∙ y z x ; cong₂ _⊓_ (comm y x) (comm z x)
-
--- Every commutative monoid generates a positively ordered monoid
--- called the "algebraic" or "minimal" pom
-module AlgebraicPOM {ℓ} (mon : CommutativeMonoid ℓ) where
-  commutativeMonoid = mon
-  open CommutativeMonoid mon
-
-  infix 4 _≤_
-  _≤_ : 𝑆 → 𝑆 → Type _
-  x ≤ y = ∃ z × (y ≡ x ∙ z)
-
-  -- The snd here is the same proof as alg-≤-trans, so could be refactored out.
-  ≤-trans : Transitive _≤_
-  ≤-trans (k₁ , _) (k₂ , _) .fst = k₁ ∙ k₂
-  ≤-trans {x} {y} {z} (k₁ , y≡x∙k₁) (k₂ , z≡y∙k₂) .snd =
-    z             ≡⟨ z≡y∙k₂ ⟩
-    y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
-    (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
-    x ∙ (k₁ ∙ k₂) ∎
-
-  preorder : Preorder 𝑆 ℓ
-  Preorder._≤_ preorder = _≤_
-  Preorder.refl preorder = ε , sym (∙ε _)
-  Preorder.trans preorder = ≤-trans
-
-  positive : ∀ x → ε ≤ x
-  positive x = x , sym (ε∙ x)
-
-  ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
-  ≤-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
-
-algebraic-pom : ∀ {ℓ} → CommutativeMonoid ℓ → POM ℓ ℓ
-algebraic-pom mon = record { AlgebraicPOM mon }
-
--- Total Minimal POM
-record TMPOM ℓ : Type (ℓsuc ℓ) where
-  field commutativeMonoid : CommutativeMonoid ℓ
-
-  pom : POM _ _
-  pom = algebraic-pom commutativeMonoid
-
-  open POM pom public
-
-  infix 4 _≤|≥_
-  field _≤|≥_ : Total _≤_
-
-  <⇒≺ : ∀ x y → y ≰ x → x ≺ y
-  <⇒≺ x y x<y with x ≤|≥ y
-  ... | inr y≤x = ⊥-elim (x<y y≤x)
-  ... | inl (k , y≡x∙k) = λ
-    where
-    .fst → k
-    .snd .fst → y≡x∙k
-    .snd .snd k≡ε → x<y (ε , sym (∙ε y ; y≡x∙k ; cong (x ∙_) k≡ε ; ∙ε x))
-
-  infixl 6 _∸_
-  _∸_ : 𝑆 → 𝑆 → 𝑆
-  x ∸ y = either′ (const ε) fst (x ≤|≥ y)
-
-  x∸y≤x : ∀ x y → x ∸ y ≤ x
-  x∸y≤x x y with x ≤|≥ y
-  ... | inl (k , p) = positive x
-  ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k
-
--- Total Minimal Antisymmetric POM
-record TMAPOM ℓ : Type (ℓsuc ℓ) where
-  field tmpom : TMPOM ℓ
-  open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans; _≺_; <⇒≺; _∸_; x∸y≤x)
-  field antisym : Antisymmetric _≤_
-
-  tapom : TAPOM _ _
-  TAPOM.pom tapom = TMPOM.pom tmpom
-  TAPOM._≤|≥_ tapom = _≤|≥_
-  TAPOM.antisym tapom = antisym
-
-  open TAPOM tapom public hiding (antisym; _≤|≥_; _≤_; positive)
-
-  zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
-  zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
-
-  ≤‿∸‿cancel : ∀ x y → x ≤ y → (y ∸ x) ∙ x ≡ y
-  ≤‿∸‿cancel x y x≤y with y ≤|≥ x
-  ... | inl y≤x = ε∙ x ; antisym x≤y y≤x
-  ... | inr (k , y≡x∙k) = comm k x ; sym y≡x∙k
-
-  ∸‿comm : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
-  ∸‿comm x y with y ≤|≥ x | x ≤|≥ y
-  ... | inl y≤x | inl x≤y = cong (_∙ ε) (antisym x≤y y≤x)
-  ... | inr (k , y≡x∙k) | inl x≤y = sym y≡x∙k ; sym (∙ε y)
-  ... | inl y≤x | inr (k , x≥y) = ∙ε x ; x≥y
-  ... | inr (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
-    x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
-    y      ≡⟨ antisym  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁) ⟩
-    x      ≡⟨ x≡y∙k₂ ⟩
-    y ∙ k₂ ∎
-
-  ∸‿≺ : ∀ x y → x ≢ ε → y ≢ ε → x ∸ y ≺ x
-  ∸‿≺ x y x≢ε y≢ε with x ≤|≥ y
-  ... | inl _ = x , sym (ε∙ x) , x≢ε
-  ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k , y≢ε
-
--- Commutative Monoids with Monus
-record CMM ℓ : Type (ℓsuc ℓ) where
-  field commutativeMonoid : CommutativeMonoid ℓ
-
-  pom : POM _ _
-  pom = algebraic-pom commutativeMonoid
-
-  open POM pom public
-
-  field _∸_ : 𝑆 → 𝑆 → 𝑆
-  infixl 6 _∸_
-  field
-    ∸‿comm  : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
-    ∸‿assoc : ∀ x y z → (x ∸ y) ∸ z ≡ x ∸ (y ∙ z)
-    ∸‿inv   : ∀ x → x ∸ x ≡ ε
-    ε∸      : ∀ x → ε ∸ x ≡ ε
-
-  ∸ε : ∀ x → x ∸ ε ≡ x
-  ∸ε x =
-    x ∸ ε       ≡˘⟨ ε∙ (x ∸ ε) ⟩
-    ε ∙ (x ∸ ε) ≡⟨ ∸‿comm ε x ⟩
-    x ∙ (ε ∸ x) ≡⟨ cong (x ∙_) (ε∸ x) ⟩
-    x ∙ ε       ≡⟨ ∙ε x ⟩
-    x ∎
-
-  ∸≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
-  ∸≤ x y (k , y≡x∙k) =
-    x ∸ y       ≡⟨ cong (x ∸_) y≡x∙k ⟩
-    x ∸ (x ∙ k) ≡˘⟨ ∸‿assoc x x k ⟩
-    (x ∸ x) ∸ k ≡⟨ cong (_∸ k) (∸‿inv x) ⟩
-    ε ∸ k       ≡⟨ ε∸ k ⟩
-    ε ∎
-
-  ∣_-_∣ : 𝑆 → 𝑆 → 𝑆
-  ∣ x - y ∣ = (x ∸ y) ∙ (y ∸ x)
-
-  _⊔₂_ : 𝑆 → 𝑆 → 𝑆
-  x ⊔₂ y = x ∙ y ∙ ∣ x - y ∣
-
-  _⊓₂_ : 𝑆 → 𝑆 → 𝑆
-  x ⊓₂ y = (x ∙ y) ∸ ∣ x - y ∣
-
-
--- Cancellative Commutative Monoids with Monus
-record CCMM ℓ : Type (ℓsuc ℓ) where
-  field cmm : CMM ℓ
-  open CMM cmm public
-
-  field ∸‿cancel : ∀ x y → (x ∙ y) ∸ x ≡ y
-
-  cancelˡ : Cancellativeˡ _∙_
-  cancelˡ x y z x∙y≡x∙z =
-    y           ≡˘⟨ ∸‿cancel x y ⟩
-    (x ∙ y) ∸ x ≡⟨ cong (_∸ x) x∙y≡x∙z ⟩
-    (x ∙ z) ∸ x ≡⟨ ∸‿cancel x z ⟩
-    z ∎
-
-  cancelʳ : Cancellativeʳ _∙_
-  cancelʳ x y z y∙x≡z∙x =
-    y           ≡˘⟨ ∸‿cancel x y ⟩
-    (x ∙ y) ∸ x ≡⟨ cong (_∸ x) (comm x y) ⟩
-    (y ∙ x) ∸ x ≡⟨ cong (_∸ x) y∙x≡z∙x ⟩
-    (z ∙ x) ∸ x ≡⟨ cong (_∸ x) (comm z x) ⟩
-    (x ∙ z) ∸ x ≡⟨ ∸‿cancel x z ⟩
-    z ∎
-
-  zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
-  zeroSumFree x y x∙y≡ε =
-    x           ≡˘⟨ ∸‿cancel y x ⟩
-    (y ∙ x) ∸ y ≡⟨ cong (_∸ y) (comm y x) ⟩
-    (x ∙ y) ∸ y ≡⟨ cong (_∸ y) x∙y≡ε ⟩
-    ε ∸ y       ≡⟨ ε∸ y ⟩
-    ε ∎
-
-  antisym : Antisymmetric _≤_
-  antisym {x} {y} (k₁ , y≡x∙k₁) (k₂ , x≡y∙k₂) =
-      x      ≡⟨ x≡y∙k₂ ⟩
-      y ∙ k₂ ≡⟨ [ lemma                 ]⇒ y ∙ ε   ≡ y ∙ (k₂ ∙ k₁)
-                ⟨ cancelˡ y ε (k₂ ∙ k₁) ⟩⇒ ε       ≡ k₂ ∙ k₁
-                ⟨ sym                   ⟩⇒ k₂ ∙ k₁ ≡ ε
-                ⟨ zeroSumFree k₂ k₁     ⟩⇒ k₂      ≡ ε
-                ⟨ cong (y ∙_)           ⟩⇒ y ∙ k₂  ≡ y ∙ ε ⇒∎ ⟩
-      y ∙ ε  ≡⟨ ∙ε y ⟩
-      y ∎
-    where
-    lemma = ∙ε y ; alg-≤-trans x≡y∙k₂ y≡x∙k₁
-
-  partialOrder : PartialOrder _ _
-  PartialOrder.preorder partialOrder = preorder
-  PartialOrder.antisym partialOrder = antisym
-
-  ≺⇒< : ∀ x y → x ≺ y → y ≰ x
-  ≺⇒< x y (k₁ , y≡x∙k₁ , k₁≢ε) (k₂ , x≡y∙k₂) =
-    [ x ∙ ε         ≡⟨ ∙ε x ⟩
-      x             ≡⟨ x≡y∙k₂ ⟩
+    alg-≤-trans : ∀ {x y z k₁ k₂} → y ≡ x ∙ k₁ → z ≡ y ∙ k₂ → z ≡ x ∙ (k₁ ∙ k₂)
+    alg-≤-trans {x} {y} {z} {k₁} {k₂} y≡x∙k₁ z≡y∙k₂ =
+      z             ≡⟨ z≡y∙k₂ ⟩
       y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
       (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
-      x ∙ (k₁ ∙ k₂) ∎       ]⇒ x ∙ ε ≡ x ∙ (k₁ ∙ k₂)
-    ⟨ cancelˡ x ε (k₁ ∙ k₂) ⟩⇒ ε ≡ k₁ ∙ k₂
-    ⟨ sym                   ⟩⇒ k₁ ∙ k₂ ≡ ε
-    ⟨ zeroSumFree k₁ k₂     ⟩⇒ k₁ ≡ ε
-    ⟨ k₁≢ε                  ⟩⇒ ⊥ ⇒∎
+      x ∙ (k₁ ∙ k₂) ∎
 
-  ≤⇒<⇒≢ε : ∀ x y → (x≤y : x ≤ y) → y ≰ x → fst x≤y ≢ ε
-  ≤⇒<⇒≢ε x y (k₁ , y≡x∙k₁) y≰x k₁≡ε = y≰x λ
-    where
-    .fst → ε
-    .snd → x      ≡˘⟨ ∙ε x ⟩
-           x ∙ ε  ≡˘⟨ cong (x ∙_) k₁≡ε ⟩
-           x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
-           y      ≡˘⟨ ∙ε y ⟩ 
-           y ∙ ε ∎
+    infix 4 _≺_
+    _≺_ : 𝑆 → 𝑆 → Type _
+    x ≺ y = ∃ k × (y ≡ x ∙ k) × (k ≢ ε)
 
-  ≤-cancelʳ : ∀ x y z → y ∙ x ≤ z ∙ x → y ≤ z
-  ≤-cancelʳ x y z (k , z∙x≡y∙x∙k) .fst = k
-  ≤-cancelʳ x y z (k , z∙x≡y∙x∙k) .snd = cancelʳ x z (y ∙ k) $
-    z ∙ x ≡⟨ z∙x≡y∙x∙k ⟩
-    (y ∙ x) ∙ k ≡⟨ assoc y x k ⟩
-    y ∙ (x ∙ k) ≡⟨ cong (y ∙_) (comm x k) ⟩
-    y ∙ (k ∙ x) ≡˘⟨ assoc y k x ⟩
-    (y ∙ k) ∙ x ∎
+  -- Total Antisymmetric POM
+  record TAPOM ℓ₂ : Type (ℓ₁ ℓ⊔ ℓsuc ℓ₂) where
+    field pom : POM ℓ₂
+    open POM pom public using (preorder; _≤_; ≤-cong; ≤-congʳ; x≤x∙y; commutativeMonoid; positive)
+    open CommutativeMonoid commutativeMonoid public
+    field
+      _≤|≥_   : Total _≤_
+      antisym : Antisymmetric _≤_
 
-  ≤-cancelˡ : ∀ x y z → x ∙ y ≤ x ∙ z → y ≤ z
-  ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .fst = k
-  ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .snd =
-    cancelˡ x z (y ∙ k) (x∙z≡x∙y∙k ; assoc x y k)
+    totalOrder : TotalOrder 𝑆 ℓ₂ ℓ₂
+    totalOrder = fromPartialOrder (record { preorder = preorder ; antisym = antisym }) _≤|≥_
+    open TotalOrder totalOrder public hiding (_≤|≥_; antisym) renaming (refl to ≤-refl)
 
-  ≺-irrefl : Irreflexive _≺_
-  ≺-irrefl {x} (k , x≡x∙k , k≢ε) = k≢ε (sym (cancelˡ x ε k (∙ε x ; x≡x∙k)))
+    ⟨⊓⟩∙ : _∙_ Distributesˡ _⊓_
+    ⟨⊓⟩∙ x y z with x <? y | (x ∙ z) <? (y ∙ z)
+    ... | yes x<y | yes xz<yz = refl
+    ... | no  x≮y | no  xz≮yz = refl
+    ... | no  x≮y | yes xz<yz = ⊥-elim (<⇒≱ xz<yz (≤-congʳ z (≮⇒≥ x≮y)))
+    ... | yes x<y | no  xz≮yz = antisym (≤-congʳ z (<⇒≤ x<y)) (≮⇒≥ xz≮yz)
 
-  ≤∸ : ∀ x y → (x≤y : x ≤ y) → y ∸ x ≡ fst x≤y
-  ≤∸ x y (k , y≡x∙k) =
-   y ∸ x       ≡⟨ cong (_∸ x) y≡x∙k ⟩
-   (x ∙ k) ∸ x ≡⟨ ∸‿cancel x k ⟩
-   k ∎
+    ∙⟨⊓⟩ : _∙_ Distributesʳ _⊓_
+    ∙⟨⊓⟩ x y z = comm x (y ⊓ z) ; ⟨⊓⟩∙ y z x ; cong₂ _⊓_ (comm y x) (comm z x)
 
-  ≤‿∸‿cancel : ∀ x y → x ≤ y → (y ∸ x) ∙ x ≡ y
-  ≤‿∸‿cancel x y (k , y≡x∙k) =
-    (y ∸ x) ∙ x ≡⟨ cong (λ y → (y ∸ x) ∙ x) y≡x∙k ⟩
-    ((x ∙ k) ∸ x) ∙ x ≡⟨ cong (_∙ x) (∸‿cancel x k) ⟩
-    k ∙ x ≡⟨ comm k x ⟩
-    x ∙ k ≡˘⟨ y≡x∙k ⟩
-    y ∎
+  -- Every commutative monoid generates a positively ordered monoid
+  -- called the "algebraic" or "minimal" pom
+  module AlgebraicPOM (mon : CommutativeMonoid 𝑆) where
+    commutativeMonoid = mon
+    open CommutativeMonoid mon
 
--- Cancellative total minimal antisymmetric pom (has monus)
-record CTMAPOM ℓ : Type (ℓsuc ℓ) where
-  field tmapom : TMAPOM ℓ
-  open TMAPOM tmapom public
-  field cancel : Cancellativeˡ _∙_
+    infix 4 _≤_
+    _≤_ : 𝑆 → 𝑆 → Type _
+    x ≤ y = ∃ z × (y ≡ x ∙ z)
 
-  module cmm where
+    -- The snd here is the same proof as alg-≤-trans, so could be refactored out.
+    ≤-trans : Transitive _≤_
+    ≤-trans (k₁ , _) (k₂ , _) .fst = k₁ ∙ k₂
+    ≤-trans {x} {y} {z} (k₁ , y≡x∙k₁) (k₂ , z≡y∙k₂) .snd =
+      z             ≡⟨ z≡y∙k₂ ⟩
+      y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
+      (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
+      x ∙ (k₁ ∙ k₂) ∎
+
+    preorder : Preorder 𝑆 ℓ₁
+    Preorder._≤_ preorder = _≤_
+    Preorder.refl preorder = ε , sym (∙ε _)
+    Preorder.trans preorder = ≤-trans
+
+    positive : ∀ x → ε ≤ x
+    positive x = x , sym (ε∙ x)
+
+    ≤-cong : ∀ x {y z} → y ≤ z → x ∙ y ≤ x ∙ z
+    ≤-cong x (k , z≡y∙k) = k , cong (x ∙_) z≡y∙k ; sym (assoc x _ k)
+
+  algebraic-pom : CommutativeMonoid 𝑆 → POM ℓ₁
+  algebraic-pom mon = record { AlgebraicPOM mon }
+
+  -- Total Minimal POM
+  record TMPOM : Type ℓ₁ where
+    field commutativeMonoid : CommutativeMonoid 𝑆
+
+    pom : POM _
+    pom = algebraic-pom commutativeMonoid
+
+    open POM pom public
+
+    infix 4 _≤|≥_
+    field _≤|≥_ : Total _≤_
+
+    <⇒≺ : ∀ x y → y ≰ x → x ≺ y
+    <⇒≺ x y x<y with x ≤|≥ y
+    ... | inr y≤x = ⊥-elim (x<y y≤x)
+    ... | inl (k , y≡x∙k) = λ
+      where
+      .fst → k
+      .snd .fst → y≡x∙k
+      .snd .snd k≡ε → x<y (ε , sym (∙ε y ; y≡x∙k ; cong (x ∙_) k≡ε ; ∙ε x))
+
+    infixl 6 _∸_
+    _∸_ : 𝑆 → 𝑆 → 𝑆
+    x ∸ y = either′ (const ε) fst (x ≤|≥ y)
+
+    x∸y≤x : ∀ x y → x ∸ y ≤ x
+    x∸y≤x x y with x ≤|≥ y
+    ... | inl (k , p) = positive x
+    ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k
+
+  -- Total Minimal Antisymmetric POM
+  record TMAPOM : Type ℓ₁ where
+    field tmpom : TMPOM
+    open TMPOM tmpom public using (_≤_; _≤|≥_; positive; alg-≤-trans; _≺_; <⇒≺; _∸_; x∸y≤x)
+    field antisym : Antisymmetric _≤_
+
+    tapom : TAPOM ℓ₁
+    TAPOM.pom tapom = TMPOM.pom tmpom
+    TAPOM._≤|≥_ tapom = _≤|≥_
+    TAPOM.antisym tapom = antisym
+
+    open TAPOM tapom public hiding (antisym; _≤|≥_; _≤_; positive)
+
+    zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
+    zeroSumFree x y x∙y≡ε = antisym (y , sym x∙y≡ε) (positive x)
+
+    ≤‿∸‿cancel : ∀ x y → x ≤ y → (y ∸ x) ∙ x ≡ y
+    ≤‿∸‿cancel x y x≤y with y ≤|≥ x
+    ... | inl y≤x = ε∙ x ; antisym x≤y y≤x
+    ... | inr (k , y≡x∙k) = comm k x ; sym y≡x∙k
+
+    ∸‿comm : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
+    ∸‿comm x y with y ≤|≥ x | x ≤|≥ y
+    ... | inl y≤x | inl x≤y = cong (_∙ ε) (antisym x≤y y≤x)
+    ... | inr (k , y≡x∙k) | inl x≤y = sym y≡x∙k ; sym (∙ε y)
+    ... | inl y≤x | inr (k , x≥y) = ∙ε x ; x≥y
+    ... | inr (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
+      x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
+      y      ≡⟨ antisym  (k₂ , x≡y∙k₂) (k₁ , y≡x∙k₁) ⟩
+      x      ≡⟨ x≡y∙k₂ ⟩
+      y ∙ k₂ ∎
+
+    ∸‿≺ : ∀ x y → x ≢ ε → y ≢ ε → x ∸ y ≺ x
+    ∸‿≺ x y x≢ε y≢ε with x ≤|≥ y
+    ... | inl _ = x , sym (ε∙ x) , x≢ε
+    ... | inr (k , x≡y∙k) = y , x≡y∙k ; comm y k , y≢ε
+
+  -- Commutative Monoids with Monus
+  record CMM : Type ℓ₁ where
+    field commutativeMonoid : CommutativeMonoid 𝑆
+
+    pom : POM _
+    pom = algebraic-pom commutativeMonoid
+
+    open POM pom public
+
+    field _∸_ : 𝑆 → 𝑆 → 𝑆
+    infixl 6 _∸_
+    field
+      ∸‿comm  : ∀ x y → x ∙ (y ∸ x) ≡ y ∙ (x ∸ y)
+      ∸‿assoc : ∀ x y z → (x ∸ y) ∸ z ≡ x ∸ (y ∙ z)
+      ∸‿inv   : ∀ x → x ∸ x ≡ ε
+      ε∸      : ∀ x → ε ∸ x ≡ ε
+
+    ∸ε : ∀ x → x ∸ ε ≡ x
+    ∸ε x =
+      x ∸ ε       ≡˘⟨ ε∙ (x ∸ ε) ⟩
+      ε ∙ (x ∸ ε) ≡⟨ ∸‿comm ε x ⟩
+      x ∙ (ε ∸ x) ≡⟨ cong (x ∙_) (ε∸ x) ⟩
+      x ∙ ε       ≡⟨ ∙ε x ⟩
+      x ∎
+
     ∸≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
-    ∸≤ x y x≤y with x ≤|≥ y
-    ∸≤ x y x≤y | inl _ = refl
-    ∸≤ x y (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
-      [ lemma                ]⇒ y ∙ ε   ≡ y ∙ (k₂ ∙ k₁)
-      ⟨ cancel y ε (k₂ ∙ k₁) ⟩⇒ ε       ≡ k₂ ∙ k₁
-      ⟨ sym                  ⟩⇒ k₂ ∙ k₁ ≡ ε
-      ⟨ zeroSumFree k₂ k₁    ⟩⇒ k₂      ≡ ε ⇒∎
+    ∸≤ x y (k , y≡x∙k) =
+      x ∸ y       ≡⟨ cong (x ∸_) y≡x∙k ⟩
+      x ∸ (x ∙ k) ≡˘⟨ ∸‿assoc x x k ⟩
+      (x ∸ x) ∸ k ≡⟨ cong (_∸ k) (∸‿inv x) ⟩
+      ε ∸ k       ≡⟨ ε∸ k ⟩
+      ε ∎
+
+    ∣_-_∣ : 𝑆 → 𝑆 → 𝑆
+    ∣ x - y ∣ = (x ∸ y) ∙ (y ∸ x)
+
+    _⊔₂_ : 𝑆 → 𝑆 → 𝑆
+    x ⊔₂ y = x ∙ y ∙ ∣ x - y ∣
+
+    _⊓₂_ : 𝑆 → 𝑆 → 𝑆
+    x ⊓₂ y = (x ∙ y) ∸ ∣ x - y ∣
+
+
+  -- Cancellative Commutative Monoids with Monus
+  record CCMM : Type ℓ₁ where
+    field cmm : CMM
+    open CMM cmm public
+
+    field ∸‿cancel : ∀ x y → (x ∙ y) ∸ x ≡ y
+
+    cancelˡ : Cancellativeˡ _∙_
+    cancelˡ x y z x∙y≡x∙z =
+      y           ≡˘⟨ ∸‿cancel x y ⟩
+      (x ∙ y) ∸ x ≡⟨ cong (_∸ x) x∙y≡x∙z ⟩
+      (x ∙ z) ∸ x ≡⟨ ∸‿cancel x z ⟩
+      z ∎
+
+    cancelʳ : Cancellativeʳ _∙_
+    cancelʳ x y z y∙x≡z∙x =
+      y           ≡˘⟨ ∸‿cancel x y ⟩
+      (x ∙ y) ∸ x ≡⟨ cong (_∸ x) (comm x y) ⟩
+      (y ∙ x) ∸ x ≡⟨ cong (_∸ x) y∙x≡z∙x ⟩
+      (z ∙ x) ∸ x ≡⟨ cong (_∸ x) (comm z x) ⟩
+      (x ∙ z) ∸ x ≡⟨ ∸‿cancel x z ⟩
+      z ∎
+
+    zeroSumFree : ∀ x y → x ∙ y ≡ ε → x ≡ ε
+    zeroSumFree x y x∙y≡ε =
+      x           ≡˘⟨ ∸‿cancel y x ⟩
+      (y ∙ x) ∸ y ≡⟨ cong (_∸ y) (comm y x) ⟩
+      (x ∙ y) ∸ y ≡⟨ cong (_∸ y) x∙y≡ε ⟩
+      ε ∸ y       ≡⟨ ε∸ y ⟩
+      ε ∎
+
+    antisym : Antisymmetric _≤_
+    antisym {x} {y} (k₁ , y≡x∙k₁) (k₂ , x≡y∙k₂) =
+        x      ≡⟨ x≡y∙k₂ ⟩
+        y ∙ k₂ ≡⟨ [ lemma                 ]⇒ y ∙ ε   ≡ y ∙ (k₂ ∙ k₁)
+                  ⟨ cancelˡ y ε (k₂ ∙ k₁) ⟩⇒ ε       ≡ k₂ ∙ k₁
+                  ⟨ sym                   ⟩⇒ k₂ ∙ k₁ ≡ ε
+                  ⟨ zeroSumFree k₂ k₁     ⟩⇒ k₂      ≡ ε
+                  ⟨ cong (y ∙_)           ⟩⇒ y ∙ k₂  ≡ y ∙ ε ⇒∎ ⟩
+        y ∙ ε  ≡⟨ ∙ε y ⟩
+        y ∎
       where
       lemma = ∙ε y ; alg-≤-trans x≡y∙k₂ y≡x∙k₁
 
-    ∸‿inv : ∀ x → x ∸ x ≡ ε
-    ∸‿inv x = ∸≤ x x ≤-refl
+    partialOrder : PartialOrder _ _
+    PartialOrder.preorder partialOrder = preorder
+    PartialOrder.antisym partialOrder = antisym
 
-    ε∸ : ∀ x → ε ∸ x ≡ ε
-    ε∸ x = ∸≤ ε x (positive x)
+    ≺⇒< : ∀ x y → x ≺ y → y ≰ x
+    ≺⇒< x y (k₁ , y≡x∙k₁ , k₁≢ε) (k₂ , x≡y∙k₂) =
+      [ x ∙ ε         ≡⟨ ∙ε x ⟩
+        x             ≡⟨ x≡y∙k₂ ⟩
+        y ∙ k₂        ≡⟨ cong (_∙ k₂) y≡x∙k₁ ⟩
+        (x ∙ k₁) ∙ k₂ ≡⟨ assoc x k₁ k₂ ⟩
+        x ∙ (k₁ ∙ k₂) ∎       ]⇒ x ∙ ε ≡ x ∙ (k₁ ∙ k₂)
+      ⟨ cancelˡ x ε (k₁ ∙ k₂) ⟩⇒ ε ≡ k₁ ∙ k₂
+      ⟨ sym                   ⟩⇒ k₁ ∙ k₂ ≡ ε
+      ⟨ zeroSumFree k₁ k₂     ⟩⇒ k₁ ≡ ε
+      ⟨ k₁≢ε                  ⟩⇒ ⊥ ⇒∎
 
-    ∸‿assoc : ∀ x y z → (x ∸ y) ∸ z ≡ x ∸ (y ∙ z)
-    ∸‿assoc x y z with x ≤|≥ y
-    ∸‿assoc x y z | inl x≤y  = ε∸ z ; sym (∸≤ x (y ∙ z) (≤-trans x≤y x≤x∙y))
-    ∸‿assoc x y z | inr x≥y with x ≤|≥ y ∙ z
-    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inl (k₂ , y∙z≡x∙k₂) = ∸≤ k₁ z (k₂ , lemma)
+    ≤⇒<⇒≢ε : ∀ x y → (x≤y : x ≤ y) → y ≰ x → fst x≤y ≢ ε
+    ≤⇒<⇒≢ε x y (k₁ , y≡x∙k₁) y≰x k₁≡ε = y≰x λ
       where
-      lemma : z ≡ k₁ ∙ k₂
-      lemma = cancel y z (k₁ ∙ k₂) (alg-≤-trans x≡y∙k₁ y∙z≡x∙k₂)
+      .fst → ε
+      .snd → x      ≡˘⟨ ∙ε x ⟩
+            x ∙ ε  ≡˘⟨ cong (x ∙_) k₁≡ε ⟩
+            x ∙ k₁ ≡˘⟨ y≡x∙k₁ ⟩
+            y      ≡˘⟨ ∙ε y ⟩ 
+            y ∙ ε ∎
 
-    ∸‿assoc x y z | inr (k , x≡y∙k) | inr x≥y∙z with k ≤|≥ z
-    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inl (k₃ , z≡k₁∙k₃) =
-        [ lemma₁            ]⇒ ε       ≡ k₂ ∙ k₃
-        ⟨ sym               ⟩⇒ k₂ ∙ k₃ ≡ ε
-        ⟨ zeroSumFree k₂ k₃ ⟩⇒ k₂      ≡ ε
-        ⟨ sym               ⟩⇒ ε       ≡ k₂ ⇒∎
-      where
-      lemma₃ =
-        y ∙ k₁       ≡˘⟨ x≡y∙k₁ ⟩
-        x            ≡⟨ x≡y∙z∙k₂ ⟩
-        (y ∙ z) ∙ k₂ ≡⟨ assoc y z k₂ ⟩
-        y ∙ (z ∙ k₂) ∎
+    ≤-cancelʳ : ∀ x y z → y ∙ x ≤ z ∙ x → y ≤ z
+    ≤-cancelʳ x y z (k , z∙x≡y∙x∙k) .fst = k
+    ≤-cancelʳ x y z (k , z∙x≡y∙x∙k) .snd = cancelʳ x z (y ∙ k) $
+      z ∙ x ≡⟨ z∙x≡y∙x∙k ⟩
+      (y ∙ x) ∙ k ≡⟨ assoc y x k ⟩
+      y ∙ (x ∙ k) ≡⟨ cong (y ∙_) (comm x k) ⟩
+      y ∙ (k ∙ x) ≡˘⟨ assoc y k x ⟩
+      (y ∙ k) ∙ x ∎
 
-      lemma₂ =
-        k₁ ∙ ε         ≡⟨ ∙ε k₁ ⟩
-        k₁             ≡⟨ alg-≤-trans z≡k₁∙k₃ (cancel y k₁ (z ∙ k₂) lemma₃) ⟩
-        k₁ ∙ (k₃ ∙ k₂) ∎
+    ≤-cancelˡ : ∀ x y z → x ∙ y ≤ x ∙ z → y ≤ z
+    ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .fst = k
+    ≤-cancelˡ x y z (k , x∙z≡x∙y∙k) .snd =
+      cancelˡ x z (y ∙ k) (x∙z≡x∙y∙k ; assoc x y k)
 
-      lemma₁ =
-        ε       ≡⟨ cancel k₁ ε (k₃ ∙ k₂) lemma₂ ⟩
-        k₃ ∙ k₂ ≡⟨ comm k₃ k₂ ⟩
-        k₂ ∙ k₃ ∎
+    ≺-irrefl : Irreflexive _≺_
+    ≺-irrefl {x} (k , x≡x∙k , k≢ε) = k≢ε (sym (cancelˡ x ε k (∙ε x ; x≡x∙k)))
 
-    ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inr (k₃ , k₁≡z∙k₃) =
-        cancel z k₃ k₂ lemma₂
-      where
-      lemma₁ =
-        y ∙ k₁       ≡˘⟨ x≡y∙k₁ ⟩
-        x            ≡⟨ x≡y∙z∙k₂ ⟩
-        (y ∙ z) ∙ k₂ ≡⟨ assoc y z k₂ ⟩
-        y ∙ (z ∙ k₂) ∎
+    ≤∸ : ∀ x y → (x≤y : x ≤ y) → y ∸ x ≡ fst x≤y
+    ≤∸ x y (k , y≡x∙k) =
+      y ∸ x       ≡⟨ cong (_∸ x) y≡x∙k ⟩
+      (x ∙ k) ∸ x ≡⟨ ∸‿cancel x k ⟩
+      k ∎
 
-      lemma₂ =
-        z ∙ k₃ ≡˘⟨ k₁≡z∙k₃ ⟩
-        k₁     ≡⟨ cancel y k₁ (z ∙ k₂) lemma₁ ⟩
-        z ∙ k₂ ∎
+    ≤‿∸‿cancel : ∀ x y → x ≤ y → (y ∸ x) ∙ x ≡ y
+    ≤‿∸‿cancel x y (k , y≡x∙k) =
+      (y ∸ x) ∙ x ≡⟨ cong (λ y → (y ∸ x) ∙ x) y≡x∙k ⟩
+      ((x ∙ k) ∸ x) ∙ x ≡⟨ cong (_∙ x) (∸‿cancel x k) ⟩
+      k ∙ x ≡⟨ comm k x ⟩
+      x ∙ k ≡˘⟨ y≡x∙k ⟩
+      y ∎
 
-  open cmm public
+  -- Cancellative total minimal antisymmetric pom (has monus)
+  record CTMAPOM : Type ℓ₁ where
+    field tmapom : TMAPOM
+    open TMAPOM tmapom public
+    field cancel : Cancellativeˡ _∙_
 
-  ∸‿cancel : ∀ x y → (x ∙ y) ∸ x ≡ y
-  ∸‿cancel x y with (x ∙ y) ≤|≥ x
-  ... | inl x∙y≤x = sym (cancel x y ε (antisym x∙y≤x x≤x∙y ; sym (∙ε x)))
-  ... | inr (k , x∙y≡x∙k) = sym (cancel x y k x∙y≡x∙k)
+    module cmm where
+      ∸≤ : ∀ x y → x ≤ y → x ∸ y ≡ ε
+      ∸≤ x y x≤y with x ≤|≥ y
+      ∸≤ x y x≤y | inl _ = refl
+      ∸≤ x y (k₁ , y≡x∙k₁) | inr (k₂ , x≡y∙k₂) =
+        [ lemma                ]⇒ y ∙ ε   ≡ y ∙ (k₂ ∙ k₁)
+        ⟨ cancel y ε (k₂ ∙ k₁) ⟩⇒ ε       ≡ k₂ ∙ k₁
+        ⟨ sym                  ⟩⇒ k₂ ∙ k₁ ≡ ε
+        ⟨ zeroSumFree k₂ k₁    ⟩⇒ k₂      ≡ ε ⇒∎
+        where
+        lemma = ∙ε y ; alg-≤-trans x≡y∙k₂ y≡x∙k₁
 
-  ccmm : CCMM _
-  ccmm = record { ∸‿cancel = ∸‿cancel
-                ; cmm = record { cmm
-                               ; ∸‿comm = ∸‿comm
-                               ; commutativeMonoid = commutativeMonoid } }
+      ∸‿inv : ∀ x → x ∸ x ≡ ε
+      ∸‿inv x = ∸≤ x x ≤-refl
 
-  open CCMM ccmm public
-    using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_; ≺-irrefl; ≤∸)
+      ε∸ : ∀ x → ε ∸ x ≡ ε
+      ε∸ x = ∸≤ ε x (positive x)
 
-  ∸‿< : ∀ x y → x ≢ ε → y ≢ ε → x ∸ y < x
-  ∸‿< x y x≢ε y≢ε = ≺⇒< (x ∸ y) x (∸‿≺ x y x≢ε y≢ε)
+      ∸‿assoc : ∀ x y z → (x ∸ y) ∸ z ≡ x ∸ (y ∙ z)
+      ∸‿assoc x y z with x ≤|≥ y
+      ∸‿assoc x y z | inl x≤y  = ε∸ z ; sym (∸≤ x (y ∙ z) (≤-trans x≤y x≤x∙y))
+      ∸‿assoc x y z | inr x≥y with x ≤|≥ y ∙ z
+      ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inl (k₂ , y∙z≡x∙k₂) = ∸≤ k₁ z (k₂ , lemma)
+        where
+        lemma : z ≡ k₁ ∙ k₂
+        lemma = cancel y z (k₁ ∙ k₂) (alg-≤-trans x≡y∙k₁ y∙z≡x∙k₂)
 
-  ∸‿<-< : ∀ x y → x < y → x ≢ ε → y ∸ x < y
-  ∸‿<-< x y x<y x≢ε = ∸‿< y x (λ y≡ε → x<y (x , sym (cong (_∙ x) y≡ε ; ε∙ x))) x≢ε
+      ∸‿assoc x y z | inr (k , x≡y∙k) | inr x≥y∙z with k ≤|≥ z
+      ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inl (k₃ , z≡k₁∙k₃) =
+          [ lemma₁            ]⇒ ε       ≡ k₂ ∙ k₃
+          ⟨ sym               ⟩⇒ k₂ ∙ k₃ ≡ ε
+          ⟨ zeroSumFree k₂ k₃ ⟩⇒ k₂      ≡ ε
+          ⟨ sym               ⟩⇒ ε       ≡ k₂ ⇒∎
+        where
+        lemma₃ =
+          y ∙ k₁       ≡˘⟨ x≡y∙k₁ ⟩
+          x            ≡⟨ x≡y∙z∙k₂ ⟩
+          (y ∙ z) ∙ k₂ ≡⟨ assoc y z k₂ ⟩
+          y ∙ (z ∙ k₂) ∎
 
-  2× : 𝑆 → 𝑆
-  2× x = x ∙ x
+        lemma₂ =
+          k₁ ∙ ε         ≡⟨ ∙ε k₁ ⟩
+          k₁             ≡⟨ alg-≤-trans z≡k₁∙k₃ (cancel y k₁ (z ∙ k₂) lemma₃) ⟩
+          k₁ ∙ (k₃ ∙ k₂) ∎
 
-  double-max : ∀ x y → 2× (x ⊔ y) ≡ x ⊔₂ y
-  double-max x y with x ≤|≥ y | y ≤|≥ x
-  double-max x y | inl x≤y | inl y≤x =
-    x ∙ x ≡⟨ cong (x ∙_) (antisym x≤y y≤x) ⟩
-    x ∙ y ≡˘⟨ ∙ε (x ∙ y) ⟩
-    (x ∙ y) ∙ ε ≡˘⟨ cong ((x ∙ y) ∙_)  (ε∙ ε) ⟩
-    (x ∙ y) ∙ (ε ∙ ε) ∎
-  double-max x y | inl x≤y | inr (k , y≡x∙k) =
-    y ∙ y ≡⟨ cong (y ∙_) y≡x∙k ⟩
-    y ∙ (x ∙ k) ≡˘⟨ assoc y x k ⟩
-    (y ∙ x) ∙ k ≡⟨ cong (_∙ k) (comm y x) ⟩
-    (x ∙ y) ∙ k ≡˘⟨ cong ((x ∙ y) ∙_) (ε∙ k) ⟩
-    (x ∙ y) ∙ (ε ∙ k) ∎
-  double-max x y | inr (k , x≡y∙k) | inl y≤x =
-    x ∙ x ≡⟨ cong (x ∙_) x≡y∙k ⟩
-    x ∙ (y ∙ k) ≡˘⟨ assoc x y k ⟩
-    (x ∙ y) ∙ k ≡˘⟨ cong ((x ∙ y) ∙_) (∙ε k) ⟩
-    (x ∙ y) ∙ (k ∙ ε) ∎
-  double-max x y | inr (k₁ , x≡y∙k₁) | inr (k₂ , y≡x∙k₂) =
-    x ∙ x ≡⟨ cong (x ∙_) (antisym (k₂ , y≡x∙k₂) (k₁ , x≡y∙k₁)) ⟩
-    x ∙ y ≡⟨ cong₂ _∙_ x≡y∙k₁ y≡x∙k₂ ⟩
-    (y ∙ k₁) ∙ (x ∙ k₂) ≡˘⟨ assoc (y ∙ k₁) x k₂ ⟩
-    ((y ∙ k₁) ∙ x) ∙ k₂ ≡⟨ cong (_∙ k₂) (comm (y ∙ k₁) x) ⟩
-    (x ∙ (y ∙ k₁)) ∙ k₂ ≡˘⟨ cong (_∙ k₂) (assoc x y k₁) ⟩
-    ((x ∙ y) ∙ k₁) ∙ k₂ ≡⟨ assoc (x ∙ y) k₁ k₂ ⟩
-    (x ∙ y) ∙ (k₁ ∙ k₂) ∎
+        lemma₁ =
+          ε       ≡⟨ cancel k₁ ε (k₃ ∙ k₂) lemma₂ ⟩
+          k₃ ∙ k₂ ≡⟨ comm k₃ k₂ ⟩
+          k₂ ∙ k₃ ∎
 
-  open import Data.Sigma.Properties
+      ∸‿assoc x y z | inr (k₁ , x≡y∙k₁) | inr (k₂ , x≡y∙z∙k₂) | inr (k₃ , k₁≡z∙k₃) =
+          cancel z k₃ k₂ lemma₂
+        where
+        lemma₁ =
+          y ∙ k₁       ≡˘⟨ x≡y∙k₁ ⟩
+          x            ≡⟨ x≡y∙z∙k₂ ⟩
+          (y ∙ z) ∙ k₂ ≡⟨ assoc y z k₂ ⟩
+          y ∙ (z ∙ k₂) ∎
 
-  ≤-prop : ∀ x y → isProp (x ≤ y)
-  ≤-prop x y (k₁ , y≡x∙k₁) (k₂ , y≡x∙k₂) = Σ≡Prop (λ _ → total⇒isSet _ _) (cancelˡ x k₁ k₂ (sym y≡x∙k₁ ; y≡x∙k₂))
+        lemma₂ =
+          z ∙ k₃ ≡˘⟨ k₁≡z∙k₃ ⟩
+          k₁     ≡⟨ cancel y k₁ (z ∙ k₂) lemma₁ ⟩
+          z ∙ k₂ ∎
 
-  open import Cubical.Foundations.HLevels using (isProp×)
-  open import Data.Empty.Properties using (isProp¬)
+    open cmm public
 
-  ≺-prop : ∀ x y → isProp (x ≺ y)
-  ≺-prop x y (k₁ , y≡x∙k₁ , k₁≢ε) (k₂ , y≡x∙k₂ , k₂≢ε) = Σ≡Prop (λ k → isProp× (total⇒isSet _ _) (isProp¬ _)) (cancelˡ x k₁ k₂ (sym y≡x∙k₁ ; y≡x∙k₂))
+    ∸‿cancel : ∀ x y → (x ∙ y) ∸ x ≡ y
+    ∸‿cancel x y with (x ∙ y) ≤|≥ x
+    ... | inl x∙y≤x = sym (cancel x y ε (antisym x∙y≤x x≤x∙y ; sym (∙ε x)))
+    ... | inr (k , x∙y≡x∙k) = sym (cancel x y k x∙y≡x∙k)
 
--- We can construct the viterbi semiring by adjoining a top element to
--- a tapom
-module Viterbi {ℓ₁} {ℓ₂} (tapom : TAPOM ℓ₁ ℓ₂) where
-  open TAPOM tapom
-  open import Relation.Binary.Construct.UpperBound totalOrder
+    ccmm : CCMM
+    ccmm = record { ∸‿cancel = ∸‿cancel
+                  ; cmm = record { cmm
+                                ; ∸‿comm = ∸‿comm
+                                ; commutativeMonoid = commutativeMonoid } }
+
+    open CCMM ccmm public
+      using (cancelʳ; cancelˡ; ∸ε; ≺⇒<; ≤⇒<⇒≢ε; _⊔₂_; _⊓₂_; ≺-irrefl; ≤∸)
+
+    ∸‿< : ∀ x y → x ≢ ε → y ≢ ε → x ∸ y < x
+    ∸‿< x y x≢ε y≢ε = ≺⇒< (x ∸ y) x (∸‿≺ x y x≢ε y≢ε)
+
+    ∸‿<-< : ∀ x y → x < y → x ≢ ε → y ∸ x < y
+    ∸‿<-< x y x<y x≢ε = ∸‿< y x (λ y≡ε → x<y (x , sym (cong (_∙ x) y≡ε ; ε∙ x))) x≢ε
+
+    2× : 𝑆 → 𝑆
+    2× x = x ∙ x
+
+    double-max : ∀ x y → 2× (x ⊔ y) ≡ x ⊔₂ y
+    double-max x y with x ≤|≥ y | y ≤|≥ x
+    double-max x y | inl x≤y | inl y≤x =
+      x ∙ x ≡⟨ cong (x ∙_) (antisym x≤y y≤x) ⟩
+      x ∙ y ≡˘⟨ ∙ε (x ∙ y) ⟩
+      (x ∙ y) ∙ ε ≡˘⟨ cong ((x ∙ y) ∙_)  (ε∙ ε) ⟩
+      (x ∙ y) ∙ (ε ∙ ε) ∎
+    double-max x y | inl x≤y | inr (k , y≡x∙k) =
+      y ∙ y ≡⟨ cong (y ∙_) y≡x∙k ⟩
+      y ∙ (x ∙ k) ≡˘⟨ assoc y x k ⟩
+      (y ∙ x) ∙ k ≡⟨ cong (_∙ k) (comm y x) ⟩
+      (x ∙ y) ∙ k ≡˘⟨ cong ((x ∙ y) ∙_) (ε∙ k) ⟩
+      (x ∙ y) ∙ (ε ∙ k) ∎
+    double-max x y | inr (k , x≡y∙k) | inl y≤x =
+      x ∙ x ≡⟨ cong (x ∙_) x≡y∙k ⟩
+      x ∙ (y ∙ k) ≡˘⟨ assoc x y k ⟩
+      (x ∙ y) ∙ k ≡˘⟨ cong ((x ∙ y) ∙_) (∙ε k) ⟩
+      (x ∙ y) ∙ (k ∙ ε) ∎
+    double-max x y | inr (k₁ , x≡y∙k₁) | inr (k₂ , y≡x∙k₂) =
+      x ∙ x ≡⟨ cong (x ∙_) (antisym (k₂ , y≡x∙k₂) (k₁ , x≡y∙k₁)) ⟩
+      x ∙ y ≡⟨ cong₂ _∙_ x≡y∙k₁ y≡x∙k₂ ⟩
+      (y ∙ k₁) ∙ (x ∙ k₂) ≡˘⟨ assoc (y ∙ k₁) x k₂ ⟩
+      ((y ∙ k₁) ∙ x) ∙ k₂ ≡⟨ cong (_∙ k₂) (comm (y ∙ k₁) x) ⟩
+      (x ∙ (y ∙ k₁)) ∙ k₂ ≡˘⟨ cong (_∙ k₂) (assoc x y k₁) ⟩
+      ((x ∙ y) ∙ k₁) ∙ k₂ ≡⟨ assoc (x ∙ y) k₁ k₂ ⟩
+      (x ∙ y) ∙ (k₁ ∙ k₂) ∎
+
+    open import Data.Sigma.Properties
+
+    ≤-prop : ∀ x y → isProp (x ≤ y)
+    ≤-prop x y (k₁ , y≡x∙k₁) (k₂ , y≡x∙k₂) = Σ≡Prop (λ _ → total⇒isSet _ _) (cancelˡ x k₁ k₂ (sym y≡x∙k₁ ; y≡x∙k₂))
+
+    open import Cubical.Foundations.HLevels using (isProp×)
+    open import Data.Empty.Properties using (isProp¬)
+
+    ≺-prop : ∀ x y → isProp (x ≺ y)
+    ≺-prop x y (k₁ , y≡x∙k₁ , k₁≢ε) (k₂ , y≡x∙k₂ , k₂≢ε) = Σ≡Prop (λ k → isProp× (total⇒isSet _ _) (isProp¬ _)) (cancelˡ x k₁ k₂ (sym y≡x∙k₁ ; y≡x∙k₂))
+
+  -- We can construct the viterbi semiring by adjoining a top element to
+  -- a tapom
+  module Viterbi {ℓ₂} (tapom : TAPOM ℓ₂) where
+    open TAPOM tapom
+    open import Relation.Binary.Construct.UpperBound totalOrder
 
 
-  open UBSugar
+    open UBSugar
 
-  module NS where
-    𝑅 = ⌈∙⌉
+    module NS where
+      𝑅 = ⌈∙⌉
 
-    0# 1# : 𝑅
-    _*_ _+_ : 𝑅 → 𝑅 → 𝑅
+      0# 1# : 𝑅
+      _*_ _+_ : 𝑅 → 𝑅 → 𝑅
 
-    1# = ⌈ ε ⌉
+      1# = ⌈ ε ⌉
 
-    ⌈⊤⌉   * y     = ⌈⊤⌉
-    ⌈ x ⌉ * ⌈⊤⌉   = ⌈⊤⌉
-    ⌈ x ⌉ * ⌈ y ⌉ = ⌈ x ∙ y ⌉
+      ⌈⊤⌉   * y     = ⌈⊤⌉
+      ⌈ x ⌉ * ⌈⊤⌉   = ⌈⊤⌉
+      ⌈ x ⌉ * ⌈ y ⌉ = ⌈ x ∙ y ⌉
 
-    0# = ⌈⊤⌉
+      0# = ⌈⊤⌉
 
-    ⌈⊤⌉   + y     = y
-    ⌈ x ⌉ + ⌈⊤⌉   = ⌈ x ⌉
-    ⌈ x ⌉ + ⌈ y ⌉ = ⌈ x ⊓ y ⌉
+      ⌈⊤⌉   + y     = y
+      ⌈ x ⌉ + ⌈⊤⌉   = ⌈ x ⌉
+      ⌈ x ⌉ + ⌈ y ⌉ = ⌈ x ⊓ y ⌉
 
-    *-assoc : Associative _*_
-    *-assoc ⌈⊤⌉   _     _     = refl
-    *-assoc ⌈ _ ⌉ ⌈⊤⌉   _     = refl
-    *-assoc ⌈ _ ⌉ ⌈ _ ⌉ ⌈⊤⌉   = refl
-    *-assoc ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (assoc x y z)
+      *-assoc : Associative _*_
+      *-assoc ⌈⊤⌉   _     _     = refl
+      *-assoc ⌈ _ ⌉ ⌈⊤⌉   _     = refl
+      *-assoc ⌈ _ ⌉ ⌈ _ ⌉ ⌈⊤⌉   = refl
+      *-assoc ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (assoc x y z)
 
-    *-com : Commutative _*_
-    *-com ⌈⊤⌉   ⌈⊤⌉   = refl
-    *-com ⌈⊤⌉   ⌈ _ ⌉ = refl
-    *-com ⌈ _ ⌉ ⌈⊤⌉   = refl
-    *-com ⌈ x ⌉ ⌈ y ⌉ = cong ⌈_⌉ (comm x y)
+      *-com : Commutative _*_
+      *-com ⌈⊤⌉   ⌈⊤⌉   = refl
+      *-com ⌈⊤⌉   ⌈ _ ⌉ = refl
+      *-com ⌈ _ ⌉ ⌈⊤⌉   = refl
+      *-com ⌈ x ⌉ ⌈ y ⌉ = cong ⌈_⌉ (comm x y)
 
-    ⟨+⟩* : _*_ Distributesˡ _+_
-    ⟨+⟩* ⌈⊤⌉   _     _     = refl
-    ⟨+⟩* ⌈ _ ⌉ ⌈⊤⌉   ⌈⊤⌉   = refl
-    ⟨+⟩* ⌈ _ ⌉ ⌈⊤⌉   ⌈ _ ⌉ = refl
-    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈⊤⌉   = refl
-    ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (⟨⊓⟩∙ x y z)
+      ⟨+⟩* : _*_ Distributesˡ _+_
+      ⟨+⟩* ⌈⊤⌉   _     _     = refl
+      ⟨+⟩* ⌈ _ ⌉ ⌈⊤⌉   ⌈⊤⌉   = refl
+      ⟨+⟩* ⌈ _ ⌉ ⌈⊤⌉   ⌈ _ ⌉ = refl
+      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈⊤⌉   = refl
+      ⟨+⟩* ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (⟨⊓⟩∙ x y z)
 
-    +-assoc : Associative _+_
-    +-assoc ⌈⊤⌉   _     _     = refl
-    +-assoc ⌈ x ⌉ ⌈⊤⌉   _     = refl
-    +-assoc ⌈ x ⌉ ⌈ _ ⌉ ⌈⊤⌉   = refl
-    +-assoc ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (⊓-assoc x y z)
+      +-assoc : Associative _+_
+      +-assoc ⌈⊤⌉   _     _     = refl
+      +-assoc ⌈ x ⌉ ⌈⊤⌉   _     = refl
+      +-assoc ⌈ x ⌉ ⌈ _ ⌉ ⌈⊤⌉   = refl
+      +-assoc ⌈ x ⌉ ⌈ y ⌉ ⌈ z ⌉ = cong ⌈_⌉ (⊓-assoc x y z)
 
-    0+ : ∀ x → 0# + x ≡ x
-    0+ ⌈⊤⌉   = refl
-    0+ ⌈ _ ⌉ = refl
+      0+ : ∀ x → 0# + x ≡ x
+      0+ ⌈⊤⌉   = refl
+      0+ ⌈ _ ⌉ = refl
 
-    +0 : ∀ x → x + 0# ≡ x
-    +0 ⌈ _ ⌉ = refl
-    +0 ⌈⊤⌉   = refl
+      +0 : ∀ x → x + 0# ≡ x
+      +0 ⌈ _ ⌉ = refl
+      +0 ⌈⊤⌉   = refl
 
-    1* : ∀ x → 1# * x ≡ x
-    1* ⌈⊤⌉   = refl
-    1* ⌈ x ⌉ = cong ⌈_⌉ (ε∙ x)
+      1* : ∀ x → 1# * x ≡ x
+      1* ⌈⊤⌉   = refl
+      1* ⌈ x ⌉ = cong ⌈_⌉ (ε∙ x)
 
-    *1 : ∀ x → x * 1# ≡ x
-    *1 ⌈⊤⌉   = refl
-    *1 ⌈ x ⌉ = cong ⌈_⌉ (∙ε x)
+      *1 : ∀ x → x * 1# ≡ x
+      *1 ⌈⊤⌉   = refl
+      *1 ⌈ x ⌉ = cong ⌈_⌉ (∙ε x)
 
-    0* : ∀ x → 0# * x ≡ 0#
-    0* _ = refl
+      0* : ∀ x → 0# * x ≡ 0#
+      0* _ = refl
 
-  open NS
+    open NS
 
-  nearSemiring : NearSemiring _
-  nearSemiring = record { NS }
+    nearSemiring : NearSemiring _
+    nearSemiring = record { NS }
 
-  +-comm : Commutative _+_
-  +-comm ⌈⊤⌉   ⌈⊤⌉   = refl
-  +-comm ⌈⊤⌉   ⌈ _ ⌉ = refl
-  +-comm ⌈ _ ⌉ ⌈⊤⌉   = refl
-  +-comm ⌈ x ⌉ ⌈ y ⌉ = cong ⌈_⌉ (⊓-comm x y)
+    +-comm : Commutative _+_
+    +-comm ⌈⊤⌉   ⌈⊤⌉   = refl
+    +-comm ⌈⊤⌉   ⌈ _ ⌉ = refl
+    +-comm ⌈ _ ⌉ ⌈⊤⌉   = refl
+    +-comm ⌈ x ⌉ ⌈ y ⌉ = cong ⌈_⌉ (⊓-comm x y)
 
-  *0 : ∀ x → x * ⌈⊤⌉ ≡ ⌈⊤⌉
-  *0 ⌈ _ ⌉ = refl
-  *0 ⌈⊤⌉   = refl
+    *0 : ∀ x → x * ⌈⊤⌉ ≡ ⌈⊤⌉
+    *0 ⌈ _ ⌉ = refl
+    *0 ⌈⊤⌉   = refl
 
-  *⟨+⟩ : _*_ Distributesʳ _+_
-  *⟨+⟩ x y z = *-com x (y + z) ; ⟨+⟩* y z x ; cong₂ _+_ (*-com y x) (*-com z x)
+    *⟨+⟩ : _*_ Distributesʳ _+_
+    *⟨+⟩ x y z = *-com x (y + z) ; ⟨+⟩* y z x ; cong₂ _+_ (*-com y x) (*-com z x)
 
-viterbi : ∀ {ℓ₁ ℓ₂} → TAPOM ℓ₁ ℓ₂ → Semiring ℓ₁
-viterbi tapom = record { Viterbi tapom }
+  viterbi : ∀ {ℓ₂} → TAPOM ℓ₂ → Semiring (Maybe 𝑆)
+  viterbi tapom = record { Viterbi tapom }

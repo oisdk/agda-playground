@@ -2,8 +2,9 @@
 {-# OPTIONS --cubical --safe #-}
 
 open import Algebra
+open import Level
 
-module Control.Monad.Weighted.Free {ℓ} (rng : Semiring ℓ) where
+module Control.Monad.Weighted.Free {ℓ} {𝑅 : Type ℓ} (rng : Semiring 𝑅) where
 
 open Semiring rng
 
@@ -23,9 +24,9 @@ open import Control.Monad.Weighted.Functor
 inj : A → Weighted A
 inj x = 1# ◃ x ∷ []
 
-module Proof {ℓ} (mod : LeftSemimodule rng ℓ) (vIsSet : isSet (LeftSemimodule.𝑉 mod)) where
+module Proof {ℓ} {𝑀 : Type ℓ} (mod : LeftSemimodule rng 𝑀) (vIsSet : isSet 𝑀) where
   module Mod = LeftSemimodule mod
-  open Mod using (_⋊_; _∪_; ∅) renaming (𝑉 to 𝑀)
+  open Mod using (_⋊_; _∪_; ∅)
 \end{code}
 %<*hom>
 \begin{code}

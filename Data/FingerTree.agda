@@ -3,7 +3,7 @@
 open import Prelude
 open import Algebra
 
-module Data.FingerTree {ℓ} (mon : Monoid ℓ) where
+module Data.FingerTree {ℓ} {𝑆 : Type ℓ} (mon : Monoid 𝑆) where
 
 open Monoid mon
 

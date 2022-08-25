@@ -3,8 +3,8 @@ open import Algebra
 open import Algebra.Monus
 
 module Codata.Segments
-  {ℓ}
-  (mon : CTMAPOM ℓ)
+  {ℓ} {𝑆 : Type ℓ}
+  (mon : CTMAPOM 𝑆)
   where
 
 open CTMAPOM mon

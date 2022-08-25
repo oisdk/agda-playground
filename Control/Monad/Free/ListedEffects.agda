@@ -5,7 +5,7 @@ open import Container renaming (Container to Container′)
 open import Data.List
 
 Container : _
-Container = Container′ ℓzero ℓzero
+Container = Container′
 
 private
   variable

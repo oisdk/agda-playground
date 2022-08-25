@@ -7,13 +7,14 @@ open import WellFounded
 open import Algebra.Monus
 open import Data.Maybe
 
-module Control.Comonad.IntervalHeap {s}
-  (mon : TMAPOM s)
-  (comon : GradedComonad (TMAPOM.monoid mon) s)
+module Control.Comonad.IntervalHeap {s} {𝑆 : Type s}
+  (mon : TMAPOM 𝑆)
+  {𝑊 : 𝑆 → Type s → Type s}
+  (comon : GradedComonad (TMAPOM.monoid mon) 𝑊)
   where
 
 open TMAPOM mon
-open GradedComonad comon renaming (𝐹 to 𝑊; map to cmap)
+open GradedComonad comon renaming (map to cmap)
 
 Weighted : (𝑆 → Type a → Type b) → Type a → Type (s ℓ⊔ b)
 Weighted C A = ∃ w × C w A

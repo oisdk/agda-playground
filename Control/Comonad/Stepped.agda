@@ -7,15 +7,15 @@ open import WellFounded
 open import Algebra.Monus
 open import Data.Maybe
 
-module Control.Comonad.Stepped {s}
-  (mon : TMAPOM s)
-  (comon : GradedComonad (TMAPOM.monoid mon) s )
+module Control.Comonad.Stepped {s} {𝑆 : Type s} {𝑊 : 𝑆 → Type s → Type s}
+  (mon : TMAPOM 𝑆)
+  (comon : GradedComonad (TMAPOM.monoid mon) 𝑊)
   {𝐹 : Type s → Type s}
   (functor : Functor 𝐹)
   where
 
 open TMAPOM mon
-open GradedComonad comon renaming (𝐹 to 𝑊; map to cmap)
+open GradedComonad comon renaming (map to cmap)
 open Functor functor renaming (map to fmap)
 
 CofreeF : Type s → 𝑆 → Type s → Type s
