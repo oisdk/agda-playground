@@ -9,86 +9,86 @@
 <a id="190" class="Keyword">open</a> <a id="195" class="Keyword">import</a> <a id="202" href="Data.List.html" class="Module">Data.List</a> <a id="212" class="Keyword">using</a> <a id="218" class="Symbol">(</a><a id="219" href="Agda.Builtin.List.html#148" class="Datatype">List</a><a id="223" class="Symbol">;</a> <a id="225" href="Agda.Builtin.List.html#200" class="InductiveConstructor Operator">_∷_</a><a id="228" class="Symbol">;</a> <a id="230" href="Agda.Builtin.List.html#185" class="InductiveConstructor">[]</a><a id="232" class="Symbol">;</a> <a id="234" href="Data.List.Base.html#269" class="Function">foldr</a><a id="239" class="Symbol">)</a>
 
 <a id="242" class="Keyword">module</a> <a id="249" href="Control.Monad.HeapT.NonTransformer.html" class="Module">Control.Monad.HeapT.NonTransformer</a>
-  <a id="286" class="Symbol">{</a><a id="287" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="288" class="Symbol">}</a>
-  <a id="292" class="Symbol">(</a><a id="293" href="Control.Monad.HeapT.NonTransformer.html#293" class="Bound">monoid</a> <a id="300" class="Symbol">:</a> <a id="302" href="Algebra.html#1343" class="Record">Monoid</a> <a id="309" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="310" class="Symbol">)</a>
-  <a id="314" class="Keyword">where</a>
+  <a id="286" class="Symbol">{</a><a id="287" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="288" class="Symbol">}</a> <a id="290" class="Symbol">{</a><a id="291" href="Control.Monad.HeapT.NonTransformer.html#291" class="Bound">𝑆</a> <a id="293" class="Symbol">:</a> <a id="295" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="300" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="301" class="Symbol">}</a>
+  <a id="305" class="Symbol">(</a><a id="306" href="Control.Monad.HeapT.NonTransformer.html#306" class="Bound">monoid</a> <a id="313" class="Symbol">:</a> <a id="315" href="Algebra.html#1358" class="Record">Monoid</a> <a id="322" href="Control.Monad.HeapT.NonTransformer.html#291" class="Bound">𝑆</a><a id="323" class="Symbol">)</a>
+  <a id="327" class="Keyword">where</a>
 
-<a id="321" class="Keyword">open</a> <a id="326" href="Algebra.html#1343" class="Module">Monoid</a> <a id="333" href="Control.Monad.HeapT.NonTransformer.html#293" class="Bound">monoid</a>
+<a id="334" class="Keyword">open</a> <a id="339" href="Algebra.html#1358" class="Module">Monoid</a> <a id="346" href="Control.Monad.HeapT.NonTransformer.html#306" class="Bound">monoid</a>
 
-<a id="341" class="Keyword">private</a>
-  <a id="351" class="Keyword">variable</a>
-    <a id="364" href="Control.Monad.HeapT.NonTransformer.html#364" class="Generalizable">w</a> <a id="366" class="Symbol">:</a> <a id="368" href="Algebra.html#1401" class="Field">𝑆</a>
+<a id="354" class="Keyword">private</a>
+  <a id="364" class="Keyword">variable</a>
+    <a id="377" href="Control.Monad.HeapT.NonTransformer.html#377" class="Generalizable">w</a> <a id="379" class="Symbol">:</a> <a id="381" href="Control.Monad.HeapT.NonTransformer.html#291" class="Bound">𝑆</a>
 
-<a id="371" class="Keyword">infixr</a> <a id="378" class="Number">5</a> <a id="380" href="Control.Monad.HeapT.NonTransformer.html#686" class="InductiveConstructor Operator">_∷_</a>
-<a id="384" class="Keyword">infixr</a> <a id="391" class="Number">6</a> <a id="393" href="Control.Monad.HeapT.NonTransformer.html#479" class="CoinductiveConstructor Operator">_⋊_</a>
+<a id="384" class="Keyword">infixr</a> <a id="391" class="Number">5</a> <a id="393" href="Control.Monad.HeapT.NonTransformer.html#699" class="InductiveConstructor Operator">_∷_</a>
+<a id="397" class="Keyword">infixr</a> <a id="404" class="Number">6</a> <a id="406" href="Control.Monad.HeapT.NonTransformer.html#492" class="CoinductiveConstructor Operator">_⋊_</a>
 
-<a id="398" class="Keyword">mutual</a>
-  <a id="407" class="Keyword">record</a> <a id="Root"></a><a id="414" href="Control.Monad.HeapT.NonTransformer.html#414" class="Record">Root</a> <a id="419" class="Symbol">(</a><a id="420" href="Control.Monad.HeapT.NonTransformer.html#420" class="Bound">A</a> <a id="422" class="Symbol">:</a> <a id="424" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="429" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="430" class="Symbol">)</a> <a id="432" class="Symbol">:</a> <a id="434" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="439" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a> <a id="441" class="Keyword">where</a>
-    <a id="451" class="Keyword">coinductive</a>
-    <a id="467" class="Keyword">constructor</a> <a id="_⋊_"></a><a id="479" href="Control.Monad.HeapT.NonTransformer.html#479" class="CoinductiveConstructor Operator">_⋊_</a>
-    <a id="487" class="Keyword">field</a>
-      <a id="Root.weight"></a><a id="499" href="Control.Monad.HeapT.NonTransformer.html#499" class="Field">weight</a> <a id="506" class="Symbol">:</a> <a id="508" href="Algebra.html#1401" class="Field">𝑆</a>
-      <a id="Root.step"></a><a id="516" href="Control.Monad.HeapT.NonTransformer.html#516" class="Field">step</a> <a id="521" class="Symbol">:</a> <a id="523" href="Control.Monad.HeapT.NonTransformer.html#628" class="Datatype">Branch</a> <a id="530" href="Control.Monad.HeapT.NonTransformer.html#420" class="Bound">A</a>
+<a id="411" class="Keyword">mutual</a>
+  <a id="420" class="Keyword">record</a> <a id="Root"></a><a id="427" href="Control.Monad.HeapT.NonTransformer.html#427" class="Record">Root</a> <a id="432" class="Symbol">(</a><a id="433" href="Control.Monad.HeapT.NonTransformer.html#433" class="Bound">A</a> <a id="435" class="Symbol">:</a> <a id="437" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="442" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="443" class="Symbol">)</a> <a id="445" class="Symbol">:</a> <a id="447" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="452" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a> <a id="454" class="Keyword">where</a>
+    <a id="464" class="Keyword">coinductive</a>
+    <a id="480" class="Keyword">constructor</a> <a id="_⋊_"></a><a id="492" href="Control.Monad.HeapT.NonTransformer.html#492" class="CoinductiveConstructor Operator">_⋊_</a>
+    <a id="500" class="Keyword">field</a>
+      <a id="Root.weight"></a><a id="512" href="Control.Monad.HeapT.NonTransformer.html#512" class="Field">weight</a> <a id="519" class="Symbol">:</a> <a id="521" href="Control.Monad.HeapT.NonTransformer.html#291" class="Bound">𝑆</a>
+      <a id="Root.step"></a><a id="529" href="Control.Monad.HeapT.NonTransformer.html#529" class="Field">step</a> <a id="534" class="Symbol">:</a> <a id="536" href="Control.Monad.HeapT.NonTransformer.html#641" class="Datatype">Branch</a> <a id="543" href="Control.Monad.HeapT.NonTransformer.html#433" class="Bound">A</a>
 
-  <a id="535" class="Keyword">data</a> <a id="Node"></a><a id="540" href="Control.Monad.HeapT.NonTransformer.html#540" class="Datatype">Node</a> <a id="545" class="Symbol">(</a><a id="546" href="Control.Monad.HeapT.NonTransformer.html#546" class="Bound">A</a> <a id="548" class="Symbol">:</a> <a id="550" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="555" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="556" class="Symbol">)</a> <a id="558" class="Symbol">:</a> <a id="560" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="565" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a> <a id="567" class="Keyword">where</a>
-    <a id="Node.⌊_⌋"></a><a id="577" href="Control.Monad.HeapT.NonTransformer.html#577" class="InductiveConstructor Operator">⌊_⌋</a> <a id="581" class="Symbol">:</a> <a id="583" href="Control.Monad.HeapT.NonTransformer.html#546" class="Bound">A</a> <a id="585" class="Symbol">→</a> <a id="587" href="Control.Monad.HeapT.NonTransformer.html#540" class="Datatype">Node</a> <a id="592" href="Control.Monad.HeapT.NonTransformer.html#546" class="Bound">A</a>
-    <a id="Node.⌈_⌉"></a><a id="598" href="Control.Monad.HeapT.NonTransformer.html#598" class="InductiveConstructor Operator">⌈_⌉</a> <a id="602" class="Symbol">:</a> <a id="604" href="Control.Monad.HeapT.NonTransformer.html#414" class="Record">Root</a> <a id="609" href="Control.Monad.HeapT.NonTransformer.html#546" class="Bound">A</a> <a id="611" class="Symbol">→</a> <a id="613" href="Control.Monad.HeapT.NonTransformer.html#540" class="Datatype">Node</a> <a id="618" href="Control.Monad.HeapT.NonTransformer.html#546" class="Bound">A</a>
+  <a id="548" class="Keyword">data</a> <a id="Node"></a><a id="553" href="Control.Monad.HeapT.NonTransformer.html#553" class="Datatype">Node</a> <a id="558" class="Symbol">(</a><a id="559" href="Control.Monad.HeapT.NonTransformer.html#559" class="Bound">A</a> <a id="561" class="Symbol">:</a> <a id="563" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="568" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="569" class="Symbol">)</a> <a id="571" class="Symbol">:</a> <a id="573" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="578" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a> <a id="580" class="Keyword">where</a>
+    <a id="Node.⌊_⌋"></a><a id="590" href="Control.Monad.HeapT.NonTransformer.html#590" class="InductiveConstructor Operator">⌊_⌋</a> <a id="594" class="Symbol">:</a> <a id="596" href="Control.Monad.HeapT.NonTransformer.html#559" class="Bound">A</a> <a id="598" class="Symbol">→</a> <a id="600" href="Control.Monad.HeapT.NonTransformer.html#553" class="Datatype">Node</a> <a id="605" href="Control.Monad.HeapT.NonTransformer.html#559" class="Bound">A</a>
+    <a id="Node.⌈_⌉"></a><a id="611" href="Control.Monad.HeapT.NonTransformer.html#611" class="InductiveConstructor Operator">⌈_⌉</a> <a id="615" class="Symbol">:</a> <a id="617" href="Control.Monad.HeapT.NonTransformer.html#427" class="Record">Root</a> <a id="622" href="Control.Monad.HeapT.NonTransformer.html#559" class="Bound">A</a> <a id="624" class="Symbol">→</a> <a id="626" href="Control.Monad.HeapT.NonTransformer.html#553" class="Datatype">Node</a> <a id="631" href="Control.Monad.HeapT.NonTransformer.html#559" class="Bound">A</a>
 
-  <a id="623" class="Keyword">data</a> <a id="Branch"></a><a id="628" href="Control.Monad.HeapT.NonTransformer.html#628" class="Datatype">Branch</a> <a id="635" class="Symbol">(</a><a id="636" href="Control.Monad.HeapT.NonTransformer.html#636" class="Bound">A</a> <a id="638" class="Symbol">:</a> <a id="640" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="645" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="646" class="Symbol">)</a> <a id="648" class="Symbol">:</a> <a id="650" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="655" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a> <a id="657" class="Keyword">where</a>
-    <a id="Branch.[]"></a><a id="667" href="Control.Monad.HeapT.NonTransformer.html#667" class="InductiveConstructor">[]</a>  <a id="671" class="Symbol">:</a> <a id="673" href="Control.Monad.HeapT.NonTransformer.html#628" class="Datatype">Branch</a> <a id="680" href="Control.Monad.HeapT.NonTransformer.html#636" class="Bound">A</a>
-    <a id="Branch._∷_"></a><a id="686" href="Control.Monad.HeapT.NonTransformer.html#686" class="InductiveConstructor Operator">_∷_</a> <a id="690" class="Symbol">:</a> <a id="692" href="Control.Monad.HeapT.NonTransformer.html#540" class="Datatype">Node</a> <a id="697" href="Control.Monad.HeapT.NonTransformer.html#636" class="Bound">A</a> <a id="699" class="Symbol">→</a> <a id="701" href="Control.Monad.HeapT.NonTransformer.html#628" class="Datatype">Branch</a> <a id="708" href="Control.Monad.HeapT.NonTransformer.html#636" class="Bound">A</a> <a id="710" class="Symbol">→</a> <a id="712" href="Control.Monad.HeapT.NonTransformer.html#628" class="Datatype">Branch</a> <a id="719" href="Control.Monad.HeapT.NonTransformer.html#636" class="Bound">A</a>
-<a id="721" class="Keyword">open</a> <a id="726" href="Control.Monad.HeapT.NonTransformer.html#414" class="Module">Root</a> <a id="731" class="Keyword">public</a>
+  <a id="636" class="Keyword">data</a> <a id="Branch"></a><a id="641" href="Control.Monad.HeapT.NonTransformer.html#641" class="Datatype">Branch</a> <a id="648" class="Symbol">(</a><a id="649" href="Control.Monad.HeapT.NonTransformer.html#649" class="Bound">A</a> <a id="651" class="Symbol">:</a> <a id="653" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="658" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a><a id="659" class="Symbol">)</a> <a id="661" class="Symbol">:</a> <a id="663" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="668" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a> <a id="670" class="Keyword">where</a>
+    <a id="Branch.[]"></a><a id="680" href="Control.Monad.HeapT.NonTransformer.html#680" class="InductiveConstructor">[]</a>  <a id="684" class="Symbol">:</a> <a id="686" href="Control.Monad.HeapT.NonTransformer.html#641" class="Datatype">Branch</a> <a id="693" href="Control.Monad.HeapT.NonTransformer.html#649" class="Bound">A</a>
+    <a id="Branch._∷_"></a><a id="699" href="Control.Monad.HeapT.NonTransformer.html#699" class="InductiveConstructor Operator">_∷_</a> <a id="703" class="Symbol">:</a> <a id="705" href="Control.Monad.HeapT.NonTransformer.html#553" class="Datatype">Node</a> <a id="710" href="Control.Monad.HeapT.NonTransformer.html#649" class="Bound">A</a> <a id="712" class="Symbol">→</a> <a id="714" href="Control.Monad.HeapT.NonTransformer.html#641" class="Datatype">Branch</a> <a id="721" href="Control.Monad.HeapT.NonTransformer.html#649" class="Bound">A</a> <a id="723" class="Symbol">→</a> <a id="725" href="Control.Monad.HeapT.NonTransformer.html#641" class="Datatype">Branch</a> <a id="732" href="Control.Monad.HeapT.NonTransformer.html#649" class="Bound">A</a>
+<a id="734" class="Keyword">open</a> <a id="739" href="Control.Monad.HeapT.NonTransformer.html#427" class="Module">Root</a> <a id="744" class="Keyword">public</a>
 
-<a id="Heap"></a><a id="739" href="Control.Monad.HeapT.NonTransformer.html#739" class="Function">Heap</a> <a id="744" class="Symbol">:</a> <a id="746" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="751" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a> <a id="753" class="Symbol">→</a> <a id="755" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="760" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a>
-<a id="762" href="Control.Monad.HeapT.NonTransformer.html#739" class="Function">Heap</a> <a id="767" href="Control.Monad.HeapT.NonTransformer.html#767" class="Bound">A</a> <a id="769" class="Symbol">=</a> <a id="771" href="Control.Monad.HeapT.NonTransformer.html#628" class="Datatype">Branch</a> <a id="778" href="Control.Monad.HeapT.NonTransformer.html#767" class="Bound">A</a>
+<a id="Heap"></a><a id="752" href="Control.Monad.HeapT.NonTransformer.html#752" class="Function">Heap</a> <a id="757" class="Symbol">:</a> <a id="759" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="764" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a> <a id="766" class="Symbol">→</a> <a id="768" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="773" href="Control.Monad.HeapT.NonTransformer.html#287" class="Bound">ℓ</a>
+<a id="775" href="Control.Monad.HeapT.NonTransformer.html#752" class="Function">Heap</a> <a id="780" href="Control.Monad.HeapT.NonTransformer.html#780" class="Bound">A</a> <a id="782" class="Symbol">=</a> <a id="784" href="Control.Monad.HeapT.NonTransformer.html#641" class="Datatype">Branch</a> <a id="791" href="Control.Monad.HeapT.NonTransformer.html#780" class="Bound">A</a>
 
-<a id="781" class="Comment">-- infixr 5 _++_</a>
-<a id="798" class="Comment">-- _++_ : 𝐹 w (Branch A) → 𝐹 ε (Branch A) → 𝐹 w (Branch A)</a>
-<a id="857" class="Comment">-- xs ++ ys =</a>
-  <a id="873" class="Comment">-- xs &gt;&gt;=ε λ  {  []       → ys</a>
-  <a id="906" class="Comment">--            ;  (x ∷ xs) → pure (x ∷ xs ++ ys) }</a>
+<a id="794" class="Comment">-- infixr 5 _++_</a>
+<a id="811" class="Comment">-- _++_ : 𝐹 w (Branch A) → 𝐹 ε (Branch A) → 𝐹 w (Branch A)</a>
+<a id="870" class="Comment">-- xs ++ ys =</a>
+  <a id="886" class="Comment">-- xs &gt;&gt;=ε λ  {  []       → ys</a>
+  <a id="919" class="Comment">--            ;  (x ∷ xs) → pure (x ∷ xs ++ ys) }</a>
 
-<a id="957" class="Comment">-- infixr 1 _&gt;&gt;=ᴺ_ _&gt;&gt;=ᴴ_</a>
-<a id="983" class="Comment">-- mutual</a>
-<a id="993" class="Comment">--   _&gt;&gt;=ᴺ_ : Node A → (A → Heap B) → Heap B</a>
-<a id="1038" class="Comment">--   ⌊ x ⌋  &gt;&gt;=ᴺ f = f x</a>
-<a id="1063" class="Comment">--   ⌈ x ⌉  &gt;&gt;=ᴺ f = pure (⌈ weight x ⋊ (step x &gt;&gt;=ᴴ f) ⌉ ∷ pure [])</a>
+<a id="970" class="Comment">-- infixr 1 _&gt;&gt;=ᴺ_ _&gt;&gt;=ᴴ_</a>
+<a id="996" class="Comment">-- mutual</a>
+<a id="1006" class="Comment">--   _&gt;&gt;=ᴺ_ : Node A → (A → Heap B) → Heap B</a>
+<a id="1051" class="Comment">--   ⌊ x ⌋  &gt;&gt;=ᴺ f = f x</a>
+<a id="1076" class="Comment">--   ⌈ x ⌉  &gt;&gt;=ᴺ f = pure (⌈ weight x ⋊ (step x &gt;&gt;=ᴴ f) ⌉ ∷ pure [])</a>
 
-<a id="1133" class="Comment">--   _&gt;&gt;=ᴴ_ : 𝐹 w (Branch A) → (A → Heap B) → 𝐹 w (Branch B)</a>
-<a id="1194" class="Comment">--   xs &gt;&gt;=ᴴ f =</a>
-<a id="1211" class="Comment">--     xs &gt;&gt;=ε λ  {  []        → pure []</a>
-<a id="1252" class="Comment">--                ;  (x ∷ xs)  → (x &gt;&gt;=ᴺ f) ++ (xs &gt;&gt;=ᴴ f) }</a>
+<a id="1146" class="Comment">--   _&gt;&gt;=ᴴ_ : 𝐹 w (Branch A) → (A → Heap B) → 𝐹 w (Branch B)</a>
+<a id="1207" class="Comment">--   xs &gt;&gt;=ᴴ f =</a>
+<a id="1224" class="Comment">--     xs &gt;&gt;=ε λ  {  []        → pure []</a>
+<a id="1265" class="Comment">--                ;  (x ∷ xs)  → (x &gt;&gt;=ᴺ f) ++ (xs &gt;&gt;=ᴴ f) }</a>
 
-<a id="1314" class="Comment">-- pureᴴ : A → Heap A</a>
-<a id="1336" class="Comment">-- pureᴴ x = pure (⌊ x ⌋ ∷ pure [])</a>
+<a id="1327" class="Comment">-- pureᴴ : A → Heap A</a>
+<a id="1349" class="Comment">-- pureᴴ x = pure (⌊ x ⌋ ∷ pure [])</a>
 
-<a id="1373" class="Comment">-- liftᴴ : 𝐹 w A → Heap A</a>
-<a id="1399" class="Comment">-- liftᴴ xs = pure (⌈ _ ⋊ map (λ x → ⌊ x ⌋ ∷ pure []) xs ⌉ ∷ pure [])</a>
+<a id="1386" class="Comment">-- liftᴴ : 𝐹 w A → Heap A</a>
+<a id="1412" class="Comment">-- liftᴴ xs = pure (⌈ _ ⋊ map (λ x → ⌊ x ⌋ ∷ pure []) xs ⌉ ∷ pure [])</a>
 
-<a id="1470" class="Comment">-- flatten : 𝐹 w (Branch A) → 𝐹 w (List A × List (Root A))</a>
-<a id="1529" class="Comment">-- flatten xs =</a>
-<a id="1545" class="Comment">--   xs &gt;&gt;=ε λ  {  []            → pure ([] , [])</a>
-<a id="1595" class="Comment">--              ;  (⌊ x ⌋ ∷ xs)  → map (map₁ (x ∷_)) (flatten xs)</a>
-<a id="1661" class="Comment">--              ;  (⌈ x ⌉ ∷ xs)  → map (map₂ (x ∷_)) (flatten xs) }</a>
+<a id="1483" class="Comment">-- flatten : 𝐹 w (Branch A) → 𝐹 w (List A × List (Root A))</a>
+<a id="1542" class="Comment">-- flatten xs =</a>
+<a id="1558" class="Comment">--   xs &gt;&gt;=ε λ  {  []            → pure ([] , [])</a>
+<a id="1608" class="Comment">--              ;  (⌊ x ⌋ ∷ xs)  → map (map₁ (x ∷_)) (flatten xs)</a>
+<a id="1674" class="Comment">--              ;  (⌈ x ⌉ ∷ xs)  → map (map₂ (x ∷_)) (flatten xs) }</a>
 
-<a id="1730" class="Comment">-- module PopMin</a>
-<a id="1747" class="Comment">--   (_≤|≥_ : Total (λ x y → ∃ z × (y ≡ x ∙ z)))</a>
-<a id="1796" class="Comment">--   (decomp : ∀ {A B w₁ w₂ w₃} → 𝐹 (w₁ ∙ w₂) A → 𝐹 (w₁ ∙ w₃) B → 𝐹 w₁ (𝐹 w₂ A × 𝐹 w₃ B)) where</a>
+<a id="1743" class="Comment">-- module PopMin</a>
+<a id="1760" class="Comment">--   (_≤|≥_ : Total (λ x y → ∃ z × (y ≡ x ∙ z)))</a>
+<a id="1809" class="Comment">--   (decomp : ∀ {A B w₁ w₂ w₃} → 𝐹 (w₁ ∙ w₂) A → 𝐹 (w₁ ∙ w₃) B → 𝐹 w₁ (𝐹 w₂ A × 𝐹 w₃ B)) where</a>
 
-<a id="1893" class="Comment">--   _∪_ : Root A → Root A → Root A</a>
-<a id="1929" class="Comment">--   xs ∪ ys with weight xs ≤|≥ weight ys</a>
-<a id="1971" class="Comment">--   ... | inl (k , wʸ≡wˣ∙k) = weight xs ⋊ map (λ { (xs , ys) → ⌈ k ⋊ ys ⌉ ∷ xs }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) (step xs)) (subst (flip 𝐹 _) wʸ≡wˣ∙k (step ys)))</a>
-<a id="2142" class="Comment">--   ... | inr (k , wˣ≡wʸ∙k) = weight ys ⋊ map (λ { (ys , xs) → ⌈ k ⋊ xs ⌉ ∷ ys }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) (step ys)) (subst (flip 𝐹 _) wˣ≡wʸ∙k (step xs)))</a>
+<a id="1906" class="Comment">--   _∪_ : Root A → Root A → Root A</a>
+<a id="1942" class="Comment">--   xs ∪ ys with weight xs ≤|≥ weight ys</a>
+<a id="1984" class="Comment">--   ... | inl (k , wʸ≡wˣ∙k) = weight xs ⋊ map (λ { (xs , ys) → ⌈ k ⋊ ys ⌉ ∷ xs }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) (step xs)) (subst (flip 𝐹 _) wʸ≡wˣ∙k (step ys)))</a>
+<a id="2155" class="Comment">--   ... | inr (k , wˣ≡wʸ∙k) = weight ys ⋊ map (λ { (ys , xs) → ⌈ k ⋊ xs ⌉ ∷ ys }) (decomp (subst (flip 𝐹 _) (sym (∙ε _)) (step ys)) (subst (flip 𝐹 _) wˣ≡wʸ∙k (step xs)))</a>
 
-<a id="2314" class="Comment">--   ⋃⁺ : Root A → List (Root A) → Root A</a>
-<a id="2356" class="Comment">--   ⋃⁺ x₁ []             = x₁</a>
-<a id="2387" class="Comment">--   ⋃⁺ x₁ (x₂ ∷ [])      = x₁ ∪ x₂</a>
-<a id="2423" class="Comment">--   ⋃⁺ x₁ (x₂ ∷ x₃ ∷ xs) = (x₁ ∪ x₂) ∪ ⋃⁺ x₃ xs</a>
+<a id="2327" class="Comment">--   ⋃⁺ : Root A → List (Root A) → Root A</a>
+<a id="2369" class="Comment">--   ⋃⁺ x₁ []             = x₁</a>
+<a id="2400" class="Comment">--   ⋃⁺ x₁ (x₂ ∷ [])      = x₁ ∪ x₂</a>
+<a id="2436" class="Comment">--   ⋃⁺ x₁ (x₂ ∷ x₃ ∷ xs) = (x₁ ∪ x₂) ∪ ⋃⁺ x₃ xs</a>
 
-<a id="2473" class="Comment">--   ⋃ : List (Root A) → Maybe (Root A)</a>
-<a id="2513" class="Comment">--   ⋃ []       = nothing</a>
-<a id="2539" class="Comment">--   ⋃ (x ∷ xs) = just (⋃⁺ x xs)</a>
+<a id="2486" class="Comment">--   ⋃ : List (Root A) → Maybe (Root A)</a>
+<a id="2526" class="Comment">--   ⋃ []       = nothing</a>
+<a id="2552" class="Comment">--   ⋃ (x ∷ xs) = just (⋃⁺ x xs)</a>
 
-<a id="2573" class="Comment">--   popMin : 𝐹 w (Branch A) → 𝐹 w (List A × Maybe (Root A))</a>
-<a id="2634" class="Comment">--   popMin = map (map₂ ⋃) ∘ flatten</a>
+<a id="2586" class="Comment">--   popMin : 𝐹 w (Branch A) → 𝐹 w (List A × Maybe (Root A))</a>
+<a id="2647" class="Comment">--   popMin = map (map₂ ⋃) ∘ flatten</a>
 </pre></body></html>
