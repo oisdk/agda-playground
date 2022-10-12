@@ -11,6 +11,13 @@ open Decidable
 GraphOf : Type a → Type a
 GraphOf A = A → List A
 
+unfold¹ : (B → A × B) → A × B → Stream A
+unfold¹ f (x , xs) .head = x
+unfold¹ f (x , xs) .tail = unfold¹ f (f xs)
+
+unfold : (B → A × B) → B → Stream A
+unfold f = unfold¹ f ∘ f
+
 module _ (g : GraphOf A) where
   dfs⊙ : {seen : List A} → NoethFrom seen → A → List A → List A
   dfs⊙ nf x xs with nf x
@@ -32,6 +39,7 @@ module _ (g : GraphOf A) where
   --   topoSort⊙ x k xs nf with nf x
   --   topoSort⊙ x k xs nf | done _     = k xs nf
   --   topoSort⊙ x k xs nf | more _ nf′ = topoSort⊙′ (g x) (k ∘ _∷_ x) xs nf′
+  --
 
 module _ (noeth : Noetherian A) where
   dfs : GraphOf A → GraphOf A
