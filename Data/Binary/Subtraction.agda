@@ -25,50 +25,43 @@ _×2^suc_ : 𝔹 → ℕ → 𝔹
 (2ᵇ xs) ×2^suc n = 2ᵇ ones (suc n) xs
 
 mutual
-  -- sub-exp₁ n x y = (x - (y + 1)) × 2ⁿ⁺¹
-  sub-exp₁ : ℕ → 𝔹 → 𝔹 → 𝔹
-  sub-exp₁ n 0ᵇ      _       = 2ᵇ ones n 0ᵇ
-  sub-exp₁ n (1ᵇ xs) 0ᵇ      = xs ×2^suc suc n
-  sub-exp₁ n (2ᵇ xs) 0ᵇ      = 2ᵇ ones n (double xs)
-  sub-exp₁ n (1ᵇ xs) (1ᵇ ys) = 2ᵇ ones n (sub-exp₁ 0 xs ys)
-  sub-exp₁ n (1ᵇ xs) (2ᵇ ys) = sub-exp₁ (suc n) xs ys
-  sub-exp₁ n (2ᵇ xs) (1ᵇ ys) = sub-exp  (suc n) xs ys
-  sub-exp₁ n (2ᵇ xs) (2ᵇ ys) = 2ᵇ ones n (sub-exp₁ 0 xs ys)
+  -- sub₁ x y = (x - (y + 1)) × 2ⁿ
+  sub₁ : ℕ → 𝔹 → 𝔹 → 𝔹
+  sub₁ zero xs      0ᵇ      = dec xs
+  sub₁ zero 0ᵇ      _       = 1ᵇ 0ᵇ
+  sub₁ zero (1ᵇ xs) (1ᵇ ys) = 1ᵇ sub₁ 0 xs ys
+  sub₁ zero (1ᵇ xs) (2ᵇ ys) = sub₁ 1 xs ys
+  sub₁ zero (2ᵇ xs) (1ᵇ ys) = sub  1 xs ys
+  sub₁ zero (2ᵇ xs) (2ᵇ ys) = 1ᵇ sub₁ 0 xs ys
+  sub₁ (suc n) 0ᵇ      _       = 2ᵇ ones n 0ᵇ
+  sub₁ (suc n) (1ᵇ xs) 0ᵇ      = xs ×2^suc suc n
+  sub₁ (suc n) (2ᵇ xs) 0ᵇ      = 2ᵇ ones n (double xs)
+  sub₁ (suc n) (1ᵇ xs) (1ᵇ ys) = 2ᵇ ones n (sub₁ 1 xs ys)
+  sub₁ (suc n) (1ᵇ xs) (2ᵇ ys) = sub₁ (suc (suc n)) xs ys
+  sub₁ (suc n) (2ᵇ xs) (1ᵇ ys) = sub  (suc (suc n)) xs ys
+  sub₁ (suc n) (2ᵇ xs) (2ᵇ ys) = 2ᵇ ones n (sub₁ 1 xs ys)
 
-  -- sub-exp n x y = (x - y) × 2ⁿ⁺¹
-  sub-exp : ℕ → 𝔹 → 𝔹 → 𝔹
-  sub-exp n xs      0ᵇ      = xs ×2^suc n
-  sub-exp n 0ᵇ      _       = 0ᵇ
-  sub-exp n (1ᵇ xs) (1ᵇ ys) = sub-exp (suc n) xs ys
-  sub-exp n (1ᵇ xs) (2ᵇ ys) = 2ᵇ ones n (sub-exp₁ 0 xs ys)
-  sub-exp n (2ᵇ xs) (1ᵇ ys) = 2ᵇ ones n (sub-exp  0 xs ys)
-  sub-exp n (2ᵇ xs) (2ᵇ ys) = sub-exp (suc n) xs ys
-
-mutual
-  -- sub₁ x y = x - (y + 1)
-  sub₁ : 𝔹 → 𝔹 → 𝔹
-  sub₁ xs      0ᵇ      = dec xs
-  sub₁ 0ᵇ      _       = 1ᵇ 0ᵇ
-  sub₁ (1ᵇ xs) (1ᵇ ys) = 1ᵇ sub₁ xs ys
-  sub₁ (1ᵇ xs) (2ᵇ ys) = sub-exp₁ 0 xs ys
-  sub₁ (2ᵇ xs) (1ᵇ ys) = sub-exp  0 xs ys
-  sub₁ (2ᵇ xs) (2ᵇ ys) = 1ᵇ sub₁ xs ys
-
-  -- sub x y = x - y
-  sub : 𝔹 → 𝔹 → 𝔹
-  sub 0ᵇ      _       = 0ᵇ
-  sub xs      0ᵇ      = xs
-  sub (1ᵇ xs) (1ᵇ ys) = sub-exp 0 xs ys
-  sub (1ᵇ xs) (2ᵇ ys) = 1ᵇ sub₁ xs ys
-  sub (2ᵇ xs) (1ᵇ ys) = 1ᵇ sub  xs ys
-  sub (2ᵇ xs) (2ᵇ ys) = sub-exp 0 xs ys
+  -- sub n x y = (x - y) × 2ⁿ
+  sub : ℕ → 𝔹 → 𝔹 → 𝔹
+  sub zero 0ᵇ      _       = 0ᵇ
+  sub (suc n) 0ᵇ      _       = 0ᵇ
+  sub zero xs      0ᵇ      = xs
+  sub zero (1ᵇ xs) (1ᵇ ys) = sub 1 xs ys
+  sub zero (1ᵇ xs) (2ᵇ ys) = 1ᵇ sub₁ 0 xs ys
+  sub zero (2ᵇ xs) (1ᵇ ys) = 1ᵇ sub  0 xs ys
+  sub zero (2ᵇ xs) (2ᵇ ys) = sub 1 xs ys
+  sub (suc n) xs      0ᵇ      = xs ×2^suc n
+  sub (suc n) (1ᵇ xs) (1ᵇ ys) = sub (suc (suc n)) xs ys
+  sub (suc n) (1ᵇ xs) (2ᵇ ys) = 2ᵇ ones n (sub₁ 1 xs ys)
+  sub (suc n) (2ᵇ xs) (1ᵇ ys) = 2ᵇ ones n (sub  1 xs ys)
+  sub (suc n) (2ᵇ xs) (2ᵇ ys) = sub (suc (suc n)) xs ys
 
 open import Data.Binary.Order
 open import Data.Bool
 
 infixl 6 _-_
 _-_ : 𝔹 → 𝔹 → 𝔹
-n - m = if n ≤ᴮ m then 0ᵇ else sub n m
+n - m = if n ≤ᴮ m then 0ᵇ else sub 0 n m
 
 
 open import Level
