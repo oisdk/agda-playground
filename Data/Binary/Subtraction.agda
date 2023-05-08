@@ -36,7 +36,7 @@ _-1×2^suc_ : 𝔹 → ℕ → 𝔹
 mutual
   -- sube₁ n x y = (x - (y + 1)) × 2ⁿ⁺¹
   sube₁ : ℕ → 𝔹 → 𝔹 → 𝔹
-  sube₁ n 0ᵇ      _       = 2ᵇ ones n 0ᵇ
+  sube₁ n 0ᵇ      _       = 0ᵇ
   sube₁ n xs      0ᵇ      = xs -1×2^suc n
   sube₁ n (1ᵇ xs) (1ᵇ ys) = 2ᵇ ones n (sube₁ 0 xs ys)
   sube₁ n (2ᵇ xs) (2ᵇ ys) = 2ᵇ ones n (sube₁ 0 xs ys)
@@ -55,7 +55,7 @@ mutual
 mutual
   -- sub₁ x y = x - (y + 1)
   sub₁ : 𝔹 → 𝔹 → 𝔹
-  sub₁ 0ᵇ      _       = 1ᵇ 0ᵇ
+  sub₁ 0ᵇ      _       = 0ᵇ
   sub₁ xs      0ᵇ      = dec xs
   sub₁ (1ᵇ xs) (1ᵇ ys) = 1ᵇ sub₁ xs ys
   sub₁ (2ᵇ xs) (2ᵇ ys) = 1ᵇ sub₁ xs ys
