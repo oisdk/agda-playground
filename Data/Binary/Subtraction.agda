@@ -36,14 +36,20 @@ _×2^suc_ : 𝔹 → ℕ → 𝔹
 (2ᵇ xs) ×2^suc n = 2ᵇ ones (suc n) xs
 
 _×2^_ : 𝔹 → ℕ → 𝔹
-xs ×2^ zero = xs
+xs ×2^ zero  = xs
 xs ×2^ suc n = xs ×2^suc n
+
+_-1×2^_ : 𝔹 → ℕ → 𝔹
+xs      -1×2^ zero  = dec xs
+0ᵇ      -1×2^ suc _ = 0ᵇ
+(2ᵇ xs) -1×2^ suc n = 2ᵇ ones n (double xs)
+(1ᵇ xs) -1×2^ suc n = xs ×2^suc suc n
 
 mutual
   -- sub₁ x y = (x - (y + 1)) × 2ⁿ
   sub₁ : ℕ → 𝔹 → 𝔹 → 𝔹
   sub₁ n 0ᵇ      _       = ones′ n 0ᵇ
-  sub₁ n xs      0ᵇ      = dec xs ×2^ n
+  sub₁ n xs      0ᵇ      = xs -1×2^ n
   sub₁ n (1ᵇ xs) (1ᵇ ys) = ones′ n (sub₁ (zer n) xs ys)
   sub₁ n (2ᵇ xs) (2ᵇ ys) = ones′ n (sub₁ (zer n) xs ys)
   sub₁ n (1ᵇ xs) (2ᵇ ys) = sub₁ (suc n) xs ys
