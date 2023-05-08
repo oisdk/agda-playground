@@ -95,28 +95,8 @@ test-exp n = let ns = 0 ⋯ n in
   liftA2 (λ n m → ⟦ n ⇑⟧ ×2^suc m) ns ns ≡
   liftA2 (λ n m → ×2-tester ⟦ n ⇑⟧ m) ns ns
 
--- e : ℕ → ℕ → ℕ
--- e n m = ⟦ ones′ n ⟦ m ⇑⟧ ⇓⟧
-
--- e′ : ℕ → ℕ → ℕ
--- e′ n m = ⟦ ×2-tester ⟦ m ⇑⟧ (pred n) ⇓⟧ + {!!}
--- e′ zero    m = suc ⟦ double ⟦ m ⇑⟧ ⇓⟧
--- e′ (suc n) m = ⟦ ×2-tester ⟦ suc m ⇑⟧ n ⇓⟧
-
--- test-e : ℕ → Type
--- test-e n = let ns = 0 ⋯ n in
---   liftA2 e ns ns ≡
---   liftA2 e′ ns ns
-
 _ : test-exp 30
 _ = refl
 
 _ : test _-_ _∸_ 30
 _ = refl
-
--- _ : e 1 3 ≡ e′ 1 3
--- _ = refl
-
-
--- _ : test-e 30
--- _ = refl
