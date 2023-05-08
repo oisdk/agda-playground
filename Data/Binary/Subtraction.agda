@@ -19,17 +19,6 @@ ones : ℕ → 𝔹 → 𝔹
 ones zero    xs = xs
 ones (suc n) xs = ones n (1ᵇ xs)
 
--- ones′ zero    x = x × 2 + 1
--- ones′ (suc n) x = (x + 1) × 2ⁿ
-
-ones′ : ℕ → 𝔹 → 𝔹
-ones′ zero    = 1ᵇ_
-ones′ (suc n) xs = 2ᵇ ones n xs
-
-zer : ℕ → ℕ
-zer zero    = zero
-zer (suc _) = suc zero
-
 _×2^suc_ : 𝔹 → ℕ → 𝔹
 0ᵇ      ×2^suc n = 0ᵇ
 (1ᵇ xs) ×2^suc n = 2ᵇ ones n (double xs)
@@ -39,38 +28,55 @@ _×2^_ : 𝔹 → ℕ → 𝔹
 xs ×2^ zero  = xs
 xs ×2^ suc n = xs ×2^suc n
 
-_-1×2^_ : 𝔹 → ℕ → 𝔹
-xs      -1×2^ zero  = dec xs
-0ᵇ      -1×2^ suc _ = 0ᵇ
-(2ᵇ xs) -1×2^ suc n = 2ᵇ ones n (double xs)
-(1ᵇ xs) -1×2^ suc n = xs ×2^suc suc n
+_-1×2^suc_ : 𝔹 → ℕ → 𝔹
+0ᵇ      -1×2^suc _ = 0ᵇ
+(2ᵇ xs) -1×2^suc n = 2ᵇ ones n (double xs)
+(1ᵇ xs) -1×2^suc n = xs ×2^suc suc n
 
 mutual
-  -- sub₁ x y = (x - (y + 1)) × 2ⁿ
-  sub₁ : ℕ → 𝔹 → 𝔹 → 𝔹
-  sub₁ n 0ᵇ      _       = ones′ n 0ᵇ
-  sub₁ n xs      0ᵇ      = xs -1×2^ n
-  sub₁ n (1ᵇ xs) (1ᵇ ys) = ones′ n (sub₁ (zer n) xs ys)
-  sub₁ n (2ᵇ xs) (2ᵇ ys) = ones′ n (sub₁ (zer n) xs ys)
-  sub₁ n (1ᵇ xs) (2ᵇ ys) = sub₁ (suc n) xs ys
-  sub₁ n (2ᵇ xs) (1ᵇ ys) = sub  (suc n) xs ys
+  -- sube₁ n x y = (x - (y + 1)) × 2ⁿ⁺¹
+  sube₁ : ℕ → 𝔹 → 𝔹 → 𝔹
+  sube₁ n 0ᵇ      _       = 2ᵇ ones n 0ᵇ
+  sube₁ n xs      0ᵇ      = xs -1×2^suc n
+  sube₁ n (1ᵇ xs) (1ᵇ ys) = 2ᵇ ones n (sube₁ 0 xs ys)
+  sube₁ n (2ᵇ xs) (2ᵇ ys) = 2ᵇ ones n (sube₁ 0 xs ys)
+  sube₁ n (1ᵇ xs) (2ᵇ ys) = sube₁ (suc n) xs ys
+  sube₁ n (2ᵇ xs) (1ᵇ ys) = sube  (suc n) xs ys
 
-  -- sub n x y = (x - y) × 2ⁿ
-  sub : ℕ → 𝔹 → 𝔹 → 𝔹
-  sub _ 0ᵇ      _       = 0ᵇ
-  sub n xs      0ᵇ      = xs ×2^ n
-  sub n (1ᵇ xs) (1ᵇ ys) = sub (suc n) xs ys
-  sub n (2ᵇ xs) (2ᵇ ys) = sub (suc n) xs ys
-  sub n (1ᵇ xs) (2ᵇ ys) = ones′ n (sub₁ (zer n) xs ys)
-  sub n (2ᵇ xs) (1ᵇ ys) = ones′ n (sub  (zer n) xs ys)
+  -- sube n x y = (x - y) × 2ⁿ⁺¹
+  sube : ℕ → 𝔹 → 𝔹 → 𝔹
+  sube _ 0ᵇ      _       = 0ᵇ
+  sube n xs      0ᵇ      = xs ×2^suc n
+  sube n (1ᵇ xs) (1ᵇ ys) = sube (suc n) xs ys
+  sube n (2ᵇ xs) (2ᵇ ys) = sube (suc n) xs ys
+  sube n (1ᵇ xs) (2ᵇ ys) = 2ᵇ ones n (sube₁ 0 xs ys)
+  sube n (2ᵇ xs) (1ᵇ ys) = 2ᵇ ones n (sube  0 xs ys)
+
+mutual
+  -- sub₁ x y = x - (y + 1)
+  sub₁ : 𝔹 → 𝔹 → 𝔹
+  sub₁ 0ᵇ      _       = 1ᵇ 0ᵇ
+  sub₁ xs      0ᵇ      = dec xs
+  sub₁ (1ᵇ xs) (1ᵇ ys) = 1ᵇ sub₁ xs ys
+  sub₁ (2ᵇ xs) (2ᵇ ys) = 1ᵇ sub₁ xs ys
+  sub₁ (1ᵇ xs) (2ᵇ ys) = sube₁ 0 xs ys
+  sub₁ (2ᵇ xs) (1ᵇ ys) = sube  0 xs ys
+
+  -- sub x y = x - y
+  sub : 𝔹 → 𝔹 → 𝔹
+  sub 0ᵇ      _       = 0ᵇ
+  sub xs      0ᵇ      = xs
+  sub (1ᵇ xs) (1ᵇ ys) = sube 0 xs ys
+  sub (2ᵇ xs) (2ᵇ ys) = sube 0 xs ys
+  sub (1ᵇ xs) (2ᵇ ys) = 1ᵇ sub₁ xs ys
+  sub (2ᵇ xs) (1ᵇ ys) = 1ᵇ sub  xs ys
 
 open import Data.Binary.Order
 open import Data.Bool
 
 infixl 6 _-_
 _-_ : 𝔹 → 𝔹 → 𝔹
-n - m = if n ≤ᴮ m then 0ᵇ else sub 0 n m
-
+n - m = if n ≤ᴮ m then 0ᵇ else sub n m
 
 open import Level
 open import Data.Binary.Testers
