@@ -3,10 +3,7 @@
 module Data.Maybe.Base where
 
 open import Level
-
-data Maybe (A : Type a) : Type a where
-  nothing  : Maybe A
-  just     : A → Maybe A
+open import Agda.Builtin.Maybe public
 
 maybe : {B : Maybe A → Type b} → B nothing → ((x : A) → B (just x)) → (x : Maybe A) → B x
 maybe b f nothing = b
