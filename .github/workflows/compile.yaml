@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         cubical-ref: ["v0.4"]
+        binary-ref: ["v0.1"]
         agda-ver: ["2.6.2.2"]
 
     steps:
@@ -20,7 +21,7 @@ jobs:
         agda-version: ${{ matrix.agda-ver }}
         agda-libraries: |
           https://github.com/agda/cubical.git#${{ matrix.cubical-ref }}
-          https://github.com/oisdk/agda-binary.git
+          https://github.com/oisdk/agda-binary.git#${{ matrix.binary-ref }}
 
     - name: Checkout main
       uses: actions/checkout@v3.4.0
