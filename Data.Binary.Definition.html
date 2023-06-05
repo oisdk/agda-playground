@@ -1,21 +1,8 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="utf-8"><title>Data.Binary.Definition</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--without-K</a> <a id="25" class="Pragma">--safe</a> <a id="32" class="Symbol">#-}</a>
+<html><head><meta charset="utf-8"><title>Data.Binary.Definition</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Keyword">module</a> <a id="8" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a> <a id="31" class="Keyword">where</a>
 
-<a id="37" class="Keyword">module</a> <a id="44" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a> <a id="67" class="Keyword">where</a>
-
-<a id="74" class="Keyword">open</a> <a id="79" class="Keyword">import</a> <a id="86" href="Level.html" class="Module">Level</a>
-<a id="92" class="Keyword">open</a> <a id="97" class="Keyword">import</a> <a id="104" href="Data.Bits.html" class="Module">Data.Bits</a> <a id="114" class="Keyword">public</a> <a id="121" class="Keyword">renaming</a> <a id="130" class="Symbol">(</a><a id="131" href="Data.Bits.html#102" class="Datatype">Bits</a> <a id="136" class="Symbol">to</a> <a id="139" class="Datatype">𝔹</a><a id="140" class="Symbol">;</a> <a id="142" href="Data.Bits.html#122" class="InductiveConstructor">[]</a> <a id="145" class="Symbol">to</a> <a id="148" class="InductiveConstructor">0ᵇ</a><a id="150" class="Symbol">;</a> <a id="152" href="Data.Bits.html#134" class="InductiveConstructor Operator">0∷_</a> <a id="156" class="Symbol">to</a> <a id="159" class="InductiveConstructor Operator">1ᵇ_</a><a id="162" class="Symbol">;</a> <a id="164" href="Data.Bits.html#154" class="InductiveConstructor Operator">1∷_</a> <a id="168" class="Symbol">to</a> <a id="171" class="InductiveConstructor Operator">2ᵇ_</a><a id="174" class="Symbol">)</a>
-
-<a id="177" class="Comment">-- The following causes a performance hit:</a>
-
-<a id="221" class="Comment">-- open import Agda.Builtin.List using ([]; _∷_; List)</a>
-<a id="276" class="Comment">-- open import Agda.Builtin.Bool using (Bool; true; false)</a>
-
-<a id="336" class="Comment">-- 𝔹 : Type</a>
-<a id="348" class="Comment">-- 𝔹 = List Bool</a>
-
-<a id="366" class="Comment">-- infixr 8 1ᵇ_ 2ᵇ_</a>
-<a id="386" class="Comment">-- pattern 0ᵇ = []</a>
-<a id="405" class="Comment">-- pattern 1ᵇ_ xs = false ∷ xs</a>
-<a id="436" class="Comment">-- pattern 2ᵇ_ xs = true  ∷ xs</a>
+<a id="38" class="Keyword">infixr</a> <a id="45" class="Number">8</a> <a id="47" href="Data.Binary.Definition.html#85" class="InductiveConstructor Operator">1ᵇ_</a> <a id="51" href="Data.Binary.Definition.html#89" class="InductiveConstructor Operator">2ᵇ_</a>
+<a id="55" class="Keyword">data</a> <a id="𝔹"></a><a id="60" href="Data.Binary.Definition.html#60" class="Datatype">𝔹</a> <a id="62" class="Symbol">:</a> <a id="64" href="Agda.Primitive.html#326" class="Primitive">Set</a> <a id="68" class="Keyword">where</a>
+  <a id="𝔹.0ᵇ"></a><a id="76" href="Data.Binary.Definition.html#76" class="InductiveConstructor">0ᵇ</a> <a id="79" class="Symbol">:</a> <a id="81" href="Data.Binary.Definition.html#60" class="Datatype">𝔹</a>
+  <a id="𝔹.1ᵇ_"></a><a id="85" href="Data.Binary.Definition.html#85" class="InductiveConstructor Operator">1ᵇ_</a> <a id="𝔹.2ᵇ_"></a><a id="89" href="Data.Binary.Definition.html#89" class="InductiveConstructor Operator">2ᵇ_</a> <a id="93" class="Symbol">:</a> <a id="95" href="Data.Binary.Definition.html#60" class="Datatype">𝔹</a> <a id="97" class="Symbol">→</a> <a id="99" href="Data.Binary.Definition.html#60" class="Datatype">𝔹</a>
 </pre></body></html>

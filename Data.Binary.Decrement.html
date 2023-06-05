@@ -1,0 +1,11 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Data.Binary.Decrement</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Keyword">module</a> <a id="8" href="Data.Binary.Decrement.html" class="Module">Data.Binary.Decrement</a> <a id="30" class="Keyword">where</a>
+
+<a id="37" class="Keyword">open</a> <a id="42" class="Keyword">import</a> <a id="49" href="Data.Binary.Definition.html" class="Module">Data.Binary.Definition</a>
+<a id="72" class="Keyword">open</a> <a id="77" class="Keyword">import</a> <a id="84" href="Data.Binary.Double.html" class="Module">Data.Binary.Double</a>
+
+<a id="dec"></a><a id="104" href="Data.Binary.Decrement.html#104" class="Function">dec</a> <a id="108" class="Symbol">:</a> <a id="110" href="Data.Binary.Definition.html#60" class="Datatype">𝔹</a> <a id="112" class="Symbol">→</a> <a id="114" href="Data.Binary.Definition.html#60" class="Datatype">𝔹</a>
+<a id="116" href="Data.Binary.Decrement.html#104" class="Function">dec</a> <a id="120" href="Data.Binary.Definition.html#76" class="InductiveConstructor">0ᵇ</a> <a id="123" class="Symbol">=</a> <a id="125" href="Data.Binary.Definition.html#76" class="InductiveConstructor">0ᵇ</a>
+<a id="128" href="Data.Binary.Decrement.html#104" class="Function">dec</a> <a id="132" class="Symbol">(</a><a id="133" href="Data.Binary.Definition.html#89" class="InductiveConstructor Operator">2ᵇ</a> <a id="136" href="Data.Binary.Decrement.html#136" class="Bound">xs</a><a id="138" class="Symbol">)</a> <a id="140" class="Symbol">=</a> <a id="142" href="Data.Binary.Definition.html#85" class="InductiveConstructor Operator">1ᵇ</a> <a id="145" href="Data.Binary.Decrement.html#136" class="Bound">xs</a>
+<a id="148" href="Data.Binary.Decrement.html#104" class="Function">dec</a> <a id="152" class="Symbol">(</a><a id="153" href="Data.Binary.Definition.html#85" class="InductiveConstructor Operator">1ᵇ</a> <a id="156" href="Data.Binary.Decrement.html#156" class="Bound">xs</a><a id="158" class="Symbol">)</a> <a id="160" class="Symbol">=</a> <a id="162" href="Data.Binary.Double.html#83" class="Function Operator">2×</a> <a id="165" href="Data.Binary.Decrement.html#156" class="Bound">xs</a>
+</pre></body></html>
