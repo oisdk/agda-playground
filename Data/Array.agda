@@ -3,6 +3,7 @@
 module Data.Array where
 
 open import Data.Binary
+open import Data.Binary.Increment
 open import Prelude
 
 private
