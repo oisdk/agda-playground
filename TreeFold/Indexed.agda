@@ -3,8 +3,9 @@
 module TreeFold.Indexed where
 
 open import Prelude
-open import Data.Binary using (𝔹; 0ᵇ; 1ᵇ_; 2ᵇ_; ⟦_⇓⟧; ⟦_⇑⟧; inc)
-open import Data.Binary.Isomorphism
+open import Data.Binary using (𝔹; 0ᵇ; 1ᵇ_; 2ᵇ_; ⟦_⇓⟧; ⟦_⇑⟧)
+open import Data.Binary.Increment using (inc)
+open import Data.Binary.Properties.Isomorphism
 open import Data.Nat
 
 private
@@ -53,7 +54,7 @@ module NonNorm {t} (N : ℕ → Type t) (f : ∀ p n m → N (2^ p * n) → N (2
   unspine = array-foldr N (λ n → f n 1) z
 
   treeFold : Vec (N 1) n → N n
-  treeFold xs = subst N (𝔹-rightInv _) (unspine (spine xs))
+  treeFold xs = subst N (ℕ→𝔹→ℕ _) (unspine (spine xs))
 
 pow-suc : ∀ n m → (2^ n * 1) + (2^ n * m) ≡ (2^ n * suc m)
 pow-suc zero m = refl
@@ -68,4 +69,4 @@ module _ {t} (N : ℕ → Type t) (f : ∀ {n m} → N n → N m → N (n + m)) 
   unspine = array-foldr N (λ n m xs ys → subst N (pow-suc n m) (f xs ys)) z
 
   treeFold : Vec (N 1) n → N n
-  treeFold xs = subst N (𝔹-rightInv _) (unspine (spine xs))
+  treeFold xs = subst N (ℕ→𝔹→ℕ _) (unspine (spine xs))
