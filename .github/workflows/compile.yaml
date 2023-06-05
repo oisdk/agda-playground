@@ -29,7 +29,6 @@ jobs:
       run: ./scripts/render.sh
 
     - name: Deploy html to github pages
-      if: steps.cache-agda.outputs.cache-hit != 'true'
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
