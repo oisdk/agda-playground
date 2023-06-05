@@ -10,132 +10,27 @@ jobs:
 
     strategy:
       matrix:
-        cubical-ref: ["v0.3"]
-        agda-ref: ["v2.6.2"]
-        ghc-ver: ["9.0.1"]
-        cabal-ver: ["3.4.0.0"]
+        cubical-ref: ["v0.4"]
+        agda-ref: ["v2.6.2.2"]
 
     steps:
 
-# Install Agda
-    - uses: actions/cache@v2
-      name: Cache cabal packages
-      id: cache-cabal
+    - uses: wenkokke/setup-agda@v2.0.0
       with:
-        path: |
-          ~/.cabal/packages
-          ~/.cabal/store
-          ~/.cabal/bin
-          dist-newstyle
-        key: ${{ runner.os }}-${{ matrix.ghc-ver }}-${{ matrix.cabal-ver }}-${{ matrix.agda-ref }}-agda-opt
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.ghc-ver }}-${{ matrix.cabal-ver }}-${{ matrix.agda-ref }}-
-          ${{ runner.os }}-${{ matrix.ghc-ver }}-${{ matrix.cabal-ver }}-
-        
+        agda-version: ${{ matrix.agda-ver }}
+        agda-libraries: |
+          https://github.com/agda/cubical.git#${{ matrix.cubical-ref }}
+          https://github.com/oisdk/agda-binary.git
 
-    - name: Install cabal
-      if: steps.cache-cabal.outputs.cache-hit != 'true'
-      uses: haskell/actions/setup@v1.2.2
-      with:
-        ghc-version: ${{ matrix.ghc-ver }}
-        cabal-version: ${{ matrix.cabal-ver }}
-
-    - name: Put cabal programs in PATH
-      run: echo "~/.cabal/bin" >> $GITHUB_PATH
-
-    - name: Download Agda from github
-      if: steps.cache-cabal.outputs.cache-hit != 'true'
-      uses: actions/checkout@v2
-      with:
-        repository: agda/agda
-        path: agda
-        ref: ${{ matrix.agda-ref }}
-      
-    - name: Install Agda
-      if: steps.cache-cabal.outputs.cache-hit != 'true'
-      run: |
-        cabal update
-        cabal install --overwrite-policy=always --ghc-options='-O2 +RTS -M6G -RTS' alex-3.2.6
-        cabal install --overwrite-policy=always --ghc-options='-O2 +RTS -M6G -RTS' happy-1.19.12
-        cd agda
-        mkdir -p doc
-        touch doc/user-manual.pdf
-        cabal install --overwrite-policy=always --ghc-options='-O2 +RTS -M6G -RTS' -foptimise-heavily
-
-# Download and compile cubical library
-    - name: Checkout cubical library
-      uses: actions/checkout@v2
-      with:
-        repository: agda/cubical
-        path: cubical
-        ref: ${{ matrix.cubical-ref }}
-
-    - name: Cache cubical library
-      uses: actions/cache@v2
-      id: cache-cubical
-      with:
-        path: ~/cubical-build
-        key: ${{ runner.os }}-${{ matrix.agda-ver }}-${{ matrix.cubical-ref }}
-
-    - name: Put cubical library in Agda library list
-      run: |
-        mkdir -p ~/.agda/
-        touch ~/.agda/libraries
-        echo "$GITHUB_WORKSPACE/cubical/cubical.agda-lib" > ~/.agda/libraries
-
-    - name: Compile cubical library
-      if: steps.cache-cubical.outputs.cache-hit != 'true'
-      run: |
-        cd $GITHUB_WORKSPACE/cubical
-        agda Cubical/Core/Everything.agda
-        agda Cubical/Foundations/Everything.agda
-        find Cubical/Data -type f -name "*.agda" | while read -r code ; do
-            agda $code
-        done
-        find Cubical/HITs -type f -name "*.agda" | while read -r code ; do
-            agda $code
-        done
-        cp -f -r _build/ ~/cubical-build
-
-    - name: Retrieve cubical library
-      if: steps.cache-cubical.outputs.cache-hit == 'true'
-      run: |
-        mkdir -p cubical/_build
-        cp -f -r ~/cubical-build/* cubical/_build
-
-# Download and compile main library
     - name: Checkout main
-      uses: actions/checkout@v2
-      with:
-        path: main
+      uses: actions/checkout@v3.4.0
 
-    - uses: actions/cache@v2
-      name: Cache main library
-      id: cache-main
-      with:
-        path: ~/main-build
-        key: html-and-tex-${{ runner.os }}-${{ matrix.agda-ver }}-${{ matrix.cubical-ref }}-${{ hashFiles('main/**') }}
-        restore-keys: |
-          html-and-tex-${{ runner.os }}-${{ matrix.agda-ver }}-${{ matrix.cubical-ref }}-
-          html-and-tex-${{ runner.os }}-${{ matrix.agda-ver }}-
-
-    - name: Retrieve main library
-      if: steps.cache-main.outputs.cache-hit == 'true'
-      run: cp -f -R ~/main-build/* $GITHUB_WORKSPACE/main
-
-    - name: Compile main library
-      if: steps.cache-main.outputs.cache-hit != 'true'
-      run: |
-        mkdir -p ~/main-build/_build
-        cp -f -R ~/main-build/_build $GITHUB_WORKSPACE/main/_build
-        rm -r ~/main-build
-        cd main
-        ./scripts/render.sh
-        cd ..
-        cp -f -R main/ ~/main-build/
+    - name: Compile agda library
+      run: ./scripts/render.sh
 
     - name: Deploy html to github pages
+      if: steps.cache-agda.outputs.cache-hit != 'true'
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: main/docs
+        publish_dir: docs
