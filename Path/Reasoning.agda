@@ -28,3 +28,8 @@ _∎ x = refl
 
 syntax ≡⟨∙⟩[∙]-syntax x y≡z x′≡y′ x′≡y′⇒x≡y = x ≡⟨ x′≡y′⇒x≡y ⟩[ x′≡y′ ] y≡z
 
+infixr 2 begin-syntax
+begin-syntax : {x y : A} → x ≡ y → x ≡ y
+begin-syntax f i = f i
+
+syntax begin-syntax f i = begin[ i ] f
