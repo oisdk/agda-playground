@@ -19,3 +19,7 @@ head (x ∷ _) = x
 foldr : (A → B → B) → B → Vec A n → B
 foldr f b [] = b
 foldr f b (x ∷ xs) = f x (foldr f b xs)
+
+vmap : (A → B) → Vec A n → Vec B n
+vmap f [] = []
+vmap f (x ∷ xs) = f x ∷ vmap f xs

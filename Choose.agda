@@ -23,7 +23,7 @@ cmap f (zl x) = zl (f x)
 cmap f zr = zr
 cmap f (xs ** ys) = cmap f xs ** cmap f ys
 
-choose : ∀ n → Vec A m → Choose (List A) n m
+choose : ∀ n → Vec A m → Choose (Vec A n) n m
 choose n       []       = zr
 choose zero    (_ ∷ _ ) = zl []
 choose (suc n) (x ∷ xs) =
@@ -34,11 +34,11 @@ zw f (zl x) (zl y) = zl (f x y)
 zw f zr zr = zr
 zw f (xl ** xr) (yl ** yr) = zw f xl yl ** zw f xr yr
 
-sub : List A → List (List A)
-sub [] = []
-sub (x ∷ xs) = xs ∷ map (x ∷_) (sub xs)
+sub : Vec A (suc n) → Vec (Vec A n) n
+sub (x ∷ []) = []
+sub (x ∷ xs@(_ ∷ _)) = xs ∷ vmap (x ∷_) (sub xs)
 
-up : Choose A n m → Choose (List A) (suc n) m
+up : Choose A n m → Choose (Vec A n) (suc n) m
 up (zl x) = {!!}
 up zr = zr
 up (xs ** ys) = up xs ** zw _∷_ xs (up ys)
