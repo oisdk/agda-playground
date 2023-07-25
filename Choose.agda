@@ -85,11 +85,16 @@ up1-lemma (x₁ ∷ []) = refl
 up1-lemma (x₁ ∷ x₂ ∷ xs) =
   cong₂ _**_ (up1-lemma (x₂ ∷ xs)) (cong₂ _**_ (lemma₁ x₁ xs) refl)
 
+lemma₂ : ∀ x n (xs : Vec A m)
+       → zw _∷_ (choose (suc (suc n)) xs) (up (cmap (x ∷_) (choose (suc n) xs))) ≡ cmap sub (cmap (x ∷_) (choose (suc (suc n)) xs))
+lemma₂ x n [] = refl
+lemma₂ x n (x₁ ∷ xs) = cong₂ _**_ (lemma₂ x n xs) {!!}
+
 up-prf : ∀ n (xs : Vec A m) → n < m → up (choose (suc n) xs) ≡ cmap sub (choose (suc (suc n)) xs)
 up-prf _       []       p = refl
 up-prf zero    (x ∷ xs) p = up1-lemma (x ∷ xs)
 up-prf (suc n) (x₁ ∷ x₂ ∷ xs) p =
-  cong₂ _**_ (up-prf (suc n) (x₂ ∷ xs) {!!}) (cong₂ _**_ {!!} {!!})
+  cong₂ _**_ (up-prf (suc n) (x₂ ∷ xs) {!!}) (lemma₂ x₁ n (x₂ ∷ xs))
 
 e3 : Type
-e3 = type-of (up-prf 2 (a ∷ b ∷ c ∷ d ∷ []) tt)
+e3 = type-of (up-prf 3 (a ∷ b ∷ c ∷ d ∷ []) tt)
