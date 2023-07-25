@@ -90,3 +90,6 @@ up-prf _       []       p = refl
 up-prf zero    (x ∷ xs) p = up1-lemma (x ∷ xs)
 up-prf (suc n) (x₁ ∷ x₂ ∷ xs) p =
   cong₂ _**_ (up-prf (suc n) (x₂ ∷ xs) {!!}) (cong₂ _**_ {!!} {!!})
+
+e3 : Type
+e3 = type-of (up-prf 2 (a ∷ b ∷ c ∷ d ∷ []) tt)
