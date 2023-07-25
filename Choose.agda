@@ -76,12 +76,12 @@ lemma : ∀ x (xs : Vec A n) → cmap (_∷ []) (choose′ 1 xs id) ≡ choose�
 lemma x [] = refl
 lemma x₁ (x₂ ∷ xs) = cong₂ _**_ (lemma x₁ xs) refl
 
-up1-lemma : (xs : Vec A n) → 1 < n → up (choose′ 1 xs id) ≡ choose′ 2 xs sub
-up1-lemma (x₁ ∷ x₂ ∷ []) p = refl
-up1-lemma (x₁ ∷ x₂ ∷ x₃ ∷ xs) p =
-  cong₂ _**_ (up1-lemma (x₂ ∷ x₃ ∷ xs) tt) (cong₂ _**_ (cong₂ _**_ (lemma x₁ xs) refl) refl)
+up1-lemma : (xs : Vec A n) → 0 < n → up (choose′ 1 xs id) ≡ choose′ 2 xs sub
+up1-lemma (x₁ ∷ []) p = refl
+up1-lemma (x₁ ∷ x₂ ∷ xs) p =
+  cong₂ _**_ (up1-lemma (x₂ ∷ xs) tt) (cong₂ _**_ (lemma x₁ xs) refl)
 
--- -- -- up-prf : ∀ k (xs : Vec A m) → k < m → up (choose (suc k) xs) ≡ cmap sub (choose (suc (suc k)) xs)
--- -- -- up-prf _       []       p = refl
--- -- -- up-prf zero    (x ∷ xs) p = {!!}
--- -- -- up-prf (suc k) (x ∷ xs) p = {!!}
+up-prf : ∀ k (xs : Vec A m) → k < m → up (choose′ (suc k) xs id) ≡ choose′ (suc (suc k)) xs sub
+up-prf _       []       p = refl
+up-prf zero    (x ∷ xs) p = up1-lemma (x ∷ xs) tt
+up-prf (suc k) (x ∷ xs) p = {!!}
