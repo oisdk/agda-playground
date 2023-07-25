@@ -28,30 +28,30 @@ cmap f (zl x) = zl (f x)
 cmap f zr = zr
 cmap f (xs ** ys) = cmap f xs ** cmap f ys
 
-choose′ : ∀ n → Vec A m → (Vec A n → B) → Choose B n m
-choose′ zero    _        k = zl (k [])
-choose′ (suc n) []       k = zr
-choose′ (suc n) (x ∷ xs) k =
-  choose′ (suc n) xs k ** choose′ n xs (k ∘ _∷_ x)
+choose : ∀ n → Vec A m → Choose (Vec A n) n m
+choose zero    _        = zl []
+choose (suc n) []       = zr
+choose (suc n) (x ∷ xs) =
+  choose (suc n) xs ** cmap (x ∷_) (choose n xs)
 
 
 data Char : Type where a b c d : Char
 
 e1 : Choose (Vec Char _) _ _
-e1 = choose′ 2 (a ∷ b ∷ c ∷ d ∷ []) id
+e1 = choose 2 (a ∷ b ∷ c ∷ d ∷ [])
 
 sub : Vec A (suc n) → Vec (Vec A n) n
 sub (x ∷ []) = []
 sub (x ∷ xs@(_ ∷ _)) = xs ∷ vmap (x ∷_) (sub xs)
 
 e2 : Choose _ _ _
-e2 = choose′ 3 (a ∷ b ∷ c ∷ d ∷ []) sub
+e2 = cmap sub (choose 3 (a ∷ b ∷ c ∷ d ∷ []) )
 
-choose1 : Vec A m → (Vec A 1 → B) → Choose B 1 m
-choose1 []       k = zr
-choose1 (x ∷ xs) k = choose1 xs k ** zl (k (x ∷ []))
+choose1 : Vec A m → Choose (Vec A 1) 1 m
+choose1 []       = zr
+choose1 (x ∷ xs) = choose1 xs ** zl (x ∷ [])
 
-choose1-lemma : (xs : Vec A m) → choose′ 1 xs id ≡ choose1 xs id
+choose1-lemma : (xs : Vec A m) → choose 1 xs ≡ choose1 xs
 choose1-lemma [] = refl
 choose1-lemma (x ∷ xs) = cong (_** zl (x ∷ [])) (choose1-lemma xs)
 
@@ -65,24 +65,28 @@ empty {n = zero} x = zl x
 empty {n = suc n} {m = zero} x = zr
 empty {n = suc n} {m = suc m} x = empty x ** empty x
 
-up : Choose A (suc k) m
-   → Choose (Vec A (suc k)) (suc (suc k)) m
+up  : Choose A (suc k) m → Choose (Vec A (suc k)) (suc (suc k)) m
+up′ : Choose A k m → Choose (Vec A k) (suc k) m
+
+up′ (zl x) = empty []
+up′ zr = zr
+up′ ys@(_ ** _) = up ys
+
 up zr = zr
-up (zr ** _) = zr ** zr
-up (xs@(_ ** _) ** ys@(_ ** _)) = up xs ** zw _∷_ xs (up ys)
-up (xs@(_ ** _) ** zl _) = up xs ** cmap (_∷ []) xs
+up (xs ** ys) = up xs ** zw _∷_ xs (up′ ys)
 
-lemma : ∀ x (xs : Vec A n) → cmap (_∷ []) (choose′ 1 xs id) ≡ choose′ 1 xs (sub ∘′ (x ∷_))
-lemma x [] = refl
-lemma x₁ (x₂ ∷ xs) = cong₂ _**_ (lemma x₁ xs) refl
+lemma₁ : ∀ x (xs : Vec A n) → zw _∷_ (choose 1 xs) (empty []) ≡ cmap sub (cmap  (x ∷_) (choose 1 xs))
+lemma₁ x [] = refl
+lemma₁ x₁ (x₂ ∷ xs) = cong₂ _**_ (lemma₁ x₁ xs) refl
 
-up1-lemma : (xs : Vec A n) → up (choose′ 1 xs id) ≡ choose′ 2 xs sub
+up1-lemma : (xs : Vec A n) → up (choose 1 xs) ≡ cmap sub (choose 2 xs)
 up1-lemma [] = refl
 up1-lemma (x₁ ∷ []) = refl
 up1-lemma (x₁ ∷ x₂ ∷ xs) =
-  cong₂ _**_ (up1-lemma (x₂ ∷ xs)) (cong₂ _**_ (lemma x₁ xs) refl)
+  cong₂ _**_ (up1-lemma (x₂ ∷ xs)) (cong₂ _**_ (lemma₁ x₁ xs) refl)
 
-up-prf : ∀ k (xs : Vec A m) → k < m → up (choose′ (suc k) xs id) ≡ choose′ (suc (suc k)) xs sub
+up-prf : ∀ n (xs : Vec A m) → n < m → up (choose (suc n) xs) ≡ cmap sub (choose (suc (suc n)) xs)
 up-prf _       []       p = refl
 up-prf zero    (x ∷ xs) p = up1-lemma (x ∷ xs)
-up-prf (suc k) (x ∷ xs) p = {!!}
+up-prf (suc n) (x₁ ∷ x₂ ∷ xs) p =
+  cong₂ _**_ (up-prf (suc n) (x₂ ∷ xs) {!!}) (cong₂ _**_ {!!} {!!})
