@@ -41,8 +41,8 @@ fill (suc n) zero    x = ⟨⟩
 fill (suc n) (suc m) x = fill (suc n) m x ** fill n m x
 
 up  : Choose A k m → Choose (Vec A k) (suc k) m
-up ⟨ _ ⟩ = fill _ _ []
-up ⟨⟩ = ⟨⟩ 
+up ⟨ _ ⟩       = fill _ _ []
+up ⟨⟩          = ⟨⟩ 
 up (xs ** ys) = up xs ** zw _∷_ xs (up ys)
 
 private variable D E : Type
