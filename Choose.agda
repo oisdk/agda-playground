@@ -9,8 +9,8 @@ open import Path.Reasoning
 private variable n m k : ℕ
 
 data Choose (A : Type) : ℕ → ℕ → Type where
-  ⟨_⟩   : A → Choose A zero m
-  ⟨⟩    : Choose A (suc n) zero
+  ⟨_⟩  : A → Choose A zero m
+  ⟨⟩   : Choose A (suc n) zero
   _**_ : Choose A (suc n) m → Choose A n m → Choose A (suc n) (suc m)
 
 cmap : (A → B) → Choose A n m → Choose B n m
