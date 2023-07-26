@@ -52,18 +52,39 @@ zw f (zl x) (zl y) = zl (f x y)
 zw f zr zr = zr
 zw f (xl ** xr) (yl ** yr) = zw f xl yl ** zw f xr yr
 
+zw-cmap-cmap : {D E : Type}
+               (f : B → D → E) (g : A → B) (h : C → D) (xs : Choose A n m) (ys : Choose C n m)
+             → zw f (cmap g xs) (cmap h ys) ≡ zw (λ x y → f (g x) (h y)) xs ys
+zw-cmap-cmap f g h (zl x) (zl y) = refl
+zw-cmap-cmap f g h zr zr = refl
+zw-cmap-cmap f g h (xl ** xr) (yl ** yr) = cong₂ _**_ (zw-cmap-cmap f g h xl yl) (zw-cmap-cmap f g h xr yr)
+
+cmap-zw : {D : Type} (f : C → D) (g : A → B → C) (xs : Choose A n m) (ys : Choose B n m)
+        → cmap f (zw g xs ys) ≡ zw (λ x y → f (g x y)) xs ys
+cmap-zw f g (zl x) (zl y) = refl
+cmap-zw f g zr zr = refl
+cmap-zw f g (xl ** xr) (yl ** yr) = cong₂ _**_ (cmap-zw f g xl yl) (cmap-zw f g xr yr)
+
 empty : A → Choose A n m
 empty {n = zero} x = zl x
 empty {n = suc n} {m = zero} x = zr
 empty {n = suc n} {m = suc m} x = empty x ** empty x
+
+empty-[] : ∀ m (f : A → B) → empty {n = 1} {m = m} [] ≡ cmap (vmap f) (empty [])
+empty-[] zero f = refl
+empty-[] (suc m) f = cong₂ _**_ (empty-[] m f) refl
 
 up  : Choose A k m → Choose (Vec A k) (suc k) m
 up x@(zl _) = empty []
 up zr = zr
 up (xs ** ys) = up xs ** zw _∷_ xs (up ys)
 
-up-nat : (f : A → B) (xs : Choose A (suc n) m) → up (cmap f xs) ≡ cmap (vmap f) (up xs)
-up-nat = {!!}
+up-nat : (f : A → B) (xs : Choose A n m) → up (cmap f xs) ≡ cmap (vmap f) (up xs)
+up-nat f (zl x) = empty-[] _ f
+up-nat f zr = refl
+up-nat f (xs ** ys) =
+  cong₂ _**_ (up-nat f xs)
+    (cong (zw _∷_ (cmap f xs)) (up-nat f ys) ; zw-cmap-cmap _∷_ f (vmap f) xs (up ys) ; sym (cmap-zw (vmap f) _∷_ xs (up ys)))
 
 cmap-comp : (g : B → C) (f : A → B) (xs : Choose A n m) → cmap g (cmap f xs) ≡ cmap (g ∘ f) xs
 cmap-comp g f (zl x) = refl
