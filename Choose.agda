@@ -3,7 +3,6 @@
 module Choose where
 
 open import Prelude hiding (_⟨_⟩_)
-open import Data.List
 open import Data.Vec
 open import Path.Reasoning
 

@@ -51,6 +51,9 @@ foldr : ∀ {p} (P : ℕ → Type p) →
 foldr {n = zero} P f b _         = b
 foldr {n = suc n} P f b (x ∷ xs) = f x (foldr P f b xs)
 
+vmap : (A → B) → Vec A n → Vec B n
+vmap f = foldr (Vec _) (_∷_ ∘ f) []
+
 foldl : ∀ {p} (P : ℕ → Type p) →
           (∀ {n} → A → P n → P (suc n)) →
           P zero →

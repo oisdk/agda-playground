@@ -23,6 +23,7 @@ open import Cubical.Foundations.Everything
         ; hcomp
         ; transp
         ; J
+        ; cong′
         )
   renaming (_∙_ to _;_; subst2 to subst₂)
   public
