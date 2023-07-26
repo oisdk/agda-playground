@@ -23,3 +23,6 @@ foldr f b (x ∷ xs) = f x (foldr f b xs)
 vmap : (A → B) → Vec A n → Vec B n
 vmap f [] = []
 vmap f (x ∷ xs) = f x ∷ vmap f xs
+
+isProp-[] : isProp (Vec A zero)
+isProp-[] [] [] = refl
