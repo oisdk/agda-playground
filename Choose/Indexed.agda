@@ -8,7 +8,7 @@ open import Data.Vec.Iterated hiding (lookup)
 private variable n m k : ℕ
 
 data Choice : ℕ → ℕ → Type where
-  done : Choice zero zero
+  done : Choice zero m
   keep : Choice n m → Choice (suc n) (suc m)
   drop : Choice n m → Choice n (suc m)
 
