@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --safe #-}
 
 module Choose where
 
@@ -17,8 +17,8 @@ data Choose (A : Type) : ℕ → ℕ → Type where
        → Choose A (suc n) (suc m)
 
 cmap : (A → B) → Choose A n m → Choose B n m
-cmap f ⟨ x ⟩      = ⟨ f x ⟩
-cmap f ⟨⟩         = ⟨⟩
+cmap f ⟨ x ⟩       = ⟨ f x ⟩
+cmap f ⟨⟩          = ⟨⟩
 cmap f (xs ** ys) = cmap f xs ** cmap f ys
 
 choose : ∀ n → Vec A m → Choose (Vec A n) n m
