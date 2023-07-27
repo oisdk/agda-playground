@@ -15,13 +15,13 @@ data Choice : ℕ → ℕ → Type where
 Choose : Type → ℕ → ℕ → Type
 Choose A n m = Choice n m → A
 
-choose : ∀ n → Vec A m → Choose (Vec A n) n m
-choose _       _        done     = []
-choose n       (x ∷ xs) (drop i) = choose n xs i
-choose (suc n) (x ∷ xs) (keep i) = x ∷ choose n xs i
+choose : Vec A m → Choose (Vec A n) n m
+choose _        done     = []
+choose (x ∷ xs) (drop i) = choose xs i
+choose (x ∷ xs) (keep i) = x ∷ choose xs i
 
 sub : Vec A (suc n) → Vec (Vec A n) n
-sub {n = zero} _ = []
+sub {n = zero}  _        = []
 sub {n = suc _} (x ∷ xs) = xs ∷ vmap (x ∷_) (sub xs)
 
 up  : Choose A k m → Choose (Vec A k) (suc k) m
@@ -34,12 +34,12 @@ up-nat {n = zero}  f xs _        = refl
 up-nat {n = suc n} f xs (drop i) = up-nat f (xs ∘ drop) i
 up-nat {n = suc n} f xs (keep i) = cong (f (xs (drop i)) ∷_) (up-nat f (xs ∘ keep) i)
 
-up-sub : ∀ n (xs : Vec A m) i → up (choose n xs) i ≡ sub (choose (suc n) xs i)
-up-sub {m = suc _} zero (x ∷ xs) i = refl
+up-sub : ∀ n (xs : Vec A m) (i : Choice (suc n) m) → up (choose xs) i ≡ sub (choose xs i)
+up-sub zero    _        _        = refl
 up-sub (suc n) (x ∷ xs) (drop i) = up-sub (suc n) xs i
-up-sub (suc n) (x ∷ xs) (keep i) =
+up-sub (suc n) (x ∷ xs) (keep i) = 
   cong
-    (choose (suc n) xs i ∷_) (up-nat (x ∷_) (choose n xs) i ; cong (vmap (x ∷_)) (up-sub n xs i))
+    (choose xs i ∷_) (up-nat (x ∷_) (choose xs) i ; cong (vmap (x ∷_)) (up-sub n xs i))
 
 open import Choose
   using (⟨_⟩; ⟨⟩; _**_)
