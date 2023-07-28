@@ -3,12 +3,12 @@
 module Choose.Indexed where
 
 open import Prelude
-open import Data.Vec.Iterated hiding (lookup)
+open import Data.Vec
 
 private variable n m k : ℕ
 
 data Choice : ℕ → ℕ → Type where
-  done : Choice zero m
+  done : Choice zero zero
   keep : Choice n m → Choice (suc n) (suc m)
   drop : Choice n m → Choice n (suc m)
 
@@ -29,23 +29,26 @@ up {k = zero}  _  _        = []
 up {k = suc k} xs (drop i) = up (xs ∘ drop) i
 up {k = suc k} xs (keep i) = xs (drop i) ∷ up (xs ∘ keep) i
 
-up-nat : (f : A → B) (xs : Choose A n m) (i : Choice (suc n) m) → up (f ∘ xs) i ≡ vmap f (up xs i)
-up-nat {n = zero}  f xs _        = refl
-up-nat {n = suc n} f xs (drop i) = up-nat f (xs ∘ drop) i
-up-nat {n = suc n} f xs (keep i) = cong (f (xs (drop i)) ∷_) (up-nat f (xs ∘ keep) i)
+up-nat : ∀ (f : A → B) (xs : Choose A n m) i → up (f ∘ xs) i ≡ vmap f (up xs i)
+up-nat {n = zero}  _ _  _        = refl
+up-nat {n = suc _} f xs (drop i) = up-nat f (xs ∘ drop) i
+up-nat {n = suc _} f xs (keep i) =
+  cong (f (xs (drop i)) ∷_) (up-nat f (xs ∘ keep) i)
 
-up-sub : ∀ n (xs : Vec A m) (i : Choice (suc n) m) → up (choose xs) i ≡ sub (choose xs i)
+up-sub : ∀ n (xs : Vec A m) (i : Choice (suc n) m) 
+       → up (choose xs) i ≡ sub (choose xs i)
 up-sub zero    _        _        = refl
 up-sub (suc n) (x ∷ xs) (drop i) = up-sub (suc n) xs i
 up-sub (suc n) (x ∷ xs) (keep i) = 
   cong
-    (choose xs i ∷_) (up-nat (x ∷_) (choose xs) i ; cong (vmap (x ∷_)) (up-sub n xs i))
+    (choose xs i ∷_)
+    (up-nat (x ∷_) (choose xs) i ; cong (vmap (x ∷_)) (up-sub n xs i))
 
 open import Choose
   using (⟨_⟩; ⟨⟩; _**_)
   renaming (Choose to Choose′)
 
 lookup : Choose′ A n m → Choose A n m
-lookup ⟨ x ⟩ i = x
+lookup ⟨ x ⟩ _ = x
 lookup (xs ** ys) (drop i) = lookup xs i
 lookup (xs ** ys) (keep i) = lookup ys i
