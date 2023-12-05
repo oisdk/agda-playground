@@ -3,7 +3,7 @@
 
 <a id="35" class="Keyword">module</a> <a id="42" href="Algebra.Construct.Free.Semilattice.Relation.Unary.Any.Map.html" class="Module">Algebra.Construct.Free.Semilattice.Relation.Unary.Any.Map</a> <a id="100" class="Keyword">where</a>
 
-<a id="107" class="Keyword">open</a> <a id="112" class="Keyword">import</a> <a id="119" href="Prelude.html" class="Module">Prelude</a> <a id="127" class="Keyword">hiding</a> <a id="134" class="Symbol">(</a><a id="135" href="Data.Empty.Base.html#91" class="Datatype">⊥</a><a id="136" class="Symbol">;</a> <a id="138" href="Agda.Builtin.Unit.html#164" class="Record">⊤</a><a id="139" class="Symbol">)</a>
+<a id="107" class="Keyword">open</a> <a id="112" class="Keyword">import</a> <a id="119" href="Prelude.html" class="Module">Prelude</a> <a id="127" class="Keyword">hiding</a> <a id="134" class="Symbol">(</a><a id="135" href="Data.Empty.Base.html#91" class="Datatype">⊥</a><a id="136" class="Symbol">;</a> <a id="138" href="Agda.Builtin.Unit.html#175" class="Record">⊤</a><a id="139" class="Symbol">)</a>
 <a id="141" class="Keyword">open</a> <a id="146" class="Keyword">import</a> <a id="153" href="Algebra.Construct.Free.Semilattice.Eliminators.html" class="Module">Algebra.Construct.Free.Semilattice.Eliminators</a>
 <a id="200" class="Keyword">open</a> <a id="205" class="Keyword">import</a> <a id="212" href="Algebra.Construct.Free.Semilattice.Definition.html" class="Module">Algebra.Construct.Free.Semilattice.Definition</a>
 <a id="258" class="Keyword">open</a> <a id="263" class="Keyword">import</a> <a id="270" href="Cubical.Foundations.HLevels.html" class="Module">Cubical.Foundations.HLevels</a>
@@ -16,8 +16,8 @@
 <a id="593" class="Keyword">open</a> <a id="598" class="Keyword">import</a> <a id="605" href="Algebra.Construct.Free.Semilattice.Relation.Unary.Membership.html" class="Module">Algebra.Construct.Free.Semilattice.Relation.Unary.Membership</a>
 
 <a id="667" class="Keyword">private</a>
-  <a id="677" class="Keyword">variable</a> <a id="686" href="Algebra.Construct.Free.Semilattice.Relation.Unary.Any.Map.html#686" class="Generalizable">p</a> <a id="688" class="Symbol">:</a> <a id="690" href="Agda.Primitive.html#597" class="Postulate">Level</a>
-  <a id="698" class="Keyword">variable</a> <a id="707" href="Algebra.Construct.Free.Semilattice.Relation.Unary.Any.Map.html#707" class="Generalizable">P</a> <a id="709" class="Symbol">:</a> <a id="711" href="Level.html#282" class="Generalizable">A</a> <a id="713" class="Symbol">→</a> <a id="715" href="Agda.Primitive.html#326" class="Primitive">Type</a> <a id="720" href="Algebra.Construct.Free.Semilattice.Relation.Unary.Any.Map.html#686" class="Generalizable">p</a>
+  <a id="677" class="Keyword">variable</a> <a id="686" href="Algebra.Construct.Free.Semilattice.Relation.Unary.Any.Map.html#686" class="Generalizable">p</a> <a id="688" class="Symbol">:</a> <a id="690" href="Agda.Primitive.html#742" class="Postulate">Level</a>
+  <a id="698" class="Keyword">variable</a> <a id="707" href="Algebra.Construct.Free.Semilattice.Relation.Unary.Any.Map.html#707" class="Generalizable">P</a> <a id="709" class="Symbol">:</a> <a id="711" href="Level.html#282" class="Generalizable">A</a> <a id="713" class="Symbol">→</a> <a id="715" href="Agda.Primitive.html#388" class="Primitive">Type</a> <a id="720" href="Algebra.Construct.Free.Semilattice.Relation.Unary.Any.Map.html#686" class="Generalizable">p</a>
 
 <a id="723" class="Comment">-- map-◇-fn : ∀ x → P x → ∀ y xs → (x ∈ xs → ◇ P xs) → (y ≡ x) ⊎ (x ∈ xs) → ◇ P (y ∷ xs)</a>
 <a id="812" class="Comment">-- map-◇-fn {P = P} x Px y xs k (inl y≡x) = ∣ inl (subst P (sym y≡x) Px) ∣</a>
