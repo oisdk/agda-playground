@@ -10,13 +10,13 @@ jobs:
 
     strategy:
       matrix:
-        cubical-ref: ["v0.3"]
+        cubical-ref: ["v0.6"]
         binary-ref: ["v0.1"]
-        agda-ver: ["2.6.2.2"]
+        agda-ver: ["2.6.4"]
 
     steps:
 
-    - uses: wenkokke/setup-agda@v2.0.0
+    - uses: wenkokke/setup-agda@v2.1.0
       with:
         agda-version: ${{ matrix.agda-ver }}
         agda-libraries: |

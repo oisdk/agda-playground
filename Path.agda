@@ -23,9 +23,11 @@ open import Cubical.Foundations.Everything
         ; hcomp
         ; transp
         ; J
-        ; cong′
         )
-  renaming (_∙_ to _;_; subst2 to subst₂)
+  renaming
+    ( congS to cong′
+    ; _∙_ to _;_
+    ; subst2 to subst₂)
   public
 
 open import Data.Empty using (¬_)

@@ -2,7 +2,7 @@
 
 module HITs.PropositionalTruncation.Sugar where
 
-open import Cubical.HITs.PropositionalTruncation
+open import HITs.PropositionalTruncation
   renaming (elim to elimPropTrunc; rec to recPropTrunc)
 open import Level
 
