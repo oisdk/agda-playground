@@ -4,10 +4,7 @@ module Data.List.Smart where
 
 open import Prelude
 
-
-
-
-open import Data.Nat.Properties using (_≡ᴮ_; complete-==)
+open import Data.Nat.Properties using (module Eqℕ)
 
 infixr 5 _∷′_ _++′_
 data List {a} (A : Type a) : Type a where
@@ -25,6 +22,8 @@ sz []′ = zero
 sz (x ∷′ xs) = zero
 sz (xs ++′ ys) = sz′ xs (sz ys)
 
+open Eqℕ
+
 _HasSize_ : List A → ℕ → Type
 xs HasSize n = T (sz xs ≡ᴮ n)
 
@@ -33,7 +32,7 @@ data ListView {a} (A : Type a) : Type a where
   Cons : A → List A → ListView A
 
 viewˡ : List A → ListView A
-viewˡ xs = go xs (sz xs) (complete-== (sz xs))
+viewˡ xs = go xs (sz xs) (complete (sz xs))
   where
   go : (xs : List A) → (n : ℕ) → xs HasSize n → ListView A
   go  []′                  n       p = Nil

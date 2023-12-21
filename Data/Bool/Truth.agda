@@ -8,5 +8,4 @@ open import Level
 open import Data.Bool.Base
 
 T : Bool → Type
-T true  = ⊤
-T false = ⊥
+T = bool′ ⊥ ⊤

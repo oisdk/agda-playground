@@ -29,7 +29,7 @@ import Data.Nat.Properties as ℕ
 private module ComputingSubstOnℕ where
   infix 4 _≡ℕ_
   _≡ℕ_ : ℕ → ℕ → Type
-  n ≡ℕ m = T (n ℕ.≡ᴮ m)
+  n ≡ℕ m = T (n ℕ.Eqℕ.≡ᴮ m)
 
   substℕ : ∀ (P : ℕ → Type) {n m} → n ≡ℕ m → P n → P m
   substℕ P {zero}  {zero } p = id

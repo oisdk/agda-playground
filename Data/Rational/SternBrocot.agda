@@ -41,7 +41,7 @@ open import Data.Bits.Equatable
 euclidian : ℕ → ℕ → ℕ → ℚ⁺
 euclidian n m zero    = 1ℚ
 euclidian n m (suc s) =
-  if n ℕ.≡ᴮ m
+  if n ℕ.Eqℕ.≡ᴮ m
   then 1ℚ
   else if n ℕ.<ᴮ m
   then lℚ (euclidian n (m ℕ.∸ (1 ℕ.+ n)) s)

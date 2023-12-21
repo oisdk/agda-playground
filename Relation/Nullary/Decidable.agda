@@ -8,8 +8,7 @@ open import Data.Empty
 open import Function.Biconditional
 
 Reflects : Type a → Bool → Type a
-Reflects A true  = A
-Reflects A false = ¬ A
+Reflects A = bool′ (¬ A) A
 
 record Dec {a} (A : Type a) : Type a where
   constructor _because_
@@ -23,6 +22,9 @@ pattern no ¬p  = false  because ¬p
 
 map-reflects : (A → B) → (¬ A → ¬ B) → ∀ {d} → Reflects A d → Reflects B d
 map-reflects {A = A} {B = B} to fro {d = d} = bool {P = λ d → Reflects A d → Reflects B d} fro to d
+
+Reflects-T : ∀ b → Reflects (T b) b
+Reflects-T = bool (λ z → z) _
 
 map-dec : (A → B) → (¬ A → ¬ B) → Dec A → Dec B
 map-dec to fro dec .does = dec .does
@@ -41,3 +43,8 @@ T? : (b : Bool) → Dec (T b)
 T? b .does = b
 T? false .why ()
 T? true  .why = _
+
+dec-bool : (b : Bool) → (T b → A) → (A → T b) → Dec A
+dec-bool b to fro .does = b
+dec-bool false to fro .why = fro
+dec-bool true  to fro .why = to _

@@ -3,7 +3,7 @@
 module Data.Nat.Properties where
 
 open import Data.Nat.Base
-open import Agda.Builtin.Nat using () renaming (_<_ to _<ᴮ_; _==_ to _≡ᴮ_) public
+open import Agda.Builtin.Nat using () renaming (_<_ to _<ᴮ_) public
 open import Prelude
 open import Cubical.Data.Nat using (caseNat; injSuc) public
 open import Data.Nat.DivMod
@@ -27,18 +27,21 @@ pred : ℕ → ℕ
 pred (suc n) = n
 pred zero = zero
 
-sound-== : ∀ n m →  T (n ≡ᴮ m) → n ≡ m
-sound-== zero zero p i = zero
-sound-== (suc n) (suc m) p i = suc (sound-== n m p i)
-
-complete-== : ∀ n → T (n ≡ᴮ n)
-complete-== zero = tt
-complete-== (suc n) = complete-== n
-
 open import Relation.Nullary.Discrete.FromBoolean
 
+module Eqℕ where
+  open import Agda.Builtin.Nat using () renaming (_==_ to _≡ᴮ_) public
+
+  sound : ∀ n m →  T (n ≡ᴮ m) → n ≡ m
+  sound zero zero p i = zero
+  sound (suc n) (suc m) p i = suc (sound n m p i)
+
+  complete : ∀ n → T (n ≡ᴮ n)
+  complete zero = tt
+  complete (suc n) = complete n
+
 discreteℕ : Discrete ℕ
-discreteℕ = from-bool-eq _≡ᴮ_ sound-== complete-==
+discreteℕ = from-bool-eq (record { Eqℕ })
 
 isSetℕ : isSet ℕ
 isSetℕ = Discrete→isSet discreteℕ
@@ -110,6 +113,8 @@ div-helper-lemma k m (suc n) (suc j) = div-helper-lemma k m n j
 
 Even : ℕ → Type
 Even n = T (even n)
+
+open Eqℕ using (_≡ᴮ_)
 
 odd : ℕ → Bool
 odd n = not (rem n 2 ≡ᴮ 0)
