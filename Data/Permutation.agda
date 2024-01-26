@@ -31,15 +31,30 @@ swap-id x y with x ≟ y
 ... | yes x≡y = x≡y
 
 perm : Swaps → ℕ → ℕ
-perm = flip (foldl (flip (uncurry swap)))
+perm = flip (foldr (uncurry swap))
+
+infix 4 _~ₚ_
+_~ₚ_ : Swaps → Swaps → Type
+x ~ₚ y = ∀ n → perm x n ≡ perm y n
 
 data Perm : Type where
   <_> : Swaps → Perm
-  eq : (x y : Swaps) → (∀ n → perm x n ≡ perm y n) → < x > ≡ < y >
+  eq : ∀ x y → x ~ₚ y → < x > ≡ < y >
 
 _·_ : Perm → ℕ → ℕ
 < x > · n = perm x n
 eq x y e i · n = e n i
+
+open import Data.List.Properties using (foldr-++)
+open import Path.Reasoning
+
+~ₚ-++ : ∀ w x y z → w ~ₚ x → y ~ₚ z → w ++ y ~ₚ x ++ z
+~ₚ-++ ws xs ys zs p q n =
+  perm (ws ++ ys) n   ≡⟨ foldr-++ (uncurry swap) n ws ys ⟩
+  perm ws (perm ys n) ≡⟨ p (perm ys n) ⟩
+  perm xs (perm ys n) ≡⟨ cong (perm xs) (q n) ⟩
+  perm xs (perm zs n) ≡˘⟨ foldr-++ (uncurry swap) n xs zs ⟩
+  perm (xs ++ zs) n ∎
 
 -- module _ (f : ℕ → ℕ → A → A) (b : A)
 --          (unswap : ∀ n m x → f n m (f m n x) ≡ x)

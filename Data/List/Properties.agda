@@ -55,6 +55,10 @@ foldr-fusion : ∀ (f : C → A) {_⊕_ : B → C → C} {_⊗_ : B → A → A}
 foldr-fusion h {f} {g} e fuse =
   foldr-universal (h ∘ foldr f e) g (h e) refl (λ x xs → fuse x (foldr f e xs))
 
+foldr-++ : (f : A → B → B) (b : B) (xs ys : List A)
+         → foldr f b (xs ++ ys) ≡ foldr f (foldr f b ys) xs
+foldr-++ f b xs ys = foldr-fusion (foldr f b) ys (λ _ _ → refl) xs
+
 foldl-is-foldr : (f : B → A → B) (z : B) (xs : List A) →
                  foldl f z xs ≡ foldr (λ x k xs → k (f xs x)) id xs z
 foldl-is-foldr f z xs =
