@@ -49,7 +49,7 @@ perm′ = foldr (uncurry f) id
   where
   f : ℕ → ℕ → (ℕ → ℕ) → ℕ → ℕ
   f zero    y k zero    = suc (k y)
-  f zero    y k (suc z) = if does (y ≟ z) then 0 else suc (k z)
+  f zero    y k (suc z) = if does (y ≟ z) then zero else suc (k z)
   f (suc x) y k zero    = zero
   f (suc x) y k (suc z) = suc (f x y k z)
 
