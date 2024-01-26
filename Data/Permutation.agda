@@ -56,9 +56,8 @@ perm′ = foldr (uncurry f) id
 prop : (xs : Swaps) (n : ℕ) → Type
 prop xs n = perm′ xs n ≡ perm (unflatten xs) n
 
-swaps-compress : ∀ xs n → perm′ xs n ≡ perm (unflatten xs) n
-swaps-compress xs n = {!!}
-
+-- swaps-compress : ∀ xs n → perm′ xs n ≡ perm (unflatten xs) n
+-- swaps-compress xs n = {!!}
 
 -- e : ℕ → ℕ
 -- e = perm ep
