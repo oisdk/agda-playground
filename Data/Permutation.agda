@@ -52,6 +52,12 @@ swap-suc x y z with does (x ≟ z)
 ... | false = refl
 ... | true = refl
 
+max-num-alg : ℕ × ℕ → ℕ → ℕ
+max-num-alg (x , y) z = suc (x + (y ⊔ z))
+
+max-num : Swaps → ℕ
+max-num = foldr max-num-alg zero
+
 swap-swap′ : ∀ x y z → swap x y z ≡ swap′ x y z
 swap-swap′ zero zero zero = refl
 swap-swap′ zero zero (suc z) = refl
@@ -84,9 +90,6 @@ prop xs n = perm′ xs n ≡ perm (unflatten xs) n
 
 swap-unf-alg : ℕ → ℕ → (ℕ → ℕ → ℕ) → ℕ → ℕ → ℕ
 swap-unf-alg x y k m n = k (suc m + x) (swap (m + x) (suc (m + x + y)) n)
-
-shft : ℕ → ℕ × ℕ → ℕ × ℕ
-shft m = map₁ (m +_)
 
 mp-hd : ℕ → Swaps → Swaps
 mp-hd m [] = []
@@ -134,18 +137,22 @@ swap-shift : ∀ m n xs → perm′ (mp-hd m xs) n ≡ swap-unf′ xs m n
 swap-shift m n [] = refl
 swap-shift m n ((x , y) ∷ xs) =
   perm-alg (m + x) y (perm′ xs) n ≡⟨ lemma m n x y xs ⟩
-  perm′ (mp-hd (suc m + x) xs) (swap′ (m + x) (suc (m + x + y)) n) ≡⟨ {!!} ⟩
+  perm′ (mp-hd (suc m + x) xs) (swap′ (m + x) (suc (m + x + y)) n) ≡˘⟨ cong (perm′ (mp-hd (suc m + x) xs)) (swap-swap′ (m + x) _ n) ⟩
   perm′ (mp-hd (suc m + x) xs) (swap (m + x) (suc (m + x + y)) n) ≡⟨⟩
   perm″ xs (suc m + x) (swap (m + x) (suc (m + x + y)) n) ≡⟨ swap-shift (suc m + x) _ xs ⟩
   swap-unf′ xs (suc m + x) (swap (m + x) (suc (m + x + y)) n) ≡⟨⟩
   swap-unf-alg x y (swap-unf′ xs) m n ∎
 
+mp-hd-0 : ∀ xs → mp-hd 0 xs ≡ xs
+mp-hd-0 [] = refl
+mp-hd-0 (x ∷ xs) = refl
+
 swaps-compress : ∀ xs n → perm′ xs n ≡ perm (unflatten xs) n
 swaps-compress xs n =
   perm′ xs n
-    ≡⟨ {!!} ⟩
+    ≡˘⟨ cong (flip perm′ n) (mp-hd-0 xs) ⟩
   perm′ (mp-hd 0 xs) n
-    ≡⟨ {!!} ⟩
+    ≡⟨ swap-shift 0 n xs ⟩
   swap-unf′ xs 0 n
     ≡⟨ swap-unflatten-lemma xs 0 n ⟩
   foldr (λ x k xs → k (uncurry swap x xs)) id (foldr (uncurry unflatten-alg) (const []) xs 0) n
@@ -154,3 +161,17 @@ swaps-compress xs n =
     ≡˘⟨ foldl-is-foldr (flip (uncurry swap)) n (unflatten xs) ⟩
   foldl (flip (uncurry swap)) n (unflatten xs) ≡⟨⟩
   perm (unflatten xs) n ∎
+
+
+
+ex : Swaps
+ex = (0 , 2) ∷ []
+
+e : ℕ
+e = perm′ ex 0
+
+-- perm′-inj : (xs ys : Swaps) → (∀ n → perm′ xs n ≡ perm′ ys n) → xs ≡ ys
+-- perm′-inj [] [] p = refl
+-- perm′-inj [] ((x , y) ∷ ys) p = {!!}
+-- perm′-inj (x ∷ xs) [] p = {!!}
+-- perm′-inj (x ∷ xs) (x₁ ∷ ys) p = {!!}
