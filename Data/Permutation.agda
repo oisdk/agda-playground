@@ -127,7 +127,8 @@ _ : swap-shift-prop 10 3 ep
 _ = refl
 
 lemma : ∀ m n x y xs → perm-alg (m + x) y (perm′ xs) n ≡ perm′ (mp-hd (suc m + x) xs) (swap′ (m + x) (suc (m + x + y)) n)
-lemma zero zero zero y xs = {!!}
+lemma zero zero zero y [] = refl
+lemma zero zero zero y (x ∷ xs) = refl
 lemma zero zero (suc x) y xs = {!!}
 lemma zero (suc n) x y xs = {!!}
 lemma (suc m) zero x y xs = {!!}
