@@ -86,11 +86,15 @@ swap-unf-alg : ℕ → ℕ → (ℕ → ℕ → ℕ) → ℕ → ℕ → ℕ
 swap-unf-alg x y k m n = k (suc m + x) (swap (m + x) (suc (m + x + y)) n)
 
 shft : ℕ → ℕ × ℕ → ℕ × ℕ
-shft m (x , y) = m + x , m + y
+shft m = map₁ (m +_)
 
--- This is incorrect. Something other than shift should be happening
+mp-hd : ℕ → Swaps → Swaps
+mp-hd m [] = []
+mp-hd m ((x , y) ∷ xs) = (m + x , y) ∷ xs
+
+-- This is likely correct now
 perm″ : Swaps → ℕ → ℕ → ℕ
-perm″ xs m = foldr (uncurry perm-alg ∘ shft m) id xs
+perm″ xs m = perm′ (mp-hd m xs)
 
 
 swap-unf′ : Swaps → ℕ → ℕ → ℕ
@@ -105,63 +109,48 @@ swap-unflatten-lemma (x ∷ xs) m n = cong (λ e → uncurry swap-unf-alg x e m 
 
 open import Data.Nat
 
-perm″-suc′ : ∀ x y xs m n → perm-alg (m + x) (suc m + y) (perm″ xs (suc m)) n ≡ perm-alg (m + x) (m + y) (perm″ xs m) n
-perm″-suc′ x y xs zero zero = {!!}
-perm″-suc′ x y xs zero (suc n) = {!!}
-perm″-suc′ x y xs (suc m) zero = {!!}
-perm″-suc′ x y xs (suc m) (suc n) = {!!}
-
-perm″-suc : ∀ xs m n → perm″ xs (suc m) (suc n) ≡ suc (perm″ xs m n)
-perm″-suc []             m n = refl
-perm″-suc ((x , y) ∷ xs) m n =
-  perm″ ((x , y) ∷ xs) (suc m) (suc n) ≡⟨⟩
-  perm-alg (suc m + x) (suc m + y) (perm″ xs (suc m)) (suc n) ≡⟨⟩
-  suc (perm-alg (m + x) (suc m + y) (perm″ xs (suc m)) n) ≡⟨ cong suc (perm″-suc′ x y xs m n) ⟩
-  suc (perm-alg (m + x) (m + y) (perm″ xs m) n) ≡⟨⟩
-  suc (perm″ ((x , y) ∷ xs) m n) ∎
-
-lemma : ∀ x y m n xs → perm-alg (x + m) (y + m) (perm″ xs m) n ≡ perm″ xs (suc x + m) (swap′ (x + m) (suc (x + y + m)) n)
-lemma zero y m zero xs = {!!}
-lemma zero y m (suc n) xs = {!!}
-lemma (suc x) y m zero xs = {!!}
-lemma (suc x) y m (suc n) xs = cong suc (lemma x y m n xs) ; sym (perm″-suc xs (suc (x + m)) _)
 
 swap-shift-prop : ℕ → ℕ → Swaps → Type
-swap-shift-prop n m xs = perm″ xs m n ≡ swap-unf′ xs m n
+swap-shift-prop n m xs = map (perm″ xs m) (0 ⋯ n) ≡ map (swap-unf′ xs m) (0 ⋯ n)
 
 compress-prop : Swaps → ℕ → Type
 compress-prop xs n = map (perm′ xs) (0 ⋯ n) ≡ map (perm (unflatten xs)) (0 ⋯ n)
 
 ep : Swaps
-ep = ((5 , 0) ∷ (2 , 1) ∷ (1 , 3) ∷ (1 , 0) ∷ [])
+ep = ((2 , 1) ∷ (1 , 3) ∷ (1 , 0) ∷ [])
 
-_ : compress-prop ep 20
+
+_ : swap-shift-prop 10 3 ep
 _ = refl
 
+lemma : ∀ m n x y xs → perm-alg (m + x) y (perm′ xs) n ≡ perm′ (mp-hd (suc m + x) xs) (swap′ (m + x) (suc (m + x + y)) n)
+lemma zero zero zero y xs = {!!}
+lemma zero zero (suc x) y xs = {!!}
+lemma zero (suc n) x y xs = {!!}
+lemma (suc m) zero x y xs = {!!}
+lemma (suc m) (suc n) x y xs = {!!}
 
--- _ : swap-shift-prop 5 1 ep
--- _ = refl
+swap-shift : ∀ m n xs → perm′ (mp-hd m xs) n ≡ swap-unf′ xs m n
+swap-shift m n [] = refl
+swap-shift m n ((x , y) ∷ xs) =
+  perm-alg (m + x) y (perm′ xs) n ≡⟨ lemma m n x y xs ⟩
+  perm′ (mp-hd (suc m + x) xs) (swap′ (m + x) (suc (m + x + y)) n) ≡⟨ {!!} ⟩
+  perm′ (mp-hd (suc m + x) xs) (swap (m + x) (suc (m + x + y)) n) ≡⟨⟩
+  perm″ xs (suc m + x) (swap (m + x) (suc (m + x + y)) n) ≡⟨ swap-shift (suc m + x) _ xs ⟩
+  swap-unf′ xs (suc m + x) (swap (m + x) (suc (m + x + y)) n) ≡⟨⟩
+  swap-unf-alg x y (swap-unf′ xs) m n ∎
 
--- swap-shift : ∀ m n xs → perm″ xs m n ≡ swap-unf′ xs m n
--- swap-shift m n [] = refl
--- swap-shift m n ((x , y) ∷ xs) =
---   perm-alg (m + x) (m + y) (perm″ xs m) n ≡⟨ {!!} ⟩
---   perm″ xs (suc m + x) (swap′ (m + x) (suc (m + x + y)) n) ≡˘⟨ cong (perm″ xs (suc m + x)) (swap-swap′ (m + x) (suc (m + x + y)) n)  ⟩
---   perm″ xs (suc m + x) (swap (m + x) (suc (m + x + y)) n) ≡⟨ swap-shift _ _ xs ⟩
---   swap-unf′ xs (suc m + x) (swap (m + x) (suc (m + x + y)) n) ≡⟨⟩
---   swap-unf-alg x y (swap-unf′ xs) m n ∎
-
--- swaps-compress : ∀ xs n → perm′ xs n ≡ perm (unflatten xs) n
--- swaps-compress xs n =
---   perm′ xs n
---     ≡⟨ {!!} ⟩
---   foldr (uncurry perm-alg ∘ shft 0) id xs n
---     ≡⟨ {!!} ⟩
---   swap-unf′ xs 0 n
---     ≡⟨ swap-unflatten-lemma xs 0 n ⟩
---   foldr (λ x k xs → k (uncurry swap x xs)) id (foldr (uncurry unflatten-alg) (const []) xs 0) n
---     ≡⟨⟩
---   foldr (λ x k xs → k (uncurry swap x xs)) id (unflatten xs) n
---     ≡˘⟨ foldl-is-foldr (flip (uncurry swap)) n (unflatten xs) ⟩
---   foldl (flip (uncurry swap)) n (unflatten xs) ≡⟨⟩
---   perm (unflatten xs) n ∎
+swaps-compress : ∀ xs n → perm′ xs n ≡ perm (unflatten xs) n
+swaps-compress xs n =
+  perm′ xs n
+    ≡⟨ {!!} ⟩
+  perm′ (mp-hd 0 xs) n
+    ≡⟨ {!!} ⟩
+  swap-unf′ xs 0 n
+    ≡⟨ swap-unflatten-lemma xs 0 n ⟩
+  foldr (λ x k xs → k (uncurry swap x xs)) id (foldr (uncurry unflatten-alg) (const []) xs 0) n
+    ≡⟨⟩
+  foldr (λ x k xs → k (uncurry swap x xs)) id (unflatten xs) n
+    ≡˘⟨ foldl-is-foldr (flip (uncurry swap)) n (unflatten xs) ⟩
+  foldl (flip (uncurry swap)) n (unflatten xs) ≡⟨⟩
+  perm (unflatten xs) n ∎
