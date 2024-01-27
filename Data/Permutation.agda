@@ -86,7 +86,7 @@ perm-alg zero    y k (suc z) = if does (y ≟ z) then zero else suc (k z)
 perm-alg (suc x) y k zero    = zero
 perm-alg (suc x) y k (suc z) = suc (perm-alg x y k z)
 
-perm′ : Swaps → ℕ → ℕ
+perm′ : Diffs → ℕ → ℕ
 perm′ = foldr (uncurry perm-alg) id
 
 perm-alg-swap : ∀ x y z → perm-alg x y id z ≡ swap′ x (suc (x + y)) z
@@ -99,7 +99,7 @@ shift : ℕ → Diffs → Diffs
 shift m [] = []
 shift m ((x , y) ∷ xs) = (m + x , y) ∷ xs
 
-perm-alg-com : ∀ x y xs z → perm-alg x y (perm′ xs) z ≡ perm′ (shift (suc x) xs) (perm-alg x y id z)
+perm-alg-com : ∀ x y xs z → perm′ ((x , y) ∷ xs) z ≡ perm′ (shift (suc x) xs) (perm-alg x y id z)
 perm-alg-com x y [] z = refl
 perm-alg-com zero y (w ∷ xs) zero = refl
 perm-alg-com (suc x) y (w ∷ xs) zero = refl
@@ -148,5 +148,5 @@ swaps-compress xs n =
 max-num-alg : ℕ × ℕ → ℕ → ℕ
 max-num-alg (x , y) z = suc (x + (y ⊔ z))
 
-max-num : Swaps → ℕ
+max-num : Diffs → ℕ
 max-num = foldr max-num-alg zero
