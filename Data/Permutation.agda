@@ -99,13 +99,6 @@ shift m ((x , y) ∷ xs) = (m + x , y) ∷ xs
 swap-unf′ : Swaps → ℕ → ℕ → ℕ
 swap-unf′ = foldr (uncurry swap-unf-alg) (const id)
 
-swap-unflatten : Swaps → ℕ → ℕ
-swap-unflatten xs = swap-unf′ xs 0
-
-swap-unflatten-lemma : ∀ xs m n → swap-unf′ xs m n ≡ foldr (λ x k xs → k (uncurry swap x xs)) id (foldr (uncurry unflatten-alg) (const []) xs m) n
-swap-unflatten-lemma [] m n = refl
-swap-unflatten-lemma (x ∷ xs) m n = cong (λ e → uncurry swap-unf-alg x e m n) (funExt λ m → funExt (swap-unflatten-lemma xs m))
-
 open import Data.Nat
 
 lemma₂ : ∀ m n x y → perm-alg (m + x) y id n ≡ swap′ (m + x) (suc (m + x + y)) n
@@ -147,10 +140,8 @@ swaps-compress xs n =
   perm′ (shift 0 xs) n
     ≡⟨ swap-shift 0 n xs ⟩
   swap-unf′ xs 0 n
-    ≡⟨ swap-unflatten-lemma xs 0 n ⟩
-  foldr (λ x k xs → k (uncurry swap x xs)) id (foldr (uncurry unflatten-alg) (const []) xs 0) n
-    ≡⟨⟩
-  foldr (λ x k xs → k (uncurry swap x xs)) id (unflatten xs) n
+    ≡˘⟨ cong′ (λ e → e 0 n) (foldr-fusion (λ xs m n → foldl-by-r (flip (uncurry swap)) n (xs m)) (const []) (λ x y → refl) xs ⦂ flip (foldl-by-r (flip (uncurry swap))) ∘ foldr (uncurry unflatten-alg) (const []) xs ≡ swap-unf′ xs) ⟩
+  foldl-by-r (flip (uncurry swap)) n (unflatten xs)
     ≡˘⟨ foldl-is-foldr (flip (uncurry swap)) n (unflatten xs) ⟩
   foldl (flip (uncurry swap)) n (unflatten xs) ≡⟨⟩
   perm (unflatten xs) n ∎

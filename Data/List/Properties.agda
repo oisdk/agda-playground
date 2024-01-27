@@ -7,6 +7,9 @@ open import Prelude
 open import Data.Fin
 open import Strict.Properties
 
+foldl-by-r : (B → A → B) → B → List A → B
+foldl-by-r f b xs = foldr (λ x k xs → k (f xs x)) id xs b
+
 map-length : (f : A → B) (xs : List A)
            → length xs ≡ length (map f xs)
 map-length f [] _ = zero
@@ -60,7 +63,7 @@ foldr-++ : (f : A → B → B) (b : B) (xs ys : List A)
 foldr-++ f b xs ys = foldr-fusion (foldr f b) ys (λ _ _ → refl) xs
 
 foldl-is-foldr : (f : B → A → B) (z : B) (xs : List A) →
-                 foldl f z xs ≡ foldr (λ x k xs → k (f xs x)) id xs z
+                 foldl f z xs ≡ foldl-by-r f z xs
 foldl-is-foldr f z xs =
   cong (_$ z) (foldr-universal (flip (foldl f)) (λ x k xs → k (f xs x)) id refl (λ x xs → refl) xs) 
 
