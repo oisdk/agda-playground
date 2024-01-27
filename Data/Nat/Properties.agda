@@ -27,6 +27,9 @@ pred : ℕ → ℕ
 pred (suc n) = n
 pred zero = zero
 
+suc-inj : ∀ {n m} → suc n ≡ suc m → n ≡ m
+suc-inj = cong pred
+
 open import Relation.Nullary.Discrete.FromBoolean
 
 module Eqℕ where
