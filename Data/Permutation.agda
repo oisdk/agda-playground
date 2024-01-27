@@ -126,13 +126,24 @@ ep = ((2 , 1) ∷ (1 , 3) ∷ (1 , 0) ∷ [])
 _ : swap-shift-prop 10 3 ep
 _ = refl
 
+lemma₂ : ∀ m n x y → perm-alg (m + x) y id n ≡ swap′ (m + x) (suc (m + x + y)) n
+lemma₂ (suc m) zero x y = refl
+lemma₂ (suc m) (suc n) x y = cong suc (lemma₂ m n x y)
+lemma₂ zero zero zero y = refl
+lemma₂ zero zero (suc x) y = refl
+lemma₂ zero (suc n) zero y = refl
+lemma₂ zero (suc n) (suc x) y = cong suc (lemma₂ zero n x y)
+
 lemma : ∀ m n x y xs → perm-alg (m + x) y (perm′ xs) n ≡ perm′ (mp-hd (suc m + x) xs) (swap′ (m + x) (suc (m + x + y)) n)
-lemma zero zero zero y [] = refl
-lemma zero zero zero y (x ∷ xs) = refl
-lemma zero zero (suc x) y xs = {!!}
-lemma zero (suc n) x y xs = {!!}
-lemma (suc m) zero x y xs = {!!}
-lemma (suc m) (suc n) x y xs = {!!}
+lemma m n x y [] = lemma₂ m n x y
+lemma zero zero zero y (z ∷ xs) = refl
+lemma zero zero (suc x) y (z ∷ xs) = refl
+lemma zero (suc n) (suc x) y (z ∷ xs) = cong suc (lemma zero n x y (z ∷ xs))
+lemma (suc m) zero x y (z ∷ xs) = refl
+lemma (suc m) (suc n) x y (z ∷ xs) = cong suc (lemma m n x y (z ∷ xs))
+lemma zero (suc n) zero y (z ∷ xs) with does (y ≟ n) 
+... | false = refl
+... | true = refl
 
 swap-shift : ∀ m n xs → perm′ (mp-hd m xs) n ≡ swap-unf′ xs m n
 swap-shift m n [] = refl
