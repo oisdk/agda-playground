@@ -45,5 +45,6 @@ T? false .why ()
 T? true  .why = _
 
 dec-bool : (b : Bool) → (T b → A) → (A → T b) → Dec A
-dec-bool false to fro = no fro
-dec-bool true  to fro = yes (to _)
+dec-bool b to fro .does = b
+dec-bool false to fro .why = fro
+dec-bool true  to fro .why = to _
