@@ -39,6 +39,7 @@ swap-id x y with does (x ≟ y) | why (x ≟ y)
 ... | false | _ = refl
 ... | true  | x≡y = x≡y
 
+infixr 4.5 _·_
 _·_ : Swaps → ℕ → ℕ
 _·_ = flip (foldl (flip (uncurry swap)))
 
@@ -86,6 +87,7 @@ perm-alg zero    y k (suc z) = if does (y ≟ z) then zero else suc (k z)
 perm-alg (suc x) y k zero    = zero
 perm-alg (suc x) y k (suc z) = suc (perm-alg x y k z)
 
+infixr 4.5 _⊙_
 _⊙_ : Diffs → ℕ → ℕ
 _⊙_ = foldr (uncurry perm-alg) id
 
@@ -99,7 +101,7 @@ shift : ℕ → Diffs → Diffs
 shift m [] = []
 shift m ((x , y) ∷ xs) = (m + x , y) ∷ xs
 
-perm-alg-com : ∀ x y xs z → ((x , y) ∷ xs) ⊙ z ≡ shift (suc x) xs ⊙ perm-alg x y id z
+perm-alg-com : ∀ x y xs z → (x , y) ∷ xs ⊙ z ≡ shift (suc x) xs ⊙ perm-alg x y id z
 perm-alg-com x y [] z = refl
 perm-alg-com zero y (w ∷ xs) zero = refl
 perm-alg-com (suc x) y (w ∷ xs) zero = refl
@@ -178,26 +180,29 @@ cmp-reflects zero (suc y) = refl
 cmp-reflects (suc x) zero = refl
 cmp-reflects (suc x) (suc y) = suc-reflect x y (cmp-diff x y) (cmp-reflects x y)
 
-cons : ℕ × ℕ → Diffs → Diffs
-cons x [] = x ∷ []
-cons (xₛ , xₜ) ((yₛ , yₜ) ∷ xs) = case cmp-diff xₛ yₛ of
-  λ { nothing → maybe (shift (suc xₛ) xs) (λ lg → (xₛ , yₜ) ∷ cons lg xs) (swap-diff xₜ yₜ)
+infixr 5 _∷ₚ_
+_∷ₚ_ : ℕ × ℕ → Diffs → Diffs
+x ∷ₚ [] = x ∷ []
+(xₛ , xₜ) ∷ₚ ((yₛ , yₜ) ∷ xs) = case cmp-diff xₛ yₛ of
+  λ { nothing → maybe (shift (suc xₛ) xs) (λ lg → (xₛ , yₜ) ∷ lg ∷ₚ xs) (swap-diff xₜ yₜ)
     ; (just (false , yₛ)) → (xₛ , xₜ) ∷ (yₛ , yₜ) ∷ xs
-    ; (just (true  , xₛ)) → (yₛ , perm-alg xₛ xₜ id yₜ) ∷ cons (xₛ , xₜ) xs
+    ; (just (true  , xₛ)) → (yₛ , perm-alg xₛ xₜ id yₜ) ∷ (xₛ , xₜ) ∷ₚ xs
     }
 
 norm : Swaps → Diffs
-norm = foldr cons [] ∘ catMaybes (uncurry swap-diff)
+norm = foldr _∷ₚ_ [] ∘ catMaybes (uncurry swap-diff)
 
-cons-swap : ∀ x y xs z → cons (x , y) xs ⊙ z ≡ xs ⊙ swap′ x (suc x + y) z
-cons-swap x y [] z = perm-alg-swap x y z
+cons-swap : ∀ x y xs z → (x , y) ∷ₚ xs ⊙ z ≡ xs ⊙ perm-alg x y id z
+cons-swap x y [] z = refl
 cons-swap x y ((zₛ , zₜ) ∷ xs) n with cmp-diff x zₛ | cmp-reflects x zₛ
 ... | nothing          | p = {!!}
 ... | just (false , k) | p =
-  ((x , y) ∷ (k , zₜ) ∷ xs) ⊙ n ≡⟨ perm-alg-com x y ((k , zₜ) ∷ xs) n ⟩
-  ((suc x + k , zₜ) ∷ xs) ⊙ perm-alg x y id n ≡⟨ cong₂ _⊙_ (cong (λ e → ((e , zₜ) ∷ xs)) p) (perm-alg-swap x y n) ⟩
-  ((zₛ , zₜ) ∷ xs) ⊙ swap′ x (suc (x + y)) n ∎
-... | just (true  , k) | p = {!!}
+  (x , y) ∷ (k , zₜ) ∷ xs ⊙ n ≡⟨ perm-alg-com x y ((k , zₜ) ∷ xs) n ⟩
+  (suc x + k , zₜ) ∷ xs ⊙ perm-alg x y id n ≡⟨ cong (λ e → (e , zₜ) ∷ xs ⊙ _) p ⟩
+  (zₛ , zₜ) ∷ xs ⊙ perm-alg x y id n ∎
+... | just (true  , k) | p =
+  (zₛ , perm-alg k y id zₜ) ∷ (k , y) ∷ₚ xs ⊙ n ≡⟨ {!!} ⟩
+  (zₛ , zₜ) ∷ xs ⊙ perm-alg x y id n ∎
 
 norm-correct : ∀ xs n → norm xs ⊙ n ≡ xs · n
 norm-correct [] n = refl
@@ -210,9 +215,10 @@ norm-correct ((x , y) ∷ xs) n with cmp-diff x y | cmp-reflects x y
   _·_ ((x , y) ∷ xs) n ∎
 ... | just (true  , k) | p = {!!}
 ... | just (false , k) | p =
-  cons (x , k) (norm xs) ⊙ n ≡⟨ cons-swap x k (norm xs) n ⟩
+  (x , k) ∷ₚ norm xs ⊙ n ≡⟨ cons-swap x k (norm xs) n ⟩
+  norm xs ⊙ perm-alg x k id n ≡⟨ cong (norm xs ⊙_) (perm-alg-swap x k n) ⟩
   norm xs ⊙ swap′ x (suc x + k) n ≡˘⟨ cong (norm xs ⊙_) (swap-swap′ x _ n) ⟩
   norm xs ⊙ swap x (suc x + k) n ≡⟨ cong (λ e → norm xs ⊙ swap x e n) p ⟩
   norm xs ⊙ swap x y n ≡⟨ norm-correct xs (swap x y n) ⟩
   xs · swap x y n ≡⟨⟩
-  ((x , y) ∷ xs) · n ∎
+  (x , y) ∷ xs · n ∎
