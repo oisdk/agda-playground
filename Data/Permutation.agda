@@ -153,11 +153,14 @@ max-num = foldr max-num-alg zero
 
 open import Data.Maybe using (mapMaybe)
 
+cmp-diff : ℕ → ℕ → Maybe (Bool × ℕ × ℕ)
+cmp-diff zero zero = nothing
+cmp-diff zero (suc y) = just (false , zero , y)
+cmp-diff (suc x) zero = just (true  , zero , x)
+cmp-diff (suc x) (suc y) = mapMaybe (map₂ (map₁ suc)) (cmp-diff x y)
+
 swap-diff : ℕ → ℕ → Maybe (ℕ × ℕ)
-swap-diff zero zero = nothing
-swap-diff zero (suc y) = just (zero , y)
-swap-diff (suc x) zero = just (zero , x)
-swap-diff (suc x) (suc y) = mapMaybe (map₁ suc) (swap-diff x y)
+swap-diff x y = mapMaybe snd (cmp-diff x y)
 
 cons : ℕ × ℕ → Diffs → Diffs
 cons x [] = x ∷ []
