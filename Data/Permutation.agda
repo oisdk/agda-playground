@@ -60,8 +60,8 @@ Diffs = List (ℕ × ℕ)
 unflatten-alg : ℕ → ℕ → (ℕ → Swaps) → ℕ → Swaps
 unflatten-alg x y k n = ((n + x) , suc (n + x + y)) ∷ k (suc n + x)
 
-unflatten : Diffs → Swaps
-unflatten xs = foldr (uncurry unflatten-alg) (const []) xs 0
+[_]↑ : Diffs → Swaps
+[ xs ]↑ = foldr (uncurry unflatten-alg) (const []) xs 0
 
 infixr 4.5 _↔′_·_
 _↔′_·_ : ℕ → ℕ → ℕ → ℕ
@@ -148,7 +148,8 @@ shift-0 : ∀ xs → shift 0 xs ≡ xs
 shift-0 [] = refl
 shift-0 (x ∷ xs) = refl
 
-swaps-compress : ∀ xs n → xs ⊙ n ≡ unflatten xs · n
+
+swaps-compress : ∀ xs n → xs ⊙ n ≡ [ xs ]↑ · n
 swaps-compress xs n =
   xs ⊙ n
     ≡˘⟨ cong (_⊙ n) (shift-0 xs) ⟩
@@ -156,9 +157,9 @@ swaps-compress xs n =
     ≡⟨ swap-shift 0 n xs ⟩
   swap-unf′ xs 0 n
     ≡˘⟨ cong′ {A = ℕ → ℕ → ℕ} (λ e → e 0 n) (foldr-fusion (λ xs m n → foldl-by-r (flip (uncurry _↔_·_)) n (xs m)) (const []) (λ _ _ → refl) xs) ⟩
-  foldl-by-r (flip (uncurry _↔_·_)) n (unflatten xs)
-    ≡˘⟨ foldl-is-foldr (flip (uncurry _↔_·_)) n (unflatten xs) ⟩
-  unflatten xs · n ∎
+  foldl-by-r (flip (uncurry _↔_·_)) n [ xs ]↑
+    ≡˘⟨ foldl-is-foldr (flip (uncurry _↔_·_)) n [ xs ]↑ ⟩
+  [ xs ]↑ · n ∎
   
 max-num-alg : ℕ × ℕ → ℕ → ℕ
 max-num-alg (x , y) z = suc (x + (y ⊔ z))
@@ -202,8 +203,8 @@ x ∷ₚ [] = x ∷ []
     ; (just (true  , xₛ)) → (yₛ , xₛ ↔ xₜ ⊙ yₜ) ∷ (xₛ , xₜ) ∷ₚ xs
     }
 
-norm : Swaps → Diffs
-norm = foldr _∷ₚ_ [] ∘ catMaybes (uncurry swap-diff)
+[_]↓ : Swaps → Diffs
+[_]↓ = foldr _∷ₚ_ [] ∘ catMaybes (uncurry swap-diff)
 
 -- perm-alg : ℕ → ℕ → (ℕ → ℕ) → ℕ → ℕ
 -- perm-alg zero    y k zero    = suc (k y)
@@ -283,21 +284,21 @@ cons-swap x y ((zₛ , zₜ) ∷ xs) n with cmp-diff x zₛ | cmp-reflects x z�
   ((x , zₜ) ∷ xs ⊙ x ↔ suc (zₜ + yz) ⊙ n) ≡⟨ cong₂ (λ e₁ e₂ → (e₁ , zₜ) ∷ xs ⊙ x ↔ e₂ ⊙ n) x≡zₛ yzp ⟩
   (zₛ , zₜ) ∷ xs ⊙ x ↔ y ⊙ n ∎
 
-norm-correct : ∀ xs n → norm xs ⊙ n ≡ xs · n
+norm-correct : ∀ xs n → [ xs ]↓ ⊙ n ≡ xs · n
 norm-correct [] n = refl
 norm-correct ((x , y) ∷ xs) n with cmp-diff x y | cmp-reflects x y 
 ... | nothing          | p =
-  norm xs ⊙ n ≡⟨ norm-correct xs n ⟩
+  [ xs ]↓ ⊙ n ≡⟨ norm-correct xs n ⟩
   xs · n ≡˘⟨ cong (xs ·_) (swap-id x n) ⟩
   (xs · x ↔ x · n) ≡⟨ cong (λ e → xs · x ↔ e · n) p ⟩
   (xs · x ↔ y · n) ≡⟨⟩
   (x , y) ∷ xs · n ∎
 ... | just (true  , k) | p = {!!}
 ... | just (false , k) | p =
-  (x , k) ∷ₚ norm xs ⊙ n ≡⟨ cons-swap x k (norm xs) n ⟩
-  (norm xs ⊙ x ↔ k ⊙ n) ≡⟨ cong (norm xs ⊙_) (perm-alg-swap x k n) ⟩
-  (norm xs ⊙ x ↔′ suc x + k · n) ≡˘⟨ cong (norm xs ⊙_) (swap-swap′ x _ n) ⟩
-  (norm xs ⊙ x ↔  suc x + k · n) ≡⟨ cong (λ e → norm xs ⊙ x ↔ e · n) p ⟩
-  (norm xs ⊙ x ↔ y · n) ≡⟨ norm-correct xs (x ↔ y · n) ⟩
+  (x , k) ∷ₚ [ xs ]↓ ⊙ n ≡⟨ cons-swap x k [ xs ]↓ n ⟩
+  ([ xs ]↓ ⊙ x ↔ k ⊙ n) ≡⟨ cong ([ xs ]↓ ⊙_) (perm-alg-swap x k n) ⟩
+  ([ xs ]↓ ⊙ x ↔′ suc x + k · n) ≡˘⟨ cong ([ xs ]↓ ⊙_) (swap-swap′ x _ n) ⟩
+  ([ xs ]↓ ⊙ x ↔  suc x + k · n) ≡⟨ cong (λ e → [ xs ]↓ ⊙ x ↔ e · n) p ⟩
+  ([ xs ]↓ ⊙ x ↔ y · n) ≡⟨ norm-correct xs (x ↔ y · n) ⟩
   (xs · x ↔ y · n) ≡⟨⟩
   (x , y) ∷ xs · n ∎
