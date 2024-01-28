@@ -269,7 +269,11 @@ cons-swap x y ((zₛ , zₜ) ∷ xs) n with cmp-diff x zₛ | cmp-reflects x z�
   (zₛ , zₜ) ∷ xs ⊙ perm-alg (suc zₛ + k) y id n ≡⟨ cong (λ e → (zₛ , zₜ) ∷ xs ⊙ perm-alg e y id n) p ⟩
   (zₛ , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ∎
 ... | nothing | x≡zₛ with cmp-diff y zₜ | cmp-reflects y zₜ
-... | nothing           | y≡zₜ = {!!}
+... | nothing           | y≡zₜ =
+  shift (suc x) xs ⊙ n ≡˘⟨ cong (shift (suc x) xs ⊙_) (cong (x ↔_⊙ x ↔ y ⊙ n) (sym y≡zₜ) ; perm-alg-dup x y n) ⟩
+  (shift (suc x) xs ⊙ x ↔ zₜ ⊙ x ↔ y ⊙ n) ≡˘⟨ perm-alg-com x zₜ xs (x ↔ y ⊙ n) ⟩
+  ((x , zₜ) ∷ xs ⊙ x ↔ y ⊙ n) ≡⟨ cong (λ e → ((e , zₜ) ∷ xs ⊙ x ↔ y ⊙ n)) x≡zₛ  ⟩
+  ((zₛ , zₜ) ∷ xs ⊙ x ↔ y ⊙ n) ∎
 ... | just (false , yz) | yzp =
   (x , zₜ) ∷ (y , yz) ∷ₚ xs ⊙ n ≡⟨ {!!} ⟩
   (x , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → (e , zₜ) ∷ xs ⊙ x ↔ y ⊙ n) x≡zₛ ⟩
