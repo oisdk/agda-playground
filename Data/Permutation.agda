@@ -280,7 +280,7 @@ cons-swap x y ((zₛ , zₜ) ∷ xs) n with cmp-diff x zₛ | cmp-reflects x z�
   (zₛ , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ∎
 ... | just (true  , yz) | yzp =
   (x , zₜ) ∷ (zₜ , yz) ∷ₚ xs ⊙ n ≡⟨ cons-swap₂ x zₜ xs yz n ⟩
-  (x , zₜ) ∷ xs ⊙ perm-alg x (suc (zₜ + yz)) id n ≡⟨ cong₂ (λ e₁ e₂ → (e₁ , zₜ) ∷ xs ⊙ perm-alg x e₂ id n) x≡zₛ yzp ⟩
+  ((x , zₜ) ∷ xs ⊙ x ↔ suc (zₜ + yz) ⊙ n) ≡⟨ cong₂ (λ e₁ e₂ → (e₁ , zₜ) ∷ xs ⊙ x ↔ e₂ ⊙ n) x≡zₛ yzp ⟩
   (zₛ , zₜ) ∷ xs ⊙ x ↔ y ⊙ n ∎
 
 norm-correct : ∀ xs n → norm xs ⊙ n ≡ xs · n
