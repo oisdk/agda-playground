@@ -1,5 +1,18 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 
+-- To change:
+--
+-- * The lists should be snoc lists. The way the notation works,
+--    (a b) (c d) . x
+--  = (a b) . ((c d) . x)
+--
+--   And the fact that . is implemented with foldl means that
+--   we're using snoce lists.
+--   (or rather we're using lists with a snoc pattern)
+
+-- The group operator (<>) = flip (++) in this case.
+-- 
+
 module Data.Permutation where
 
 open import Prelude hiding (_↔_)
