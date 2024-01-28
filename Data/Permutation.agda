@@ -2,9 +2,9 @@
 
 module Data.Permutation where
 
-open import Prelude
+open import Prelude hiding (_↔_)
 open import Data.List
-open import Data.Nat.Properties renaming (discreteℕ to _≟_)
+open import Data.Nat.Properties renaming (discreteℕ to infix 4 _≟_)
 open import Data.Nat using (_+_)
 open import Path.Reasoning
 open import Data.List.Properties
@@ -16,32 +16,33 @@ open import Data.List.Properties
 Swaps : Type
 Swaps = List (ℕ × ℕ)
 
-swap : ℕ → ℕ → ℕ → ℕ
-swap x y z =
+infixr 4.5 _↔_·_
+_↔_·_ : ℕ → ℕ → ℕ → ℕ
+x ↔ y · z =
   if does (x ≟ z) then y else
   if does (y ≟ z) then x else
   z
 
-swap-lhs : ∀ x y → swap x y x ≡ y
+swap-lhs : ∀ x y → x ↔ y · x ≡ y
 swap-lhs x y with does (x ≟ x) | why (x ≟ x)
 ... | true  | _ = refl
 ... | false | x≢x = ⊥-elim (x≢x refl)
 
-swap-rhs : ∀ x y → swap x y y ≡ x
+swap-rhs : ∀ x y → x ↔ y · y ≡ x
 swap-rhs x y with does (x ≟ y) | why (x ≟ y)
 ... | true  | x≡y = sym x≡y
 ... | false | _ with does (y ≟ y) | why (y ≟ y)
 ... | false | y≢y = ⊥-elim (y≢y refl)
 ... | true  | _ = refl
 
-swap-id : ∀ x y → swap x x y ≡ y
+swap-id : ∀ x y → x ↔ x · y ≡ y
 swap-id x y with does (x ≟ y) | why (x ≟ y)
 ... | false | _ = refl
 ... | true  | x≡y = x≡y
 
 infixr 4.5 _·_
 _·_ : Swaps → ℕ → ℕ
-_·_ = flip (foldl (flip (uncurry swap)))
+_·_ = flip (foldl (flip (uncurry _↔_·_)))
 
 --------------------------------------------------------------------------------
 -- Normalised Representation
@@ -56,23 +57,24 @@ unflatten-alg x y k n = ((n + x) , suc (n + x + y)) ∷ k (suc n + x)
 unflatten : Diffs → Swaps
 unflatten xs = foldr (uncurry unflatten-alg) (const []) xs 0
 
-swap′ : ℕ → ℕ → ℕ → ℕ
-swap′ zero zero z = z
-swap′ zero y@(suc _) zero = y
-swap′ zero (suc y) (suc z) = if does (y ≟ z) then zero else suc z
-swap′ x@(suc _) zero zero = x
-swap′ (suc x) (suc y) zero = zero
-swap′ (suc x) zero (suc z) = if does (x ≟ z) then zero else suc z
-swap′ (suc x) (suc y) (suc z) = suc (swap′ x y z)
+infixr 4.5 _↔′_·_
+_↔′_·_ : ℕ → ℕ → ℕ → ℕ
+zero  ↔′ zero  · z     = z
+zero  ↔′ y     · zero  = y
+zero  ↔′ suc y · suc z = if does (y ≟ z) then zero else suc z
+x     ↔′ zero  · zero  = x
+suc x ↔′ suc y · zero  = zero
+suc x ↔′ zero  · suc z = if does (x ≟ z) then zero else suc z
+suc x ↔′ suc y · suc z = suc (x ↔′ y · z)
 
-swap-suc : ∀ x y z → swap (suc x) (suc y) (suc z) ≡ suc (swap x y z)
+swap-suc : ∀ x y z → suc x ↔ suc y · suc z ≡ suc (x ↔ y · z)
 swap-suc x y z with does (x ≟ z)
 ... | true = refl
 ... | false with does (y ≟ z)
 ... | false = refl
 ... | true = refl
 
-swap-swap′ : ∀ x y z → swap x y z ≡ swap′ x y z
+swap-swap′ : ∀ x y z → x ↔ y · z ≡ x ↔′ y · z
 swap-swap′ zero    zero    z       = swap-id zero z
 swap-swap′ zero    (suc y) zero    = refl
 swap-swap′ zero    (suc y) (suc z) = refl
@@ -87,11 +89,16 @@ perm-alg zero    y k (suc z) = if does (y ≟ z) then zero else suc (k z)
 perm-alg (suc x) y k zero    = zero
 perm-alg (suc x) y k (suc z) = suc (perm-alg x y k z)
 
+
 infixr 4.5 _⊙_
 _⊙_ : Diffs → ℕ → ℕ
 _⊙_ = foldr (uncurry perm-alg) id
 
-perm-alg-swap : ∀ x y z → perm-alg x y id z ≡ swap′ x (suc (x + y)) z
+infixr 4.5 _↔_⊙_
+_↔_⊙_ : ℕ → ℕ → ℕ → ℕ
+_↔_⊙_ x y = perm-alg x y id
+
+perm-alg-swap : ∀ x y z → x ↔ y ⊙ z ≡ x ↔′ suc (x + y) · z
 perm-alg-swap zero y zero = refl
 perm-alg-swap zero y (suc z) = refl
 perm-alg-swap (suc x) y zero = refl
@@ -101,7 +108,7 @@ shift : ℕ → Diffs → Diffs
 shift m [] = []
 shift m ((x , y) ∷ xs) = (m + x , y) ∷ xs
 
-perm-alg-com : ∀ x y xs z → (x , y) ∷ xs ⊙ z ≡ shift (suc x) xs ⊙ perm-alg x y id z
+perm-alg-com : ∀ x y xs z → (x , y) ∷ xs ⊙ z ≡ shift (suc x) xs ⊙ x ↔ y ⊙ z
 perm-alg-com x y [] z = refl
 perm-alg-com zero y (w ∷ xs) zero = refl
 perm-alg-com (suc x) y (w ∷ xs) zero = refl
@@ -111,7 +118,7 @@ perm-alg-com zero y (w ∷ xs) (suc z) with does (y ≟ z)
 ... | true  = refl
 
 swap-unf-alg : ℕ → ℕ → (ℕ → ℕ → ℕ) → ℕ → ℕ → ℕ
-swap-unf-alg x y k m n = k (suc m + x) (swap (m + x) (suc (m + x + y)) n)
+swap-unf-alg x y k m n = k (suc m + x) (m + x ↔ suc (m + x + y) · n)
 
 swap-unf′ : Swaps → ℕ → ℕ → ℕ
 swap-unf′ = foldr (uncurry swap-unf-alg) (const id)
@@ -123,11 +130,11 @@ swap-shift m n ((x , y) ∷ xs) =
     ≡⟨ perm-alg-com (m + x) y xs n ⟩
   shift (suc m + x) xs ⊙ perm-alg (m + x) y id n
     ≡⟨ cong (_⊙_ (shift (suc m + x) xs)) (perm-alg-swap (m + x) y n) ⟩
-  shift (suc m + x) xs ⊙ swap′ (m + x) (suc (m + x + y)) n
+  shift (suc m + x) xs ⊙ m + x ↔′ suc (m + x + y) · n
     ≡˘⟨ cong (_⊙_ (shift (suc m + x) xs)) (swap-swap′ (m + x) _ n) ⟩
-  shift (suc m + x) xs ⊙ swap (m + x) (suc (m + x + y)) n
+  shift (suc m + x) xs ⊙ m + x ↔ suc (m + x + y) · n
     ≡⟨ swap-shift (suc m + x) _ xs ⟩
-  swap-unf′ xs (suc m + x) (swap (m + x) (suc (m + x + y)) n)
+  swap-unf′ xs (suc m + x) (m + x ↔ suc (m + x + y) · n)
     ≡⟨⟩
   swap-unf-alg x y (swap-unf′ xs) m n ∎
 
@@ -142,9 +149,9 @@ swaps-compress xs n =
   shift 0 xs ⊙ n
     ≡⟨ swap-shift 0 n xs ⟩
   swap-unf′ xs 0 n
-    ≡˘⟨ cong′ {A = ℕ → ℕ → ℕ} (λ e → e 0 n) (foldr-fusion (λ xs m n → foldl-by-r (flip (uncurry swap)) n (xs m)) (const []) (λ _ _ → refl) xs) ⟩
-  foldl-by-r (flip (uncurry swap)) n (unflatten xs)
-    ≡˘⟨ foldl-is-foldr (flip (uncurry swap)) n (unflatten xs) ⟩
+    ≡˘⟨ cong′ {A = ℕ → ℕ → ℕ} (λ e → e 0 n) (foldr-fusion (λ xs m n → foldl-by-r (flip (uncurry _↔_·_)) n (xs m)) (const []) (λ _ _ → refl) xs) ⟩
+  foldl-by-r (flip (uncurry _↔_·_)) n (unflatten xs)
+    ≡˘⟨ foldl-is-foldr (flip (uncurry _↔_·_)) n (unflatten xs) ⟩
   unflatten xs · n ∎
   
 max-num-alg : ℕ × ℕ → ℕ → ℕ
@@ -186,7 +193,7 @@ x ∷ₚ [] = x ∷ []
 (xₛ , xₜ) ∷ₚ ((yₛ , yₜ) ∷ xs) = case cmp-diff xₛ yₛ of
   λ { nothing → maybe (shift (suc xₛ) xs) (λ lg → (xₛ , yₜ) ∷ lg ∷ₚ xs) (swap-diff xₜ yₜ)
     ; (just (false , yₛ)) → (xₛ , xₜ) ∷ (yₛ , yₜ) ∷ xs
-    ; (just (true  , xₛ)) → (yₛ , perm-alg xₛ xₜ id yₜ) ∷ (xₛ , xₜ) ∷ₚ xs
+    ; (just (true  , xₛ)) → (yₛ , xₛ ↔ xₜ ⊙ yₜ) ∷ (xₛ , xₜ) ∷ₚ xs
     }
 
 norm : Swaps → Diffs
@@ -198,8 +205,10 @@ norm = foldr _∷ₚ_ [] ∘ catMaybes (uncurry swap-diff)
 -- perm-alg (suc x) y k zero    = zero
 -- perm-alg (suc x) y k (suc z) = suc (perm-alg x y k z)
 --
+--
 
-perm-alg-dup : ∀ x y z → perm-alg x y id (perm-alg x y id z) ≡ z
+
+perm-alg-dup : ∀ x y z → x ↔ y ⊙ x ↔ y ⊙ z ≡ z
 perm-alg-dup zero y zero with does (y ≟ y) | why (y ≟ y)
 perm-alg-dup zero y zero | false | y≢y = ⊥-elim (y≢y refl)
 perm-alg-dup zero y zero | true | _ = refl
@@ -211,21 +220,21 @@ perm-alg-dup zero y (suc z) with does (y ≟ z) | why (y ≟ z)
 ... | true | y≡z = ⊥-elim (y≢z y≡z)
 ... | false | _ = refl
 
--- perm-alg-com : ∀ x y xs z → (x , y) ∷ xs ⊙ z ≡ shift (suc x) xs ⊙ perm-alg x y id z
+-- -- perm-alg-com : ∀ x y xs z → (x , y) ∷ xs ⊙ z ≡ shift (suc x) xs ⊙ swap″ x y z
 
-cons-swap : ∀ x y xs z → (x , y) ∷ₚ xs ⊙ z ≡ xs ⊙ perm-alg x y id z
-cons-swap₁ : ∀ x k y z xs n → (x , perm-alg k y id z) ∷ (k , y) ∷ₚ xs ⊙ n ≡ (x , z) ∷ xs ⊙ perm-alg (suc (x + k)) y id n
+cons-swap : ∀ x y xs z → (x , y) ∷ₚ xs ⊙ z ≡ xs ⊙ x ↔ y ⊙ z
+cons-swap₁ : ∀ x k y z xs n → (x , k ↔ y ⊙ z) ∷ (k , y) ∷ₚ xs ⊙ n ≡ (x , z) ∷ xs ⊙ suc (x + k) ↔ y ⊙ n
 
 cons-swap₁ (suc x) k y z xs (suc n) = cong suc (cons-swap₁ x k y z xs n)
 cons-swap₁ (suc x) k y z xs zero = refl
-cons-swap₁ zero k y z xs zero = cong suc ( cons-swap k y xs (perm-alg k y id z) ; cong (xs ⊙_) (perm-alg-dup k y z))
-cons-swap₁ zero k y z xs (suc n) with does (perm-alg k y id z ≟ n) | does (z ≟ perm-alg k y id n) | why (perm-alg k y id z ≟ n) | why (z ≟ perm-alg k y id n)
+cons-swap₁ zero k y z xs zero = cong suc (cons-swap k y xs (perm-alg k y id z) ; cong (xs ⊙_) (perm-alg-dup k y z))
+cons-swap₁ zero k y z xs (suc n) with does (k ↔ y ⊙ z ≟ n) | does (z ≟ k ↔ y ⊙ n) | why (k ↔ y ⊙ z ≟ n) | why (z ≟ k ↔ y ⊙ n)
 ... | false | false | _ | _ = cong suc (cons-swap k y xs n) 
 ... | true  | true  | _ | _ = refl
 ... | false | true  | e1 | e2 = ⊥-elim (e1 (cong (perm-alg k y id) e2 ; perm-alg-dup k y n))
 ... | true  | false | e1 | e2 = ⊥-elim (e2 (sym (cong (perm-alg k y id) (sym e1) ; perm-alg-dup k y z)))
 
-cons-swap₂ : ∀ x y xs z n → (x , y) ∷ (y , z) ∷ₚ xs ⊙ n ≡ (x , y) ∷ xs ⊙ perm-alg x (suc (y + z)) id n
+cons-swap₂ : ∀ x y xs z n → (x , y) ∷ (y , z) ∷ₚ xs ⊙ n ≡ (x , y) ∷ xs ⊙ x ↔ suc (y + z) ⊙ n
 cons-swap₂ (suc x) y xs z zero = refl
 cons-swap₂ (suc x) y xs z (suc n) = cong suc (cons-swap₂ x y xs z n)
 cons-swap₂ zero y xs z zero = {!!}
@@ -235,22 +244,22 @@ cons-swap x y [] z = refl
 cons-swap x y ((zₛ , zₜ) ∷ xs) n with cmp-diff x zₛ | cmp-reflects x zₛ
 ... | just (false , k) | p =
   (x , y) ∷ (k , zₜ) ∷ xs ⊙ n ≡⟨ perm-alg-com x y ((k , zₜ) ∷ xs) n ⟩
-  (suc x + k , zₜ) ∷ xs ⊙ perm-alg x y id n ≡⟨ cong (λ e → (e , zₜ) ∷ xs ⊙ _) p ⟩
-  (zₛ , zₜ) ∷ xs ⊙ perm-alg x y id n ∎
+  (suc x + k , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → (e , zₜ) ∷ xs ⊙ _) p ⟩
+  (zₛ , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ∎
 ... | just (true  , k) | p =
   (zₛ , perm-alg k y id zₜ) ∷ (k , y) ∷ₚ xs ⊙ n ≡⟨ cons-swap₁ zₛ k y zₜ xs n ⟩
   (zₛ , zₜ) ∷ xs ⊙ perm-alg (suc zₛ + k) y id n ≡⟨ cong (λ e → (zₛ , zₜ) ∷ xs ⊙ perm-alg e y id n) p ⟩
-  (zₛ , zₜ) ∷ xs ⊙ perm-alg x y id n ∎
+  (zₛ , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ∎
 ... | nothing | x≡zₛ with cmp-diff y zₜ | cmp-reflects y zₜ
 ... | nothing           | y≡zₜ = {!!}
 ... | just (false , yz) | yzp =
   (x , zₜ) ∷ (y , yz) ∷ₚ xs ⊙ n ≡⟨ {!!} ⟩
-  (x , zₜ) ∷ xs ⊙ perm-alg x y id n ≡⟨ cong (λ e → (e , zₜ) ∷ xs ⊙ perm-alg x y id n) x≡zₛ ⟩
-  (zₛ , zₜ) ∷ xs ⊙ perm-alg x y id n ∎
+  (x , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → (e , zₜ) ∷ xs ⊙ x ↔ y ⊙ n) x≡zₛ ⟩
+  (zₛ , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ∎
 ... | just (true  , yz) | yzp =
   (x , zₜ) ∷ (zₜ , yz) ∷ₚ xs ⊙ n ≡⟨ cons-swap₂ x zₜ xs yz n ⟩
   (x , zₜ) ∷ xs ⊙ perm-alg x (suc (zₜ + yz)) id n ≡⟨ cong₂ (λ e₁ e₂ → (e₁ , zₜ) ∷ xs ⊙ perm-alg x e₂ id n) x≡zₛ yzp ⟩
-  (zₛ , zₜ) ∷ xs ⊙ perm-alg x y id n ∎
+  (zₛ , zₜ) ∷ xs ⊙ x ↔ y ⊙ n ∎
 
 norm-correct : ∀ xs n → norm xs ⊙ n ≡ xs · n
 norm-correct [] n = refl
@@ -258,15 +267,15 @@ norm-correct ((x , y) ∷ xs) n with cmp-diff x y | cmp-reflects x y
 ... | nothing          | p =
   norm xs ⊙ n ≡⟨ norm-correct xs n ⟩
   xs · n ≡˘⟨ cong (xs ·_) (swap-id x n) ⟩
-  xs · swap x x n ≡⟨ cong (λ e → xs · swap x e n) p ⟩
-  xs · swap x y n ≡⟨⟩
+  (xs · x ↔ x · n) ≡⟨ cong (λ e → xs · x ↔ e · n) p ⟩
+  (xs · x ↔ y · n) ≡⟨⟩
   (x , y) ∷ xs · n ∎
 ... | just (true  , k) | p = {!!}
 ... | just (false , k) | p =
   (x , k) ∷ₚ norm xs ⊙ n ≡⟨ cons-swap x k (norm xs) n ⟩
-  norm xs ⊙ perm-alg x k id n ≡⟨ cong (norm xs ⊙_) (perm-alg-swap x k n) ⟩
-  norm xs ⊙ swap′ x (suc x + k) n ≡˘⟨ cong (norm xs ⊙_) (swap-swap′ x _ n) ⟩
-  norm xs ⊙ swap x (suc x + k) n ≡⟨ cong (λ e → norm xs ⊙ swap x e n) p ⟩
-  norm xs ⊙ swap x y n ≡⟨ norm-correct xs (swap x y n) ⟩
-  xs · swap x y n ≡⟨⟩
+  (norm xs ⊙ x ↔ k ⊙ n) ≡⟨ cong (norm xs ⊙_) (perm-alg-swap x k n) ⟩
+  (norm xs ⊙ x ↔′ suc x + k · n) ≡˘⟨ cong (norm xs ⊙_) (swap-swap′ x _ n) ⟩
+  (norm xs ⊙ x ↔  suc x + k · n) ≡⟨ cong (λ e → norm xs ⊙ x ↔ e · n) p ⟩
+  (norm xs ⊙ x ↔ y · n) ≡⟨ norm-correct xs (x ↔ y · n) ⟩
+  (xs · x ↔ y · n) ≡⟨⟩
   (x , y) ∷ xs · n ∎
