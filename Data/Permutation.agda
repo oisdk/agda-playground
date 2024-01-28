@@ -46,6 +46,13 @@ swap-neq x y z x≢z y≢z with does (x ≟ z) | why (x ≟ z) | does (y ≟ z) 
 ... | _ | _ | true | y≡z = ⊥-elim (y≢z y≡z)
 ... | false | _ | false | _ = refl
 
+swap-com : ∀ x y z → x ↔ y · z ≡ y ↔ x · z
+swap-com x y z with does (x ≟ z) | why (x ≟ z) | does (y ≟ z) | why (y ≟ z)
+... | false | _   | false | _ = refl
+... | false | _   | true  | _ = refl
+... | true  | _   | false | _ = refl
+... | true  | x≡z | true  | y≡z = y≡z ; sym x≡z
+
 infixr 4.5 _·_
 _·_ : Swaps → ℕ → ℕ
 _·_ = flip (foldl (flip (uncurry _↔_·_)))
@@ -206,10 +213,6 @@ x ∷ₚ [] = x ∷ []
 [_]↓ : Swaps → Diffs
 [_]↓ = foldr _∷ₚ_ [] ∘ catMaybes (uncurry swap-diff)
 
---
---
-
-
 perm-alg-dup : ∀ x y z → x ↔ y ⊙ x ↔ y ⊙ z ≡ z
 perm-alg-dup zero y zero with does (y ≟ y) | why (y ≟ y)
 perm-alg-dup zero y zero | false | y≢y = ⊥-elim (y≢y refl)
@@ -319,12 +322,20 @@ norm-correct ((x , y) ∷ xs) n with cmp-diff x y | cmp-reflects x y
   (xs · x ↔ x · n) ≡⟨ cong (λ e → xs · x ↔ e · n) p ⟩
   (xs · x ↔ y · n) ≡⟨⟩
   (x , y) ∷ xs · n ∎
-... | just (true  , k) | p = {!!}
 ... | just (false , k) | p =
   (x , k) ∷ₚ [ xs ]↓ ⊙ n ≡⟨ cons-swap x k [ xs ]↓ n ⟩
   ([ xs ]↓ ⊙ x ↔ k ⊙ n) ≡⟨ cong ([ xs ]↓ ⊙_) (perm-alg-swap x k n) ⟩
   ([ xs ]↓ ⊙ x ↔′ suc x + k · n) ≡˘⟨ cong ([ xs ]↓ ⊙_) (swap-swap′ x _ n) ⟩
   ([ xs ]↓ ⊙ x ↔  suc x + k · n) ≡⟨ cong (λ e → [ xs ]↓ ⊙ x ↔ e · n) p ⟩
   ([ xs ]↓ ⊙ x ↔ y · n) ≡⟨ norm-correct xs (x ↔ y · n) ⟩
+  (xs · x ↔ y · n) ≡⟨⟩
+  (x , y) ∷ xs · n ∎
+... | just (true  , k) | p =
+  (y , k) ∷ₚ [ xs ]↓ ⊙ n ≡⟨ cons-swap y k [ xs ]↓ n ⟩
+  ([ xs ]↓ ⊙ y ↔ k ⊙ n) ≡⟨ cong ([ xs ]↓ ⊙_) (perm-alg-swap y k n) ⟩
+  ([ xs ]↓ ⊙ y ↔′ suc y + k · n) ≡˘⟨ cong ([ xs ]↓ ⊙_) (swap-swap′ y _ n)  ⟩
+  ([ xs ]↓ ⊙ y ↔  suc y + k · n) ≡⟨ cong (λ e → [ xs ]↓ ⊙ y ↔ e · n) p ⟩
+  ([ xs ]↓ ⊙ y ↔ x · n) ≡⟨ norm-correct xs (y ↔ x · n) ⟩
+  (xs · y ↔ x · n) ≡⟨ cong (xs ·_) (swap-com y x n) ⟩
   (xs · x ↔ y · n) ≡⟨⟩
   (x , y) ∷ xs · n ∎
