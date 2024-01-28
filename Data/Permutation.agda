@@ -274,9 +274,14 @@ cons-swap₃ zero y z xs zero =
   suc (xs ⊙ y) ≡˘⟨ cong (bool _ zero) (doesn't (x≢sx+y y z ∘ sym) (suc (y + z) ≟ y)) ⟩
   (if does (suc (y + z) ≟ y) then zero else suc (xs ⊙ y)) ≡⟨⟩
   (zero , suc (y + z)) ∷ xs ⊙ zero ↔ y ⊙ zero ∎
-cons-swap₃ zero y z xs (suc n) =
-  (zero , suc (y + z)) ∷ (y , z) ∷ₚ xs ⊙ suc n ≡⟨ {!!} ⟩
-  (zero , suc (y + z)) ∷ xs ⊙ zero ↔ y ⊙ suc n ∎
+cons-swap₃ zero y z xs (suc n) with does (suc (y + z) ≟ n) | why (suc (y + z) ≟ n) | does (y ≟ n) | why (y ≟ n)
+cons-swap₃ zero y z xs (suc n) | true | wyzn | true | yny = ⊥-elim (x≢sx+y _ _ (yny ; sym wyzn))
+cons-swap₃ zero y z xs (suc n) | false | wyzn | true | yny = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (perm-alg-swap y z n ; sym (swap-swap′ y _ n) ; cong (_↔ _ · n) yny ; swap-lhs n (suc (y + z)) ))
+cons-swap₃ zero y z xs (suc n) | syzn | wyzn | false | yny with does (suc y + z ≟ n) | why (suc y + z ≟ n)
+cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | true | wyzn′ = ⊥-elim (wyzn wyzn′)
+cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | false | wyzn′ = ⊥-elim (wyzn′ wyzn)
+cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | true | wyzn′ = refl
+cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | false | wyzn′ = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (perm-alg-swap y z n ; sym (swap-swap′ y _ n) ; swap-neq y (suc (y + z)) n yny wyzn))
 
 cons-swap x y [] z = refl
 cons-swap x y ((zₛ , zₜ) ∷ xs) n with cmp-diff x zₛ | cmp-reflects x zₛ
