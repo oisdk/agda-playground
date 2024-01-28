@@ -41,6 +41,9 @@ concat = foldr _++_ []
 concatMap : (A → List B) → List A → List B
 concatMap f = foldr (λ x ys → f x ++ ys) []
 
+catMaybes : (A → Maybe B) → List A → List B
+catMaybes f = foldr (λ x xs → maybe xs (_∷ xs) (f x)) []
+
 map : (A → B) → List A → List B
 map f = foldr (λ x xs → f x ∷ xs) []
 

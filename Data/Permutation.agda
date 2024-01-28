@@ -150,3 +150,21 @@ max-num-alg (x , y) z = suc (x + (y ⊔ z))
 
 max-num : Diffs → ℕ
 max-num = foldr max-num-alg zero
+
+open import Data.Maybe using (mapMaybe)
+
+swap-diff : ℕ → ℕ → Maybe (ℕ × ℕ)
+swap-diff zero zero = nothing
+swap-diff zero (suc y) = just (zero , y)
+swap-diff (suc x) zero = just (zero , x)
+swap-diff (suc x) (suc y) = mapMaybe (map₁ suc) (swap-diff x y)
+
+cons : ℕ × ℕ → Diffs → Diffs
+cons x [] = x ∷ []
+cons (zero   , xₜ) ((zero   , yₜ) ∷ xs) = maybe (shift 1 xs) (λ lg → (zero , yₜ) ∷ cons lg xs) (swap-diff xₜ yₜ)
+cons (zero   , xₜ) ((suc yₛ , yₜ) ∷ xs) = (zero , xₜ) ∷ (yₛ , yₜ) ∷ xs
+cons (suc xₛ , xₜ) ((suc yₛ , yₜ) ∷ xs) = shift 1 (cons (xₛ , xₜ) ((yₛ , yₜ) ∷ xs))
+cons (suc xₛ , xₜ) ((zero   , yₜ) ∷ xs) = (zero , perm-alg xₛ xₜ id yₜ) ∷ cons (xₛ , xₜ) xs
+
+norm : Swaps → Diffs
+norm = foldr cons [] ∘ catMaybes (uncurry swap-diff)
