@@ -174,3 +174,7 @@ linearise : ∀ n m → n ≡ m → n ≡ m
 linearise n m n≡m with discreteℕ n m
 ... | yes p = p
 ... | no ¬p = ⊥-elim (¬p n≡m)
+
+x≢sx+y : ∀ x y → x ≢ suc x + y
+x≢sx+y zero y = znots
+x≢sx+y (suc x) y p = x≢sx+y x y (suc-inj p)
