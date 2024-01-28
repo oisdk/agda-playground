@@ -206,11 +206,6 @@ x ∷ₚ [] = x ∷ []
 [_]↓ : Swaps → Diffs
 [_]↓ = foldr _∷ₚ_ [] ∘ catMaybes (uncurry swap-diff)
 
--- perm-alg : ℕ → ℕ → (ℕ → ℕ) → ℕ → ℕ
--- perm-alg zero    y k zero    = suc (k y)
--- perm-alg zero    y k (suc z) = if does (y ≟ z) then zero else suc (k z)
--- perm-alg (suc x) y k zero    = zero
--- perm-alg (suc x) y k (suc z) = suc (perm-alg x y k z)
 --
 --
 
@@ -227,7 +222,6 @@ perm-alg-dup zero y (suc z) with does (y ≟ z) | why (y ≟ z)
 ... | true | y≡z = ⊥-elim (y≢z y≡z)
 ... | false | _ = refl
 
--- -- perm-alg-com : ∀ x y xs z → (x , y) ∷ xs ⊙ z ≡ shift (suc x) xs ⊙ x ↔ y ⊙ z
 
 cons-swap : ∀ x y xs z → (x , y) ∷ₚ xs ⊙ z ≡ xs ⊙ x ↔ y ⊙ z
 cons-swap₁ : ∀ x k y z xs n → (x , k ↔ y ⊙ z) ∷ (k , y) ∷ₚ xs ⊙ n ≡ (x , z) ∷ xs ⊙ suc (x + k) ↔ y ⊙ n
@@ -259,6 +253,31 @@ cons-swap₂ zero y xs z (suc n) | true | ynp | false | synp | false | ynp′ = 
 cons-swap₂ zero y xs z (suc n) | true | ynp | false | synp | true | ynp′ = refl
 cons-swap₂ zero y xs z (suc n) | false | ynp | false | synp | false | ynp′ = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (perm-alg-swap y z n ; sym (swap-swap′ y _ n) ; swap-neq y _ n ynp synp))
 
+-- perm-alg-com : ∀ x y xs z → (x , y) ∷ xs ⊙ z ≡ shift (suc x) xs ⊙ x ↔ y ⊙ z
+-- 
+-- perm-alg : ℕ → ℕ → (ℕ → ℕ) → ℕ → ℕ
+-- perm-alg zero    y k zero    = suc (k y)
+-- perm-alg zero    y k (suc z) = if does (y ≟ z) then zero else suc (k z)
+-- perm-alg (suc x) y k zero    = zero
+-- perm-alg (suc x) y k (suc z) = suc (perm-alg x y k z)
+--
+doesn't : ¬ A → (d : Dec A) → does d ≡ false
+doesn't ¬A (no why₁) = refl
+doesn't ¬A (yes A) = ⊥-elim (¬A A)
+
+cons-swap₃ : ∀ x y z xs n → (x , suc (y + z)) ∷ (y , z) ∷ₚ xs ⊙ n ≡ (x , suc (y + z)) ∷ xs ⊙ (x ↔ y ⊙ n)
+cons-swap₃ (suc x) y z xs zero = refl
+cons-swap₃ (suc x) y z xs (suc n) = cong suc (cons-swap₃ x y z xs n)
+cons-swap₃ zero y z xs zero =
+  suc ((y , z) ∷ₚ xs ⊙ suc (y + z)) ≡⟨ cong suc (cons-swap y z xs _) ⟩
+  suc (xs ⊙ y ↔ z ⊙ suc (y + z)) ≡⟨ cong suc (cong (xs ⊙_) (perm-alg-swap y z _ ; sym (swap-swap′ y _ _ ) ; swap-rhs y _)) ⟩
+  suc (xs ⊙ y) ≡˘⟨ cong (bool _ zero) (doesn't (x≢sx+y y z ∘ sym) (suc (y + z) ≟ y)) ⟩
+  (if does (suc (y + z) ≟ y) then zero else suc (xs ⊙ y)) ≡⟨⟩
+  (zero , suc (y + z)) ∷ xs ⊙ zero ↔ y ⊙ zero ∎
+cons-swap₃ zero y z xs (suc n) =
+  (zero , suc (y + z)) ∷ (y , z) ∷ₚ xs ⊙ suc n ≡⟨ {!!} ⟩
+  (zero , suc (y + z)) ∷ xs ⊙ zero ↔ y ⊙ suc n ∎
+
 cons-swap x y [] z = refl
 cons-swap x y ((zₛ , zₜ) ∷ xs) n with cmp-diff x zₛ | cmp-reflects x zₛ
 ... | just (false , k) | p =
@@ -276,7 +295,9 @@ cons-swap x y ((zₛ , zₜ) ∷ xs) n with cmp-diff x zₛ | cmp-reflects x z�
   ((x , zₜ) ∷ xs ⊙ x ↔ y ⊙ n) ≡⟨ cong (λ e → ((e , zₜ) ∷ xs ⊙ x ↔ y ⊙ n)) x≡zₛ  ⟩
   ((zₛ , zₜ) ∷ xs ⊙ x ↔ y ⊙ n) ∎
 ... | just (false , yz) | yzp =
-  (x , zₜ) ∷ (y , yz) ∷ₚ xs ⊙ n ≡⟨ {!!} ⟩
+  (x , zₜ) ∷ (y , yz) ∷ₚ xs ⊙ n ≡⟨ cong (λ e → (x , e) ∷ (y , yz) ∷ₚ xs ⊙ n) (sym yzp) ⟩
+  (x , suc (y + yz)) ∷ (y , yz) ∷ₚ xs ⊙ n ≡⟨ cons-swap₃ x y yz xs n ⟩
+  (x , suc (y + yz)) ∷ xs ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → (x , e) ∷ xs ⊙ x ↔ y ⊙ n) yzp ⟩
   (x , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → (e , zₜ) ∷ xs ⊙ x ↔ y ⊙ n) x≡zₛ ⟩
   (zₛ , zₜ) ∷ xs ⊙ (x ↔ y ⊙ n) ∎
 ... | just (true  , yz) | yzp =
