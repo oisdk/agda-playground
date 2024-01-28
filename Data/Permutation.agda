@@ -153,21 +153,22 @@ max-num = foldr max-num-alg zero
 
 open import Data.Maybe using (mapMaybe)
 
-cmp-diff : ℕ → ℕ → Maybe (Bool × ℕ × ℕ)
+cmp-diff : ℕ → ℕ → Maybe (Bool × ℕ)
 cmp-diff zero zero = nothing
-cmp-diff zero (suc y) = just (false , zero , y)
-cmp-diff (suc x) zero = just (true  , zero , x)
-cmp-diff (suc x) (suc y) = mapMaybe (map₂ (map₁ suc)) (cmp-diff x y)
+cmp-diff zero (suc y) = just (false , y)
+cmp-diff (suc x) zero = just (true  , x)
+cmp-diff (suc x) (suc y) = cmp-diff x y
 
 swap-diff : ℕ → ℕ → Maybe (ℕ × ℕ)
-swap-diff x y = mapMaybe snd (cmp-diff x y)
+swap-diff x y = mapMaybe (map₁ (bool′ x y)) (cmp-diff x y)
 
 cons : ℕ × ℕ → Diffs → Diffs
 cons x [] = x ∷ []
-cons (zero   , xₜ) ((zero   , yₜ) ∷ xs) = maybe (shift 1 xs) (λ lg → (zero , yₜ) ∷ cons lg xs) (swap-diff xₜ yₜ)
-cons (zero   , xₜ) ((suc yₛ , yₜ) ∷ xs) = (zero , xₜ) ∷ (yₛ , yₜ) ∷ xs
-cons (suc xₛ , xₜ) ((suc yₛ , yₜ) ∷ xs) = shift 1 (cons (xₛ , xₜ) ((yₛ , yₜ) ∷ xs))
-cons (suc xₛ , xₜ) ((zero   , yₜ) ∷ xs) = (zero , perm-alg xₛ xₜ id yₜ) ∷ cons (xₛ , xₜ) xs
+cons (xₛ , xₜ) ((yₛ , yₜ) ∷ xs) = case cmp-diff xₛ yₛ of
+  λ { nothing → maybe (shift (suc xₛ) xs) (λ lg → (xₛ , yₜ) ∷ cons lg xs) (swap-diff xₜ yₜ)
+    ; (just (false , yₛ)) → (xₛ , xₜ) ∷ (yₛ , yₜ) ∷ xs
+    ; (just (true  , xₛ)) → (yₛ , perm-alg xₛ xₜ id yₜ) ∷ cons (xₛ , xₜ) xs
+    }
 
 norm : Swaps → Diffs
 norm = foldr cons [] ∘ catMaybes (uncurry swap-diff)
