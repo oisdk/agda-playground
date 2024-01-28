@@ -16,6 +16,9 @@ open import Data.List.Properties
 Swaps : Type
 Swaps = List (ℕ × ℕ)
 
+infixl 5 _∘⟨_↔_⟩
+pattern _∘⟨_↔_⟩ xs x y = (x , y) ∷ xs
+
 infixr 4.5 _↔_·_
 _↔_·_ : ℕ → ℕ → ℕ → ℕ
 x ↔ y · z =
@@ -121,7 +124,7 @@ shift : ℕ → Diffs → Diffs
 shift m [] = []
 shift m ((x , y) ∷ xs) = (m + x , y) ∷ xs
 
-perm-alg-com : ∀ x y xs z → (x , y) ∷ xs ⊙ z ≡ shift (suc x) xs ⊙ x ↔ y ⊙ z
+perm-alg-com : ∀ x y xs z → xs ∘⟨ x ↔ y ⟩ ⊙ z ≡ shift (suc x) xs ⊙ x ↔ y ⊙ z
 perm-alg-com x y [] z = refl
 perm-alg-com zero y (w ∷ xs) zero = refl
 perm-alg-com (suc x) y (w ∷ xs) zero = refl
@@ -210,6 +213,10 @@ x ∷ₚ [] = x ∷ []
     ; (just (true  , xₛ)) → (yₛ , xₛ ↔ xₜ ⊙ yₜ) ∷ (xₛ , xₜ) ∷ₚ xs
     }
 
+infixl 5 _∘⟨_↭_⟩
+_∘⟨_↭_⟩ : Diffs → ℕ → ℕ → Diffs
+xs ∘⟨ x ↭ y ⟩ = (x , y) ∷ₚ xs
+
 [_]↓ : Swaps → Diffs
 [_]↓ = foldr _∷ₚ_ [] ∘ catMaybes (uncurry swap-diff)
 
@@ -225,8 +232,7 @@ perm-alg-dup zero y (suc z) with does (y ≟ z) | why (y ≟ z)
 ... | true | y≡z = ⊥-elim (y≢z y≡z)
 ... | false | _ = refl
 
-
-cons-swap : ∀ x y xs z → (x , y) ∷ₚ xs ⊙ z ≡ xs ⊙ x ↔ y ⊙ z
+cons-swap : ∀ x y xs z → xs ∘⟨ x ↭ y ⟩ ⊙ z ≡ xs ⊙ x ↔ y ⊙ z
 cons-swap₁ : ∀ x k y z xs n → (x , k ↔ y ⊙ z) ∷ (k , y) ∷ₚ xs ⊙ n ≡ (x , z) ∷ xs ⊙ suc (x + k) ↔ y ⊙ n
 
 cons-swap₁ (suc x) k y z xs (suc n) = cong suc (cons-swap₁ x k y z xs n)
@@ -238,7 +244,8 @@ cons-swap₁ zero k y z xs (suc n) with does (k ↔ y ⊙ z ≟ n) | does (z ≟
 ... | false | true  | e1 | e2 = ⊥-elim (e1 (cong (perm-alg k y id) e2 ; perm-alg-dup k y n))
 ... | true  | false | e1 | e2 = ⊥-elim (e2 (sym (cong (perm-alg k y id) (sym e1) ; perm-alg-dup k y z)))
 
-cons-swap₂ : ∀ x y xs z n → (x , y) ∷ (y , z) ∷ₚ xs ⊙ n ≡ (x , y) ∷ xs ⊙ x ↔ suc (y + z) ⊙ n
+
+cons-swap₂ : ∀ x y xs z n → xs ∘⟨ y ↭ z ⟩ ∘⟨ x ↔ y ⟩ ⊙ n ≡ xs ∘⟨ x ↔ y ⟩ ⊙ x ↔ suc (y + z) ⊙ n
 cons-swap₂ (suc x) y xs z zero = refl
 cons-swap₂ (suc x) y xs z (suc n) = cong suc (cons-swap₂ x y xs z n)
 cons-swap₂ zero y xs z zero with does (y ≟ suc (y + z)) | why (y ≟ suc (y + z))
@@ -268,15 +275,14 @@ doesn't : ¬ A → (d : Dec A) → does d ≡ false
 doesn't ¬A (no why₁) = refl
 doesn't ¬A (yes A) = ⊥-elim (¬A A)
 
-cons-swap₃ : ∀ x y z xs n → (x , suc (y + z)) ∷ (y , z) ∷ₚ xs ⊙ n ≡ (x , suc (y + z)) ∷ xs ⊙ (x ↔ y ⊙ n)
+cons-swap₃ : ∀ x y z xs n → xs ∘⟨ y ↭ z ⟩ ∘⟨ x ↔ suc (y + z) ⟩ ⊙ n ≡ xs ∘⟨ x ↔ suc (y + z) ⟩ ⊙ x ↔ y ⊙ n
 cons-swap₃ (suc x) y z xs zero = refl
 cons-swap₃ (suc x) y z xs (suc n) = cong suc (cons-swap₃ x y z xs n)
 cons-swap₃ zero y z xs zero =
-  suc ((y , z) ∷ₚ xs ⊙ suc (y + z)) ≡⟨ cong suc (cons-swap y z xs _) ⟩
+  suc (xs ∘⟨ y ↭ z ⟩ ⊙ suc (y + z)) ≡⟨ cong suc (cons-swap y z xs _) ⟩
   suc (xs ⊙ y ↔ z ⊙ suc (y + z)) ≡⟨ cong suc (cong (xs ⊙_) (perm-alg-swap y z _ ; sym (swap-swap′ y _ _ ) ; swap-rhs y _)) ⟩
   suc (xs ⊙ y) ≡˘⟨ cong (bool _ zero) (doesn't (x≢sx+y y z ∘ sym) (suc (y + z) ≟ y)) ⟩
-  (if does (suc (y + z) ≟ y) then zero else suc (xs ⊙ y)) ≡⟨⟩
-  (zero , suc (y + z)) ∷ xs ⊙ zero ↔ y ⊙ zero ∎
+  xs ∘⟨ zero ↔ suc (y + z) ⟩ ⊙ zero ↔ y ⊙ zero ∎
 cons-swap₃ zero y z xs (suc n) with does (suc (y + z) ≟ n) | why (suc (y + z) ≟ n) | does (y ≟ n) | why (y ≟ n)
 cons-swap₃ zero y z xs (suc n) | true | wyzn | true | yny = ⊥-elim (x≢sx+y _ _ (yny ; sym wyzn))
 cons-swap₃ zero y z xs (suc n) | false | wyzn | true | yny = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (perm-alg-swap y z n ; sym (swap-swap′ y _ n) ; cong (_↔ _ · n) yny ; swap-lhs n (suc (y + z)) ))
