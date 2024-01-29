@@ -51,10 +51,10 @@ dec-bool true  to fro .why = to _
 
 open import Path
 
-it-does : A → (d : Dec A) → does d ≡ true
-it-does A (yes _) = refl
-it-does A (no ¬A) = ⊥-elim (¬A A)
+it-does : (d : Dec A) → A → does d ≡ true
+it-does (yes _) _ = refl
+it-does (no ¬A) A = ⊥-elim (¬A A)
 
-it-doesn't : ¬ A → (d : Dec A) → does d ≡ false
-it-doesn't ¬A (no _) = refl
-it-doesn't ¬A (yes A) = ⊥-elim (¬A A)
+it-doesn't : (d : Dec A) → ¬ A → does d ≡ false
+it-doesn't (no _)  _  = refl
+it-doesn't (yes A) ¬A = ⊥-elim (¬A A)

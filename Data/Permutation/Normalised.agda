@@ -114,16 +114,12 @@ xs ∘⟨ yₛ , yₜ ⟩ ⊙⟨ xₛ , xₜ ⟩ = case compare xₛ yₛ of
 [_]↓ = foldr (flip _⊙⟨_⟩) ⟨⟩ ∘ catMaybes (uncurry swap-diff)
 
 ⊙-alg-dup : ∀ x y z → x ↔ y ⊙ x ↔ y ⊙ z ≡ z
-⊙-alg-dup zero y zero with does (y ≟ y) | why (y ≟ y)
-⊙-alg-dup zero y zero | false | y≢y = ⊥-elim (y≢y refl)
-⊙-alg-dup zero y zero | true | _ = refl
+⊙-alg-dup zero y zero = cong (bool′ _ _) (it-does (y ≟ y) refl)
 ⊙-alg-dup (suc x) y zero = refl
 ⊙-alg-dup (suc x) y (suc z) = cong suc (⊙-alg-dup x y z)
 ⊙-alg-dup zero y (suc z) with does (y ≟ z) | why (y ≟ z)
 ... | true  | y≡z = cong suc y≡z
-... | false | y≢z with does (y ≟ z) | why (y ≟ z)
-... | true | y≡z = ⊥-elim (y≢z y≡z)
-... | false | _ = refl
+... | false | y≢z = cong (bool′ _ _) (it-doesn't (y ≟ z) y≢z)
 
 cons-swap : ∀ x y xs z → xs ⊙⟨ x , y ⟩ ⊙ z ≡ xs ⊙ x ↔ y ⊙ z
 cons-swap₁ : ∀ x k y z xs n → xs ⊙⟨ k , y ⟩ ∘⟨ x , k ↔ y ⊙ z ⟩ ⊙ n ≡ xs ∘⟨ x , z ⟩ ⊙ suc (x + k) ↔ y ⊙ n
@@ -162,7 +158,7 @@ cons-swap₃ (suc x) y z xs (suc n) = cong suc (cons-swap₃ x y z xs n)
 cons-swap₃ zero y z xs zero =
   suc (xs ⊙⟨ y , z ⟩ ⊙ suc (y + z)) ≡⟨ cong suc (cons-swap y z xs _) ⟩
   suc (xs ⊙ y ↔ z ⊙ suc (y + z)) ≡⟨ cong suc (cong (xs ⊙_) (⊙-· y z _ ; swap-rhs y _)) ⟩
-  suc (xs ⊙ y) ≡˘⟨ cong (bool _ zero) (it-doesn't (x≢sx+y y z ∘ sym) (suc (y + z) ≟ y)) ⟩
+  suc (xs ⊙ y) ≡˘⟨ cong (bool _ zero) (it-doesn't  (suc (y + z) ≟ y) (x≢sx+y y z ∘ sym)) ⟩
   xs ∘⟨ zero , suc (y + z) ⟩ ⊙ zero ↔ y ⊙ zero ∎
 cons-swap₃ zero y z xs (suc n) with does (suc (y + z) ≟ n) | why (suc (y + z) ≟ n) | does (y ≟ n) | why (y ≟ n)
 cons-swap₃ zero y z xs (suc n) | true | wyzn | true | yny = ⊥-elim (x≢sx+y _ _ (yny ; sym wyzn))
