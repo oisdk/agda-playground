@@ -171,27 +171,27 @@ cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | false | wyzn′ 
 
 cons-swap x y ⟨⟩ z = refl
 cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with compare x zₛ | comparing x zₛ
-... | just (false , k) | p =
+... | less k | p =
   xs ∘⟨ k , zₜ ⟩ ∘⟨ x , y ⟩ ⊙ n ≡⟨ ⊙-alg-com x y (xs ∘⟨ k , zₜ ⟩) n ⟩
   xs ∘⟨ suc x + k , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → xs ∘⟨ e , zₜ ⟩ ⊙ _) p ⟩
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ∎
-... | just (true  , k) | p =
+... | greater k | p =
   xs ⊙⟨ k , y ⟩ ∘⟨ zₛ , k ↔ y ⊙ zₜ ⟩ ⊙ n ≡⟨ cons-swap₁ zₛ k y zₜ xs n ⟩
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ ⊙-alg (suc zₛ + k) y id n ≡⟨ cong (λ e → xs ∘⟨ zₛ , zₜ ⟩ ⊙ e ↔ y ⊙ n) p ⟩
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ∎
-... | nothing | x≡zₛ with compare y zₜ | comparing y zₜ
-... | nothing           | y≡zₜ =
+... | equal | x≡zₛ with compare y zₜ | comparing y zₜ
+... | equal | y≡zₜ =
   xs ⊙+ suc x ⊙ n ≡˘⟨ cong (xs ⊙+ suc x ⊙_) (cong (x ↔_⊙ x ↔ y ⊙ n) (sym y≡zₜ) ; ⊙-alg-dup x y n) ⟩
   (xs ⊙+ suc x ⊙ x ↔ zₜ ⊙ x ↔ y ⊙ n) ≡˘⟨ ⊙-alg-com x zₜ xs (x ↔ y ⊙ n) ⟩
   (xs ∘⟨ x , zₜ ⟩ ⊙ x ↔ y ⊙ n) ≡⟨ cong (λ e → (xs ∘⟨ e , zₜ ⟩ ⊙ x ↔ y ⊙ n)) x≡zₛ  ⟩
   (xs ∘⟨ zₛ , zₜ ⟩ ⊙ x ↔ y ⊙ n) ∎
-... | just (false , yz) | yzp =
+... | less yz | yzp =
   xs ⊙⟨ y , yz ⟩ ∘⟨ x , zₜ ⟩ ⊙ n ≡⟨ cong (λ e → xs ⊙⟨ y , yz ⟩ ∘⟨ x , e ⟩ ⊙ n) (sym yzp) ⟩
   xs ⊙⟨ y , yz ⟩ ∘⟨ x , suc (y + yz) ⟩ ⊙ n ≡⟨ cons-swap₃ x y yz xs n ⟩
   xs ∘⟨ x , suc (y + yz) ⟩ ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → xs ∘⟨ x , e ⟩ ⊙ x ↔ y ⊙ n) yzp ⟩
   xs ∘⟨ x  , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → xs ∘⟨ e , zₜ ⟩ ⊙ x ↔ y ⊙ n) x≡zₛ ⟩
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ∎
-... | just (true  , yz) | yzp =
+... | greater yz | yzp =
   xs ⊙⟨ zₜ , yz ⟩ ∘⟨ x , zₜ ⟩ ⊙ n ≡⟨ cons-swap₂ x zₜ xs yz n ⟩
   (xs ∘⟨ x , zₜ ⟩ ⊙ x ↔ suc (zₜ + yz) ⊙ n) ≡⟨ cong₂ (λ e₁ e₂ → xs ∘⟨ e₁ , zₜ ⟩ ⊙ x ↔ e₂ ⊙ n) x≡zₛ yzp ⟩
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ x ↔ y ⊙ n ∎
@@ -199,20 +199,20 @@ cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with compare x zₛ | comparing x z�
 norm-correct : ∀ xs n → [ xs ]↓ ⊙ n ≡ xs · n
 norm-correct ⟨⟩ n = refl
 norm-correct (xs ∘⟨ x , y ⟩) n with compare x y | comparing x y 
-... | nothing          | p =
+... | equal | p =
   [ xs ]↓ ⊙ n ≡⟨ norm-correct xs n ⟩
   xs · n ≡˘⟨ cong (xs ·_) (swap-id x n) ⟩
   (xs · x ↔ x · n) ≡⟨ cong (λ e → xs · x ↔ e · n) p ⟩
   (xs · x ↔ y · n) ≡⟨⟩
   xs ∘⟨ x , y ⟩ · n ∎
-... | just (false , k) | p =
+... | less k | p =
   [ xs ]↓ ⊙⟨ x , k ⟩ ⊙ n ≡⟨ cons-swap x k [ xs ]↓ n ⟩
   ([ xs ]↓ ⊙ x ↔ k ⊙ n) ≡⟨ cong ([ xs ]↓ ⊙_) (⊙-· x k n) ⟩
   ([ xs ]↓ ⊙ x ↔ suc x + k · n) ≡⟨ cong (λ e → [ xs ]↓ ⊙ x ↔ e · n) p ⟩
   ([ xs ]↓ ⊙ x ↔ y · n) ≡⟨ norm-correct xs (x ↔ y · n) ⟩
   (xs · x ↔ y · n) ≡⟨⟩
   xs ∘⟨ x , y ⟩ · n ∎
-... | just (true  , k) | p =
+... | greater k | p =
   [ xs ]↓ ⊙⟨ y , k ⟩ ⊙ n ≡⟨ cons-swap y k [ xs ]↓ n ⟩
   ([ xs ]↓ ⊙ y ↔ k ⊙ n) ≡⟨ cong ([ xs ]↓ ⊙_) (⊙-· y k n) ⟩
   ([ xs ]↓ ⊙ y ↔ suc y + k · n) ≡⟨ cong (λ e → [ xs ]↓ ⊙ y ↔ e · n) p ⟩
