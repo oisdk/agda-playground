@@ -22,11 +22,11 @@ infixr 4.5 _↔′_·_
 _↔′_·_ : ℕ → ℕ → ℕ → ℕ
 zero  ↔′ zero  · z     = z
 zero  ↔′ y     · zero  = y
-zero  ↔′ suc y · suc z = if does (y ≟ z) then zero else suc z
 x     ↔′ zero  · zero  = x
-suc x ↔′ suc y · zero  = zero
-suc x ↔′ zero  · suc z = if does (x ≟ z) then zero else suc z
 suc x ↔′ suc y · suc z = suc (x ↔′ y · z)
+suc x ↔′ suc y · zero  = zero
+zero  ↔′ suc y · suc z = if does (y ≟ z) then zero else suc z
+suc x ↔′ zero  · suc z = if does (x ≟ z) then zero else suc z
 
 swap-suc : ∀ x y z → suc x ↔ suc y · suc z ≡ suc (x ↔ y · z)
 swap-suc x y z with does (x ≟ z)
