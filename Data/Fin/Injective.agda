@@ -10,6 +10,7 @@ open import Data.Fin.Properties using (discreteFin)
 
 open import Data.Nat
 open import Data.Nat.Properties using (+-comm)
+open import Data.Nat.Compare
 
 open import Function.Injective
 
@@ -60,7 +61,7 @@ n≢sn+m n m n≡m =
         refl-↣))
 
 Fin-inj : Injective Fin
-Fin-inj n m eq with compare n m
-... | equal _        = refl
-... | less     n  k  = ⊥-elim (n≢sn+m n k eq)
-... | greater  m  k  = ⊥-elim (n≢sn+m m k (sym eq))
+Fin-inj n m eq with compare n m | comparing n m
+... | equal      | p = p
+... | less     k | p = ⊥-elim (n≢sn+m n k (eq ; cong Fin (sym p)))
+... | greater  k | p = ⊥-elim (n≢sn+m m k (sym eq ; cong Fin (sym p)))
