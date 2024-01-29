@@ -106,7 +106,7 @@ _⊙⟨_⟩ : Diffs → ℕ × ℕ → Diffs
 ⟨⟩ ⊙⟨ p ⟩ = ⟨⟩ ∘⟨ p ⟩
 xs ∘⟨ yₛ , yₜ ⟩ ⊙⟨ xₛ , xₜ ⟩ = case compare xₛ yₛ of
   λ { equal → maybe (xs ⊙+ suc xₛ) (λ lg → xs ⊙⟨ lg ⟩ ∘⟨ xₛ , yₜ ⟩) (swap-diff xₜ yₜ)
-    ; (less yₛ) → xs ∘⟨ yₛ , yₜ ⟩ ∘⟨ xₛ , xₜ ⟩
+    ; (less    yₛ) → xs ∘⟨ yₛ , yₜ ⟩ ∘⟨ xₛ , xₜ ⟩
     ; (greater xₛ) → xs ⊙⟨ xₛ , xₜ ⟩ ∘⟨ yₛ , xₛ ↔ xₜ ⊙ yₜ ⟩
     }
 
