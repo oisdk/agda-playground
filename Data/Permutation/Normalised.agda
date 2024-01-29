@@ -134,16 +134,16 @@ cons-swap₁ zero k y z xs (suc n) with does (k ↔ y ⊙ z ≟ n) | does (z ≟
 ... | true  | false | e1 | e2 = ⊥-elim (e2 (sym (cong (⊙-alg k y id) (sym e1) ; ⊙-alg-dup k y z)))
 
 
-cons-swap₂ : ∀ x y xs z n → xs ⊙⟨ y , z ⟩ ∘⟨ x , y ⟩ ⊙ n ≡ xs ∘⟨ x , y ⟩ ⊙ x ↔ suc (y + z) ⊙ n
+cons-swap₂ : ∀ x y xs z n → xs ⊙⟨ y , z ⟩ ∘⟨ x , y ⟩ ⊙ n ≡ xs ∘⟨ x , y ⟩ ⊙ x ↔ suc y + z ⊙ n
 cons-swap₂ (suc x) y xs z zero = refl
 cons-swap₂ (suc x) y xs z (suc n) = cong suc (cons-swap₂ x y xs z n)
-cons-swap₂ zero y xs z zero with does (y ≟ suc (y + z)) | why (y ≟ suc (y + z))
+cons-swap₂ zero y xs z zero with does (y ≟ suc y + z) | why (y ≟ suc y + z)
 ... | false | p = cong suc $
   xs ⊙⟨ y , z ⟩ ⊙ y ≡⟨ cons-swap y z xs y ⟩
-  xs ⊙ (y ↔ z ⊙ y) ≡⟨ cong (xs ⊙_) (⊙-· y z y ; swap-lhs y (suc (y + z)) ) ⟩
-  xs ⊙ suc (y + z) ∎
+  xs ⊙ (y ↔ z ⊙ y) ≡⟨ cong (xs ⊙_) (⊙-· y z y ; swap-lhs y (suc y + z) ) ⟩
+  xs ⊙ suc y + z ∎
 ... | true  | p = ⊥-elim (x≢sx+y y z p)
-cons-swap₂ zero y xs z (suc n) with does (y ≟ n) | why (y ≟ n) | does (suc (y + z) ≟ n) | why (suc (y + z) ≟ n)
+cons-swap₂ zero y xs z (suc n) with does (y ≟ n) | why (y ≟ n) | does (suc y + z ≟ n) | why (suc y + z ≟ n)
 cons-swap₂ zero y xs z (suc n) | true | ynp | true | synp = ⊥-elim (x≢sx+y n z (sym synp ; cong suc (cong (_+ z) ynp)))
 cons-swap₂ zero y xs z (suc n) | false | ynp | true | synp = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; cong (y ↔_· n) synp ; swap-rhs y n))
 cons-swap₂ zero y xs z (suc n) | yn | ynp | false | synp with does (y ≟ n) | why (y ≟ n)
@@ -152,22 +152,22 @@ cons-swap₂ zero y xs z (suc n) | true | ynp | false | synp | false | ynp′ = 
 cons-swap₂ zero y xs z (suc n) | true | ynp | false | synp | true | ynp′ = refl
 cons-swap₂ zero y xs z (suc n) | false | ynp | false | synp | false | ynp′ = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; swap-neq y _ n ynp synp))
 
-cons-swap₃ : ∀ x y z xs n → xs ⊙⟨ y , z ⟩ ∘⟨ x , suc (y + z) ⟩ ⊙ n ≡ xs ∘⟨ x , suc (y + z) ⟩ ⊙ x ↔ y ⊙ n
+cons-swap₃ : ∀ x y z xs n → xs ⊙⟨ y , z ⟩ ∘⟨ x , suc y + z ⟩ ⊙ n ≡ xs ∘⟨ x , suc y + z ⟩ ⊙ x ↔ y ⊙ n
 cons-swap₃ (suc x) y z xs zero = refl
 cons-swap₃ (suc x) y z xs (suc n) = cong suc (cons-swap₃ x y z xs n)
 cons-swap₃ zero y z xs zero =
-  suc (xs ⊙⟨ y , z ⟩ ⊙ suc (y + z)) ≡⟨ cong suc (cons-swap y z xs _) ⟩
-  suc (xs ⊙ y ↔ z ⊙ suc (y + z)) ≡⟨ cong suc (cong (xs ⊙_) (⊙-· y z _ ; swap-rhs y _)) ⟩
-  suc (xs ⊙ y) ≡˘⟨ cong (bool _ zero) (it-doesn't  (suc (y + z) ≟ y) (x≢sx+y y z ∘ sym)) ⟩
-  xs ∘⟨ zero , suc (y + z) ⟩ ⊙ zero ↔ y ⊙ zero ∎
-cons-swap₃ zero y z xs (suc n) with does (suc (y + z) ≟ n) | why (suc (y + z) ≟ n) | does (y ≟ n) | why (y ≟ n)
+  suc (xs ⊙⟨ y , z ⟩ ⊙ suc y + z) ≡⟨ cong suc (cons-swap y z xs _) ⟩
+  suc (xs ⊙ y ↔ z ⊙ suc y + z) ≡⟨ cong suc (cong (xs ⊙_) (⊙-· y z _ ; swap-rhs y _)) ⟩
+  suc (xs ⊙ y) ≡˘⟨ cong (bool _ zero) (it-doesn't  (suc y + z ≟ y) (x≢sx+y y z ∘ sym)) ⟩
+  xs ∘⟨ zero , suc y + z ⟩ ⊙ zero ↔ y ⊙ zero ∎
+cons-swap₃ zero y z xs (suc n) with does (suc y + z ≟ n) | why (suc y + z ≟ n) | does (y ≟ n) | why (y ≟ n)
 cons-swap₃ zero y z xs (suc n) | true | wyzn | true | yny = ⊥-elim (x≢sx+y _ _ (yny ; sym wyzn))
-cons-swap₃ zero y z xs (suc n) | false | wyzn | true | yny = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; cong (_↔ _ · n) yny ; swap-lhs n (suc (y + z)) ))
+cons-swap₃ zero y z xs (suc n) | false | wyzn | true | yny = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; cong (_↔ _ · n) yny ; swap-lhs n (suc y + z) ))
 cons-swap₃ zero y z xs (suc n) | syzn | wyzn | false | yny with does (suc y + z ≟ n) | why (suc y + z ≟ n)
 cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | true | wyzn′ = ⊥-elim (wyzn wyzn′)
 cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | false | wyzn′ = ⊥-elim (wyzn′ wyzn)
 cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | true | wyzn′ = refl
-cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | false | wyzn′ = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; swap-neq y (suc (y + z)) n yny wyzn))
+cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | false | wyzn′ = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; swap-neq y (suc y + z) n yny wyzn))
 
 cons-swap x y ⟨⟩ z = refl
 cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with compare x zₛ | comparing x zₛ
