@@ -1,91 +1,19 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
--- To change:
---
--- * The lists should be snoc lists. The way the notation works,
---    (a b) (c d) . x
---  = (a b) . ((c d) . x)
---
---   And the fact that . is implemented with foldl means that
---   we're using snoce lists.
---   (or rather we're using lists with a snoc pattern)
-
--- The group operator (<>) = flip (++) in this case.
--- 
-
-module Data.Permutation where
+module Data.Permutation.Normalised where
 
 open import Prelude hiding (_↔_)
 open import Data.Nat.Properties renaming (discreteℕ to infix 4 _≟_)
 open import Data.Nat using (_+_)
 open import Path.Reasoning
 open import Data.List.Properties
-
 open import Data.List hiding ([]; _∷_)
-import Data.List as ConsR
-
---------------------------------------------------------------------------------
--- Unnormalised Representation
---------------------------------------------------------------------------------
-
-Swaps : Type
-Swaps = List (ℕ × ℕ)
-
-infixl 5 _∘⟨_⟩
-pattern _∘⟨_⟩ xs x = x ConsR.∷ xs
-
-pattern ⟨⟩ = ConsR.[]
-
-infixr 4.5 _↔_·_
-_↔_·_ : ℕ → ℕ → ℕ → ℕ
-x ↔ y · z =
-  if does (x ≟ z) then y else
-  if does (y ≟ z) then x else
-  z
-
-swap-lhs : ∀ x y → x ↔ y · x ≡ y
-swap-lhs x y with does (x ≟ x) | why (x ≟ x)
-... | true  | _ = refl
-... | false | x≢x = ⊥-elim (x≢x refl)
-
-swap-rhs : ∀ x y → x ↔ y · y ≡ x
-swap-rhs x y with does (x ≟ y) | why (x ≟ y)
-... | true  | x≡y = sym x≡y
-... | false | _ with does (y ≟ y) | why (y ≟ y)
-... | false | y≢y = ⊥-elim (y≢y refl)
-... | true  | _ = refl
-
-swap-id : ∀ x y → x ↔ x · y ≡ y
-swap-id x y with does (x ≟ y) | why (x ≟ y)
-... | false | _ = refl
-... | true  | x≡y = x≡y
-
-swap-neq : ∀ x y z → x ≢ z → y ≢ z → x ↔ y · z ≡ z
-swap-neq x y z x≢z y≢z with does (x ≟ z) | why (x ≟ z) | does (y ≟ z) | why (y ≟ z)
-... | true | x≡z | _ | _ = ⊥-elim (x≢z x≡z)
-... | _ | _ | true | y≡z = ⊥-elim (y≢z y≡z)
-... | false | _ | false | _ = refl
-
-swap-com : ∀ x y z → x ↔ y · z ≡ y ↔ x · z
-swap-com x y z with does (x ≟ z) | why (x ≟ z) | does (y ≟ z) | why (y ≟ z)
-... | false | _   | false | _ = refl
-... | false | _   | true  | _ = refl
-... | true  | _   | false | _ = refl
-... | true  | x≡z | true  | y≡z = y≡z ; sym x≡z
-
-infixr 4.5 _·_
-_·_ : Swaps → ℕ → ℕ
-_·_ = flip (foldl (flip (uncurry _↔_·_)))
-
---------------------------------------------------------------------------------
--- Normalised Representation
---------------------------------------------------------------------------------
+open import Data.Permutation.Swap _≟_
+open import Data.Permutation.NonNorm _≟_
 
 Diffs : Type
 Diffs = List (ℕ × ℕ)
 
 unflatten-alg : ℕ → ℕ → (ℕ → Swaps) → ℕ → Swaps
-unflatten-alg x y k n =  k (suc n + x) ∘⟨ n + x , suc (n + x + y) ⟩
+unflatten-alg x y k n = k (suc n + x) ∘⟨ n + x , suc (n + x + y) ⟩
 
 [_]↑ : Diffs → Swaps
 [ xs ]↑ = foldr (uncurry unflatten-alg) (const ⟨⟩) xs 0
@@ -121,7 +49,6 @@ perm-alg zero    y k zero    = suc (k y)
 perm-alg zero    y k (suc z) = if does (y ≟ z) then zero else suc (k z)
 perm-alg (suc x) y k zero    = zero
 perm-alg (suc x) y k (suc z) = suc (perm-alg x y k z)
-
 
 infixr 4.5 _⊙_
 _⊙_ : Diffs → ℕ → ℕ
