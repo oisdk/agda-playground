@@ -105,9 +105,9 @@ infixl 5 _⊙⟨_⟩
 _⊙⟨_⟩ : Diffs → ℕ × ℕ → Diffs
 ⟨⟩ ⊙⟨ p ⟩ = ⟨⟩ ∘⟨ p ⟩
 xs ∘⟨ yₛ , yₜ ⟩ ⊙⟨ xₛ , xₜ ⟩ = case compare xₛ yₛ of
-  λ { equal        → maybe (xs ⊙+ suc xₛ) (λ lg → xs ⊙⟨ lg ⟩ ∘⟨ xₛ , yₜ ⟩) (swap-diff xₜ yₜ)
-    ; (less    yₛ) → xs ∘⟨ yₛ , yₜ ⟩ ∘⟨ xₛ , xₜ ⟩
-    ; (greater xₛ) → xs ⊙⟨ xₛ , xₜ ⟩ ∘⟨ yₛ , xₛ ↔ xₜ ⊙ yₜ ⟩
+  λ { equal       → maybe (xs ⊙+ suc xₛ) (λ lg → xs ⊙⟨ lg ⟩ ∘⟨ xₛ , yₜ ⟩) (swap-diff xₜ yₜ)
+    ; (less    k) → xs ∘⟨ k , yₜ ⟩ ∘⟨ xₛ , xₜ ⟩
+    ; (greater k) → xs ⊙⟨ k , xₜ ⟩ ∘⟨ yₛ , k ↔ xₜ ⊙ yₜ ⟩
     }
 
 [_]↓ : Swaps → Diffs
