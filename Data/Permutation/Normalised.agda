@@ -18,32 +18,12 @@ unflatten-alg x y k n = k (suc n + x) ∘⟨ n + x , suc (n + x + y) ⟩
 [_]↑ : Diffs → Swaps
 [ xs ]↑ = foldr (uncurry unflatten-alg) (const ⟨⟩) xs 0
 
--- infixr 4.5 _↔′_·_
--- _↔′_·_ : ℕ → ℕ → ℕ → ℕ
--- zero  ↔′ zero  · z     = z
--- zero  ↔′ y     · zero  = y
--- x     ↔′ zero  · zero  = x
--- suc x ↔′ suc y · suc z = suc (x ↔′ y · z)
--- suc x ↔′ suc y · zero  = zero
--- zero  ↔′ suc y · suc z = if does (y ≟ z) then zero else suc z
--- suc x ↔′ zero  · suc z = if does (x ≟ z) then zero else suc z
-
 swap-suc : ∀ x y z → suc x ↔ suc y · suc z ≡ suc (x ↔ y · z)
 swap-suc x y z with does (x ≟ z)
 ... | true = refl
 ... | false with does (y ≟ z)
 ... | false = refl
 ... | true = refl
-
--- swap-swap′ : ∀ x y z → x ↔ y · z ≡ x ↔′ y · z
--- swap-swap′ zero    zero    z       = swap-id zero z
--- swap-swap′ zero    (suc y) zero    = refl
--- swap-swap′ zero    (suc y) (suc z) = refl
--- swap-swap′ (suc x) zero    zero    = refl
--- swap-swap′ (suc x) (suc y) zero    = refl
--- swap-swap′ (suc x) zero    (suc z) = refl
--- swap-swap′ (suc x) (suc y) (suc z) = swap-suc x y z ; cong suc (swap-swap′ x y z)
-
 
 ⊙-alg : ℕ → ℕ → (ℕ → ℕ) → ℕ → ℕ
 ⊙-alg zero    y k zero    = suc (k y)
@@ -59,17 +39,18 @@ infixr 4.5 _↔_⊙_
 _↔_⊙_ : ℕ → ℕ → ℕ → ℕ
 _↔_⊙_ x y = ⊙-alg x y id
 
-⊙-· : ∀ x y z → x ↔ y ⊙ z ≡ x ↔ suc (x + y) · z
+⊙-· : ∀ x y z → x ↔ y ⊙ z ≡ x ↔ suc x + y · z
 ⊙-· (suc x) y (suc z) = cong suc (⊙-· x y z) ; sym (swap-suc x (suc (x + y)) z)
 ⊙-· (suc x) y zero    = refl
 ⊙-· zero    y zero    = refl
 ⊙-· zero    y (suc z) = refl
 
-shift : ℕ → Diffs → Diffs
-shift m ⟨⟩ = ⟨⟩
-shift m (xs ∘⟨ x , y ⟩) = xs ∘⟨ m + x , y ⟩
+infixl 5 _⊙+_
+_⊙+_ : Diffs → ℕ → Diffs
+⟨⟩ ⊙+ _ = ⟨⟩
+xs ∘⟨ x , y ⟩ ⊙+ m = xs ∘⟨ m + x , y ⟩
 
-⊙-alg-com : ∀ x y xs z → xs ∘⟨ x , y ⟩ ⊙ z ≡ shift (suc x) xs ⊙ x ↔ y ⊙ z
+⊙-alg-com : ∀ x y xs z → xs ∘⟨ x , y ⟩ ⊙ z ≡ xs ⊙+ suc x ⊙ x ↔ y ⊙ z
 ⊙-alg-com x y ⟨⟩ z = refl
 ⊙-alg-com zero y (xs ∘⟨ w ⟩) zero = refl
 ⊙-alg-com (suc x) y (xs ∘⟨ w ⟩) zero = refl
@@ -84,20 +65,18 @@ swap-unf-alg x y k m n = k (suc m + x) (m + x ↔ suc (m + x + y) · n)
 swap-unf′ : Swaps → ℕ → ℕ → ℕ
 swap-unf′ = foldr (uncurry swap-unf-alg) (const id)
 
-swap-shift : ∀ m n xs → shift m xs ⊙ n ≡ swap-unf′ xs m n
+swap-shift : ∀ m n xs → xs ⊙+ m ⊙ n ≡ swap-unf′ xs m n
 swap-shift m n ⟨⟩ = refl
 swap-shift m n (xs ∘⟨ x , y ⟩) =
   ⊙-alg (m + x) y (xs ⊙_) n
     ≡⟨ ⊙-alg-com (m + x) y xs n ⟩
-  shift (suc m + x) xs ⊙ ⊙-alg (m + x) y id n
-    ≡⟨ cong (_⊙_ (shift (suc m + x) xs)) (⊙-· (m + x) y n) ⟩
-  shift (suc m + x) xs ⊙ m + x ↔ suc (m + x + y) · n
+  (xs ⊙+ suc m + x ⊙ m + x ↔ y ⊙ n)
+    ≡⟨ cong (_⊙_ (xs ⊙+ suc m + x)) (⊙-· (m + x) y n) ⟩
+  xs ⊙+ suc m + x ⊙ m + x ↔ suc m + x + y · n
     ≡⟨ swap-shift (suc m + x) _ xs ⟩
-  swap-unf′ xs (suc m + x) (m + x ↔ suc (m + x + y) · n)
-    ≡⟨⟩
   swap-unf-alg x y (swap-unf′ xs) m n ∎
 
-shift-0 : ∀ xs → shift 0 xs ≡ xs
+shift-0 : ∀ xs → xs ⊙+ 0 ≡ xs
 shift-0 ⟨⟩ = refl
 shift-0 (xs ∘⟨ w ⟩) = refl
 
@@ -105,7 +84,7 @@ swaps-compress : ∀ xs n → xs ⊙ n ≡ [ xs ]↑ · n
 swaps-compress xs n =
   xs ⊙ n
     ≡˘⟨ cong (_⊙ n) (shift-0 xs) ⟩
-  shift 0 xs ⊙ n
+  xs ⊙+ 0 ⊙ n
     ≡⟨ swap-shift 0 n xs ⟩
   swap-unf′ xs 0 n
     ≡˘⟨ cong′ {A = ℕ → ℕ → ℕ} (λ e → e 0 n) (foldr-fusion (λ xs m n → foldl-by-r (flip (uncurry _↔_·_)) n (xs m)) (const ⟨⟩) (λ _ _ → refl) xs) ⟩
@@ -150,7 +129,7 @@ infixl 5 _⊙⟨_⟩
 _⊙⟨_⟩ : Diffs → ℕ × ℕ → Diffs
 ⟨⟩ ⊙⟨ p ⟩ = ⟨⟩ ∘⟨ p ⟩
 xs ∘⟨ yₛ , yₜ ⟩ ⊙⟨ xₛ , xₜ ⟩ = case cmp-diff xₛ yₛ of
-  λ { nothing → maybe (shift (suc xₛ) xs) (λ lg → xs ⊙⟨ lg ⟩ ∘⟨ xₛ , yₜ ⟩) (swap-diff xₜ yₜ)
+  λ { nothing → maybe (xs ⊙+ suc xₛ) (λ lg → xs ⊙⟨ lg ⟩ ∘⟨ xₛ , yₜ ⟩) (swap-diff xₜ yₜ)
     ; (just (false , yₛ)) → xs ∘⟨ yₛ , yₜ ⟩ ∘⟨ xₛ , xₜ ⟩
     ; (just (true  , xₛ)) → xs ⊙⟨ xₛ , xₜ ⟩ ∘⟨ yₛ , xₛ ↔ xₜ ⊙ yₜ ⟩
     }
@@ -230,8 +209,8 @@ cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with cmp-diff x zₛ | cmp-reflects 
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ∎
 ... | nothing | x≡zₛ with cmp-diff y zₜ | cmp-reflects y zₜ
 ... | nothing           | y≡zₜ =
-  shift (suc x) xs ⊙ n ≡˘⟨ cong (shift (suc x) xs ⊙_) (cong (x ↔_⊙ x ↔ y ⊙ n) (sym y≡zₜ) ; ⊙-alg-dup x y n) ⟩
-  (shift (suc x) xs ⊙ x ↔ zₜ ⊙ x ↔ y ⊙ n) ≡˘⟨ ⊙-alg-com x zₜ xs (x ↔ y ⊙ n) ⟩
+  xs ⊙+ suc x ⊙ n ≡˘⟨ cong (xs ⊙+ suc x ⊙_) (cong (x ↔_⊙ x ↔ y ⊙ n) (sym y≡zₜ) ; ⊙-alg-dup x y n) ⟩
+  (xs ⊙+ suc x ⊙ x ↔ zₜ ⊙ x ↔ y ⊙ n) ≡˘⟨ ⊙-alg-com x zₜ xs (x ↔ y ⊙ n) ⟩
   (xs ∘⟨ x , zₜ ⟩ ⊙ x ↔ y ⊙ n) ≡⟨ cong (λ e → (xs ∘⟨ e , zₜ ⟩ ⊙ x ↔ y ⊙ n)) x≡zₛ  ⟩
   (xs ∘⟨ zₛ , zₜ ⟩ ⊙ x ↔ y ⊙ n) ∎
 ... | just (false , yz) | yzp =
