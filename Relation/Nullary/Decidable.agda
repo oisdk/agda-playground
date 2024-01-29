@@ -48,3 +48,13 @@ dec-bool : (b : Bool) → (T b → A) → (A → T b) → Dec A
 dec-bool b to fro .does = b
 dec-bool false to fro .why = fro
 dec-bool true  to fro .why = to _
+
+open import Path
+
+it-does : A → (d : Dec A) → does d ≡ true
+it-does A (yes _) = refl
+it-does A (no ¬A) = ⊥-elim (¬A A)
+
+it-doesn't : ¬ A → (d : Dec A) → does d ≡ false
+it-doesn't ¬A (no _) = refl
+it-doesn't ¬A (yes A) = ⊥-elim (¬A A)
