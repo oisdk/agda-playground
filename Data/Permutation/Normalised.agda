@@ -102,7 +102,6 @@ shift-0 : ∀ xs → shift 0 xs ≡ xs
 shift-0 ⟨⟩ = refl
 shift-0 (xs ∘⟨ w ⟩) = refl
 
-
 swaps-compress : ∀ xs n → xs ⊙ n ≡ [ xs ]↑ · n
 swaps-compress xs n =
   xs ⊙ n
@@ -219,8 +218,6 @@ cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | true | wyzn′ =
 cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | false | wyzn′ = ⊥-elim (wyzn′ wyzn)
 cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | true | wyzn′ = refl
 cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | false | wyzn′ = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (perm-alg-swap y z n ; sym (swap-swap′ y _ n) ; swap-neq y (suc (y + z)) n yny wyzn))
-
-
 
 cons-swap x y ⟨⟩ z = refl
 cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with cmp-diff x zₛ | cmp-reflects x zₛ
