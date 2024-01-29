@@ -62,19 +62,16 @@ xs ∘⟨ x , y ⟩ ⊙+ m = xs ∘⟨ m + x , y ⟩
 swap-unf-alg : ℕ → ℕ → (ℕ → ℕ → ℕ) → ℕ → ℕ → ℕ
 swap-unf-alg x y k m n = k (suc m + x) (m + x ↔ suc (m + x + y) · n)
 
-swap-unf′ : Swaps → ℕ → ℕ → ℕ
-swap-unf′ = foldr (uncurry swap-unf-alg) (const id)
-
-swap-shift : ∀ m n xs → xs ⊙+ m ⊙ n ≡ swap-unf′ xs m n
+swap-shift : ∀ m n xs → xs ⊙+ m ⊙ n ≡ foldr (uncurry swap-unf-alg) (const id) xs m n
 swap-shift m n ⟨⟩ = refl
 swap-shift m n (xs ∘⟨ x , y ⟩) =
   ⊙-alg (m + x) y (xs ⊙_) n
     ≡⟨ ⊙-alg-com (m + x) y xs n ⟩
   (xs ⊙+ suc m + x ⊙ m + x ↔ y ⊙ n)
-    ≡⟨ cong (_⊙_ (xs ⊙+ suc m + x)) (⊙-· (m + x) y n) ⟩
+    ≡⟨ cong (xs ⊙+ suc m + x ⊙_) (⊙-· (m + x) y n) ⟩
   xs ⊙+ suc m + x ⊙ m + x ↔ suc m + x + y · n
     ≡⟨ swap-shift (suc m + x) _ xs ⟩
-  swap-unf-alg x y (swap-unf′ xs) m n ∎
+  swap-unf-alg x y (foldr (uncurry swap-unf-alg) (const id) xs) m n ∎
 
 shift-0 : ∀ xs → xs ⊙+ 0 ≡ xs
 shift-0 ⟨⟩ = refl
@@ -86,7 +83,7 @@ swaps-compress xs n =
     ≡˘⟨ cong (_⊙ n) (shift-0 xs) ⟩
   xs ⊙+ 0 ⊙ n
     ≡⟨ swap-shift 0 n xs ⟩
-  swap-unf′ xs 0 n
+  foldr (uncurry swap-unf-alg) (const id) xs 0 n
     ≡˘⟨ cong′ {A = ℕ → ℕ → ℕ} (λ e → e 0 n) (foldr-fusion (λ xs m n → foldl-by-r (flip (uncurry _↔_·_)) n (xs m)) (const ⟨⟩) (λ _ _ → refl) xs) ⟩
   foldl-by-r (flip (uncurry _↔_·_)) n [ xs ]↑
     ≡˘⟨ foldl-is-foldr (flip (uncurry _↔_·_)) n [ xs ]↑ ⟩
