@@ -96,39 +96,18 @@ max-num : Diffs → ℕ
 max-num = foldr max-num-alg zero
 
 open import Data.Maybe using (mapMaybe)
-
-cmp-diff : ℕ → ℕ → Maybe (Bool × ℕ)
-cmp-diff zero zero = nothing
-cmp-diff zero (suc y) = just (false , y)
-cmp-diff (suc x) zero = just (true  , x)
-cmp-diff (suc x) (suc y) = cmp-diff x y
+open import Data.Nat.Compare
 
 swap-diff : ℕ → ℕ → Maybe (ℕ × ℕ)
-swap-diff x y = mapMaybe (map₁ (bool′ x y)) (cmp-diff x y)
-
-cmp-reflect : ℕ → ℕ → Maybe (Bool × ℕ) → Type
-cmp-reflect x y (just (false , z)) = suc x + z ≡ y
-cmp-reflect x y (just (true  , z)) = suc y + z ≡ x
-cmp-reflect x y nothing = x ≡ y
-
-suc-reflect : ∀ x y z → cmp-reflect x y z → cmp-reflect (suc x) (suc y) z
-suc-reflect x y (just (false , r)) = cong suc
-suc-reflect x y (just (true  , r)) = cong suc
-suc-reflect x y nothing            = cong suc
-
-cmp-reflects : ∀ x y → cmp-reflect x y (cmp-diff x y)
-cmp-reflects zero    zero    = refl
-cmp-reflects zero    (suc y) = refl
-cmp-reflects (suc x) zero    = refl
-cmp-reflects (suc x) (suc y) = suc-reflect x y (cmp-diff x y) (cmp-reflects x y)
+swap-diff x y = mapMaybe (map₁ (bool′ x y)) (compare x y)
 
 infixl 5 _⊙⟨_⟩
 _⊙⟨_⟩ : Diffs → ℕ × ℕ → Diffs
 ⟨⟩ ⊙⟨ p ⟩ = ⟨⟩ ∘⟨ p ⟩
-xs ∘⟨ yₛ , yₜ ⟩ ⊙⟨ xₛ , xₜ ⟩ = case cmp-diff xₛ yₛ of
-  λ { nothing → maybe (xs ⊙+ suc xₛ) (λ lg → xs ⊙⟨ lg ⟩ ∘⟨ xₛ , yₜ ⟩) (swap-diff xₜ yₜ)
-    ; (just (false , yₛ)) → xs ∘⟨ yₛ , yₜ ⟩ ∘⟨ xₛ , xₜ ⟩
-    ; (just (true  , xₛ)) → xs ⊙⟨ xₛ , xₜ ⟩ ∘⟨ yₛ , xₛ ↔ xₜ ⊙ yₜ ⟩
+xs ∘⟨ yₛ , yₜ ⟩ ⊙⟨ xₛ , xₜ ⟩ = case compare xₛ yₛ of
+  λ { equal → maybe (xs ⊙+ suc xₛ) (λ lg → xs ⊙⟨ lg ⟩ ∘⟨ xₛ , yₜ ⟩) (swap-diff xₜ yₜ)
+    ; (less yₛ) → xs ∘⟨ yₛ , yₜ ⟩ ∘⟨ xₛ , xₜ ⟩
+    ; (greater xₛ) → xs ⊙⟨ xₛ , xₜ ⟩ ∘⟨ yₛ , xₛ ↔ xₜ ⊙ yₜ ⟩
     }
 
 [_]↓ : Swaps → Diffs
@@ -195,7 +174,7 @@ cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | true | wyzn′ = 
 cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | false | wyzn′ = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; swap-neq y (suc (y + z)) n yny wyzn))
 
 cons-swap x y ⟨⟩ z = refl
-cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with cmp-diff x zₛ | cmp-reflects x zₛ
+cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with compare x zₛ | comparing x zₛ
 ... | just (false , k) | p =
   xs ∘⟨ k , zₜ ⟩ ∘⟨ x , y ⟩ ⊙ n ≡⟨ ⊙-alg-com x y (xs ∘⟨ k , zₜ ⟩) n ⟩
   xs ∘⟨ suc x + k , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → xs ∘⟨ e , zₜ ⟩ ⊙ _) p ⟩
@@ -204,7 +183,7 @@ cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with cmp-diff x zₛ | cmp-reflects 
   xs ⊙⟨ k , y ⟩ ∘⟨ zₛ , k ↔ y ⊙ zₜ ⟩ ⊙ n ≡⟨ cons-swap₁ zₛ k y zₜ xs n ⟩
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ ⊙-alg (suc zₛ + k) y id n ≡⟨ cong (λ e → xs ∘⟨ zₛ , zₜ ⟩ ⊙ e ↔ y ⊙ n) p ⟩
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ∎
-... | nothing | x≡zₛ with cmp-diff y zₜ | cmp-reflects y zₜ
+... | nothing | x≡zₛ with compare y zₜ | comparing y zₜ
 ... | nothing           | y≡zₜ =
   xs ⊙+ suc x ⊙ n ≡˘⟨ cong (xs ⊙+ suc x ⊙_) (cong (x ↔_⊙ x ↔ y ⊙ n) (sym y≡zₜ) ; ⊙-alg-dup x y n) ⟩
   (xs ⊙+ suc x ⊙ x ↔ zₜ ⊙ x ↔ y ⊙ n) ≡˘⟨ ⊙-alg-com x zₜ xs (x ↔ y ⊙ n) ⟩
@@ -223,7 +202,7 @@ cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with cmp-diff x zₛ | cmp-reflects 
 
 norm-correct : ∀ xs n → [ xs ]↓ ⊙ n ≡ xs · n
 norm-correct ⟨⟩ n = refl
-norm-correct (xs ∘⟨ x , y ⟩) n with cmp-diff x y | cmp-reflects x y 
+norm-correct (xs ∘⟨ x , y ⟩) n with compare x y | comparing x y 
 ... | nothing          | p =
   [ xs ]↓ ⊙ n ≡⟨ norm-correct xs n ⟩
   xs · n ≡˘⟨ cong (xs ·_) (swap-id x n) ⟩
