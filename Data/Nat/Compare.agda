@@ -16,11 +16,13 @@ pattern equal = nothing
 pattern less n = just (false , n)
 pattern greater n = just (true , n)
 
+open import Agda.Builtin.Nat using () renaming (_<_ to _<ᴮ_; _==_ to _≡ᴮ_)
+
 compare : ℕ → ℕ → Ordering
-compare zero zero = equal
-compare zero (suc m) = less m
-compare (suc n) zero = greater n
-compare (suc n) (suc m) = compare n m
+compare n m =
+  if n <ᴮ m then less (m ∸ suc n) else
+  if n ≡ᴮ m then equal else
+  greater (n ∸ suc m)
 
 Compared : ℕ → ℕ → Ordering → Type
 Compared x y (less    n) = suc x + n ≡ y
