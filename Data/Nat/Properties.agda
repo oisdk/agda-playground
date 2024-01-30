@@ -32,6 +32,10 @@ pred zero = zero
 suc-inj : ∀ {n m} → suc n ≡ suc m → n ≡ m
 suc-inj = cong pred
 
++-inj : ∀ x {n m} → x + n ≡ x + m → n ≡ m
++-inj zero p = p
++-inj (suc x) p = +-inj x (suc-inj p)
+
 open import Relation.Nullary.Discrete.FromBoolean
 
 module Eqℕ where
