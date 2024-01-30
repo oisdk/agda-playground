@@ -277,3 +277,20 @@ norm-correct (xs ∘⟨ x , y ⟩) n with compare x y | comparing x y
   (xs · y ↔ x · n) ≡⟨ cong (xs ·_) (swap-com y x n) ⟩
   (xs · x ↔ y · n) ≡⟨⟩
   xs ∘⟨ x , y ⟩ · n ∎
+
+-- --------------------------------------------------------------------------------
+-- -- Group Operator
+-- --------------------------------------------------------------------------------
+
+-- un-diff : Diffs → Diffs
+-- un-diff xs = foldr (λ { (x , y) k n → k (suc n + x) ∘⟨ n + x , y ⟩ }) (const ⟨⟩) xs 0
+
+-- infixl 6 _∙_
+-- _∙_ : Diffs → Diffs → Diffs
+-- xs ∙ ys = foldr (flip _⊙⟨_⟩) xs (un-diff ys)
+
+-- diffs-comp : ∀ xs ys n → (xs ∙ ys) ⊙ n ≡ xs ⊙ (ys ⊙ n)
+-- diffs-comp xs ys n =
+--   xs ∙ ys ⊙ n ≡⟨ {!!} ⟩
+--   xs ⊙ ys ⊙ n ≡⟨ {!!} ⟩
+--   xs ⊙ ys ⊙ n ∎
