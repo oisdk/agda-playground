@@ -20,3 +20,8 @@ pattern ⟨⟩ = ConsR.[]
 infixr 4.5 _·_
 _·_ : Swaps → A → A
 _·_ = flip (foldl (flip (uncurry _↔_·_)))
+
+-- We can't really compute the support without first removing ids from the list
+-- 
+-- supp-swaps : Swaps → List A
+-- supp-swaps = foldr (λ { (x , y) xs → xs ∘⟨ y ⟩ ∘⟨ x ⟩ }) ⟨⟩
