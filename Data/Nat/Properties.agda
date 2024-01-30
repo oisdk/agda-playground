@@ -8,14 +8,16 @@ open import Prelude
 open import Cubical.Data.Nat using (caseNat; injSuc) public
 open import Data.Nat.DivMod
 
-mutual
-  _-1⊔_ : ℕ → ℕ → ℕ
-  zero  -1⊔ n = n
-  suc m -1⊔ n = n ⊔ m
+infixr 4 _⊔_ _-1⊔_
 
-  _⊔_ : ℕ → ℕ → ℕ
-  zero  ⊔ m = m
-  suc n ⊔ m = suc (m -1⊔ n)
+_⊔_ _-1⊔_ : ℕ → ℕ → ℕ
+
+zero  ⊔ m = m
+suc n ⊔ m = suc (m -1⊔ n)
+
+zero  -1⊔ n = n
+suc m -1⊔ n = n ⊔ m
+
 
 znots : ∀ {n} → zero ≢ suc n
 znots z≡s = subst (caseNat ⊤ ⊥) z≡s tt

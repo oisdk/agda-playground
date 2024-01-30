@@ -9,21 +9,16 @@ open import Data.List hiding ([]; _∷_)
 open import Data.Permutation.Swap _≟_
 open import Data.Permutation.NonNorm _≟_
 
+--------------------------------------------------------------------------------
+-- Diffs type
+--------------------------------------------------------------------------------
+
 Diffs : Type
 Diffs = List (ℕ × ℕ)
 
-unflatten-alg : ℕ → ℕ → (ℕ → Swaps) → ℕ → Swaps
-unflatten-alg x y k n = k (suc n + x) ∘⟨ n + x , suc (n + x + y) ⟩
-
-[_]↑ : Diffs → Swaps
-[ xs ]↑ = foldr (uncurry unflatten-alg) (const ⟨⟩) xs 0
-
-swap-suc : ∀ x y z → suc x ↔ suc y · suc z ≡ suc (x ↔ y · z)
-swap-suc x y z with does (x ≟ z)
-... | true = refl
-... | false with does (y ≟ z)
-... | false = refl
-... | true = refl
+--------------------------------------------------------------------------------
+-- Applying a normalised permutation
+--------------------------------------------------------------------------------
 
 ⊙-alg : ℕ → ℕ → (ℕ → ℕ) → ℕ → ℕ
 ⊙-alg zero    y k zero    = suc (k y)
@@ -38,6 +33,27 @@ _⊙_ = foldr (uncurry ⊙-alg) id
 infixr 4.5 _↔_⊙_
 _↔_⊙_ : ℕ → ℕ → ℕ → ℕ
 _↔_⊙_ x y = ⊙-alg x y id
+
+--------------------------------------------------------------------------------
+-- Unnormalise a permutation
+--------------------------------------------------------------------------------
+
+unflatten-alg : ℕ → ℕ → (ℕ → Swaps) → ℕ → Swaps
+unflatten-alg x y k n = k (suc n + x) ∘⟨ n + x , suc (n + x + y) ⟩
+
+[_]↑ : Diffs → Swaps
+[ xs ]↑ = foldr (uncurry unflatten-alg) (const ⟨⟩) xs 0
+
+--------------------------------------------------------------------------------
+-- Unnormalise Proof
+--------------------------------------------------------------------------------
+
+swap-suc : ∀ x y z → suc x ↔ suc y · suc z ≡ suc (x ↔ y · z)
+swap-suc x y z with does (x ≟ z)
+... | true = refl
+... | false with does (y ≟ z)
+... | false = refl
+... | true = refl
 
 ⊙-· : ∀ x y z → x ↔ y ⊙ z ≡ x ↔ suc x + y · z
 ⊙-· (suc x) y (suc z) = cong suc (⊙-· x y z) ; sym (swap-suc x (suc (x + y)) z)
@@ -89,11 +105,28 @@ swaps-compress xs n =
     ≡˘⟨ foldl-is-foldr (flip (uncurry _↔_·_)) n [ xs ]↑ ⟩
   [ xs ]↑ · n ∎
   
+--------------------------------------------------------------------------------
+-- Find range of permutatiuon 
+--------------------------------------------------------------------------------
+
 max-num-alg : ℕ × ℕ → ℕ → ℕ
 max-num-alg (x , y) z = suc (x + (y ⊔ z))
 
 max-num : Diffs → ℕ
 max-num = foldr max-num-alg zero
+
+disp-diffs : Diffs → List ℕ
+disp-diffs d = map (d ⊙_) (0 ⋯ max-num d)
+
+max-swaps : Swaps → ℕ
+max-swaps = foldr (λ { (x , y) z → x ⊔ y ⊔ z }) zero
+
+disp-swaps : Swaps → List ℕ
+disp-swaps d = map (d ·_) (0 ⋯ max-swaps d)
+
+--------------------------------------------------------------------------------
+-- Normalise a permutation
+--------------------------------------------------------------------------------
 
 open import Data.Maybe using (mapMaybe)
 open import Data.Nat.Compare
@@ -112,6 +145,10 @@ xs ∘⟨ yₛ , yₜ ⟩ ⊙⟨ xₛ , xₜ ⟩ = case compare xₛ yₛ of
 
 [_]↓ : Swaps → Diffs
 [_]↓ = foldr (flip _⊙⟨_⟩) ⟨⟩ ∘ catMaybes (uncurry swap-diff)
+
+--------------------------------------------------------------------------------
+-- Normalisation proof
+--------------------------------------------------------------------------------
 
 ⊙-alg-dup : ∀ x y z → x ↔ y ⊙ x ↔ y ⊙ z ≡ z
 ⊙-alg-dup zero y zero = cong (bool′ _ _) (it-does (y ≟ y) refl)
