@@ -165,8 +165,10 @@ xs ∘⟨ yₛ , yₜ ⟩ ⊙⟨ xₛ , xₜ ⟩ = case compare xₛ yₛ of
 ... | true  | y≡z = cong suc y≡z
 ... | false | y≢z = cong (bool′ _ _) (it-doesn't (y ≟ z) y≢z)
 
+-- ⊙-· : ∀ x y z → x ↔ y ⊙ z ≡ x ↔ suc x + y · z
+-- 
 cons-swap : ∀ x y xs z → xs ⊙⟨ x , y ⟩ ⊙ z ≡ xs ⊙ x ↔ y ⊙ z
-cons-swap₁ : ∀ x k y z xs n → xs ⊙⟨ k , y ⟩ ∘⟨ x , k ↔ y ⊙ z ⟩ ⊙ n ≡ xs ∘⟨ x , z ⟩ ⊙ suc (x + k) ↔ y ⊙ n
+cons-swap₁ : ∀ x k y z xs n → xs ⊙⟨ k , y ⟩ ∘⟨ x , k ↔ y ⊙ z ⟩ ⊙ n ≡ xs ∘⟨ x , z ⟩ ⊙ suc x + k ↔ y ⊙ n
 
 cons-swap₁ (suc x) k y z xs (suc n) = cong suc (cons-swap₁ x k y z xs n)
 cons-swap₁ (suc x) k y z xs zero = refl
@@ -176,7 +178,6 @@ cons-swap₁ zero k y z xs (suc n) with does (k ↔ y ⊙ z ≟ n) | does (z ≟
 ... | true  | true  | _ | _ = refl
 ... | false | true  | e1 | e2 = ⊥-elim (e1 (cong (⊙-alg k y id) e2 ; ⊙-alg-dup k y n))
 ... | true  | false | e1 | e2 = ⊥-elim (e2 (sym (cong (⊙-alg k y id) (sym e1) ; ⊙-alg-dup k y z)))
-
 
 cons-swap₂ : ∀ x y xs z n → xs ⊙⟨ y , z ⟩ ∘⟨ x , y ⟩ ⊙ n ≡ xs ∘⟨ x , y ⟩ ⊙ x ↔ suc y + z ⊙ n
 cons-swap₂ (suc x) y xs z zero = refl
@@ -213,6 +214,10 @@ cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | false | wyzn′ =
 cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | true | wyzn′ = refl
 cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | false | wyzn′ = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; swap-neq y (suc y + z) n yny wyzn))
 
+-- cons-swap₁ : ∀ x k y z xs n → xs ⊙⟨ k , y ⟩ ∘⟨ x , k ↔ y ⊙ z ⟩ ⊙ n ≡ xs ∘⟨ x , z         ⟩ ⊙ suc x + k ↔ y         ⊙ n
+-- cons-swap₂ : ∀ x y xs z   n → xs ⊙⟨ y , z ⟩ ∘⟨ x , y         ⟩ ⊙ n ≡ xs ∘⟨ x , y         ⟩ ⊙ x         ↔ suc y + z ⊙ n
+-- cons-swap₃ : ∀ x y z xs   n → xs ⊙⟨ y , z ⟩ ∘⟨ x , suc y + z ⟩ ⊙ n ≡ xs ∘⟨ x , suc y + z ⟩ ⊙ x         ↔ y         ⊙ n
+
 cons-swap x y ⟨⟩ z = refl
 cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with compare x zₛ | comparing x zₛ
 ... | less k | p =
@@ -220,9 +225,9 @@ cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with compare x zₛ | comparing x z�
   xs ∘⟨ suc x + k , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → xs ∘⟨ e , zₜ ⟩ ⊙ _) p ⟩
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ∎
 ... | greater k | p =
-  xs ⊙⟨ k , y ⟩ ∘⟨ zₛ , k ↔ y ⊙ zₜ ⟩ ⊙ n ≡⟨ cons-swap₁ zₛ k y zₜ xs n ⟩
-  xs ∘⟨ zₛ , zₜ ⟩ ⊙ ⊙-alg (suc zₛ + k) y id n ≡⟨ cong (λ e → xs ∘⟨ zₛ , zₜ ⟩ ⊙ e ↔ y ⊙ n) p ⟩
-  xs ∘⟨ zₛ , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ∎
+  xs ⊙⟨ k , y ⟩ ∘⟨ zₛ , k ↔ y ⊙ zₜ ⟩ ⊙ n ≡⟨ cons-swap₁ zₛ k y zₜ xs n  ⟩
+  (xs ∘⟨ zₛ , zₜ ⟩ ⊙ suc zₛ + k ↔ y ⊙ n) ≡⟨ cong (λ e → xs ∘⟨ zₛ , zₜ ⟩ ⊙ e ↔ y ⊙ n) p ⟩
+  xs ∘⟨ zₛ , zₜ ⟩ ⊙ x ↔ y ⊙ n ∎
 ... | equal | x≡zₛ with compare y zₜ | comparing y zₜ
 ... | equal | y≡zₜ =
   xs ⊙+ suc x ⊙ n ≡˘⟨ cong (xs ⊙+ suc x ⊙_) (cong (x ↔_⊙ x ↔ y ⊙ n) (sym y≡zₜ) ; ⊙-alg-dup x y n) ⟩
@@ -231,8 +236,8 @@ cons-swap x y (xs ∘⟨ zₛ , zₜ ⟩) n with compare x zₛ | comparing x z�
   (xs ∘⟨ zₛ , zₜ ⟩ ⊙ x ↔ y ⊙ n) ∎
 ... | less yz | yzp =
   xs ⊙⟨ y , yz ⟩ ∘⟨ x , zₜ ⟩ ⊙ n ≡⟨ cong (λ e → xs ⊙⟨ y , yz ⟩ ∘⟨ x , e ⟩ ⊙ n) (sym yzp) ⟩
-  xs ⊙⟨ y , yz ⟩ ∘⟨ x , suc (y + yz) ⟩ ⊙ n ≡⟨ cons-swap₃ x y yz xs n ⟩
-  xs ∘⟨ x , suc (y + yz) ⟩ ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → xs ∘⟨ x , e ⟩ ⊙ x ↔ y ⊙ n) yzp ⟩
+  xs ⊙⟨ y , yz ⟩ ∘⟨ x , suc y + yz ⟩ ⊙ n ≡⟨ cons-swap₃ x y yz xs n ⟩
+  xs ∘⟨ x , suc y + yz ⟩ ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → xs ∘⟨ x , e ⟩ ⊙ x ↔ y ⊙ n) yzp ⟩
   xs ∘⟨ x  , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ≡⟨ cong (λ e → xs ∘⟨ e , zₜ ⟩ ⊙ x ↔ y ⊙ n) x≡zₛ ⟩
   xs ∘⟨ zₛ , zₜ ⟩ ⊙ (x ↔ y ⊙ n) ∎
 ... | greater yz | yzp =
