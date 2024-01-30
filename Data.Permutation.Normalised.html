@@ -278,4 +278,21 @@
   <a id="11885" class="Symbol">(</a><a id="11886" class="Bound">xs</a> <a id="11889" href="Data.Permutation.NonNorm.html#360" class="Function Operator">·</a> <a id="11891" class="Bound">y</a> <a id="11893" href="Data.Permutation.Swap.html#131" class="Function Operator">↔</a> <a id="11895" class="Bound">x</a> <a id="11897" href="Data.Permutation.Swap.html#131" class="Function Operator">·</a> <a id="11899" class="Bound">n</a><a id="11900" class="Symbol">)</a> <a id="11902" href="Path.Reasoning.html#281" class="Function">≡⟨</a> <a id="11905" href="Cubical.Foundations.Prelude.html#1430" class="Function">cong</a> <a id="11910" class="Symbol">(</a><a id="11911" class="Bound">xs</a> <a id="11914" href="Data.Permutation.NonNorm.html#360" class="Function Operator">·_</a><a id="11916" class="Symbol">)</a> <a id="11918" class="Symbol">(</a><a id="11919" href="Data.Permutation.Swap.html#773" class="Function">swap-com</a> <a id="11928" class="Bound">y</a> <a id="11930" class="Bound">x</a> <a id="11932" class="Bound">n</a><a id="11933" class="Symbol">)</a> <a id="11935" href="Path.Reasoning.html#281" class="Function">⟩</a>
   <a id="11939" class="Symbol">(</a><a id="11940" class="Bound">xs</a> <a id="11943" href="Data.Permutation.NonNorm.html#360" class="Function Operator">·</a> <a id="11945" class="Bound">x</a> <a id="11947" href="Data.Permutation.Swap.html#131" class="Function Operator">↔</a> <a id="11949" class="Bound">y</a> <a id="11951" href="Data.Permutation.Swap.html#131" class="Function Operator">·</a> <a id="11953" class="Bound">n</a><a id="11954" class="Symbol">)</a> <a id="11956" href="Path.Reasoning.html#417" class="Function Operator">≡⟨⟩</a>
   <a id="11962" class="Bound">xs</a> <a id="11965" href="Data.Permutation.NonNorm.html#295" class="InductiveConstructor Operator">∘⟨</a> <a id="11968" class="Bound">x</a> <a id="11970" href="Agda.Builtin.Sigma.html#235" class="InductiveConstructor Operator">,</a> <a id="11972" class="Bound">y</a> <a id="11974" href="Data.Permutation.NonNorm.html#295" class="InductiveConstructor Operator">⟩</a> <a id="11976" href="Data.Permutation.NonNorm.html#360" class="Function Operator">·</a> <a id="11978" class="Bound">n</a> <a id="11980" href="Path.Reasoning.html#485" class="Function Operator">∎</a>
+
+<a id="11983" class="Comment">-- --------------------------------------------------------------------------------</a>
+<a id="12067" class="Comment">-- -- Group Operator</a>
+<a id="12088" class="Comment">-- --------------------------------------------------------------------------------</a>
+
+<a id="12173" class="Comment">-- un-diff : Diffs → Diffs</a>
+<a id="12200" class="Comment">-- un-diff xs = foldr (λ { (x , y) k n → k (suc n + x) ∘⟨ n + x , y ⟩ }) (const ⟨⟩) xs 0</a>
+
+<a id="12290" class="Comment">-- infixl 6 _∙_</a>
+<a id="12306" class="Comment">-- _∙_ : Diffs → Diffs → Diffs</a>
+<a id="12337" class="Comment">-- xs ∙ ys = foldr (flip _⊙⟨_⟩) xs (un-diff ys)</a>
+
+<a id="12386" class="Comment">-- diffs-comp : ∀ xs ys n → (xs ∙ ys) ⊙ n ≡ xs ⊙ (ys ⊙ n)</a>
+<a id="12444" class="Comment">-- diffs-comp xs ys n =</a>
+<a id="12468" class="Comment">--   xs ∙ ys ⊙ n ≡⟨ {!!} ⟩</a>
+<a id="12495" class="Comment">--   xs ⊙ ys ⊙ n ≡⟨ {!!} ⟩</a>
+<a id="12522" class="Comment">--   xs ⊙ ys ⊙ n ∎</a>
 </pre></body></html>
