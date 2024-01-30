@@ -205,14 +205,21 @@ cons-swap₃ zero y z xs zero =
   suc (xs ⊙ y ↔ z ⊙ suc y + z) ≡⟨ cong suc (cong (xs ⊙_) (⊙-· y z _ ; swap-rhs y _)) ⟩
   suc (xs ⊙ y) ≡˘⟨ cong (bool _ zero) (it-doesn't  (suc y + z ≟ y) (x≢sx+y y z ∘ sym)) ⟩
   xs ∘⟨ zero , suc y + z ⟩ ⊙ zero ↔ y ⊙ zero ∎
-cons-swap₃ zero y z xs (suc n) with does (suc y + z ≟ n) | why (suc y + z ≟ n) | does (y ≟ n) | why (y ≟ n)
-cons-swap₃ zero y z xs (suc n) | true | wyzn | true | yny = ⊥-elim (x≢sx+y _ _ (yny ; sym wyzn))
-cons-swap₃ zero y z xs (suc n) | false | wyzn | true | yny = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; cong (_↔ _ · n) yny ; swap-lhs n (suc y + z) ))
-cons-swap₃ zero y z xs (suc n) | syzn | wyzn | false | yny with does (suc y + z ≟ n) | why (suc y + z ≟ n)
-cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | true | wyzn′ = ⊥-elim (wyzn wyzn′)
-cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | false | wyzn′ = ⊥-elim (wyzn′ wyzn)
-cons-swap₃ zero y z xs (suc n) | true | wyzn | false | yny | true | wyzn′ = refl
-cons-swap₃ zero y z xs (suc n) | false | wyzn | false | yny | false | wyzn′ = cong suc (cons-swap y z xs n ; cong (xs ⊙_) (⊙-· y z n ; swap-neq y (suc y + z) n yny wyzn))
+cons-swap₃ zero y z xs (suc n) with does (y ≟ n) | why (y ≟ n)
+... | true | y≡n =
+  (xs ⊙⟨ y , z ⟩ ∘⟨ zero , suc y + z ⟩ ⊙ suc n) ≡⟨ cong (bool′ _ _) (it-doesn't (suc y + z ≟ n) (x≢sx+y y z ∘ sym ∘ _; sym y≡n)) ⟩
+  suc (xs ⊙⟨ y , z ⟩ ⊙ n) ≡⟨ cong suc (cons-swap y z xs n) ⟩
+  suc (xs ⊙ y ↔ z ⊙ n) ≡⟨ cong (λ e → suc (xs ⊙ e)) (⊙-· y z n) ⟩
+  suc (xs ⊙ y ↔ suc y + z · n) ≡⟨ cong (λ e → suc (xs ⊙ e ↔ suc y + z · n)) y≡n ⟩
+  suc (xs ⊙ n ↔ suc y + z · n) ≡⟨ cong (λ e → suc (xs ⊙ e)) (swap-lhs n _)  ⟩
+  suc (xs ⊙ suc y + z) ∎
+... | false | y≢n with does (suc y + z ≟ n) | why (suc y + z ≟ n)
+... | true | _ = refl
+... | false | sy+z≢n =
+  suc (xs ⊙⟨ y , z ⟩ ⊙ n) ≡⟨ cong suc (cons-swap y z xs n) ⟩
+  suc (xs ⊙ y ↔ z ⊙ n) ≡⟨ cong (λ e → suc (xs ⊙ e)) (⊙-· y z n) ⟩
+  suc (xs ⊙ y ↔ suc y + z · n) ≡⟨ cong (λ e → suc (xs ⊙ e)) (swap-neq y _ n y≢n sy+z≢n) ⟩
+  suc (xs ⊙ n) ∎
 
 -- ⊙-alg-com : ∀ x y xs z → xs ∘⟨ x , y ⟩ ⊙ z ≡ xs ⊙+ suc x ⊙ x ↔ y ⊙ z
 -- ⊙-· : ∀ x y z → x ↔ y ⊙ z ≡ x ↔ suc x + y · z
