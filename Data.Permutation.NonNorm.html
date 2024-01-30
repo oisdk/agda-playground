@@ -21,4 +21,9 @@
 <a id="345" class="Keyword">infixr</a> <a id="352" class="Number">4.5</a> <a id="356" href="Data.Permutation.NonNorm.html#360" class="Function Operator">_·_</a>
 <a id="_·_"></a><a id="360" href="Data.Permutation.NonNorm.html#360" class="Function Operator">_·_</a> <a id="364" class="Symbol">:</a> <a id="366" href="Data.Permutation.NonNorm.html#235" class="Function">Swaps</a> <a id="372" class="Symbol">→</a> <a id="374" href="Data.Permutation.NonNorm.html#92" class="Bound">A</a> <a id="376" class="Symbol">→</a> <a id="378" href="Data.Permutation.NonNorm.html#92" class="Bound">A</a>
 <a id="380" href="Data.Permutation.NonNorm.html#360" class="Function Operator">_·_</a> <a id="384" class="Symbol">=</a> <a id="386" href="Function.html#369" class="Function">flip</a> <a id="391" class="Symbol">(</a><a id="392" href="Data.List.Base.html#463" class="Function">foldl</a> <a id="398" class="Symbol">(</a><a id="399" href="Function.html#369" class="Function">flip</a> <a id="404" class="Symbol">(</a><a id="405" href="Data.Sigma.Base.html#711" class="Function">uncurry</a> <a id="413" href="Data.Permutation.Swap.html#131" class="Function Operator">_↔_·_</a><a id="418" class="Symbol">)))</a>
+
+<a id="423" class="Comment">-- We can&#39;t really compute the support without first removing ids from the list</a>
+<a id="503" class="Comment">-- </a>
+<a id="507" class="Comment">-- supp-swaps : Swaps → List A</a>
+<a id="538" class="Comment">-- supp-swaps = foldr (λ { (x , y) xs → xs ∘⟨ y ⟩ ∘⟨ x ⟩ }) ⟨⟩</a>
 </pre></body></html>
