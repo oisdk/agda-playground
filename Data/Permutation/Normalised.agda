@@ -165,19 +165,27 @@ xs ∘⟨ yₛ , yₜ ⟩ ⊙⟨ xₛ , xₜ ⟩ = case compare xₛ yₛ of
 ... | true  | y≡z = cong suc y≡z
 ... | false | y≢z = cong (bool′ _ _) (it-doesn't (y ≟ z) y≢z)
 
--- ⊙-· : ∀ x y z → x ↔ y ⊙ z ≡ x ↔ suc x + y · z
--- 
+⊙-cong : ∀ w x y z → does (w ↔ x ⊙ y ≟ z) ≡ does (y ≟ w ↔ x ⊙ z)
+⊙-cong w x y z =
+  both-do
+    (w ↔ x ⊙ y ≟ z)
+    (y ≟ w ↔ x ⊙ z)
+    ((sym (⊙-alg-dup w x y) ;_ ∘′ cong (w ↔ x ⊙_)) iff (_; ⊙-alg-dup w x z ∘′ cong (w ↔ x ⊙_) ))
+
+
 cons-swap : ∀ x y xs z → xs ⊙⟨ x , y ⟩ ⊙ z ≡ xs ⊙ x ↔ y ⊙ z
 cons-swap₁ : ∀ x k y z xs n → xs ⊙⟨ k , y ⟩ ∘⟨ x , k ↔ y ⊙ z ⟩ ⊙ n ≡ xs ∘⟨ x , z ⟩ ⊙ suc x + k ↔ y ⊙ n
 
 cons-swap₁ (suc x) k y z xs (suc n) = cong suc (cons-swap₁ x k y z xs n)
 cons-swap₁ (suc x) k y z xs zero = refl
-cons-swap₁ zero k y z xs zero = cong suc (cons-swap k y xs (⊙-alg k y id z) ; cong (xs ⊙_) (⊙-alg-dup k y z))
-cons-swap₁ zero k y z xs (suc n) with does (k ↔ y ⊙ z ≟ n) | does (z ≟ k ↔ y ⊙ n) | why (k ↔ y ⊙ z ≟ n) | why (z ≟ k ↔ y ⊙ n)
-... | false | false | _ | _ = cong suc (cons-swap k y xs n) 
-... | true  | true  | _ | _ = refl
-... | false | true  | e1 | e2 = ⊥-elim (e1 (cong (⊙-alg k y id) e2 ; ⊙-alg-dup k y n))
-... | true  | false | e1 | e2 = ⊥-elim (e2 (sym (cong (⊙-alg k y id) (sym e1) ; ⊙-alg-dup k y z)))
+cons-swap₁ zero k y z xs zero = cong suc (cons-swap k y xs (k ↔ y ⊙ z) ; cong (xs ⊙_) (⊙-alg-dup k y z))
+cons-swap₁ zero k y z xs (suc n) = 
+  xs ⊙⟨ k , y ⟩ ∘⟨ zero , k ↔ y ⊙ z ⟩ ⊙ suc n ≡⟨⟩
+  (if does (k ↔ y ⊙ z ≟ n) then zero else suc (xs ⊙⟨ k , y ⟩ ⊙ n)) ≡⟨ cong (λ e → if does (k ↔ y ⊙ z ≟ n) then zero else suc e) (cons-swap k y xs n) ⟩
+  (if does (k ↔ y ⊙ z ≟ n) then zero else suc (xs ⊙ k ↔ y ⊙ n)) ≡⟨ cong (bool′ (suc (xs ⊙ k ↔ y ⊙ n)) zero) (⊙-cong k y z n) ⟩
+  (if does (z ≟ k ↔ y ⊙ n) then zero else suc (xs ⊙ k ↔ y ⊙ n)) ≡⟨⟩
+  xs ∘⟨ zero , z ⟩ ⊙ suc (k ↔ y ⊙ n) ≡⟨⟩
+  xs ∘⟨ zero , z ⟩ ⊙ suc k ↔ y ⊙ suc n ∎
 
 cons-swap₂ : ∀ x y xs z n → xs ⊙⟨ y , z ⟩ ∘⟨ x , y ⟩ ⊙ n ≡ xs ∘⟨ x , y ⟩ ⊙ x ↔ suc y + z ⊙ n
 cons-swap₂ (suc x) y xs z zero = refl

@@ -58,3 +58,7 @@ it-does (no ¬A) A = ⊥-elim (¬A A)
 it-doesn't : (d : Dec A) → ¬ A → does d ≡ false
 it-doesn't (no _)  _  = refl
 it-doesn't (yes A) ¬A = ⊥-elim (¬A A)
+
+both-do : (x : Dec A) (y : Dec B) → (A ↔ B) → does x ≡ does y
+both-do x (no ¬B) A↔B = it-doesn't x λ A → ¬B (A↔B .fun A)
+both-do x (yes B) A↔B = it-does x (A↔B .inv B)
