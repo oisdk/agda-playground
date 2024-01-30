@@ -291,23 +291,23 @@ norm-correct (xs ∘⟨ x , y ⟩) n with compare x y | comparing x y
 ⊙+⊙ zero y (xs ∘⟨ w , z ⟩) = refl
 ⊙+⊙ (suc x) y (xs ∘⟨ w , z ⟩) = cong suc (⊙+⊙ x y (xs ∘⟨ w , z ⟩))
 
-step-lemma : ∀ x y xs ys → (∀ n → xs ∘⟨ x , y ⟩ ⊙ n ≡ ys ∘⟨ x , y ⟩ ⊙ n) → ∀ n → xs ⊙ n ≡ ys ⊙ n
-step-lemma x y xs ys p n with y ≟ n 
-... | no y≢n =
-  let h =
-        sym (cong (λ e → xs ⊙+ suc x ⊙ e) (swap-neq x (suc x + y) (suc x + n) (x≢sx+y x n) (y≢n ∘ +-inj (suc x)))
-        ; ⊙+⊙ (suc x) _ xs)
-        ; sym (⊙-alg-com x y xs (suc x + n) ; cong′ {A = ℕ} (λ e → xs ⊙+ suc x ⊙ e) (⊙-· x y (suc (x + n))))
-        ; p (suc x + n)
-        ; ⊙-alg-com x y ys (suc x + n) ; cong′ {A = ℕ} (λ e → ys ⊙+ suc x ⊙ e) (⊙-· x y (suc (x + n)))
-        ; cong (λ e → ys ⊙+ suc x ⊙ e) (swap-neq x (suc x + y) (suc x + n) (x≢sx+y x n) (y≢n ∘ +-inj (suc x)))
-        ; ⊙+⊙ (suc x) _ ys
-  in +-inj (suc x) h
-... | yes y≡n =
-  let h = sym (⊙-alg-com x y xs x ; cong (λ e → xs ⊙+ suc x ⊙ e) (⊙-· x y x ; swap-lhs x _) ; ⊙+⊙ (suc x) y xs)
-        ; p x
-        ; ⊙-alg-com x y ys x ; cong (λ e → ys ⊙+ suc x ⊙ e) (⊙-· x y x ; swap-lhs x _) ; ⊙+⊙ (suc x) y ys
-  in  cong (xs ⊙_) (sym y≡n) ; +-inj (suc x) h ; cong (ys ⊙_) y≡n
+-- step-lemma : ∀ x y xs ys → (∀ n → xs ∘⟨ x , y ⟩ ⊙ n ≡ ys ∘⟨ x , y ⟩ ⊙ n) → ∀ n → xs ⊙ n ≡ ys ⊙ n
+-- step-lemma x y xs ys p n with y ≟ n 
+-- ... | no y≢n =
+--   let h =
+--         sym (cong (λ e → xs ⊙+ suc x ⊙ e) (swap-neq x (suc x + y) (suc x + n) (x≢sx+y x n) (y≢n ∘ +-inj (suc x)))
+--         ; ⊙+⊙ (suc x) _ xs)
+--         ; sym (⊙-alg-com x y xs (suc x + n) ; cong′ {A = ℕ} (λ e → xs ⊙+ suc x ⊙ e) (⊙-· x y (suc (x + n))))
+--         ; p (suc x + n)
+--         ; ⊙-alg-com x y ys (suc x + n) ; cong′ {A = ℕ} (λ e → ys ⊙+ suc x ⊙ e) (⊙-· x y (suc (x + n)))
+--         ; cong (λ e → ys ⊙+ suc x ⊙ e) (swap-neq x (suc x + y) (suc x + n) (x≢sx+y x n) (y≢n ∘ +-inj (suc x)))
+--         ; ⊙+⊙ (suc x) _ ys
+--   in +-inj (suc x) h
+-- ... | yes y≡n =
+--   let h = sym (⊙-alg-com x y xs x ; cong (λ e → xs ⊙+ suc x ⊙ e) (⊙-· x y x ; swap-lhs x _) ; ⊙+⊙ (suc x) y xs)
+--         ; p x
+--         ; ⊙-alg-com x y ys x ; cong (λ e → ys ⊙+ suc x ⊙ e) (⊙-· x y x ; swap-lhs x _) ; ⊙+⊙ (suc x) y ys
+--   in  cong (xs ⊙_) (sym y≡n) ; +-inj (suc x) h ; cong (ys ⊙_) y≡n
 
 -- ⊙-inj : ∀ xs ys → (∀ n → xs ⊙ n ≡ ys ⊙ n) → xs ≡ ys
 -- ⊙-inj ⟨⟩ ⟨⟩ _ = refl
@@ -337,26 +337,40 @@ step-lemma x y xs ys p n with y ≟ n
 --   in {!!}
   
 
--- -- ⊙-alg-com : ∀ x y xs z → xs ∘⟨ x , y ⟩ ⊙ z ≡ xs ⊙+ suc x ⊙ x ↔ y ⊙ z
+-- ⊙-alg-com : ∀ x y xs z → xs ∘⟨ x , y ⟩ ⊙ z ≡ xs ⊙+ suc x ⊙ x ↔ y ⊙ z
+
+
+-- unflatten-alg x y k n = k (suc n + x) ∘⟨ n + x , suc (n + x + y) ⟩
+
+compare-diff-+ : ∀ x y → compare x (suc x + y) ≡ less y
+compare-diff-+ zero y = refl
+compare-diff-+ (suc x) y = compare-diff-+ x y
 
 -- norm-inv : ∀ xs → [ [ xs ]↑ ]↓ ≡ xs
--- norm-inv ⟨⟩ = {!!}
--- norm-inv (xs ∘⟨ x ⟩) = {!!}
+-- norm-inv xs =
+--   [ [ xs ]↑ ]↓ ≡⟨⟩
+--   [ foldr (uncurry unflatten-alg) (const ⟨⟩) xs 0 ]↓ ≡⟨⟩
+--   foldr (flip _⊙⟨_⟩) ⟨⟩ (catMaybes (uncurry swap-diff) (foldr (uncurry unflatten-alg) (const ⟨⟩) xs 0))
+--     ≡⟨ cong′ {A = ℕ → Swaps} (λ k → foldr (flip _⊙⟨_⟩) ⟨⟩ (k 0)) (foldr-fusion (λ xs n → catMaybes (uncurry swap-diff) (xs n)) (const ⟨⟩) (λ { (x , y) k → funExt λ n → cong (maybe _ _) (cong (mapMaybe (map₁ (bool′ (n + x) _))) (compare-diff-+ (n + x) y)) }) xs) ⟩
+--   foldr (flip _⊙⟨_⟩) ⟨⟩ (foldr (λ { (x , y) k n → k (suc n + x) ∘⟨ n + x , y ⟩ } ) (const ⟨⟩) xs 0)
+--     ≡⟨  foldr-fusion (λ k → foldr (flip _⊙⟨_⟩) ⟨⟩ (k 0)) (const ⟨⟩) (λ { (x , y) k →  {!!}  }) xs ⟩
+--   foldr (flip _∘⟨_⟩) ⟨⟩ xs
+--     ≡˘⟨ foldr-id xs ⟩
+--   xs ∎
 
+-- --------------------------------------------------------------------------------
+-- -- Group Operator
+-- --------------------------------------------------------------------------------
 
--- -- --------------------------------------------------------------------------------
--- -- -- Group Operator
--- -- --------------------------------------------------------------------------------
+-- un-diff : Diffs → Diffs
+-- un-diff xs = foldr (λ { (x , y) k n → k (suc n + x) ∘⟨ n + x , y ⟩ }) (const ⟨⟩) xs 0
 
--- -- un-diff : Diffs → Diffs
--- -- un-diff xs = foldr (λ { (x , y) k n → k (suc n + x) ∘⟨ n + x , y ⟩ }) (const ⟨⟩) xs 0
+-- infixl 6 _∙_
+-- _∙_ : Diffs → Diffs → Diffs
+-- xs ∙ ys = foldr (flip _⊙⟨_⟩) xs (un-diff ys)
 
--- -- infixl 6 _∙_
--- -- _∙_ : Diffs → Diffs → Diffs
--- -- xs ∙ ys = foldr (flip _⊙⟨_⟩) xs (un-diff ys)
-
--- -- diffs-comp : ∀ xs ys n → (xs ∙ ys) ⊙ n ≡ xs ⊙ (ys ⊙ n)
--- -- diffs-comp xs ys n =
--- --   xs ∙ ys ⊙ n ≡⟨ {!!} ⟩
--- --   xs ⊙ ys ⊙ n ≡⟨ {!!} ⟩
--- --   xs ⊙ ys ⊙ n ∎
+-- diffs-comp : ∀ xs ys n → (xs ∙ ys) ⊙ n ≡ xs ⊙ (ys ⊙ n)
+-- diffs-comp xs ys n =
+--   xs ∙ ys ⊙ n ≡⟨ {!!} ⟩
+--   xs ⊙ ys ⊙ n ≡⟨ {!!} ⟩
+--   xs ⊙ ys ⊙ n ∎
