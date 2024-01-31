@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 module Data.Permutation.Normalised where
 
 open import Prelude hiding (_↔_)
