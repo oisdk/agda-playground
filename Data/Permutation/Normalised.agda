@@ -291,61 +291,48 @@ norm-correct (xs ∘⟨ x , y ⟩) n with compare x y | comparing x y
 ⊙-eq-neq zero y xs p = snotz p
 ⊙-eq-neq (suc x) y xs p = ⊙-eq-neq x y xs (suc-inj p)
 
+⊙-lt : ∀ xs n → xs ⊙+ suc n ⊙ n ≡ n
+⊙-lt ⟨⟩ n = refl
+⊙-lt (xs ∘⟨ x , y ⟩) zero = refl
+⊙-lt (xs ∘⟨ x , y ⟩) (suc n) = cong suc (⊙-lt (xs ∘⟨ x , y ⟩) n)
+
 ⊙+⊙ : ∀ x y xs → xs ⊙+ x ⊙ x + y ≡ x + (xs ⊙ y)
 ⊙+⊙ x y ⟨⟩ = refl
 ⊙+⊙ zero y (xs ∘⟨ w , z ⟩) = refl
 ⊙+⊙ (suc x) y (xs ∘⟨ w , z ⟩) = cong suc (⊙+⊙ x y (xs ∘⟨ w , z ⟩))
 
--- step-lemma : ∀ x y xs ys → (∀ n → xs ∘⟨ x , y ⟩ ⊙ n ≡ ys ∘⟨ x , y ⟩ ⊙ n) → ∀ n → xs ⊙ n ≡ ys ⊙ n
--- step-lemma x y xs ys p n with y ≟ n 
--- ... | no y≢n =
---   let h =
---         sym (cong (λ e → xs ⊙+ suc x ⊙ e) (swap-neq x (suc x + y) (suc x + n) (x≢sx+y x n) (y≢n ∘ +-inj (suc x)))
---         ; ⊙+⊙ (suc x) _ xs)
---         ; sym (⊙-alg-com x y xs (suc x + n) ; cong′ {A = ℕ} (λ e → xs ⊙+ suc x ⊙ e) (⊙-· x y (suc (x + n))))
---         ; p (suc x + n)
---         ; ⊙-alg-com x y ys (suc x + n) ; cong′ {A = ℕ} (λ e → ys ⊙+ suc x ⊙ e) (⊙-· x y (suc (x + n)))
---         ; cong (λ e → ys ⊙+ suc x ⊙ e) (swap-neq x (suc x + y) (suc x + n) (x≢sx+y x n) (y≢n ∘ +-inj (suc x)))
---         ; ⊙+⊙ (suc x) _ ys
---   in +-inj (suc x) h
--- ... | yes y≡n =
---   let h = sym (⊙-alg-com x y xs x ; cong (λ e → xs ⊙+ suc x ⊙ e) (⊙-· x y x ; swap-lhs x _) ; ⊙+⊙ (suc x) y xs)
---         ; p x
---         ; ⊙-alg-com x y ys x ; cong (λ e → ys ⊙+ suc x ⊙ e) (⊙-· x y x ; swap-lhs x _) ; ⊙+⊙ (suc x) y ys
---   in  cong (xs ⊙_) (sym y≡n) ; +-inj (suc x) h ; cong (ys ⊙_) y≡n
+step-lemma : ∀ x y xs ys → (∀ n → xs ∘⟨ x , y ⟩ ⊙ n ≡ ys ∘⟨ x , y ⟩ ⊙ n) → ∀ n → xs ⊙ n ≡ ys ⊙ n
+step-lemma x y xs ys p n with y ≟ n 
+... | no y≢n =
+  let h =
+        sym (cong (λ e → xs ⊙+ suc x ⊙ e) (swap-neq x (suc x + y) (suc x + n) (x≢sx+y x n) (y≢n ∘ +-inj (suc x)))
+        ; ⊙+⊙ (suc x) _ xs)
+        ; sym (⊙-alg-com x y xs (suc x + n) ; cong′ {A = ℕ} (λ e → xs ⊙+ suc x ⊙ e) (⊙-· x y (suc (x + n))))
+        ; p (suc x + n)
+        ; ⊙-alg-com x y ys (suc x + n) ; cong′ {A = ℕ} (λ e → ys ⊙+ suc x ⊙ e) (⊙-· x y (suc (x + n)))
+        ; cong (λ e → ys ⊙+ suc x ⊙ e) (swap-neq x (suc x + y) (suc x + n) (x≢sx+y x n) (y≢n ∘ +-inj (suc x)))
+        ; ⊙+⊙ (suc x) _ ys
+  in +-inj (suc x) h
+... | yes y≡n =
+  let h = sym (⊙-alg-com x y xs x ; cong (λ e → xs ⊙+ suc x ⊙ e) (⊙-· x y x ; swap-lhs x _) ; ⊙+⊙ (suc x) y xs)
+        ; p x
+        ; ⊙-alg-com x y ys x ; cong (λ e → ys ⊙+ suc x ⊙ e) (⊙-· x y x ; swap-lhs x _) ; ⊙+⊙ (suc x) y ys
+  in  cong (xs ⊙_) (sym y≡n) ; +-inj (suc x) h ; cong (ys ⊙_) y≡n
 
--- ⊙-inj : ∀ xs ys → (∀ n → xs ⊙ n ≡ ys ⊙ n) → xs ≡ ys
--- ⊙-inj ⟨⟩ ⟨⟩ _ = refl
--- ⊙-inj ⟨⟩ (ys ∘⟨ x , y ⟩) p = ⊥-elim (⊙-eq-neq x y ys (sym (p x)))
--- ⊙-inj (xs ∘⟨ x , y ⟩) ⟨⟩ p = ⊥-elim (⊙-eq-neq x y xs (p x))
--- ⊙-inj (xs ∘⟨ xₛ , xₜ ⟩) (ys ∘⟨ yₛ , yₜ ⟩) p with xₛ ≟ yₛ | xₜ ≟ yₜ
+⊙-inj : ∀ xs ys → (∀ n → xs ⊙ n ≡ ys ⊙ n) → xs ≡ ys
+⊙-inj ⟨⟩ ⟨⟩ _ = refl
+⊙-inj ⟨⟩ (ys ∘⟨ x , y ⟩) p = ⊥-elim (⊙-eq-neq x y ys (sym (p x)))
+⊙-inj (xs ∘⟨ x , y ⟩) ⟨⟩ p = ⊥-elim (⊙-eq-neq x y xs (p x))
+⊙-inj (xs ∘⟨ xₛ , xₜ ⟩) (ys ∘⟨ yₛ , yₜ ⟩) p with xₛ ≟ yₛ | xₜ ≟ yₜ
 
--- ... | yes xₛ≡yₛ | no xₜ≢yₜ =
---   let h = +-inj (suc yₛ) $ cong (_+ (xs ⊙ xₜ)) (sym (cong suc xₛ≡yₛ))
---         ; sym (⊙-alg-com xₛ xₜ xs xₛ ; cong (λ e → xs ⊙+ suc xₛ ⊙ e) (⊙-· xₛ xₜ xₛ ; swap-lhs xₛ _) ; ⊙+⊙ (suc xₛ) xₜ xs)
---         ; cong (xs ∘⟨ xₛ , xₜ ⟩ ⊙_) xₛ≡yₛ
---         ; p yₛ
---         ; ⊙-alg-com yₛ yₜ ys yₛ ; cong (λ e → ys ⊙+ suc yₛ ⊙ e) (⊙-· yₛ yₜ yₛ ; swap-lhs yₛ _) ; ⊙+⊙ (suc yₛ) yₜ ys
---   in {!!}
--- ... | yes xₛ≡yₛ | yes xₜ≡yₜ = cong₂ _∘⟨_⟩ (⊙-inj xs ys  λ n → step-lemma xₛ xₜ xs ys (_; cong₂ (λ e₁ e₂ → ys ∘⟨ e₁ , e₂ ⟩ ⊙ _) (sym xₛ≡yₛ) (sym xₜ≡yₜ) ∘ p) n ) (cong₂ _,_ xₛ≡yₛ xₜ≡yₜ)
--- ... | no  xₛ≢yₛ | _ =
---   let lemma =
---               suc xₛ + (xs ⊙ xₜ) ≡˘⟨ ⊙+⊙ (suc xₛ) xₜ xs ⟩
---               (xs ⊙+ suc xₛ ⊙ suc xₛ + xₜ) ≡˘⟨ cong (λ e → xs ⊙+ suc xₛ ⊙ e) (swap-lhs xₛ _) ⟩
---               (xs ⊙+ suc xₛ ⊙ xₛ ↔ suc xₛ + xₜ · xₛ) ≡˘⟨ cong (λ e → xs ⊙+ suc xₛ ⊙ e) (⊙-· xₛ xₜ xₛ) ⟩
---               (xs ⊙+ suc xₛ ⊙ xₛ ↔ xₜ ⊙ xₛ) ≡˘⟨ ⊙-alg-com xₛ xₜ xs xₛ ⟩
---               (xs ∘⟨ xₛ , xₜ ⟩ ⊙ xₛ) ≡⟨ p xₛ ⟩
---               (ys ∘⟨ yₛ , yₜ ⟩ ⊙ xₛ) ≡⟨ ⊙-alg-com yₛ yₜ ys xₛ ⟩
---               (ys ⊙+ suc yₛ ⊙ yₛ ↔ yₜ ⊙ xₛ) ≡⟨ cong (λ e → ys ⊙+ suc yₛ ⊙ e) (⊙-· yₛ yₜ xₛ) ⟩
---               (ys ⊙+ suc yₛ ⊙ yₛ ↔ suc yₛ + yₜ · xₛ) ≡⟨ cong (λ e → ys ⊙+ suc yₛ ⊙ e) (cong (bool′ _ _) (it-doesn't (yₛ ≟ xₛ) (xₛ≢yₛ ∘ sym)))  ⟩
---               (ys ⊙+ suc yₛ ⊙ (if does (suc yₛ + yₜ ≟ xₛ) then yₛ else xₛ)) ∎
---   in {!!}
-  
-
--- ⊙-alg-com : ∀ x y xs z → xs ∘⟨ x , y ⟩ ⊙ z ≡ xs ⊙+ suc x ⊙ x ↔ y ⊙ z
-
-
--- unflatten-alg x y k n = k (suc n + x) ∘⟨ n + x , suc (n + x + y) ⟩
+... | yes xₛ≡yₛ | yes xₜ≡yₜ = cong₂ _∘⟨_⟩ (⊙-inj xs ys  λ n → step-lemma xₛ xₜ xs ys (_; cong₂ (λ e₁ e₂ → ys ∘⟨ e₁ , e₂ ⟩ ⊙ _) (sym xₛ≡yₛ) (sym xₜ≡yₜ) ∘ p) n ) (cong₂ _,_ xₛ≡yₛ xₜ≡yₜ)
+... | yes xₛ≡yₛ | no xₜ≢yₜ = {!!}
+... | no  xₛ≢yₛ | _ with compare xₛ yₛ | comparing xₛ yₛ
+... | equal | xₛ≡yₛ = ⊥-elim (xₛ≢yₛ xₛ≡yₛ)
+... | less    k | xₛ<yₛ =
+  ⊥-elim (⊙-eq-neq xₛ xₜ xs (p xₛ ; cong (λ e → ys ∘⟨ e , yₜ ⟩ ⊙ xₛ) (sym xₛ<yₛ) ; ⊙-lt (ys ∘⟨ k , yₜ ⟩) xₛ))
+... | greater k | yₛ<xₛ =
+  ⊥-elim (⊙-eq-neq yₛ yₜ ys (sym (p yₛ) ; cong (λ e → xs ∘⟨ e , xₜ ⟩ ⊙ yₛ) (sym yₛ<xₛ) ; ⊙-lt (xs ∘⟨ k , xₜ ⟩) yₛ))
 
 unf-coalg : ℕ → ℕ → (ℕ → Diffs) → ℕ → Diffs
 unf-coalg x y k n = k (suc n + x) ∘⟨ n + x , y ⟩ 
