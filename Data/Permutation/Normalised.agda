@@ -393,31 +393,18 @@ infixl 6 _⊕_
 _⊕_ : Diffs → Diffs → Diffs
 xs ⊕ ys = foldr (flip _⊙⟨_⟩) xs (un-diff ys 0)
 
-⊕-hom-lemma : ∀ xs ys n → [ foldr (flip _⊙⟨_⟩) xs (un-diff ys n) ]↑ ≡ unflat ys n ++ [ xs ]↑
-⊕-hom-lemma xs ⟨⟩ n = refl
-⊕-hom-lemma xs (ys ∘⟨ x , y ⟩) n =
-  [ foldr (flip _⊙⟨_⟩) xs (un-diff ys (suc n + x)) ⊙⟨ n + x , y ⟩ ]↑
-    ≡⟨ {!!} ⟩
-  [ foldr (flip _⊙⟨_⟩) xs (un-diff ys (suc n + x)) ]↑ ∘⟨ n + x , suc n + x + y ⟩ 
-    ≡⟨ cong (_∘⟨ _ ⟩) (⊕-hom-lemma xs ys (suc n + x)) ⟩
-  (unflat ys (suc n + x) ++ [ xs ]↑) ∘⟨ n + x , suc n + x + y ⟩ 
-    ≡⟨⟩
-  (unflat ys (suc n + x) ∘⟨ n + x , suc n + x + y ⟩) ++ [ xs ]↑ ∎
-
-⊕-hom : ∀ xs ys → [ xs ⊕ ys ]↑ ≡ [ xs ]↑ ∙ [ ys ]↑
-⊕-hom xs ys =
-  [ xs ⊕ ys ]↑ ≡⟨⟩
-  [ foldr (flip _⊙⟨_⟩) xs (un-diff ys 0) ]↑ ≡⟨ {!!} ⟩
-  foldr (uncurry unflatten-alg) (const ⟨⟩) ys 0 ++ [ xs ]↑ ≡⟨⟩
-  [ ys ]↑ ++ [ xs ]↑ ≡⟨⟩
-  [ xs ]↑ ∙ [ ys ]↑ ∎
+diffs-comp-lemma : ∀ xs ys m n → foldr (flip _⊙⟨_⟩) xs (un-diff ys m) ⊙ n ≡ xs ⊙ (ys ⊙+ m ⊙ n)
+diffs-comp-lemma xs ⟨⟩ m n = refl
+diffs-comp-lemma xs (ys ∘⟨ x , y ⟩) m n =
+  foldr (flip _⊙⟨_⟩) xs (un-diff (ys ∘⟨ x , y ⟩) m) ⊙ n ≡⟨⟩
+  foldr (flip _⊙⟨_⟩) xs (un-diff ys (suc m + x)) ⊙⟨ m + x , y ⟩ ⊙ n ≡⟨ cons-swap (m + x) y (foldr (flip _⊙⟨_⟩) xs (un-diff ys (suc m + x))) n ⟩
+  (foldr (flip _⊙⟨_⟩) xs (un-diff ys (suc m + x)) ⊙ m + x ↔ y ⊙ n) ≡⟨ diffs-comp-lemma xs ys (suc m + x) _ ⟩
+  xs ⊙ (ys ⊙+ suc m + x ⊙ m + x ↔ y ⊙ n) ≡˘⟨ cong (xs ⊙_) (⊙-alg-com (m + x) y ys n ) ⟩
+  xs ⊙ (ys ∘⟨ m + x , y ⟩ ⊙ n) ≡⟨⟩
+  xs ⊙ (ys ∘⟨ x , y ⟩ ⊙+ m ⊙ n) ∎
 
 diffs-comp : ∀ xs ys n → (xs ⊕ ys) ⊙ n ≡ xs ⊙ (ys ⊙ n)
 diffs-comp xs ys n =
-  xs ⊕ ys ⊙ n ≡⟨ swaps-compress (xs ⊕ ys) n ⟩
-  [ xs ⊕ ys ]↑ · n ≡⟨ cong (_· n) (⊕-hom xs ys) ⟩
-  [ xs ]↑ ∙ [ ys ]↑ · n ≡⟨ ∙-· [ xs ]↑ [ ys ]↑ n ⟩
-  [ xs ]↑ · [ ys ]↑ · n ≡˘⟨ norm-correct [ xs ]↑ ([ ys ]↑ · n) ⟩
-  [ [ xs ]↑ ]↓ ⊙ [ ys ]↑ · n ≡˘⟨ cong ([ [ xs ]↑ ]↓ ⊙_) (norm-correct [ ys ]↑ n) ⟩
-  [ [ xs ]↑ ]↓ ⊙ [ [ ys ]↑ ]↓ ⊙ n ≡⟨ cong₂ (λ e₁ e₂ → e₁ ⊙ e₂ ⊙ n) (norm-inv xs) (norm-inv ys) ⟩
+  xs ⊕ ys ⊙ n ≡⟨ diffs-comp-lemma xs ys 0 n  ⟩
+  xs ⊙ (ys ⊙+ 0 ⊙ n) ≡⟨ cong (λ e → xs ⊙ e ⊙ n) (shift-0 ys) ⟩
   xs ⊙ ys ⊙ n ∎
