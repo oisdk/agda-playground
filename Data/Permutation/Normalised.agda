@@ -41,8 +41,11 @@ _↔_⊙_ x y = ⊙-alg x y id
 unflatten-alg : ℕ → ℕ → (ℕ → Swaps) → ℕ → Swaps
 unflatten-alg x y k n = k (suc n + x) ∘⟨ n + x , suc (n + x + y) ⟩
 
+unflat : Diffs → ℕ → Swaps
+unflat = foldr (uncurry unflatten-alg) (const ⟨⟩)
+
 [_]↑ : Diffs → Swaps
-[ xs ]↑ = foldr (uncurry unflatten-alg) (const ⟨⟩) xs 0
+[ xs ]↑ = unflat xs 0
 
 --------------------------------------------------------------------------------
 -- Support of a permutation
@@ -384,22 +387,35 @@ norm-inv xs =
 -- Group Operator
 --------------------------------------------------------------------------------
 
--- infixl 6 _∙_
--- _∙_ : Diffs → Diffs → Diffs
--- xs ∙ ys = foldr (flip _⊙⟨_⟩) xs (un-diff ys 0)
+infixl 6 _⊕_
+_⊕_ : Diffs → Diffs → Diffs
+xs ⊕ ys = foldr (flip _⊙⟨_⟩) xs (un-diff ys 0)
 
--- diffs-lemma : ∀ xs ys m n →
---   foldr (uncurry ⊙-alg) id (foldr (flip _⊙⟨_⟩) xs (un-diff ys m)) n ≡
---   xs ∙ (ys ⊙+ m) ⊙ n
--- diffs-lemma xs ⟨⟩ m n = refl
--- diffs-lemma xs (ys ∘⟨ x , y ⟩) m n =
---   foldr (uncurry ⊙-alg) id (foldr (flip _⊙⟨_⟩) xs (un-diff (ys ∘⟨ x , y ⟩) m)) n ≡⟨ {!!} ⟩
---   xs ∙ ((ys ∘⟨ x , y ⟩) ⊙+ m) ⊙ n ∎
+⊕-hom-lemma : ∀ xs ys n → [ foldr (flip _⊙⟨_⟩) xs (un-diff ys n) ]↑ ≡ unflat ys n ++ [ xs ]↑
+⊕-hom-lemma xs ⟨⟩ n = refl
+⊕-hom-lemma xs (ys ∘⟨ x , y ⟩) n =
+  [ foldr (flip _⊙⟨_⟩) xs (un-diff ys (suc n + x)) ⊙⟨ n + x , y ⟩ ]↑
+    ≡⟨ {!!} ⟩
+  [ foldr (flip _⊙⟨_⟩) xs (un-diff ys (suc n + x)) ]↑ ∘⟨ n + x , suc n + x + y ⟩ 
+    ≡⟨ cong (_∘⟨ _ ⟩) (⊕-hom-lemma xs ys (suc n + x)) ⟩
+  (unflat ys (suc n + x) ++ [ xs ]↑) ∘⟨ n + x , suc n + x + y ⟩ 
+    ≡⟨⟩
+  (unflat ys (suc n + x) ∘⟨ n + x , suc n + x + y ⟩) ++ [ xs ]↑ ∎
 
--- diffs-comp : ∀ xs ys n → (xs ∙ ys) ⊙ n ≡ xs ⊙ (ys ⊙ n)
--- diffs-comp xs ys n =
---   xs ∙ ys ⊙ n ≡⟨⟩
---   foldr (flip _⊙⟨_⟩) xs (un-diff ys 0) ⊙ n ≡⟨⟩
---   foldr (uncurry ⊙-alg) id (foldr (flip _⊙⟨_⟩) xs (un-diff ys 0)) n ≡⟨ {!!} ⟩
---   xs ⊙ ys ⊙ n ∎
+⊕-hom : ∀ xs ys → [ xs ⊕ ys ]↑ ≡ [ xs ]↑ ∙ [ ys ]↑
+⊕-hom xs ys =
+  [ xs ⊕ ys ]↑ ≡⟨⟩
+  [ foldr (flip _⊙⟨_⟩) xs (un-diff ys 0) ]↑ ≡⟨ {!!} ⟩
+  foldr (uncurry unflatten-alg) (const ⟨⟩) ys 0 ++ [ xs ]↑ ≡⟨⟩
+  [ ys ]↑ ++ [ xs ]↑ ≡⟨⟩
+  [ xs ]↑ ∙ [ ys ]↑ ∎
 
+diffs-comp : ∀ xs ys n → (xs ⊕ ys) ⊙ n ≡ xs ⊙ (ys ⊙ n)
+diffs-comp xs ys n =
+  xs ⊕ ys ⊙ n ≡⟨ swaps-compress (xs ⊕ ys) n ⟩
+  [ xs ⊕ ys ]↑ · n ≡⟨ cong (_· n) (⊕-hom xs ys) ⟩
+  [ xs ]↑ ∙ [ ys ]↑ · n ≡⟨ ∙-· [ xs ]↑ [ ys ]↑ n ⟩
+  [ xs ]↑ · [ ys ]↑ · n ≡˘⟨ norm-correct [ xs ]↑ ([ ys ]↑ · n) ⟩
+  [ [ xs ]↑ ]↓ ⊙ [ ys ]↑ · n ≡˘⟨ cong ([ [ xs ]↑ ]↓ ⊙_) (norm-correct [ ys ]↑ n) ⟩
+  [ [ xs ]↑ ]↓ ⊙ [ [ ys ]↑ ]↓ ⊙ n ≡⟨ cong₂ (λ e₁ e₂ → e₁ ⊙ e₂ ⊙ n) (norm-inv xs) (norm-inv ys) ⟩
+  xs ⊙ ys ⊙ n ∎

@@ -58,10 +58,5 @@ xs ∙ ys = ys ++ xs
 open import Path.Reasoning
 open import Data.List.Properties
 
--- ∙-· : ∀ xs ys n → xs ∙ ys · n ≡ xs · ys · n
--- ∙-· xs ys n =
---   xs ∙ ys · n ≡⟨⟩
---   foldr (flip _∘⟨_⟩) xs ys · n ≡⟨⟩
---   foldl (flip (uncurry _↔_·_)) n (foldr (flip _∘⟨_⟩) xs ys) ≡⟨ foldr-fusion (_· n) xs {!!} ys ⟩
---   foldr (flip _∘⟨_⟩) ⟨⟩ xs · ys · n ≡⟨ {!!} ⟩
---   xs · ys · n ∎
+∙-· : ∀ xs ys n → xs ∙ ys · n ≡ xs · ys · n
+∙-· xs ys n = foldl-++ (flip (uncurry _↔_·_)) n ys xs
