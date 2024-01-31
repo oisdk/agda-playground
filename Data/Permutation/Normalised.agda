@@ -342,12 +342,15 @@ norm-correct (xs ∘⟨ x , y ⟩) n with compare x y | comparing x y
 
 -- unflatten-alg x y k n = k (suc n + x) ∘⟨ n + x , suc (n + x + y) ⟩
 
+unf-coalg : ℕ → ℕ → (ℕ → Diffs) → ℕ → Diffs
+unf-coalg x y k n = k (suc n + x) ∘⟨ n + x , y ⟩ 
+
+un-diff : Diffs → ℕ → Diffs
+un-diff = foldr (uncurry unf-coalg) (const ⟨⟩)
+
 compare-diff-+ : ∀ x y → compare x (suc x + y) ≡ less y
 compare-diff-+ zero y = refl
 compare-diff-+ (suc x) y = compare-diff-+ x y
-
-unf-coalg : ℕ → ℕ → (ℕ → Diffs) → ℕ → Diffs
-unf-coalg x y k n = k (suc n + x) ∘⟨ n + x , y ⟩ 
 
 norm-lemma₁ : ∀ xs x y → xs ⊙+ suc x ⊙⟨ x , y ⟩ ≡ xs ∘⟨ x , y ⟩
 norm-lemma₁ ⟨⟩ x y = refl
@@ -356,12 +359,12 @@ norm-lemma₁ (xs ∘⟨ s , t ⟩) x y with compare x (suc x + s) | comparing x
 ... | equal     | x≡sx+s = ⊥-elim (x≢sx+y x s x≡sx+s)
 ... | greater k | p = ⊥-elim (x≢sx+y x (suc s + k) (sym p ; cong suc (cong suc (+-assoc x s k) ; sym (+-suc x (s + k)))))
 
-norm-lemma : ∀ xs n → foldr (flip _⊙⟨_⟩) ⟨⟩ (foldr (uncurry unf-coalg) (const ⟨⟩) xs n) ≡ xs ⊙+ n
+norm-lemma : ∀ xs n → foldr (flip _⊙⟨_⟩) ⟨⟩ (un-diff xs n) ≡ xs ⊙+ n
 norm-lemma ⟨⟩ n = refl
 norm-lemma (xs ∘⟨ x , y ⟩) n =
-  foldr (flip _⊙⟨_⟩) ⟨⟩ (foldr (uncurry unf-coalg) (const ⟨⟩) (xs ∘⟨ x , y ⟩) n) ≡⟨⟩
-  foldr (flip _⊙⟨_⟩) ⟨⟩ (foldr (uncurry unf-coalg) (const ⟨⟩) xs (suc n + x) ∘⟨ n + x , y ⟩) ≡⟨⟩
-  foldr (flip _⊙⟨_⟩) ⟨⟩ (foldr (uncurry unf-coalg) (const ⟨⟩) xs (suc n + x)) ⊙⟨ n + x , y ⟩ ≡⟨ cong (_⊙⟨ n + x , y ⟩) (norm-lemma xs (suc n + x)) ⟩
+  foldr (flip _⊙⟨_⟩) ⟨⟩ (un-diff (xs ∘⟨ x , y ⟩) n) ≡⟨⟩
+  foldr (flip _⊙⟨_⟩) ⟨⟩ (un-diff xs (suc n + x) ∘⟨ n + x , y ⟩) ≡⟨⟩
+  foldr (flip _⊙⟨_⟩) ⟨⟩ (un-diff xs (suc n + x)) ⊙⟨ n + x , y ⟩ ≡⟨ cong (_⊙⟨ n + x , y ⟩) (norm-lemma xs (suc n + x)) ⟩
   xs ⊙+ suc n + x ⊙⟨ n + x , y ⟩ ≡⟨ norm-lemma₁ xs (n + x) y ⟩
   xs ∘⟨ n + x , y ⟩ ∎
 
@@ -371,25 +374,32 @@ norm-inv xs =
   [ foldr (uncurry unflatten-alg) (const ⟨⟩) xs 0 ]↓ ≡⟨⟩
   foldr (flip _⊙⟨_⟩) ⟨⟩ (catMaybes (uncurry swap-diff) (foldr (uncurry unflatten-alg) (const ⟨⟩) xs 0))
     ≡⟨ cong′ {A = ℕ → Swaps} (λ k → foldr (flip _⊙⟨_⟩) ⟨⟩ (k 0)) (foldr-fusion (λ xs n → catMaybes (uncurry swap-diff) (xs n)) (const ⟨⟩) (λ { (x , y) k → funExt λ n → cong (maybe _ _) (cong (mapMaybe (map₁ (bool′ (n + x) _))) (compare-diff-+ (n + x) y)) }) xs) ⟩
-  foldr (flip _⊙⟨_⟩) ⟨⟩ (foldr (uncurry unf-coalg) (const ⟨⟩) xs 0)
+  foldr (flip _⊙⟨_⟩) ⟨⟩ (un-diff xs 0)
     ≡⟨  norm-lemma xs 0 ⟩
   xs ⊙+ 0
     ≡⟨ shift-0 xs ⟩
   xs ∎
 
--- --------------------------------------------------------------------------------
--- -- Group Operator
--- --------------------------------------------------------------------------------
-
--- un-diff : Diffs → Diffs
--- un-diff xs = foldr (λ { (x , y) k n → k (suc n + x) ∘⟨ n + x , y ⟩ }) (const ⟨⟩) xs 0
+--------------------------------------------------------------------------------
+-- Group Operator
+--------------------------------------------------------------------------------
 
 -- infixl 6 _∙_
 -- _∙_ : Diffs → Diffs → Diffs
--- xs ∙ ys = foldr (flip _⊙⟨_⟩) xs (un-diff ys)
+-- xs ∙ ys = foldr (flip _⊙⟨_⟩) xs (un-diff ys 0)
+
+-- diffs-lemma : ∀ xs ys m n →
+--   foldr (uncurry ⊙-alg) id (foldr (flip _⊙⟨_⟩) xs (un-diff ys m)) n ≡
+--   xs ∙ (ys ⊙+ m) ⊙ n
+-- diffs-lemma xs ⟨⟩ m n = refl
+-- diffs-lemma xs (ys ∘⟨ x , y ⟩) m n =
+--   foldr (uncurry ⊙-alg) id (foldr (flip _⊙⟨_⟩) xs (un-diff (ys ∘⟨ x , y ⟩) m)) n ≡⟨ {!!} ⟩
+--   xs ∙ ((ys ∘⟨ x , y ⟩) ⊙+ m) ⊙ n ∎
 
 -- diffs-comp : ∀ xs ys n → (xs ∙ ys) ⊙ n ≡ xs ⊙ (ys ⊙ n)
 -- diffs-comp xs ys n =
---   xs ∙ ys ⊙ n ≡⟨ {!!} ⟩
---   xs ⊙ ys ⊙ n ≡⟨ {!!} ⟩
+--   xs ∙ ys ⊙ n ≡⟨⟩
+--   foldr (flip _⊙⟨_⟩) xs (un-diff ys 0) ⊙ n ≡⟨⟩
+--   foldr (uncurry ⊙-alg) id (foldr (flip _⊙⟨_⟩) xs (un-diff ys 0)) n ≡⟨ {!!} ⟩
 --   xs ⊙ ys ⊙ n ∎
+

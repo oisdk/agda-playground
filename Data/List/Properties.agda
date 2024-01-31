@@ -74,6 +74,18 @@ foldl-fusion h {f} {g} e fuse [] = refl
 foldl-fusion h {f} {g} e fuse (x ∷ xs) =
   foldl-fusion h (f e x) fuse xs ; cong (flip (foldl g) xs) (fuse e x)
 
+open import Path.Reasoning
+
+module _ {A : Type a} {B : Type b} where
+  foldl-++ : (f : B → A → B) (b : B) (xs ys : List A)
+          → foldl f b (xs ++ ys) ≡ foldl f (foldl f b xs) ys
+  foldl-++ f b xs ys =
+    foldl f b (xs ++ ys) ≡⟨ foldl-is-foldr f b (xs ++ ys) ⟩
+    foldl-by-r f b (xs ++ ys) ≡⟨ cong (_$ b) (foldr-++ (λ x k b → k (f b x)) id xs ys) ⟩
+    foldr (λ x k b → k (f b x)) (foldr (λ x k b → k (f b x)) id ys) xs b ≡˘⟨ cong (λ e → foldr (λ x k b → k (f b x)) e xs b) (funExt λ b → foldl-is-foldr f b ys) ⟩
+    foldr (λ x k b → k (f b x)) (flip (foldl f) ys) xs b ≡˘⟨ cong′ {A = B → B} (_$ b) (foldr-universal (λ xs b → foldl f (foldl f b xs) ys) (λ x k b → k (f b x)) (flip (foldl f) ys) refl (λ _ _ → refl) xs ) ⟩
+    foldl f (foldl f b xs) ys ∎
+
 ++-assoc : (xs ys zs : List A) → (xs ++ ys) ++ zs ≡ xs ++ (ys ++ zs)
 ++-assoc xs ys zs = foldr-fusion (_++ zs) ys (λ _ _ → refl) xs
 

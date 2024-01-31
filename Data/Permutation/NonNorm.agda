@@ -50,3 +50,18 @@ perm-inj : ∀ xs z₁ z₂ → xs · z₁ ≡ xs · z₂ → z₁ ≡ z₂
 perm-inj ⟨⟩              z₁ z₂ p = p
 perm-inj (xs ∘⟨ x , y ⟩) z₁ z₂ p =
   swap-inj x y z₁ z₂ (perm-inj xs (x ↔ y · z₁) (x ↔ y · z₂) p)
+
+infixl 6 _∙_
+_∙_ : Swaps → Swaps → Swaps
+xs ∙ ys = ys ++ xs
+
+open import Path.Reasoning
+open import Data.List.Properties
+
+-- ∙-· : ∀ xs ys n → xs ∙ ys · n ≡ xs · ys · n
+-- ∙-· xs ys n =
+--   xs ∙ ys · n ≡⟨⟩
+--   foldr (flip _∘⟨_⟩) xs ys · n ≡⟨⟩
+--   foldl (flip (uncurry _↔_·_)) n (foldr (flip _∘⟨_⟩) xs ys) ≡⟨ foldr-fusion (_· n) xs {!!} ys ⟩
+--   foldr (flip _∘⟨_⟩) ⟨⟩ xs · ys · n ≡⟨ {!!} ⟩
+--   xs · ys · n ∎
