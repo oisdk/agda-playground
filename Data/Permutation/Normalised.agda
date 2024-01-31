@@ -327,13 +327,9 @@ step-lemma x y xs ys p n with y ≟ n
 ⊙-lhs (suc x) y xs z y≢z = cong suc (⊙-lhs x y xs z y≢z)
 ⊙-lhs zero    y xs z y≢z = cong (bool′ _ _) (it-doesn't (y ≟ z) y≢z)
 
-⊙-rhs′ : ∀ x y xs → xs ∘⟨ x , y ⟩ ⊙ suc x + y ≡ x
-⊙-rhs′ (suc x) y xs = cong suc (⊙-rhs′ x y xs)
-⊙-rhs′ zero    y xs = cong (bool′ _ _) (it-does (y ≟ y) refl)
-
-⊙-rhs : ∀ x y xs → xs ∘⟨ x , y ⟩ ⊙ x ≡ suc x + (xs ⊙ y)
-⊙-rhs zero y xs = refl
+⊙-rhs : ∀ x y xs → xs ∘⟨ x , y ⟩ ⊙ suc x + y ≡ x
 ⊙-rhs (suc x) y xs = cong suc (⊙-rhs x y xs)
+⊙-rhs zero    y xs = cong (bool′ _ _) (it-does (y ≟ y) refl)
 
 inj-⊙-lemma : ∀ x xₜ yₜ xs ys
             → (∀ n → xs ∘⟨ x , xₜ ⟩ ⊙ n ≡ ys ∘⟨ x , yₜ ⟩ ⊙ n)
@@ -344,10 +340,10 @@ inj-⊙-lemma : ∀ x xₜ yₜ xs ys
 inj-⊙-lemma x xₜ yₜ xs ys p xₜ≢yₜ xye n with n ≟ xₜ | n ≟ yₜ
 ... | yes n≡xₜ | yes n≡yₜ = ⊥-elim (xₜ≢yₜ (sym n≡xₜ ; n≡yₜ))
 ... | no  n≢xₜ | yes n≡yₜ =
-  ⊥-elim (x≢sx+y x (xs ⊙ n) (sym (sym (⊙-lhs x xₜ xs n (n≢xₜ ∘ sym)) ; p (suc x + n) ; cong (λ e → ys ∘⟨ x , yₜ ⟩ ⊙ suc x + e) n≡yₜ  ; ⊙-rhs′ x yₜ ys)))
+  ⊥-elim (x≢sx+y x (xs ⊙ n) (sym (sym (⊙-lhs x xₜ xs n (n≢xₜ ∘ sym)) ; p (suc x + n) ; cong (λ e → ys ∘⟨ x , yₜ ⟩ ⊙ suc x + e) n≡yₜ  ; ⊙-rhs x yₜ ys)))
 ... | yes n≡xₜ | no  n≢yₜ =
   ⊥-elim (x≢sx+y x (ys ⊙ n)
-    ( sym (⊙-rhs′ x xₜ xs)
+    ( sym (⊙-rhs x xₜ xs)
     ; cong (λ e → xs ∘⟨ x , xₜ ⟩ ⊙ suc x + e) (sym n≡xₜ)
     ; p (suc x + n)
     ; ⊙-lhs x yₜ ys n (n≢yₜ ∘ sym)
