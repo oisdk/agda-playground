@@ -60,3 +60,19 @@ open import Data.List.Properties
 
 ∙-· : ∀ xs ys n → xs ∙ ys · n ≡ xs · ys · n
 ∙-· xs ys n = foldl-++ (flip (uncurry _↔_·_)) n ys xs
+
+neg : Swaps → Swaps
+neg = reverse
+
+open import Path.Reasoning
+
+-- neg-id : ∀ xs n → xs ∙ neg xs · n ≡ n
+-- neg-id xs n =
+--   xs ∙ neg xs · n ≡⟨⟩
+--   neg xs ++ xs · n ≡⟨ foldl-++ (flip (uncurry _↔_·_)) n (neg xs) xs ⟩
+--   foldl (flip (uncurry _↔_·_)) (neg xs · n) xs ≡⟨⟩
+--   foldl (flip (uncurry _↔_·_)) (foldl (flip (uncurry _↔_·_)) n (neg xs)) xs ≡⟨⟩
+--   foldl (flip (uncurry _↔_·_)) (foldl (flip (uncurry _↔_·_)) n (foldl _∘⟨_⟩ ⟨⟩ xs)) xs ≡⟨ {!!} ⟩
+--   foldl (flip (uncurry _↔_·_)) (foldr (uncurry _↔_·_) n xs) xs ≡⟨ {!!} ⟩
+--   n ∎
+  

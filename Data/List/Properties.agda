@@ -7,6 +7,10 @@ open import Prelude
 open import Data.Fin
 open import Strict.Properties
 
+reverse : List A → List A
+reverse = foldl (flip _∷_) []
+
+
 foldl-by-r : (B → A → B) → B → List A → B
 foldl-by-r f b xs = foldr (λ x k xs → k (f xs x)) id xs b
 
