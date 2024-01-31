@@ -40,3 +40,5 @@ comparing zero    (suc y) = refl
 comparing (suc x) zero    = refl
 comparing (suc x) (suc y) = suc-compared x y _ (comparing x y)
 
+comparison : ∀ x y → Σ Ordering (Compared x y)
+comparison x y = compare x y , comparing x y
