@@ -444,14 +444,12 @@ diffs-comp xs ys n =
   xs ⊙ (ys ⊙+ 0 ⊙ n) ≡⟨ cong (λ e → xs ⊙ e ⊙ n) (shift-0 ys) ⟩
   xs ⊙ ys ⊙ n ∎
 
-
--- ⊕-hom : ∀ xs ys → [ xs ∙ ys ]↓ ≡ [ xs ]↓ ⊕ [ ys ]↓
--- ⊕-hom xs ⟨⟩ = refl
--- ⊕-hom xs (ys ∘⟨ x , y ⟩) with compare x y
--- ... | equal = ⊕-hom xs ys
--- ... | greater k = {!!}
--- ... | less k =
---   [ xs ∙ ys ]↓ ⊙⟨ x , k ⟩ ≡⟨ cong (_⊙⟨ x , k ⟩) (⊕-hom xs ys) ⟩
---   ([ xs ]↓ ⊕ [ ys ]↓) ⊙⟨ x , k ⟩ ≡⟨ {!!} ⟩
---   [ xs ]↓ ⊕ ([ ys ]↓ ⊙⟨ x , k ⟩) ∎
-  
+⊕-hom : ∀ xs ys → [ xs ∙ ys ]↓ ≡ [ xs ]↓ ⊕ [ ys ]↓
+⊕-hom xs ys =
+  inj-⊙ [ xs ∙ ys ]↓ ([ xs ]↓ ⊕ [ ys ]↓) λ n →
+  [ xs ∙ ys ]↓ ⊙ n ≡⟨ norm-correct (xs ∙ ys) n ⟩
+  xs ∙ ys · n ≡⟨ ∙-· xs ys n ⟩
+  xs · ys · n ≡˘⟨ norm-correct xs (ys · n) ⟩
+  [ xs ]↓ ⊙ ys · n ≡˘⟨ cong ([ xs ]↓ ⊙_) (norm-correct ys n) ⟩
+  [ xs ]↓ ⊙ [ ys ]↓ ⊙ n ≡˘⟨ diffs-comp [ xs ]↓ [ ys ]↓ n ⟩
+  [ xs ]↓ ⊕ [ ys ]↓ ⊙ n ∎
