@@ -61,11 +61,7 @@ supp = foldr (λ { (x , y) xs → map (suc x +_) (xs ∘⟨ y ⟩) ∘⟨ x ⟩ 
 --------------------------------------------------------------------------------
 
 swap-suc : ∀ x y z → suc x ↔ suc y · suc z ≡ suc (x ↔ y · z)
-swap-suc x y z with does (x ≟ z)
-... | true = refl
-... | false with does (y ≟ z)
-... | false = refl
-... | true = refl
+swap-suc = swap-cong (suc , λ _ _ → suc-inj) 
 
 ⊙-· : ∀ x y z → x ↔ y ⊙ z ≡ x ↔ suc x + y · z
 ⊙-· (suc x) y (suc z) = cong suc (⊙-· x y z) ; sym (swap-suc x (suc (x + y)) z)

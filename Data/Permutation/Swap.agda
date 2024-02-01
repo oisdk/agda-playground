@@ -40,3 +40,16 @@ swap-dup x y z with does (x ≟ z) | why (x ≟ z) | does (y ≟ z) | why (y ≟
 ... | true  | x≡z | true  | y≡z = cong (bool′ _ _) (it-does (x ≟ y) (x≡z ; sym y≡z)) ; y≡z
 ... | true  | x≡z | false | y≢z = cong (bool′ _ _) (it-doesn't (x ≟ y) (y≢z ∘ sym ∘ (sym x≡z ;_))) ; cong (bool′ _ _) (it-does (y ≟ y) refl) ; x≡z
 ... | false | x≢z | true  | y≡z = cong (bool′ _ _) (it-does (x ≟ x) refl) ; y≡z
+
+open import Function.Injective
+
+swap-cong : (f : A ↣ A) (x y z : A)
+          → fst f x ↔ fst f y · fst f z ≡ fst f (x ↔ y · z)
+swap-cong (f , f-inj) x y z with does (f x ≟ f z) | why (f x ≟ f z) | does (x ≟ z) | why (x ≟ z) | does (f y ≟ f z) | why (f y ≟ f z) | does (y ≟ z) | why (y ≟ z)
+... | true  | fx≡fz | false | x≢z | _ | _ | _ | _ = ⊥-elim (x≢z (f-inj x z fx≡fz))
+... | _ | _ | _ | _ | true | fy≡fz | false | y≢z = ⊥-elim (y≢z (f-inj y z fy≡fz))
+... | _ | _ | _ | _ | false | fy≢fz | true | y≡z = ⊥-elim (fy≢fz (cong f y≡z))
+... | false | fx≢fz | true | x≡z | _ | _ | _ | _ = ⊥-elim (fx≢fz (cong f x≡z))
+... | true | _ | true | _ | _ | _ | _ | _ = refl
+... | false | _ | false | _ | false | _ | false | _ = refl
+... | false | _ | false | _ | true  | _ | true  | _ = refl
