@@ -50,3 +50,14 @@ builtin-eq-to-path {x = x} MLTT.refl i = x
 
 path-to-builtin-eq : {A : Type a} {x y : A} → x ≡ y → x MLTT.≡ y
 path-to-builtin-eq {x = x} x≡y = subst (x MLTT.≡_) x≡y MLTT.refl
+
+cong₃ : ∀ {d} {D : Type d}
+      → (f : A → B → C → D)
+      → {x x′ : A}
+      → {y y′ : B}
+      → {z z′ : C}
+      → x ≡ x′
+      → y ≡ y′
+      → z ≡ z′
+      → f x y z ≡ f x′ y′ z′
+cong₃ f x y z = cong₂ (λ f x → f x) (cong₂ f x y) z

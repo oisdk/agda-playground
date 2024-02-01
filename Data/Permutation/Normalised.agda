@@ -449,3 +449,31 @@ diffs-comp xs ys n =
   [ xs ]↓ ⊙ ys · n ≡˘⟨ cong ([ xs ]↓ ⊙_) (norm-correct ys n) ⟩
   [ xs ]↓ ⊙ [ ys ]↓ ⊙ n ≡˘⟨ diffs-comp [ xs ]↓ [ ys ]↓ n ⟩
   [ xs ]↓ ⊕ [ ys ]↓ ⊙ n ∎
+
+
+⊕-assoc : ∀ xs ys zs → (xs ⊕ ys) ⊕ zs ≡ xs ⊕ (ys ⊕ zs)
+⊕-assoc xs ys zs =
+  (xs ⊕ ys) ⊕ zs ≡˘⟨ cong₃ (λ x y z → (x ⊕ y) ⊕ z) (norm-inv xs) (norm-inv ys) (norm-inv zs) ⟩
+  ([ [ xs ]↑ ]↓ ⊕ [ [ ys ]↑ ]↓) ⊕ [ [ zs ]↑ ]↓ ≡˘⟨ cong (_⊕ [ [ zs ]↑ ]↓) (⊕-hom [ xs ]↑ [ ys ]↑) ⟩
+  [ [ xs ]↑ ∙ [ ys ]↑ ]↓ ⊕ [ [ zs ]↑ ]↓ ≡˘⟨ ⊕-hom ([ xs ]↑ ∙ [ ys ]↑) [ zs ]↑ ⟩
+  [ ([ xs ]↑ ∙ [ ys ]↑) ∙ [ zs ]↑ ]↓ ≡⟨ cong [_]↓ (∙-assoc [ xs ]↑ [ ys ]↑ [ zs ]↑) ⟩ 
+  [ [ xs ]↑ ∙ ([ ys ]↑ ∙ [ zs ]↑) ]↓ ≡⟨ ⊕-hom [ xs ]↑ ([ ys ]↑ ∙ [ zs ]↑) ⟩
+  [ [ xs ]↑ ]↓ ⊕ ([ [ ys ]↑ ∙ [ zs ]↑ ]↓) ≡⟨ cong ([ [ xs ]↑ ]↓ ⊕_) (⊕-hom [ ys ]↑ [ zs ]↑) ⟩
+  [ [ xs ]↑ ]↓ ⊕ ([ [ ys ]↑ ]↓ ⊕ [ [ zs ]↑ ]↓) ≡⟨ cong₃ (λ x y z → x ⊕ (y ⊕ z)) (norm-inv xs) (norm-inv ys) (norm-inv zs) ⟩
+  xs ⊕ (ys ⊕ zs) ∎
+
+--------------------------------------------------------------------------------
+-- Negation
+--------------------------------------------------------------------------------
+
+negate : Diffs → Diffs
+negate xs = [ neg [ xs ]↑ ]↓
+
+neg-inv-d : ∀ xs → xs ⊕ negate xs ≡ ⟨⟩
+neg-inv-d xs = inj-⊙ _ _ λ n →
+  xs ⊕ negate xs ⊙ n ≡⟨⟩
+  xs ⊕ [ neg [ xs ]↑ ]↓ ⊙ n ≡˘⟨ cong (λ e → e ⊕ [ neg [ xs ]↑ ]↓ ⊙ n) (norm-inv xs) ⟩
+  [ [ xs ]↑ ]↓ ⊕ [ neg [ xs ]↑ ]↓ ⊙ n ≡˘⟨ cong (_⊙ n) (⊕-hom [ xs ]↑ (neg [ xs ]↑)) ⟩
+  [ [ xs ]↑ ∙ neg [ xs ]↑ ]↓ ⊙ n ≡⟨ norm-correct ([ xs ]↑ ∙ neg [ xs ]↑) n ⟩
+  [ xs ]↑ ∙ neg [ xs ]↑ · n ≡⟨ neg-id [ xs ]↑ n ⟩
+  ⟨⟩ ⊙ n ∎

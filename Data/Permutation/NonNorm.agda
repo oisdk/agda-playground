@@ -65,7 +65,6 @@ neg : Swaps → Swaps
 neg = reverse
 
 
-
 open import Path.Reasoning
 
 neg-id-lemma : ∀ xs n → foldl (flip (uncurry _↔_·_)) (foldr (uncurry _↔_·_) n xs) xs ≡ n
@@ -93,3 +92,5 @@ neg-id xs n =
     ≡⟨ neg-id-lemma xs n ⟩
   n ∎
   
+∙-assoc : ∀ xs ys zs → (xs ∙ ys) ∙ zs ≡ xs ∙ (ys ∙ zs)
+∙-assoc xs ys zs = sym (++-assoc zs ys xs)
