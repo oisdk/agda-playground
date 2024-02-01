@@ -10,7 +10,6 @@ open import Strict.Properties
 reverse : List A → List A
 reverse = foldl (flip _∷_) []
 
-
 foldl-by-r : (B → A → B) → B → List A → B
 foldl-by-r f b xs = foldr (λ x k xs → k (f xs x)) id xs b
 
@@ -89,6 +88,21 @@ module _ {A : Type a} {B : Type b} where
     foldr (λ x k b → k (f b x)) (foldr (λ x k b → k (f b x)) id ys) xs b ≡˘⟨ cong (λ e → foldr (λ x k b → k (f b x)) e xs b) (funExt λ b → foldl-is-foldr f b ys) ⟩
     foldr (λ x k b → k (f b x)) (flip (foldl f) ys) xs b ≡˘⟨ cong′ {A = B → B} (_$ b) (foldr-universal (λ xs b → foldl f (foldl f b xs) ys) (λ x k b → k (f b x)) (flip (foldl f) ys) refl (λ _ _ → refl) xs ) ⟩
     foldl f (foldl f b xs) ys ∎
+
+foldl-by-r-cons : (A → B → B) → A → (B → B) → B → B
+foldl-by-r-cons f x k xs = k (f x xs)
+
+foldr-reverse : (f : A → B → B) (b : B) (xs : List A)
+              → foldr f b (reverse xs) ≡ foldl (flip f) b xs
+foldr-reverse f b = foldl-fusion (foldr f b) [] (λ _ _ → refl)
+
+module _ {A : Type a} where
+  reverse-reverse : (xs : List A) → reverse (reverse xs) ≡ xs
+  reverse-reverse xs = foldl-is-foldr (flip _∷_) [] (reverse xs)
+                     ; cong (_$ []) (foldr-reverse (foldl-by-r-cons _∷_) id xs)
+                     ; cong (_$ []) (foldl-is-foldr (flip (foldl-by-r-cons _∷_)) id xs)
+                     ; cong (λ k → k id [] ) (sym (foldr-universal (λ xs k a → k (foldr _∷_ a xs)) (foldl-by-r-cons (foldl-by-r-cons _∷_)) id refl (λ x xs → funExt λ k → funExt λ a → refl) xs))
+                     ; sym (foldr-id xs)
 
 ++-assoc : (xs ys zs : List A) → (xs ++ ys) ++ zs ≡ xs ++ (ys ++ zs)
 ++-assoc xs ys zs = foldr-fusion (_++ zs) ys (λ _ _ → refl) xs

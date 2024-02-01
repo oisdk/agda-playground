@@ -64,15 +64,32 @@ open import Data.List.Properties
 neg : Swaps → Swaps
 neg = reverse
 
+
+
 open import Path.Reasoning
 
--- neg-id : ∀ xs n → xs ∙ neg xs · n ≡ n
--- neg-id xs n =
---   xs ∙ neg xs · n ≡⟨⟩
---   neg xs ++ xs · n ≡⟨ foldl-++ (flip (uncurry _↔_·_)) n (neg xs) xs ⟩
---   foldl (flip (uncurry _↔_·_)) (neg xs · n) xs ≡⟨⟩
---   foldl (flip (uncurry _↔_·_)) (foldl (flip (uncurry _↔_·_)) n (neg xs)) xs ≡⟨⟩
---   foldl (flip (uncurry _↔_·_)) (foldl (flip (uncurry _↔_·_)) n (foldl _∘⟨_⟩ ⟨⟩ xs)) xs ≡⟨ {!!} ⟩
---   foldl (flip (uncurry _↔_·_)) (foldr (uncurry _↔_·_) n xs) xs ≡⟨ {!!} ⟩
---   n ∎
+neg-id-lemma : ∀ xs n → foldl (flip (uncurry _↔_·_)) (foldr (uncurry _↔_·_) n xs) xs ≡ n
+neg-id-lemma ⟨⟩ n = refl
+neg-id-lemma (xs ∘⟨ x , y ⟩) n =
+  foldl (flip (uncurry _↔_·_)) (x ↔ y · x ↔ y · foldr (uncurry _↔_·_) n xs) xs ≡⟨ cong (flip (foldl (flip (uncurry _↔_·_))) xs) (swap-dup x y (foldr (uncurry _↔_·_) n xs)) ⟩
+  foldl (flip (uncurry _↔_·_)) (foldr (uncurry _↔_·_) n xs) xs ≡⟨ neg-id-lemma xs n ⟩
+  n ∎
+
+neg-id-lemma₂ : ∀ xs n → foldl (flip (uncurry _↔_·_)) n (foldl _∘⟨_⟩ ⟨⟩ xs) ≡ foldr (uncurry _↔_·_) n xs
+neg-id-lemma₂ xs n =
+  foldl (flip (uncurry _↔_·_)) n (reverse xs) ≡˘⟨ foldr-reverse _ _ (reverse xs) ⟩
+  foldr (uncurry _↔_·_) n (reverse (reverse xs)) ≡⟨ cong (foldr (uncurry _↔_·_) n) (reverse-reverse xs) ⟩
+  foldr (uncurry _↔_·_) n xs ∎
+
+neg-id : ∀ xs n → xs ∙ neg xs · n ≡ n
+neg-id xs n =
+  xs ∙ neg xs · n ≡⟨⟩
+  neg xs ++ xs · n ≡⟨ foldl-++ (flip (uncurry _↔_·_)) n (neg xs) xs ⟩
+  foldl (flip (uncurry _↔_·_)) (neg xs · n) xs ≡⟨⟩
+  foldl (flip (uncurry _↔_·_)) (foldl (flip (uncurry _↔_·_)) n (neg xs)) xs ≡⟨⟩
+  foldl (flip (uncurry _↔_·_)) (foldl (flip (uncurry _↔_·_)) n (foldl _∘⟨_⟩ ⟨⟩ xs)) xs
+    ≡⟨ cong (flip (foldl (flip (uncurry _↔_·_))) xs) (neg-id-lemma₂ xs n) ⟩
+  foldl (flip (uncurry _↔_·_)) (foldr (uncurry _↔_·_) n xs) xs
+    ≡⟨ neg-id-lemma xs n ⟩
+  n ∎
   
