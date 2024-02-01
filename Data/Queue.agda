@@ -14,9 +14,6 @@ data Q (A : Type a) : Type a where
   _+-_ : List A → List A → Q A
   quot : ∀ x xs ys → xs +- ys ∷′ x ≡ xs ∷′ x +- ys
 
-reverse : List A → List A
-reverse = foldl (flip _∷_) []
-
 snoc-fold : ∀ (xs ys : List A) → foldl (flip _∷_) ys xs ≡ foldr (flip _∷′_) [] xs ++ ys
 snoc-fold []       ys = refl
 snoc-fold (x ∷ xs) ys = snoc-fold xs (x ∷ ys) ; sym (++-assoc (foldr (flip _∷′_) [] xs) (x ∷ []) ys)

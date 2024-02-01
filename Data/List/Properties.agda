@@ -102,6 +102,7 @@ module _ {A : Type a} where
                      ; cong (_$ []) (foldr-reverse (foldl-by-r-cons _∷_) id xs)
                      ; cong (_$ []) (foldl-is-foldr (flip (foldl-by-r-cons _∷_)) id xs)
                      ; cong (λ k → k id [] ) (sym (foldr-universal (λ xs k a → k (foldr _∷_ a xs)) (foldl-by-r-cons (foldl-by-r-cons _∷_)) id refl (λ x xs → funExt λ k → funExt λ a → refl) xs))
+                     -- ; cong (λ k → k id [] ) (sym (foldr-fusion {!!}  {_⊗_ = (foldl-by-r-cons (foldl-by-r-cons _∷_))} {!!} {!!} xs))
                      ; sym (foldr-id xs)
 
 ++-assoc : (xs ys zs : List A) → (xs ++ ys) ++ zs ≡ xs ++ (ys ++ zs)
