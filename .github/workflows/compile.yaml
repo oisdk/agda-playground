@@ -6,25 +6,45 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
-        cubical-ref: ["v0.6"]
+        cubical-ref: ["v0.8"]
         binary-ref: ["v0.2"]
-        agda-ver: ["2.6.4"]
+        agda-ver: ["2.8.0"]
 
     steps:
 
-    - uses: wenkokke/setup-agda@v2.1.0
+    - name: Download Agda binary
+      run: |
+        set -e
+        mkdir -p ~/.local/bin
+        wget -qO- "https://github.com/agda/agda/releases/download/v${{ matrix.agda-ver }}/Agda-v${{ matrix.agda-ver }}-linux.tar.xz" | tar -xJ -C ~/.local/bin
+
+    - name: Checkout cubical library
+      uses: actions/checkout@v4
       with:
-        agda-version: ${{ matrix.agda-ver }}
-        agda-libraries: |
-          https://github.com/agda/cubical.git#${{ matrix.cubical-ref }}
-          https://github.com/oisdk/agda-binary.git#${{ matrix.binary-ref }}
+        repository: agda/cubical
+        path: cubical
+        ref: ${{ matrix.cubical-ref }}
+
+    - name: Checkout binary library
+      uses: actions/checkout@v4
+      with:
+        repository: oisdk/agda-binary
+        path: agda-binary
+        ref: ${{ matrix.binary-ref }}
+
+    - name: Put cubical library in Agda library list
+      run: |
+        mkdir -p ~/.agda/
+        touch ~/.agda/libraries
+        echo "$GITHUB_WORKSPACE/cubical/cubical.agda-lib" > ~/.agda/libraries
+        echo "$GITHUB_WORKSPACE/agda-binary/agda-binary.agda-lib" > ~/.agda/libraries
 
     - name: Checkout main
-      uses: actions/checkout@v3.4.0
+      uses: actions/checkout@v4
 
     - name: Compile agda library
       run: ./scripts/render.sh
