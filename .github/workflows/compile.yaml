@@ -24,6 +24,8 @@ jobs:
 
     - name: Checkout main
       uses: actions/checkout@v4
+      with:
+        path: main
 
     - name: Checkout cubical library
       uses: actions/checkout@v4
@@ -52,6 +54,7 @@ jobs:
       run: |
         ls "~/cubical"
         ls "~/agda-binary"
+        cd main
         ./scripts/render.sh
 
     - name: Deploy html to github pages
