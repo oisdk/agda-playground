@@ -29,6 +29,7 @@ module _ (Univ : Type) (univ : Univ → Container) (_≟_ : Discrete Univ) where
   open import Algebra
 
   module MonadInst where
+    {-# TERMINATING #-}
     _>>=_ : Free Fs A → (A → Free Gs B) → Free (Fs ∪ Gs) B
     ret x >>= k = k x
     op x  >>= k = op (cmap (_>>= k) x)
@@ -44,6 +45,7 @@ module _ (Univ : Type) (univ : Univ → Container) (_≟_ : Discrete Univ) where
 
     module _ (traverse : ∀ {F A B} → (A → 𝐹 B) → ⟦ F ⟧ A → 𝐹 (⟦ F ⟧ B)) where
       module _ (E : Univ) where
+        {-# TERMINATING #-}
         interp : (⟦ E ⟧ ⇒ 𝐹) → Free Fs A → 𝐹 (Free (Fs \\ E) A)
         interp ψ (ret x) = return (ret x)
         interp ψ (op {F = F} x) with E ≟ F

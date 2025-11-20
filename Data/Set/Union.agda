@@ -3,7 +3,7 @@ module Data.Set.Union where
 open import Data.Set.Definition
 open import Data.Set.Eliminators
 open import Prelude
-open import Cubical.Foundations.Everything using (isSetΠ; isPropΠ)
+open import HLevels using (isSetΠ; isPropΠ)
 open import Path.Reasoning
 
 union-alg : ψ A (𝒦 A → 𝒦 A)

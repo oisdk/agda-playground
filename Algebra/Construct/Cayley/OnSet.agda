@@ -31,7 +31,7 @@ _⊙_ : 𝒞 → 𝒞 → 𝒞
   x .fst (y .fst z) ∎
 
 open import Data.Sigma.Properties
-open import Cubical.Foundations.Everything using (isPropΠ)
+open import Cubical.Foundations.HLevels using (isPropΠ)
 
 𝒞≡ : {x y : 𝒞} → fst x ≡ fst y → x ≡ y
 𝒞≡ = Σ≡Prop λ _ → isPropΠ λ _ → sIsSet _ _

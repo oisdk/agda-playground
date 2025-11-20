@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         cubical-ref: ["v0.8"]
-        binary-ref: ["v0.2"]
+        binary-ref: ["v0.3"]
         agda-ver: ["2.8.0"]
 
     steps:

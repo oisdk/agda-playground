@@ -30,7 +30,6 @@ _◇_ = fst ∘ ⟦ ◇-alg ⟧
 ◇-isProp : ∀ xs → isProp (_◇_ xs)
 ◇-isProp = snd ∘ ⟦ ◇-alg ⟧
 
-open import Cubical.Foundations.Everything using (isPropΠ)
 
 
 open import Data.Set.Union

@@ -1,7 +1,6 @@
 \begin{code}
 open import Prelude
 open import Algebra
-open import Cubical.Foundations.Everything using (isSet)
 
 module Data.Set.Hom {ℓ} {𝑆 : Type ℓ} (latt : Semilattice 𝑆) (sIsSet : isSet 𝑆) where
 

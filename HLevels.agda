@@ -18,6 +18,8 @@ open import Cubical.Foundations.HLevels
         ;hProp
         ;isSetHProp
         ;hSet
+        ;isPropΠ
+        ;isSetΠ
         )
   public
 
