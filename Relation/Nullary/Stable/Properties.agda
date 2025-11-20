@@ -9,7 +9,7 @@ open import Path
 open import HLevels
 open import Data.Empty.Properties
 
-open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Prelude
   using (hcomp; _∧_; i0; i1)
 
 Stable≡→isSet : ∀ {ℓ} {A : Type ℓ} → (st : ∀ (a b : A) → Stable (a ≡ b)) → isSet A

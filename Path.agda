@@ -2,7 +2,7 @@
 
 module Path where
 
-open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Prelude
   using ( _≡_
         ; sym
         ; refl

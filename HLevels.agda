@@ -3,16 +3,20 @@
 module HLevels where
 
 open import Path
-open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Prelude
   using (isProp
         ;isSet
         ;isContr
         ;isPropIsContr
         ;isProp→isSet
-        ;isOfHLevel→isOfHLevelDep
+        ;isPropIsProp
+        )
+  public
+
+open import Cubical.Foundations.HLevels
+  using (isOfHLevel→isOfHLevelDep
         ;hProp
         ;isSetHProp
-        ;isPropIsProp
         ;hSet
         )
   public
