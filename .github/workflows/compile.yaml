@@ -43,11 +43,16 @@ jobs:
       run: |
         mkdir -p ~/.agda/
         touch ~/.agda/libraries
+        ls "~/cubical"
+        ls "~/agda-binary"
         echo "~/cubical/cubical.agda-lib" > ~/.agda/libraries
         echo "~/agda-binary/agda-binary.agda-lib" > ~/.agda/libraries
 
     - name: Compile agda library
-      run: ./scripts/render.sh
+      run: |
+        ls "~/cubical"
+        ls "~/agda-binary"
+        ./scripts/render.sh
 
     - name: Deploy html to github pages
       uses: peaceiris/actions-gh-pages@v3
