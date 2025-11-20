@@ -22,24 +22,24 @@ jobs:
         mkdir -p ~/.local/bin
         wget -qO- "https://github.com/agda/agda/releases/download/v${{ matrix.agda-ver }}/Agda-v${{ matrix.agda-ver }}-linux.tar.xz" | tar -xJ -C ~/.local/bin
 
-    - name: Checkout main
-      uses: actions/checkout@v4
-      with:
-        path: main
-
     - name: Checkout cubical library
       uses: actions/checkout@v4
       with:
         repository: agda/cubical
-        path: ~/cubical
+        path: cubical
         ref: ${{ matrix.cubical-ref }}
 
     - name: Checkout binary library
       uses: actions/checkout@v4
       with:
         repository: oisdk/agda-binary
-        path: ~/agda-binary
+        path: agda-binary
         ref: ${{ matrix.binary-ref }}
+
+    - name: Checkout main
+      uses: actions/checkout@v4
+      with:
+        path: main
 
     - name: Put cubical library in Agda library list
       run: |
@@ -47,11 +47,12 @@ jobs:
         touch ~/.agda/libraries
         ls "~/cubical"
         ls "~/agda-binary"
-        echo "~/cubical/cubical.agda-lib" > ~/.agda/libraries
-        echo "~/agda-binary/agda-binary.agda-lib" > ~/.agda/libraries
+        echo "$GITHUB_WORKSPACE/cubical/cubical.agda-lib" >> ~/.agda/libraries
+        echo "$GITHUB_WORKSPACE/agda-binary/agda-binary.agda-lib" >> ~/.agda/libraries
 
     - name: Compile agda library
       run: |
+        set -e
         ls "~/cubical"
         ls "~/agda-binary"
         cd main
@@ -61,4 +62,4 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs
+        publish_dir: main/docs
