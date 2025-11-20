@@ -26,24 +26,22 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: agda/cubical
-        path: cubical
+        path: ~/cubical
         ref: ${{ matrix.cubical-ref }}
 
     - name: Checkout binary library
       uses: actions/checkout@v4
       with:
         repository: oisdk/agda-binary
-        path: agda-binary
+        path: ~/agda-binary
         ref: ${{ matrix.binary-ref }}
 
     - name: Put cubical library in Agda library list
       run: |
         mkdir -p ~/.agda/
         touch ~/.agda/libraries
-        ls "$GITHUB_WORKSPACE/cubical"
-        ls "$GITHUB_WORKSPACE/agda-binary"
-        echo "$GITHUB_WORKSPACE/cubical/cubical.agda-lib" > ~/.agda/libraries
-        echo "$GITHUB_WORKSPACE/agda-binary/agda-binary.agda-lib" > ~/.agda/libraries
+        echo "~/cubical/cubical.agda-lib" > ~/.agda/libraries
+        echo "~/agda-binary/agda-binary.agda-lib" > ~/.agda/libraries
 
     - name: Checkout main
       uses: actions/checkout@v4
