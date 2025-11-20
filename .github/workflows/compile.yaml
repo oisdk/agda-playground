@@ -41,7 +41,7 @@ jobs:
         mkdir -p ~/.agda/
         touch ~/.agda/libraries
         echo "~/cubical/cubical.agda-lib" > ~/.agda/libraries
-        echo "~/agda-binary/agda-binary.agda-lib" > ~/.agda/libraries
+        # echo "~/agda-binary/agda-binary.agda-lib" > ~/.agda/libraries
 
     - name: Checkout main
       uses: actions/checkout@v4
