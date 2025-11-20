@@ -4,23 +4,29 @@
 <a id="35" class="Keyword">module</a> <a id="42" href="HLevels.html" class="Module">HLevels</a> <a id="50" class="Keyword">where</a>
 
 <a id="57" class="Keyword">open</a> <a id="62" class="Keyword">import</a> <a id="69" href="Path.html" class="Module">Path</a>
-<a id="74" class="Keyword">open</a> <a id="79" class="Keyword">import</a> <a id="86" href="Cubical.Foundations.Everything.html" class="Module">Cubical.Foundations.Everything</a>
-  <a id="119" class="Keyword">using</a> <a id="125" class="Symbol">(</a><a id="126" href="Cubical.Foundations.Prelude.html#14245" class="Function">isProp</a>
-        <a id="141" class="Symbol">;</a><a id="142" href="Cubical.Foundations.Prelude.html#14300" class="Function">isSet</a>
-        <a id="156" class="Symbol">;</a><a id="157" href="Cubical.Foundations.Prelude.html#14181" class="Function">isContr</a>
-        <a id="173" class="Symbol">;</a><a id="174" href="Cubical.Foundations.Prelude.html#18113" class="Function">isPropIsContr</a>
-        <a id="196" class="Symbol">;</a><a id="197" href="Cubical.Foundations.Prelude.html#18522" class="Function">isProp→isSet</a>
-        <a id="218" class="Symbol">;</a><a id="219" href="Cubical.Foundations.HLevels.html#24798" class="Function">isOfHLevel→isOfHLevelDep</a>
-        <a id="252" class="Symbol">;</a><a id="253" href="Cubical.Foundations.HLevels.html#2018" class="Function">hProp</a>
-        <a id="267" class="Symbol">;</a><a id="268" href="Cubical.Foundations.HLevels.html#22223" class="Function">isSetHProp</a>
-        <a id="287" class="Symbol">;</a><a id="288" href="Cubical.Foundations.Prelude.html#18994" class="Function">isPropIsProp</a>
-        <a id="309" class="Symbol">;</a><a id="310" href="Cubical.Foundations.HLevels.html#2024" class="Function">hSet</a>
-        <a id="323" class="Symbol">)</a>
-  <a id="327" class="Keyword">public</a>
+<a id="74" class="Keyword">open</a> <a id="79" class="Keyword">import</a> <a id="86" href="Cubical.Foundations.Prelude.html" class="Module">Cubical.Foundations.Prelude</a>
+  <a id="116" class="Keyword">using</a> <a id="122" class="Symbol">(</a><a id="123" href="Cubical.Foundations.Prelude.html#15547" class="Function">isProp</a>
+        <a id="138" class="Symbol">;</a><a id="139" href="Cubical.Foundations.Prelude.html#15602" class="Function">isSet</a>
+        <a id="153" class="Symbol">;</a><a id="154" href="Cubical.Foundations.Prelude.html#15483" class="Function">isContr</a>
+        <a id="170" class="Symbol">;</a><a id="171" href="Cubical.Foundations.Prelude.html#19446" class="Function">isPropIsContr</a>
+        <a id="193" class="Symbol">;</a><a id="194" href="Cubical.Foundations.Prelude.html#19855" class="Function">isProp→isSet</a>
+        <a id="215" class="Symbol">;</a><a id="216" href="Cubical.Foundations.Prelude.html#20327" class="Function">isPropIsProp</a>
+        <a id="237" class="Symbol">)</a>
+  <a id="241" class="Keyword">public</a>
 
-<a id="335" class="Keyword">open</a> <a id="340" class="Keyword">import</a> <a id="347" href="Level.html" class="Module">Level</a>
-<a id="353" class="Keyword">open</a> <a id="358" class="Keyword">import</a> <a id="365" href="Data.Sigma.html" class="Module">Data.Sigma</a>
+<a id="249" class="Keyword">open</a> <a id="254" class="Keyword">import</a> <a id="261" href="Cubical.Foundations.HLevels.html" class="Module">Cubical.Foundations.HLevels</a>
+  <a id="291" class="Keyword">using</a> <a id="297" class="Symbol">(</a><a id="298" href="Cubical.Foundations.HLevels.html#26172" class="Function">isOfHLevel→isOfHLevelDep</a>
+        <a id="331" class="Symbol">;</a><a id="332" href="Cubical.Foundations.HLevels.html#2028" class="Function">hProp</a>
+        <a id="346" class="Symbol">;</a><a id="347" href="Cubical.Foundations.HLevels.html#23597" class="Function">isSetHProp</a>
+        <a id="366" class="Symbol">;</a><a id="367" href="Cubical.Foundations.HLevels.html#2034" class="Function">hSet</a>
+        <a id="380" class="Symbol">;</a><a id="381" href="Cubical.Foundations.HLevels.html#16906" class="Function">isPropΠ</a>
+        <a id="397" class="Symbol">;</a><a id="398" href="Cubical.Foundations.HLevels.html#18893" class="Function">isSetΠ</a>
+        <a id="413" class="Symbol">)</a>
+  <a id="417" class="Keyword">public</a>
 
-<a id="377" class="Comment">-- hSet : ∀ ℓ → Type (ℓsuc ℓ)</a>
-<a id="407" class="Comment">-- hSet ℓ = Σ (Type ℓ) isSet</a>
+<a id="425" class="Keyword">open</a> <a id="430" class="Keyword">import</a> <a id="437" href="Level.html" class="Module">Level</a>
+<a id="443" class="Keyword">open</a> <a id="448" class="Keyword">import</a> <a id="455" href="Data.Sigma.html" class="Module">Data.Sigma</a>
+
+<a id="467" class="Comment">-- hSet : ∀ ℓ → Type (ℓsuc ℓ)</a>
+<a id="497" class="Comment">-- hSet ℓ = Σ (Type ℓ) isSet</a>
 </pre></body></html>
