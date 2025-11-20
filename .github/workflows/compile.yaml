@@ -22,6 +22,9 @@ jobs:
         mkdir -p ~/.local/bin
         wget -qO- "https://github.com/agda/agda/releases/download/v${{ matrix.agda-ver }}/Agda-v${{ matrix.agda-ver }}-linux.tar.xz" | tar -xJ -C ~/.local/bin
 
+    - name: Checkout main
+      uses: actions/checkout@v4
+
     - name: Checkout cubical library
       uses: actions/checkout@v4
       with:
@@ -41,10 +44,7 @@ jobs:
         mkdir -p ~/.agda/
         touch ~/.agda/libraries
         echo "~/cubical/cubical.agda-lib" > ~/.agda/libraries
-        # echo "~/agda-binary/agda-binary.agda-lib" > ~/.agda/libraries
-
-    - name: Checkout main
-      uses: actions/checkout@v4
+        echo "~/agda-binary/agda-binary.agda-lib" > ~/.agda/libraries
 
     - name: Compile agda library
       run: ./scripts/render.sh
